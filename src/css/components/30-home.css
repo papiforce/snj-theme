@@ -428,7 +428,16 @@
 }
 
 .sg-cover__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   padding: 16px 18px 18px;
+}
+
+/* Les raccourcis remplissent toute la hauteur restante de la carte */
+.sg-cover__body .sg-shortcuts {
+  flex: 1;
+  grid-auto-rows: 1fr;
 }
 
 .sg-shortcuts {

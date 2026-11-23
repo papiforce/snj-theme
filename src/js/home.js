@@ -309,8 +309,8 @@
   }
 
   function annexe() {
-    return h('article', { class: 'sg-card sg-c-annexe sg-cover' }, [
-      link(ANNEXE + '/', { class: 'sg-cover__img', style: img('land-mizu.webp'), 'aria-label': "Ouvrir l'annexe" }, [
+    return h('article', { class: 'sg-card sg-c-annexe sg-cover sg-tone' }, [
+      link(ANNEXE + '/', { class: 'sg-cover__img sg-has-light', style: imgPair('card-annexe.webp', 'card-annexe-light.webp'), 'aria-label': "Ouvrir l'annexe" }, [
         title('Annexe', 'l')
       ]),
       h('div', { class: 'sg-cover__body' }, [
