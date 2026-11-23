@@ -25,9 +25,11 @@ dans le panneau d'administration (PA), puis on commit.
 - **Couleur primaire** : Hagane (acier bleuté) — `#9fb0c3` en sombre, `#3e5266` en clair.
   Toutes les autres couleurs existantes (nations, clans, or de Kaminari `#c9a558`) sont conservées.
 - **Accents** (réutilisables partout, jamais une couleur de nation ni proche d'elle) : `--sg-accent-1` **Asagi** 浅葱
-  (sarcelle, `#6fb3ae` sombre / `#3d8a87` clair), `--sg-accent-2` **Ume** 梅 (prune, `#c27390` / `#a8506f`) et
-  `--sg-accent-3` **Wakatake** 若竹 (jeune bambou, vert jade, `#6fc29b` / `#2f8a5f`), avec leurs variantes `-rgb`.
-  Texte posé sur un accent : `--sg-on-accent` (encre en sombre, papier en clair). Halos flous aux coins (accent 1 en haut à droite, accent 2 en bas à gauche, inspirés de Themis
+  (sarcelle, `#6fb3ae` sombre / `#3d8a87` clair) et `--sg-accent-2` **Ume** 梅 (prune, `#c27390` / `#a8506f`), avec
+  leurs variantes `-rgb`. Texte posé sur un accent : `--sg-on-accent`.
+  **Sumi et gofun** (encre et blanc de coquille) pour les éléments d'interface sans teinte : `--sg-contrast`
+  (`#ece5d4` en sombre, `#1d1915` en clair, variante `-rgb`) et `--sg-on-contrast`. Les couleurs vives trop proches
+  du rouge, bleu, jaune, vert, marron, de Hagane ou des accents sont exclues (Wakatake a été écarté). Halos flous aux coins (accent 1 en haut à droite, accent 2 en bas à gauche, inspirés de Themis
   Trials) sur `html::before/::after`, intensité `--sg-glow-strength` (0,6 sombre / 0,5 clair) ; le `<body>` est transparent.
 - **Polices** : titres en **Zen Antique**, texte en **Inria Sans** (comme l'annexe). Cinzel abandonnée.
 - **Thème** : celui de l'appareil par défaut ; le choix du membre est mémorisé dans le navigateur
@@ -53,14 +55,18 @@ dans le panneau d'administration (PA), puis on commit.
   `scripts/grade-cards.py`). Rumeurs : une illustration et la couleur de la nation (`--sg-nation-*`).
   Contexte sans image (trop d'images sinon), sur le même motif kikkō que le Staff.
   Images du Guide et de l'Annexe fournies par Vinny (`assets/card-guide*.webp`, `assets/card-annexe*.webp`).
-  Raccourcis de l'Annexe (inspirés de Themis Trials) : pastille de couleur pour l'icône, panneau arrondi avec le libellé,
-  sans bordure ; au survol la couleur remplit tout le raccourci (accents 1, 2, 3 puis primaire). Ils remplissent toute
-  la hauteur restante de la carte. Annonces et Rumeurs défilent seules (8 s). Scénarios : `taken: true` pour un
+  Raccourcis de l'Annexe (inspirés de Themis Trials) : pastille sumi et gofun pour l'icône, panneau arrondi
+  (`12px 0 0 12px / 50% 0 0 50%`) avec le libellé, sans bordure ; au survol (0,9 s) la couleur remplit tout le
+  raccourci. Libellé toujours sur une ligne, taille calculée sur la largeur du raccourci (unités `cqi`). Ils remplissent
+  toute la hauteur restante de la carte. Staff : bouton « Voir le staff et les crédits » (`DATA.staffHref`, flèche qui
+  glisse) au-dessus de « Contacter sur Discord ». Annonces et Rumeurs défilent seules (8 s). Scénarios : `taken: true` pour un
   scénario pris (grisé, sceau « Pris », non cliquable), les disponibles en premier.
   **Séparateur** réutilisable `.sg-divider` (`05-ornaments.css`), en rupture avec l'ancien séparateur de SnJ (filets,
-  losanges, kanji doré — à ne pas reproduire) : deux bandes de yagasuri 矢絣 (pennes de flèches, motif réservé aux
-  séparations) qui convergent vers un mon rond à deux anneaux entrelacés (accent 1 et accent 2). Sur l'accueil, entre
-  les widgets et les catégories, à la place de la barre de liens rapides d'AwesomeBB. En clair, Guide, Annexe et Rumeurs utilisent des variantes claires au ton de la bannière (`*-light.webp`, `grade-cards.py --light`) et passent au papier
+  losanges, kanji doré — à ne pas reproduire) : une ligne qui forme un triangle pointé vers le bas en son milieu,
+  surmontée du logo de SnJ au trait (`assets/snj-logo-outline.svg`, aussi dans `home.js`), en sumi et gofun. Espace
+  identique au-dessus et en dessous (`--sg-divider-space`, 56px) : `#sg-home` n'a pas de marge basse et l'entretoise
+  native de 3px est masquée. Sur l'accueil, entre les widgets et les catégories, à la place de la barre de liens
+  rapides d'AwesomeBB. En clair, Guide, Annexe et Rumeurs utilisent des variantes claires au ton de la bannière (`*-light.webp`, `grade-cards.py --light`) et passent au papier
   et à l'encre (classe `sg-tone`). Seules les cartes Guide, Staff, Vote et Discord se soulèvent au survol.
   **Motifs Edo : un motif = une famille d'information**, uniquement sur les cartes de texte (jamais sur les cartes
   illustrées, les fils ni la carte Discord) : seigaiha 青海波 (vagues) → parcours et aide (onboarding, guides,
