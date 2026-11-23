@@ -42,6 +42,12 @@
   min-width: 0;
 }
 
+/* Entretoise native de 3px avant les catégories : retirée pour un espacement
+   identique au-dessus et en dessous du séparateur */
+#sg-home ~ div[style="height:3px"] {
+  display: none;
+}
+
 .sg-c-onboarding { grid-column: span 12; }
 .sg-c-context { grid-column: span 7; }
 .sg-c-season { grid-column: span 5; }
