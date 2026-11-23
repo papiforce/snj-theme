@@ -641,6 +641,7 @@ body > footer,
   grid-template-columns: auto 1fr;
   grid-template-areas: "num ." "icon title" "text text";
   align-items: center;
+  align-content: start;
   column-gap: 8px;
   row-gap: 8px;
   height: 100%;

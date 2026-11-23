@@ -14,7 +14,7 @@ dans le panneau d'administration (PA), puis on commit.
 | `src/css/critical.css` | Tokens, thèmes clair/sombre, base | PA › Affichage › Couleurs › CSS principal |
 | `src/css/components/` | CSS des composants (barre latérale, catégories, sujets…), préfixés par un numéro d'ordre | Assemblés dans `dist/snj.css` par `node scripts/build.mjs`, servis par jsDelivr |
 | `src/templates/` | Templates HTML et extraits à insérer | PA › Affichage › Templates |
-| `src/js/` | Un fichier par script (`layout.js` = barre latérale + thème) | PA › Modules › Gestion des codes JavaScript |
+| `src/js/` | Un fichier par script : `layout.js` (barre latérale + thème, toutes les pages), `home.js` (widgets de l'accueil, index seulement) | PA › Modules › Gestion des codes JavaScript |
 | `docs/` | Décisions, notes de migration | — |
 
 ## Décisions
@@ -39,6 +39,12 @@ dans le panneau d'administration (PA), puis on commit.
   (inspiré de Themis Trials), coins arrondis.
 - **Bannière** : clair = brume au clair de lune, sombre = renard dans les braises (`scripts/grade-banner.py`).
   Pas de logo ; wordmark « Sengoku no Jidai » fondu dans l'image (modes de fusion + dégradé).
+- **Accueil** (`home.js` + `30-home.css`) : zones numérotées 壱 à 伍. Visiteur : Rejoindre (onboarding : Guide, Annexe,
+  Fiche, Validation, Configuration du profil) → Univers (Contexte, Saison) → Se préparer (Guide, Annexe, Scénarios)
+  → Vie du forum (Annonces, Rumeurs, Derniers sujets en carrousels) → Communauté (Staff, Top-sites, Discord).
+  Membre : pas d'onboarding, la Vie du forum passe en premier. Annonces, Rumeurs et Saison sont des données
+  provisoires (objet `DATA`) à brancher plus tard sur l'API de l'annexe. Pas d'animation de bordure au survol.
+  Les `<header>` sont interdits dans nos composants : AwesomeBB les fixe tous en haut de page.
 - **Variables CSS** préfixées `--sg-*`. On rebranche les `--t_*` d'AwesomeBB sur nos tokens.
 - **CSS hors forum** : servi par jsDelivr depuis ce dépôt, avec une adresse versionnée (SHA de commit ou tag).
   Le CSS indispensable reste dans le CSS principal du forum pour que le forum reste lisible si le CDN tombe.
