@@ -468,7 +468,6 @@
   align-items: stretch;
   min-height: 52px;
   overflow: hidden;
-  border: 1px solid var(--sg-border);
   border-radius: var(--sg-radius-lg);
   background: var(--sc);
   color: var(--sc);
@@ -633,8 +632,6 @@
   background: none;
   color: var(--sg-text-muted);
   font-weight: 400;
-  text-decoration: line-through;
-  text-decoration-color: var(--sg-border-strong);
   opacity: 1;
   transform: none;
 }
