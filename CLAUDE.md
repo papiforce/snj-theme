@@ -31,7 +31,7 @@ dans le panneau d'administration (PA), puis on commit.
 - **Navigation** : barre latérale fixe à gauche avec icônes et infobulle à droite (inspirée de Themis Trials),
   barre fixe en bas d'écran sur mobile. Elle remplace l'en-tête natif d'AwesomeBB.
 - **Variables CSS** préfixées `--sg-*`. On rebranche les `--t_*` d'AwesomeBB sur nos tokens.
-- **CSS hors forum** : servi par jsDelivr depuis ce dépôt, avec une adresse versionnée (tag).
+- **CSS hors forum** : servi par jsDelivr depuis ce dépôt, avec une adresse versionnée (SHA de commit ou tag).
   Le CSS indispensable reste dans le CSS principal du forum pour que le forum reste lisible si le CDN tombe.
 - **Messages libres** (sans modèle) : doivent rester lisibles et épurés.
 - **Migration** : bascule de tout le forum en une fois.
@@ -39,8 +39,10 @@ dans le panneau d'administration (PA), puis on commit.
 ## Publier une nouvelle version du CSS des composants
 
 1. Modifier `src/css/components/*.css`, puis `node scripts/build.mjs`.
-2. Commit, puis tag `vX.Y.Z` et push du tag.
-3. Dans `overall_header`, remplacer `@vX.Y.Z` dans le lien jsDelivr, enregistrer et **publier** le template.
+2. Commit et push.
+3. Dans `overall_header`, remplacer la version après `snj-theme@` dans le lien jsDelivr par le **SHA complet
+   du commit** (ou un tag `vX.Y.Z` créé depuis GitHub), enregistrer et **publier** le template.
+   Reporter le même lien dans `src/templates/head-snippet.html`.
 
 Une adresse versionnée ne change jamais : une version ratée n'atteint pas le forum tant qu'on n'a pas changé le lien.
 
