@@ -94,7 +94,7 @@
    -------------------------------------------------------------------------- */
 :root {
   --bodyline_back: var(--sg-surface);
-  --header_th_color: var(--sg-text);
+  --header_th_color: var(--sg-primary-fg);
   --mobi_forumcat_bgcolor: var(--sg-surface-2);
   --t_body_alink: var(--sg-primary-hover);
   --t_body_bgcolor: var(--sg-primary);
@@ -108,7 +108,7 @@
   --t_header_bg: none;
   --t_header_colorbg: var(--sg-surface);
   --t_h1_header_color: var(--sg-text);
-  --t_tr_color1: var(--sg-text);
+  --t_tr_color1: var(--sg-surface-2);
   --t_tr_color2: var(--sg-surface-2);
 }
 
