@@ -21,6 +21,39 @@ body > footer,
   margin-right: var(--sg-content-right) !important;
 }
 
+/* --- Halos d'ambiance aux coins (inspirés de Themis Trials) -----------------
+   Accent 1 en haut à droite, accent 2 en bas à gauche, derrière tout le contenu.
+   Le fond reste sur <html> : le <body> devient transparent pour laisser voir les halos. */
+body {
+  background: transparent !important;
+}
+
+html::before,
+html::after {
+  content: "";
+  position: fixed;
+  z-index: -1;
+  width: 1400px;
+  height: 1400px;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: var(--sg-glow-strength);
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+html::before {
+  top: -700px;
+  right: -700px;
+  background: radial-gradient(circle, rgb(var(--sg-accent-1-rgb)) 0%, rgb(var(--sg-accent-1-rgb)) 28%, rgba(var(--sg-accent-1-rgb), 0.18) 48%, rgba(var(--sg-accent-1-rgb), 0.08) 68%, rgba(var(--sg-accent-1-rgb), 0.025) 84%, rgba(var(--sg-accent-1-rgb), 0) 100%);
+}
+
+html::after {
+  bottom: -700px;
+  left: -700px;
+  background: radial-gradient(circle, rgb(var(--sg-accent-2-rgb)) 0%, rgb(var(--sg-accent-2-rgb)) 28%, rgba(var(--sg-accent-2-rgb), 0.18) 48%, rgba(var(--sg-accent-2-rgb), 0.08) 68%, rgba(var(--sg-accent-2-rgb), 0.025) 84%, rgba(var(--sg-accent-2-rgb), 0) 100%);
+}
+
 #wrap {
   padding-left: 0 !important;
   padding-right: 0 !important;
