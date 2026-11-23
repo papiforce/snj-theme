@@ -35,6 +35,10 @@ dans le panneau d'administration (PA), puis on commit.
   Haut : avatar du membre, ou logo SnJ (`assets/snj-logo.webp`) pour les visiteurs.
   Navigation : Accueil, Membres (masqué sur mobile), Discord, Annexe, Carte.
   Bas : Notifications (avec pastille), Panneau d'administration (admins), Déconnexion, thème clair/sombre.
+- **Mise en page** : bannière, catégories et pied de page prennent toute la largeur disponible à droite de la barre
+  (inspiré de Themis Trials), coins arrondis.
+- **Bannière** : clair = brume au clair de lune, sombre = renard dans les braises (`scripts/grade-banner.py`).
+  Pas de logo ; wordmark « Sengoku no Jidai » fondu dans l'image (modes de fusion + dégradé).
 - **Variables CSS** préfixées `--sg-*`. On rebranche les `--t_*` d'AwesomeBB sur nos tokens.
 - **CSS hors forum** : servi par jsDelivr depuis ce dépôt, avec une adresse versionnée (SHA de commit ou tag).
   Le CSS indispensable reste dans le CSS principal du forum pour que le forum reste lisible si le CDN tombe.
@@ -44,7 +48,9 @@ dans le panneau d'administration (PA), puis on commit.
 ## Publier une nouvelle version du CSS des composants
 
 1. Modifier `src/css/components/*.css`, puis `node scripts/build.mjs`.
-2. Commit et push.
+2. Commit et push, puis **attendre que jsDelivr serve la nouvelle version** (réponse 200 sur
+   `https://cdn.jsdelivr.net/gh/papiforce/snj-theme@<SHA>/dist/snj.min.css`, parfois quelques dizaines de secondes).
+   Sinon le forum charge une page sans CSS.
 3. Dans `overall_header`, remplacer la version après `snj-theme@` dans le lien jsDelivr par le **SHA complet
    du commit** (ou un tag `vX.Y.Z` créé depuis GitHub), enregistrer et **publier** le template.
    Reporter le même lien dans `src/templates/head-snippet.html`.
