@@ -1,0 +1,289 @@
+{
+ "note": "Structure des forums d'Alendria (test), reprise de Sengoku no Jidai. Images, descriptions et clans : production (index, nov. 2026). Kanji des cartes et dangerosité : provisoires.",
+ "selector": [
+  {
+   "slug": "gestion",
+   "label": "Gestion",
+   "icon": "badge",
+   "color": "--sg-contrast"
+  },
+  {
+   "slug": "hi-no-kuni",
+   "label": "Hi no Kuni",
+   "sub": "Pays du Feu",
+   "kanji": "火",
+   "color": "--sg-nation-hi"
+  },
+  {
+   "slug": "mizu-no-kuni",
+   "label": "Mizu no Kuni",
+   "sub": "Pays de l'Eau",
+   "kanji": "水",
+   "color": "--sg-nation-mizu"
+  },
+  {
+   "slug": "kaze-no-kuni",
+   "label": "Kaze no Kuni",
+   "sub": "Pays du Vent",
+   "kanji": "風",
+   "color": "--sg-nation-kaze"
+  },
+  {
+   "slug": "kaminari-no-kuni",
+   "label": "Kaminari no Kuni",
+   "sub": "Pays de la Foudre",
+   "kanji": "雷",
+   "color": "--sg-nation-kaminari"
+  },
+  {
+   "slug": "tsuchi-no-kuni",
+   "label": "Tsuchi no Kuni",
+   "sub": "Pays de la Terre",
+   "kanji": "土",
+   "color": "--sg-nation-tsuchi"
+  },
+  {
+   "slug": "reste-du-sekai",
+   "label": "Reste du Sekai",
+   "kanji": "他",
+   "color": "--sg-nation-autres"
+  }
+ ],
+ "categories": [
+  {
+   "slug": "gestion",
+   "name": "Gestion",
+   "forums": [
+    {
+     "name": "Présentations",
+     "kanji": "紹介",
+     "description": "Les fiches de présentation des personnages, en cours de rédaction ou en attente de validation.",
+     "subforums": []
+    },
+    {
+     "name": "Fiches techniques",
+     "kanji": "術",
+     "description": "Les techniques, capacités et équipements de chaque personnage.",
+     "subforums": []
+    },
+    {
+     "name": "Progressions",
+     "kanji": "進歩",
+     "description": "Le suivi de l'évolution des personnages : expérience, rangs et nouvelles techniques.",
+     "subforums": []
+    }
+   ]
+  },
+  {
+   "slug": "hi-no-kuni",
+   "name": "Hi no Kuni",
+   "forums": [
+    {
+     "name": "Hi no Kuni",
+     "kanji": "火の国",
+     "image": "https://i.pinimg.com/1200x/c8/42/bd/c842bd82492df7a7d8ea9f958bd6f4f0.jpg",
+     "description": "Pays du Feu.",
+     "subforums": [
+      "Correspondance de Hi"
+     ],
+     "danger": 3
+    },
+    {
+     "name": "Kagutsuchi",
+     "kanji": "迦具土",
+     "image": "https://i.pinimg.com/1200x/08/ac/0c/08ac0c8b8ebdd260ad07b11330e099b8.jpg",
+     "description": "Cœur battant du Pays du Feu, Kagutsuchi en est la région la plus active, où convergent la majorité des échanges. Elle abrite aussi Katsu, la plus grande ville du pays, dominée par le palais du Daimyō.",
+     "subforums": [
+      "Katsu"
+     ],
+     "danger": 2
+    },
+    {
+     "name": "Forêt Homura",
+     "kanji": "焔の森",
+     "image": "https://i.pinimg.com/736x/45/63/6c/45636c47717c89ae6ef3a6ff8837421b.jpg",
+     "description": "Territoire du clan Hyūga, la forêt d’Homura est dense et ancienne, peuplée d’arbres immenses et parsemée de temples anciens. Elle abrite le domaine du clan ainsi que quelques villages isolés, dont l’économie stable assure l’équilibre de la région. Profondément religieuse, la population voue au clan une admiration sans faille et une loyauté indéfectible.",
+     "subforums": [
+      "Domaine du clan Hyuga",
+      "Domaine secondaire du clan Hyuga"
+     ],
+     "clan": "Hyuga",
+     "clanHref": "https://snj-base-de-donnees.vercel.app/clans/hyuga/",
+     "danger": 4
+    },
+    {
+     "name": "Plaines Homura",
+     "kanji": "焔の野",
+     "image": "https://i.pinimg.com/736x/9f/2c/14/9f2c1407a0db7ec7151fbdaae63d1e18.jpg",
+     "description": "Vaste territoire fertile regroupant de nombreux villages, c’est aussi une route commerciale sûre sous le contrôle du clan Hyūga. Un avant-poste de shinobis y protège les routes, rapidement débarrassées des bandits. La population respecte et vénère le clan comme de véritables seigneurs.",
+     "subforums": [],
+     "clan": "Hyuga",
+     "clanHref": "https://snj-base-de-donnees.vercel.app/clans/hyuga/",
+     "danger": 1
+    },
+    {
+     "name": "Nagiya",
+     "kanji": "凪の港",
+     "image": "https://i.pinimg.com/1200x/35/1d/b5/351db53a815879ac1149b87c262e1d83.jpg",
+     "description": "Nagiya est une région côtière importante du Pays du Feu, centre d’échanges maritimes. Proche du Pays de l’Eau, elle subit des attaques de pirates, et Noroi no Kuni y engendre parfois des phénomènes étranges qui viennent s'y échouer. Le clan Sarutobi y est installé.",
+     "subforums": [
+      "Ville de Nagiya",
+      "Domaine du clan Sarutobi"
+     ],
+     "clan": "Sarutobi",
+     "clanHref": "https://snj-base-de-donnees.vercel.app/clans/sarutobi/",
+     "danger": 1
+    },
+    {
+     "name": "Forêt Senju",
+     "kanji": "千手の森",
+     "image": "https://i.pinimg.com/1200x/08/44/d8/0844d8aa0f32c0ccecc862b157ba944b.jpg",
+     "description": "La forêt du clan Senju est un lieu sacré et mystique, riche en légendes sur les esprits. Elle abrite le temple d’Ashura qui regroupe des archives anciennes liées à l’Ermite Rikudo. Cette forêt est strictement protégée, son bois est très prisé pour sa solidité. Quelques villages vivent autour sous la protection du clan, tandis qu’au cœur de la forêt se cache le domaine des Senju, un village en harmonie avec la nature.",
+     "subforums": [
+      "Domaine du clan Senju",
+      "Temple Ashura"
+     ],
+     "clan": "Senju",
+     "clanHref": "https://snj-base-de-donnees.vercel.app/clans/senju/",
+     "danger": 5
+    },
+    {
+     "name": "Vallée Nagumo",
+     "kanji": "南雲谷",
+     "image": "https://i.pinimg.com/1200x/49/d2/e1/49d2e1a31b3ae625d2266942abb96e9d.jpg",
+     "description": "Champ de bataille ravagé par la guerre Senju/Uchiha, ce territoire est plongé dans la famine, la guerre, la criminalité et la pauvreté. L'influence du Daimyō n'a plus sa place ici, c'est une véritable zone de non-droit.",
+     "subforums": [
+      "Zones de guerre",
+      "Mura"
+     ],
+     "danger": 1
+    },
+    {
+     "name": "Forêt d'érable",
+     "kanji": "紅葉",
+     "image": "https://zupimages.net/up/26/19/lj3r.jpg",
+     "description": "Forêt aux arbres de feu qui appartient au clan Uchiha, si le clan autrefois possédait un vaste territoire, les nombreuses crises et conflits l’ont fait régresser jusqu’ici, mais dans le plus vaste qu’il soit. Une immense forêt aux feuilles orangées, les arbres y sont gigantesques et le soleil traverse le feuillage, donnant l’impression que le ciel est recouvert de magnifiques flammes.",
+     "subforums": [
+      "Domaine du clan Uchiha",
+      "Temple Naka"
+     ],
+     "clan": "Uchiha",
+     "clanHref": "https://snj-base-de-donnees.vercel.app/clans/uchiha/",
+     "danger": 3
+    },
+    {
+     "name": "Les bois Fuyujin",
+     "kanji": "冬神",
+     "image": "https://i.pinimg.com/1200x/67/b6/e7/67b6e7479cbf24d3064e61229815ecf1.jpg",
+     "description": "Les bois Fuyujin sont une région neutre du Pays du Feu, où de nombreux ordres religieux viennent en aide aux réfugiés venus de différentes régions. L’autorité du Daimyō y est totalement absente, la population suivant principalement les divers courants spirituels.",
+     "subforums": [],
+     "danger": 5
+    },
+    {
+     "name": "Forêt Nara",
+     "kanji": "鹿の森",
+     "image": "https://i.pinimg.com/1200x/9b/a8/ea/9ba8ea5e8c879a608ca371267d06cb7e.jpg",
+     "description": "La fameuse forêt des Cerfs du clan Nara, vaste territoire forestier disposant d'importantes ressources médicales.",
+     "subforums": [
+      "Domaine du clan Nara"
+     ],
+     "clan": "Nara",
+     "clanHref": "https://snj-base-de-donnees.vercel.app/clans/nara/",
+     "danger": 1
+    },
+    {
+     "name": "Sylve mandibulaire",
+     "kanji": "蟲の森",
+     "image": "https://i.pinimg.com/736x/e7/3f/97/e73f972f017b67d82dc598f8348d0708.jpg",
+     "description": "Territoire du clan Aburame, il s'agit d'une vaste forêt abritant de nombreuses espèces mortelles. L'endroit est également parsemé de plusieurs passages souterrains.",
+     "subforums": [
+      "Domaine du clan Aburame"
+     ],
+     "clan": "Aburame",
+     "clanHref": "https://snj-base-de-donnees.vercel.app/clans/aburame/",
+     "danger": 5
+    },
+    {
+     "name": "Les gorges Hiougi",
+     "kanji": "檜扇",
+     "image": "https://i.pinimg.com/1200x/e7/87/f1/e787f12518aa1d309412fa06668cee8f.jpg",
+     "description": "La région de Hiougi est un territoire qui échappe à l'autorité du Daimyō, on soupçonne le clan Yamanaka de s'y trouver. On y compte la grande ville de Hiougi, ville avec une activité criminelle très haute.",
+     "subforums": [
+      "Hiougi"
+     ],
+     "clan": "Yamanaka",
+     "clanHref": "https://snj-base-de-donnees.vercel.app/clans/yamanaka/",
+     "danger": 2
+    }
+   ]
+  },
+  {
+   "slug": "mizu-no-kuni",
+   "name": "Mizu no Kuni",
+   "forums": [
+    {
+     "name": "Mizu no Kuni",
+     "kanji": "水の国",
+     "image": "https://i.pinimg.com/1200x/e0/89/e3/e089e35b2364d5591a5b8c21b70428ca.jpg",
+     "description": "Pays de l'Eau.",
+     "subforums": [
+      "Correspondance de Mizu"
+     ],
+     "danger": 1
+    },
+    {
+     "name": "Archipel Tenjo",
+     "kanji": "天上",
+     "image": "https://i.pinimg.com/1200x/7a/22/76/7a2276d438ee32590cab67208a59fb22.jpg",
+     "description": "Regroupement de plusieurs îles massives et stables, il constitue le centre principal du Pays de l’Eau. On y trouve également la capitale, Tenjo, l'endroit le plus sécurisé du pays.",
+     "subforums": [
+      "Île Tenjo"
+     ],
+     "danger": 1
+    },
+    {
+     "name": "Îles Terumi",
+     "kanji": "照美",
+     "image": "https://i.pinimg.com/736x/5e/77/2b/5e772bb62b5a4ef1fb0232c68c631ce0.jpg",
+     "description": "Une grande île au sol fertile, où de nombreux villages vivent sous l’autorité du clan Terumi, assurant ainsi une forme d’autonomie à l’ensemble du territoire. Les terres y sont riches, propices à l’agriculture, et permettent aux habitants de subvenir à leurs besoins tout en alimentant les réserves du clan.",
+     "subforums": [
+      "Domaine du clan Terumi",
+      "Baie de Sanbi"
+     ],
+     "clan": "Terumi",
+     "clanHref": "https://snj-base-de-donnees.vercel.app/clans/terumi/",
+     "danger": 4
+    },
+    {
+     "name": "Îles tourbillonnantes",
+     "kanji": "渦潮",
+     "image": "https://i.pinimg.com/1200x/c9/4e/c6/c94ec68cb2844f2386a495e5df265ddf.jpg",
+     "description": "Ancien territoire du clan Uzumaki, épargné par la catastrophe et récupéré par Mizu no Kuni. Ces deux îles sont principalement militaires et c'est ici qu'a été relocalisé le clan Hozuki. L'endroit est une jungle humide. Des phénomènes étranges venant de Noroi no Kuni s'échouent souvent sur l'île : des monstres et créatures anormales rendent la vie des habitants horrible. C'est ici qu'on exile les criminels de guerre ; sur l'île voisine se trouve par ailleurs une prison massive.",
+     "subforums": [
+      "Île Hozuki",
+      "Kiribakurō"
+     ],
+     "clan": "Hozuki",
+     "clanHref": "https://snj-base-de-donnees.vercel.app/clans/hozuki/",
+     "danger": 4
+    },
+    {
+     "name": "Île Kasumi",
+     "kanji": "霞",
+     "image": "https://i.pinimg.com/1200x/08/67/cc/0867cca6a7a7926186afa4fb08bc3fb4.jpg",
+     "description": "Véritable jungle hostile et repaire de plusieurs contrebandiers qui défient l'autorité, c'est également ici que le clan Hoshigaki vivait il y a plusieurs siècles ; on y trouve de très nombreuses ruines.",
+     "subforums": [],
+     "danger": 1
+    },
+    {
+     "name": "Chohama",
+     "kanji": "長浜",
+     "image": "https://i.pinimg.com/1200x/04/a0/eb/04a0ebc69ff3612673da873877b46aba.jpg",
+     "description": "Théâtre de la rébellion Hozuki, c'était également leur ancien territoire. Aujourd'hui il ne s'agit plus que d'une île rongée par la criminalité et l'instabilité.",
+     "subforums": [],
+     "danger": 2
+    }
+   ]
+  }
+ ]
+}
