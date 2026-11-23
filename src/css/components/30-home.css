@@ -206,7 +206,11 @@
   outline: none;
 }
 
-/* --- Motifs de l'ère Edo ----------------------------------------------------- */
+/* --- Motifs de l'ère Edo -----------------------------------------------------
+   Un motif = une famille d'information (jamais sur les cartes illustrées ni les fils) :
+   - seigaiha 青海波 (vagues)          → parcours et aide : onboarding, guides, tutoriels
+   - kikkō 亀甲 (carapace de tortue)   → univers et références durables : contexte, règlement, chronologie
+   - shippō 七宝 (cercles entrelacés)  → communauté et liens : staff, votes, partenaires, membres */
 .sg-pat::before {
   content: "";
   position: absolute;
@@ -215,7 +219,7 @@
   pointer-events: none;
 }
 
-/* Seigaiha (vagues de l'océan), en dégradés CSS : le fond de la carte masque les arcs du dessous */
+/* Seigaiha (vagues de l'océan) : parcours et aide. En dégradés CSS : le fond de la carte masque les arcs du dessous */
 .sg-pat--seigaiha {
   --pat-bg: var(--sg-surface);
   --pat-line: color-mix(in srgb, var(--sg-primary) 22%, var(--sg-surface));
@@ -234,16 +238,16 @@
   mask-image: linear-gradient(to left, #000 0%, rgba(0, 0, 0, 0.6) 45%, transparent 85%);
 }
 
-/* Kikkō (carapace de tortue, hexagones) */
+/* Kikkō (carapace de tortue, hexagones) : univers et références */
 .sg-pat--kikko::before {
   background-color: color-mix(in srgb, var(--sg-primary) 14%, transparent);
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34.64' height='60' viewBox='0 0 34.64 60'%3E%3Cpath d='M17.32 0L34.64 10V30L17.32 40L0 30V10Z M17.32 40V60' fill='none' stroke='%23000' stroke-width='1'/%3E%3C/svg%3E") repeat;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34.64' height='60' viewBox='0 0 34.64 60'%3E%3Cpath d='M17.32 0L34.64 10V30L17.32 40L0 30V10Z M17.32 40V60' fill='none' stroke='%23000' stroke-width='1'/%3E%3C/svg%3E") repeat;
 }
 
-/* Shippō (sept trésors, cercles entrelacés) */
+/* Shippō (sept trésors, cercles entrelacés) : communauté et liens */
 .sg-pat--shippo::before {
-  background-color: rgba(244, 239, 227, 0.14);
+  background-color: color-mix(in srgb, var(--sg-primary) 14%, transparent);
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='%23000' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='20'/%3E%3Ccircle cx='40' cy='0' r='20'/%3E%3Ccircle cx='0' cy='40' r='20'/%3E%3Ccircle cx='40' cy='40' r='20'/%3E%3Ccircle cx='20' cy='20' r='20'/%3E%3C/g%3E%3C/svg%3E") repeat;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='%23000' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='20'/%3E%3Ccircle cx='40' cy='0' r='20'/%3E%3Ccircle cx='0' cy='40' r='20'/%3E%3Ccircle cx='40' cy='40' r='20'/%3E%3Ccircle cx='20' cy='20' r='20'/%3E%3C/g%3E%3C/svg%3E") repeat;
 }

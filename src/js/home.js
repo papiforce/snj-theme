@@ -412,7 +412,7 @@
   }
 
   function staff() {
-    return h('article', { class: 'sg-card sg-c-staff sg-pat sg-pat--kikko' }, [
+    return h('article', { class: 'sg-card sg-c-staff sg-pat sg-pat--shippo' }, [
       title('Le staff', 'm'),
       h('ul', { class: 'sg-staff' }, DATA.staff.map(function (m) {
         return h('li', { class: 'sg-member' }, [
