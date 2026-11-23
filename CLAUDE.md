@@ -30,7 +30,8 @@ dans le panneau d'administration (PA), puis on commit.
   Trials) sur `html::before/::after`, intensité `--sg-glow-strength` (0,6 sombre / 0,5 clair) ; le `<body>` est transparent.
 - **Polices** : titres en **Zen Antique**, texte en **Inria Sans** (comme l'annexe). Cinzel abandonnée.
 - **Thème** : celui de l'appareil par défaut ; le choix du membre est mémorisé dans le navigateur
-  (`localStorage`, clé `snj-theme`). Attribut `data-theme` sur `<html>`.
+  (`localStorage`, clé `snj-theme`, doublé d'un cookie `snj-theme` de secours) et réappliqué à chaque affichage
+  de page, retour arrière compris (`pageshow`). Attribut `data-theme` sur `<html>`.
 - **Icônes** : **Material Symbols Outlined uniquement**, partout (c'est la bibliothèque native d'AwesomeBB).
   Jamais de Font Awesome ni d'autre bibliothèque. Seule exception : les logos de marque absents de Material Symbols
   (Discord…), en SVG inline repris de Simple Icons (licence CC0), à la même taille que les icônes.
@@ -50,7 +51,8 @@ dans le panneau d'administration (PA), puis on commit.
   Rumeurs et Derniers sujets en premier. Illustrations : paysages des nations de l'annexe (`assets/land-*.webp`,
   `scripts/grade-cards.py`). Rumeurs : une illustration et la couleur de la nation (`--sg-nation-*`).
   Contexte sans image (trop d'images sinon), sur le même motif kikkō que le Staff.
-  Image du Guide fournie par Vinny (`assets/card-guide*.webp`). En clair, Guide et Rumeurs utilisent des variantes claires au ton de la bannière (`*-light.webp`, `grade-cards.py --light`) et passent au papier
+  Images du Guide et de l'Annexe fournies par Vinny (`assets/card-guide*.webp`, `assets/card-annexe*.webp`).
+  Les 4 raccourcis de l'Annexe remplissent toute la hauteur restante de la carte. En clair, Guide, Annexe et Rumeurs utilisent des variantes claires au ton de la bannière (`*-light.webp`, `grade-cards.py --light`) et passent au papier
   et à l'encre (classe `sg-tone`). Seules les cartes Guide, Staff, Vote et Discord se soulèvent au survol.
   **Motifs Edo : un motif = une famille d'information**, uniquement sur les cartes de texte (jamais sur les cartes
   illustrées, les fils ni la carte Discord) : seigaiha 青海波 (vagues) → parcours et aide (onboarding, guides,
