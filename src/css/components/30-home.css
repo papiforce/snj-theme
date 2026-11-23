@@ -620,6 +620,9 @@
   font-weight: 700;
   line-height: 1.25;
   text-align: center;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: auto;
   opacity: 0;
   transform: translateY(8px);
   transition: opacity 0.35s ease, transform 0.45s var(--sg-ease);
@@ -1210,6 +1213,12 @@
 }
 
 @media (max-width: 768px) {
+  .sg-tile__name {
+    padding-left: 4px;
+    padding-right: 4px;
+    font-size: 0.66rem;
+  }
+
   #sg-home > * {
     grid-column: span 12;
   }
