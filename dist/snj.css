@@ -338,6 +338,10 @@ body {
   background-image: url("../assets/banner-light.webp");
 }
 
+:root[data-theme="light"] #header-banner {
+  --sg-banner-scrim: 35%;
+}
+
 /* Voile : vignette + fondu vers le fond de page en bas */
 #header-banner::after {
   content: "";
@@ -345,7 +349,7 @@ body {
   inset: 0;
   z-index: -1;
   background:
-    radial-gradient(ellipse 45% 55% at 50% 48%, color-mix(in srgb, var(--sg-bg) 55%, transparent) 0%, transparent 100%),
+    radial-gradient(ellipse 45% 55% at 50% 48%, color-mix(in srgb, var(--sg-bg) var(--sg-banner-scrim, 55%), transparent) 0%, transparent 100%),
     radial-gradient(ellipse at 50% 45%, transparent 45%, color-mix(in srgb, var(--sg-bg) 70%, transparent) 100%),
     linear-gradient(to bottom, transparent 55%, var(--sg-bg) 100%);
 }
@@ -370,6 +374,11 @@ body {
   aspect-ratio: 1;
   background: url("../assets/snj-logo-320.webp") center / contain no-repeat;
   filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.55));
+}
+
+/* En clair, l'or du logo est assombri (comme l'or clair de l'annexe) pour rester lisible sur le papier */
+:root[data-theme="light"] #header-banner .wrap::before {
+  filter: brightness(0.72) saturate(1.15) drop-shadow(0 4px 14px rgba(29, 25, 21, 0.25));
 }
 
 #header-banner .wrap::after {
