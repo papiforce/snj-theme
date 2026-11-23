@@ -501,7 +501,7 @@
   font-weight: 700;
   line-height: 1.1;
   text-align: right;
-  transition: background-size 0.45s var(--sg-ease), color 0.3s ease;
+  transition: background-size 0.9s var(--sg-ease), color 0.45s ease 0.2s;
 }
 
 .sg-shortcut:hover .sg-shortcut__label,

@@ -508,17 +508,17 @@
     /* Séparateur entre les widgets et les catégories, à la place de la barre
        de liens rapides d'AwesomeBB (masquée par le CSS quand il la précède) */
     var bar = document.querySelector('#index .action-bar-top');
-    var sep = divider('時');
+    var sep = divider();
     if (bar) bar.parentNode.insertBefore(sep, bar);
     else home.parentNode.insertBefore(sep, home.nextSibling);
   }
 
   /* Séparateur ornemental (voir src/css/components/05-ornaments.css) */
-  function divider(mark) {
-    var parts = [h('span', { class: 'sg-divider__line' }), h('span', { class: 'sg-divider__gem' })];
-    if (mark) parts.push(h('span', { class: 'sg-divider__mark', 'aria-hidden': 'true', text: mark }), h('span', { class: 'sg-divider__gem' }));
-    parts.push(h('span', { class: 'sg-divider__line' }));
-    return h('div', { class: 'sg-divider', role: 'separator' }, parts);
+  function divider() {
+    var mon = h('span', { class: 'sg-divider__mon', 'aria-hidden': 'true' }, [h('i'), h('i')]);
+    return h('div', { class: 'sg-divider', role: 'separator' }, [
+      h('span', { class: 'sg-divider__band' }), mon, h('span', { class: 'sg-divider__band' })
+    ]);
   }
 
   if (document.readyState === 'loading') {
