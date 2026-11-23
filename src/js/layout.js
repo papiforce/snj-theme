@@ -25,7 +25,7 @@
   ];
 
   /* Fichiers du thème servis par jsDelivr (version figée = SHA du commit) */
-  var ASSETS = 'https://cdn.jsdelivr.net/gh/papiforce/snj-theme@__ASSETS_SHA__/assets/';
+  var ASSETS = 'https://cdn.jsdelivr.net/gh/papiforce/snj-theme@68fdca1129bc685eeec7a8fe1b4b07e452920dcd/assets/';
   var LOGO = ASSETS + 'snj-logo.webp';
 
   /* Logos de marque absents de Material Symbols : SVG de Simple Icons (licence CC0) */

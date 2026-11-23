@@ -19,7 +19,8 @@ dans le panneau d'administration (PA), puis on commit.
 
 ## Décisions
 
-- **Version** : AwesomeBB (même version que le forum de production).
+- **Version** : AwesomeBB. Attention : le forum de production est aujourd'hui en **ModernBB** (Blank Theme).
+  Le jour de la migration, il faudra passer la production en AwesomeBB, ce qui remet ses templates et son CSS à zéro.
 - **Ambiance** : japonaise médiévale sombre.
 - **Couleur primaire** : Hagane (acier bleuté) — `#9fb0c3` en sombre, `#3e5266` en clair.
   Toutes les autres couleurs existantes (nations, clans, or de Kaminari `#c9a558`) sont conservées.
@@ -27,9 +28,13 @@ dans le panneau d'administration (PA), puis on commit.
 - **Thème** : celui de l'appareil par défaut ; le choix du membre est mémorisé dans le navigateur
   (`localStorage`, clé `snj-theme`). Attribut `data-theme` sur `<html>`.
 - **Icônes** : **Material Symbols Outlined uniquement**, partout (c'est la bibliothèque native d'AwesomeBB).
-  Jamais de Font Awesome ni d'autre bibliothèque. Pas d'icônes de marque (Discord…) : on choisit une icône générique.
+  Jamais de Font Awesome ni d'autre bibliothèque. Seule exception : les logos de marque absents de Material Symbols
+  (Discord…), en SVG inline repris de Simple Icons (licence CC0), à la même taille que les icônes.
 - **Navigation** : barre latérale fixe à gauche avec icônes et infobulle à droite (inspirée de Themis Trials),
   barre fixe en bas d'écran sur mobile. Elle remplace l'en-tête natif d'AwesomeBB.
+  Haut : avatar du membre, ou logo SnJ (`assets/snj-logo.webp`) pour les visiteurs.
+  Navigation : Accueil, Membres (masqué sur mobile), Discord, Annexe, Carte.
+  Bas : Notifications (avec pastille), Panneau d'administration (admins), Déconnexion, thème clair/sombre.
 - **Variables CSS** préfixées `--sg-*`. On rebranche les `--t_*` d'AwesomeBB sur nos tokens.
 - **CSS hors forum** : servi par jsDelivr depuis ce dépôt, avec une adresse versionnée (SHA de commit ou tag).
   Le CSS indispensable reste dans le CSS principal du forum pour que le forum reste lisible si le CDN tombe.
