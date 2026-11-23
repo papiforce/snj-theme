@@ -369,7 +369,7 @@ body > footer,
   position: absolute;
   inset: 0;
   z-index: -2;
-  background: url("../assets/banner-dark.webp") center 45% / cover no-repeat;
+  background: url("../assets/banner-dark.webp") center 32% / cover no-repeat;
 }
 
 :root[data-theme="light"] #header-banner::before {
@@ -404,10 +404,10 @@ body > footer,
 
 /*
  * Le wordmark se fond dans l'image au lieu d'être posé dessus :
- * - mode de fusion (overlay en sombre, multiply en clair) : les lettres prennent
- *   la lumière et les couleurs de l'image ;
- * - dégradé dans les lettres : elles se dissolvent vers le bas, comme dans la brume ;
- * - lueur diffuse derrière, de la couleur de l'image, pour la lisibilité.
+ * - mode de fusion (screen en sombre, multiply en clair) : les lettres prennent
+ *   la lumière et la texture de l'image ;
+ * - dégradé dans les lettres : elles se dissolvent vers le bas, comme dans la fumée ou la brume ;
+ * - en clair, une nappe de brume derrière le texte estompe les silhouettes pour la lisibilité.
  */
 #header-banner .wrap::after {
   content: "Sengoku no Jidai";
@@ -417,20 +417,25 @@ body > footer,
   line-height: 1;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  background: linear-gradient(to bottom, #fff6e0 0%, #f3dfae 55%, rgba(243, 223, 174, 0.15) 100%);
+  background: linear-gradient(to bottom, rgba(255, 236, 196, 0.92) 0%, rgba(232, 194, 122, 0.75) 55%, rgba(232, 194, 122, 0.12) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  mix-blend-mode: overlay;
-  filter: drop-shadow(0 0 28px rgba(255, 196, 120, 0.35));
+  mix-blend-mode: screen;
+  filter: drop-shadow(0 0 26px rgba(255, 170, 80, 0.28));
+}
+
+:root[data-theme="light"] #header-banner .wrap {
+  padding: 48px 72px;
+  background: radial-gradient(ellipse 50% 50% at 50% 50%, rgba(244, 239, 227, 0.78) 0%, rgba(244, 239, 227, 0.45) 55%, transparent 100%);
 }
 
 :root[data-theme="light"] #header-banner .wrap::after {
-  background: linear-gradient(to bottom, #141b22 0%, #26323e 55%, rgba(38, 50, 62, 0.2) 100%);
+  background: linear-gradient(to bottom, rgba(20, 27, 34, 0.9) 0%, rgba(38, 50, 62, 0.75) 55%, rgba(38, 50, 62, 0.12) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   mix-blend-mode: multiply;
-  filter: drop-shadow(0 0 24px rgba(244, 239, 227, 0.6));
+  filter: none;
 }
 
 /* Le titre natif reste lisible par les lecteurs d'écran, mais n'est plus affiché */
