@@ -122,6 +122,12 @@ body {
   fill: currentColor;
 }
 
+/* Les liens déjà visités gardent la couleur neutre (sinon ils prennent la couleur
+   :visited du forum, qui est la couleur primaire) */
+.sg-sb-item:visited {
+  color: var(--sg-text-muted);
+}
+
 .sg-sb-item:hover,
 .sg-sb-item:focus-visible {
   color: var(--sg-text);
@@ -131,6 +137,7 @@ body {
 
 /* Actif : page en cours, ou panneau ouvert (notifications) — seul état en couleur primaire */
 .sg-sb-item[aria-current="page"],
+.sg-sb-item[aria-current="page"]:visited,
 .sg-sb-item[aria-expanded="true"] {
   color: var(--sg-primary);
   background: var(--sg-primary-soft);
