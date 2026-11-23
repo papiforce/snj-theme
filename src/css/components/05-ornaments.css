@@ -1,92 +1,87 @@
 /* ==========================================================================
    SNJ — Ornements réutilisables
-   Séparateur : deux bandes de yagasuri 矢絣 (motif Edo de pennes de flèches)
-   qui convergent vers un mon central, deux anneaux entrelacés aux couleurs
-   d'accent (Asagi et Ume, les deux halos du forum).
-   Le yagasuri est réservé à la structure (séparations), hors des familles
-   d'information des cartes (seigaiha, kikkō, shippō).
+   Séparateur : une ligne qui forme, en son milieu, un triangle pointé vers le
+   bas, surmonté du logo de Sengoku no Jidai au trait. Couleur « sumi et gofun »
+   (--sg-contrast : ivoire en sombre, encre en clair). Construit par home.js
+   (fonction divider) ; logo au trait aussi dans assets/snj-logo-outline.svg.
 
    <div class="sg-divider" role="separator">
-     <span class="sg-divider__band"></span>
-     <span class="sg-divider__mon" aria-hidden="true"><i></i><i></i></span>
-     <span class="sg-divider__band"></span>
+     <span class="sg-divider__logo" aria-hidden="true"><svg>…logo…</svg></span>
+     <span class="sg-divider__rule" aria-hidden="true">
+       <span class="sg-divider__line"></span>
+       <svg class="sg-divider__notch" viewBox="0 0 48 25"><path d="M0 .5L24 24.5L48 .5"/></svg>
+       <span class="sg-divider__line"></span>
+     </span>
    </div>
 
-   Variante : une icône Material Symbols à la place des anneaux
-   <span class="sg-divider__mon material-symbols-outlined" aria-hidden="true">swords</span>
-   Variables : --sg-divider-space (marge haute et basse), --sg-divider-color (bandes).
+   Variables : --sg-divider-space (espace identique au-dessus et en dessous).
+   Ne pas reproduire l'ancien séparateur de SnJ (filets, losanges, kanji doré).
    ========================================================================== */
 
 .sg-divider {
-  --sg-divider-space: 64px;
-  --sg-divider-color: var(--sg-primary);
+  --sg-divider-space: 56px;
+  --sg-divider-line: rgba(var(--sg-contrast-rgb), 0.5);
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 22px;
+  gap: 14px;
   padding: var(--sg-divider-space) 0;
+  color: var(--sg-contrast);
 }
 
-/* Bande : flèches pointées vers le centre, effacées vers l'extérieur */
-.sg-divider__band {
+.sg-divider__logo {
+  display: block;
+  width: 46px;
+  height: 46px;
+}
+
+.sg-divider__logo svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Ligne : s'efface vers les bords, plonge en triangle au centre */
+.sg-divider__rule {
+  display: flex;
+  align-items: flex-start;
+  align-self: stretch;
+  height: 25px;
+}
+
+.sg-divider__line {
   flex: 1;
-  height: 14px;
-  background: var(--sg-divider-color);
-  opacity: 0.5;
-  -webkit-mask:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='14' viewBox='0 0 24 14'%3E%3Cpath d='M0 0H5L12 7L5 14H0L7 7Z'/%3E%3C/svg%3E") left center / 24px 14px repeat-x,
-    linear-gradient(90deg, transparent 0%, #000 55%, #000 86%, transparent 100%);
-  -webkit-mask-composite: source-in;
-  mask:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='14' viewBox='0 0 24 14'%3E%3Cpath d='M0 0H5L12 7L5 14H0L7 7Z'/%3E%3C/svg%3E") left center / 24px 14px repeat-x,
-    linear-gradient(90deg, transparent 0%, #000 55%, #000 86%, transparent 100%);
-  mask-composite: intersect;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--sg-divider-line));
 }
 
-.sg-divider__band:last-child {
-  transform: scaleX(-1);
+.sg-divider__line:last-child {
+  background: linear-gradient(270deg, transparent, var(--sg-divider-line));
 }
 
-/* Mon : pastille ronde, deux anneaux entrelacés (accent 1 et accent 2) */
-.sg-divider__mon {
-  position: relative;
-  display: grid;
+.sg-divider__notch {
   flex: none;
-  place-items: center;
-  width: 54px;
-  height: 54px;
-  box-sizing: border-box;
-  border: 1px solid var(--sg-border-strong);
-  border-radius: 50%;
-  background: var(--sg-surface);
-  box-shadow: var(--sg-shadow);
-  color: var(--sg-primary);
+  width: 48px;
+  height: 25px;
+  overflow: visible;
 }
 
-.sg-divider__mon i {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 20px;
-  height: 20px;
-  box-sizing: border-box;
-  border: 2px solid var(--sg-accent-1);
-  border-radius: 50%;
-  transform: translate(-80%, -50%);
-}
-
-.sg-divider__mon i + i {
-  border-color: var(--sg-accent-2);
-  transform: translate(-20%, -50%);
-}
-
-.sg-divider__mon.material-symbols-outlined {
-  font-size: 24px;
+.sg-divider__notch path {
+  fill: none;
+  stroke: var(--sg-divider-line);
+  stroke-width: 1;
+  stroke-linejoin: miter;
 }
 
 @media (max-width: 768px) {
   .sg-divider {
     --sg-divider-space: 40px;
-    gap: 14px;
+  }
+
+  .sg-divider__logo {
+    width: 38px;
+    height: 38px;
   }
 }
 

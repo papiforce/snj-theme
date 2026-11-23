@@ -33,7 +33,7 @@
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: var(--sg-space-4);
-  margin-bottom: 40px;
+  margin-bottom: 0;
   font-size: 16px; /* AwesomeBB réduit la taille du texte dans #wrap */
   line-height: 1.6;
 }
@@ -151,6 +151,7 @@
   font-weight: 700;
   font-size: 0.9rem;
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .sg-more .material-symbols-outlined,
@@ -204,6 +205,28 @@
   background: var(--sg-primary-soft);
   color: var(--sg-primary);
   outline: none;
+}
+
+/* Pile de boutons en bas d'une carte (Staff) */
+.sg-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sg-space-2);
+  margin-top: auto;
+}
+
+.sg-actions .sg-btn--ghost {
+  margin-top: 0;
+}
+
+/* Bouton vers une autre page : libellé à gauche, flèche à droite qui glisse au survol */
+.sg-btn--next {
+  justify-content: space-between;
+}
+
+.sg-btn--next:hover .material-symbols-outlined,
+.sg-btn--next:focus-visible .material-symbols-outlined {
+  transform: translateX(4px);
 }
 
 /* --- Motifs de l'ère Edo -----------------------------------------------------
@@ -457,12 +480,13 @@
   list-style: none;
 }
 
-/* Raccourci : pastille de couleur pour l'icône, puis panneau arrondi avec le libellé.
-   Au survol, la couleur remplit tout le raccourci et le texte passe en --sg-on-accent.
-   Couleur donnée par --sc (un accent ou la primaire, jamais une couleur de nation). */
+/* Raccourci : pastille « sumi et gofun » pour l'icône, puis panneau arrondi avec le libellé.
+   Au survol, la couleur remplit tout le raccourci et le texte passe en --sg-on-contrast.
+   Le libellé tient toujours sur une ligne : sa taille suit la largeur du raccourci (unités cqi). */
 .sg-shortcut,
 .sg-shortcut:visited {
-  --sc: var(--sg-primary);
+  --sc: var(--sg-contrast);
+  container-type: inline-size;
   position: relative;
   display: flex;
   align-items: stretch;
@@ -478,13 +502,13 @@
   display: grid;
   flex: none;
   place-items: center;
-  width: 58px;
+  width: clamp(40px, 22cqi, 58px);
   padding-right: 6px;
-  color: var(--sg-on-accent);
+  color: var(--sg-on-contrast);
 }
 
 .sg-shortcut__icon.material-symbols-outlined {
-  font-size: 24px;
+  font-size: clamp(18px, 9cqi, 24px);
 }
 
 .sg-shortcut__label {
@@ -493,32 +517,30 @@
   align-items: center;
   justify-content: flex-end;
   min-width: 0;
-  padding: 0 16px 0 22px;
-  border-radius: 26px 0 0 26px / 50% 0 0 50%;
+  overflow: hidden;
+  padding: 0 clamp(10px, 6cqi, 16px) 0 clamp(12px, 8cqi, 22px);
+  border-radius: 12px 0 0 12px / 50% 0 0 50%;
   background: linear-gradient(var(--sc), var(--sc)) left center / 0% 100% no-repeat, var(--sg-surface-2);
   color: var(--sc);
-  font-size: 1.2rem;
+  font-size: clamp(11px, 10cqi - 3px, 1.2rem);
   font-weight: 700;
   line-height: 1.1;
   text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   transition: background-size 0.9s var(--sg-ease), color 0.45s ease 0.2s;
 }
 
 .sg-shortcut:hover .sg-shortcut__label,
 .sg-shortcut:focus-visible .sg-shortcut__label {
   background-size: 100% 100%, auto;
-  color: var(--sg-on-accent);
+  color: var(--sg-on-contrast);
 }
 
 .sg-shortcut:focus-visible {
   outline: 2px solid var(--sc);
   outline-offset: 2px;
 }
-
-.sg-shortcut--1 { --sc: var(--sg-accent-1); }
-.sg-shortcut--2 { --sc: var(--sg-accent-2); }
-.sg-shortcut--3 { --sc: var(--sg-accent-3); }
-.sg-shortcut--4 { --sc: var(--sg-primary); }
 
 @media (prefers-reduced-motion: reduce) {
   .sg-shortcut__label {
@@ -529,9 +551,10 @@
 /* --- Scénarios (tuiles, révélation au survol) ------------------------------- */
 .sg-card__top {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
-  gap: var(--sg-space-3);
+  gap: var(--sg-space-2) var(--sg-space-3);
 }
 
 .sg-card__top > div {

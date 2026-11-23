@@ -66,15 +66,18 @@
   --sg-primary-soft: rgba(159, 176, 195, 0.14);
   --sg-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
 
-  /* Accents (hors couleurs des nations) : 1 = Asagi 浅葱 (sarcelle), 2 = Ume 梅 (prune),
-     3 = Wakatake 若竹 (jeune bambou, vert jade). --sg-on-accent : texte posé sur un accent. */
+  /* Accents (hors couleurs des nations) : 1 = Asagi 浅葱 (sarcelle), 2 = Ume 梅 (prune).
+     --sg-on-accent : texte posé sur un accent.
+     Contraste « sumi et gofun » (encre et blanc de coquille) : ivoire en sombre, encre en clair,
+     pour les éléments d'interface sans teinte (raccourcis, séparateurs). */
   --sg-accent-1: #6fb3ae;
   --sg-accent-1-rgb: 111, 179, 174;
   --sg-accent-2: #c27390;
   --sg-accent-2-rgb: 194, 115, 144;
-  --sg-accent-3: #6fc29b;
-  --sg-accent-3-rgb: 111, 194, 155;
   --sg-on-accent: var(--sg-ink-950);
+  --sg-contrast: #ece5d4;
+  --sg-contrast-rgb: 236, 229, 212;
+  --sg-on-contrast: var(--sg-ink-950);
   --sg-glow-strength: 0.6;
 }
 
@@ -101,9 +104,10 @@
   --sg-accent-1-rgb: 61, 138, 135;
   --sg-accent-2: #a8506f;
   --sg-accent-2-rgb: 168, 80, 111;
-  --sg-accent-3: #2f8a5f;
-  --sg-accent-3-rgb: 47, 138, 95;
   --sg-on-accent: var(--sg-paper-50);
+  --sg-contrast: #1d1915;
+  --sg-contrast-rgb: 29, 25, 21;
+  --sg-on-contrast: var(--sg-paper-50);
   --sg-glow-strength: 0.5;
 }
 
