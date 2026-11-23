@@ -35,12 +35,29 @@
 
   var THEME_KEY = 'snj-theme';
   var root = document.documentElement;
+  var media = window.matchMedia ? window.matchMedia('(prefers-color-scheme: light)') : null;
 
   /* ----------------------------------------------------------------------
      Thème clair/sombre
      ---------------------------------------------------------------------- */
+  /* Le choix est gardé à deux endroits : localStorage et un cookie de secours,
+     pour survivre aux navigateurs où l'un des deux est indisponible ou vidé. */
   function storedTheme() {
-    try { return localStorage.getItem(THEME_KEY); } catch (e) { return null; }
+    var t = null;
+    try { t = localStorage.getItem(THEME_KEY); } catch (e) {}
+    if (t === 'light' || t === 'dark') return t;
+    var m = document.cookie.match(/(?:^|;\s*)snj-theme=(light|dark)/);
+    return m ? m[1] : null;
+  }
+
+  function saveTheme(theme) {
+    try { localStorage.setItem(THEME_KEY, theme); } catch (e) {}
+    document.cookie = THEME_KEY + '=' + theme + '; path=/; max-age=31536000; SameSite=Lax' +
+      (location.protocol === 'https:' ? '; Secure' : '');
+  }
+
+  function systemTheme() {
+    return media && media.matches ? 'light' : 'dark';
   }
 
   function currentTheme() {
@@ -59,11 +76,21 @@
 
   function toggleTheme() {
     var theme = currentTheme() === 'dark' ? 'light' : 'dark';
-    try { localStorage.setItem(THEME_KEY, theme); } catch (e) {}
+    saveTheme(theme);
     applyTheme(theme);
   }
 
-  var media = window.matchMedia ? window.matchMedia('(prefers-color-scheme: light)') : null;
+  /* Réapplique le choix enregistré : retour arrière (page restaurée depuis le cache
+     du navigateur, sans relancer les scripts) et changement fait dans un autre onglet. */
+  function syncTheme() {
+    applyTheme(storedTheme() || systemTheme());
+  }
+
+  window.addEventListener('pageshow', syncTheme);
+  window.addEventListener('storage', function (e) {
+    if (!e.key || e.key === THEME_KEY) syncTheme();
+  });
+
   if (media) {
     var onSystemChange = function (e) {
       if (!storedTheme()) applyTheme(e.matches ? 'light' : 'dark');
@@ -261,7 +288,7 @@
     bar.appendChild(bottom);
 
     document.body.insertBefore(bar, document.body.firstChild);
-    applyTheme(currentTheme());
+    applyTheme(storedTheme() || currentTheme());
   }
 
   if (document.readyState === 'loading') {
