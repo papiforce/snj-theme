@@ -276,14 +276,11 @@
   }
 
   function context() {
-    return h('article', { class: 'sg-card sg-c-context sg-hero sg-tone' }, [
-      h('div', { class: 'sg-hero__img sg-has-light', style: imgPair('card-context.webp', 'card-context-light.webp') }),
-      h('div', { class: 'sg-hero__body' }, [
-        eyebrow("L'univers"),
-        title('Contexte', 'xl'),
-        h('div', { class: 'sg-prose' }, DATA.context.text.map(function (p) { return h('p', { text: fr(p) }); })),
-        more(DATA.context.href, 'Lire la suite')
-      ])
+    return h('article', { class: 'sg-card sg-c-context sg-pat sg-pat--kikko' }, [
+      eyebrow("L'univers"),
+      title('Contexte', 'xl'),
+      h('div', { class: 'sg-prose' }, DATA.context.text.map(function (p) { return h('p', { text: fr(p) }); })),
+      more(DATA.context.href, 'Lire la suite')
     ]);
   }
 

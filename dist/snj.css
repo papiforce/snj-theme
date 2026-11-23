@@ -47,21 +47,26 @@ body > header {
   border-radius: var(--sg-radius);
   overflow: visible;
   background: var(--sg-surface);
-  border: 1px solid var(--sg-border-strong);
+  /* Contour plutôt que bordure : il se dessine par-dessus l'avatar et ne réduit pas sa place */
+  border: 0;
+  outline: 1px solid var(--sg-border-strong);
+  outline-offset: -1px;
   box-shadow: var(--sg-shadow);
   color: var(--sg-text);
   text-decoration: none;
-  transition: border-color var(--sg-transition), transform var(--sg-transition);
+  transition: outline-color var(--sg-transition), transform var(--sg-transition);
 }
 
 .sg-sb-brand:hover,
 .sg-sb-brand:focus-visible {
-  border-color: var(--sg-primary);
-  outline: none;
+  outline-color: var(--sg-primary);
 }
 
-/* Avatar recadré dans le cadre (AwesomeBB impose sa propre taille aux images) */
+/* Avatar recadré sur tout le cadre (AwesomeBB impose sa propre taille aux images ;
+   hors du flux, la hauteur à 100 % ne dépend plus de la grille) */
 .sg-sb-brand img {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100% !important;
   height: 100% !important;
@@ -69,7 +74,7 @@ body > header {
   max-height: none !important;
   object-fit: cover;
   object-position: center;
-  border-radius: calc(var(--sg-radius) - 1px);
+  border-radius: var(--sg-radius);
 }
 
 /* Logo du forum (visiteurs, ou membre sans avatar) */
@@ -836,27 +841,17 @@ body > footer,
   line-height: 1.65;
 }
 
-/* Contexte : texte long, voile de côté sur toute la hauteur */
+/* Contexte : carte de texte sur motif kikkō (comme le staff) */
 .sg-c-context {
-  min-height: 360px;
   justify-content: center;
+  padding: 30px 32px;
 }
 
-.sg-c-context .sg-hero__body {
-  height: 100%;
-  box-sizing: border-box;
-  justify-content: center;
-  padding: 32px 30px;
-  max-width: 68%;
-  background: none;
-}
-
-.sg-c-context::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: linear-gradient(90deg, rgba(var(--sg-ink-overlay), 0.94) 0%, rgba(var(--sg-ink-overlay), 0.78) 50%, rgba(var(--sg-ink-overlay), 0.15) 100%);
+.sg-c-context .sg-prose p {
+  max-width: 68ch;
+  color: var(--sg-text-muted);
+  font-size: 0.95rem;
+  line-height: 1.7;
 }
 
 .sg-season__line {
@@ -1547,9 +1542,6 @@ body > footer,
     grid-template-columns: 1fr;
   }
 
-  .sg-c-context .sg-hero__body {
-    max-width: none;
-  }
 }
 
 @media (max-width: 768px) {

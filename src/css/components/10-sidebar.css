@@ -45,21 +45,26 @@ body > header {
   border-radius: var(--sg-radius);
   overflow: visible;
   background: var(--sg-surface);
-  border: 1px solid var(--sg-border-strong);
+  /* Contour plutôt que bordure : il se dessine par-dessus l'avatar et ne réduit pas sa place */
+  border: 0;
+  outline: 1px solid var(--sg-border-strong);
+  outline-offset: -1px;
   box-shadow: var(--sg-shadow);
   color: var(--sg-text);
   text-decoration: none;
-  transition: border-color var(--sg-transition), transform var(--sg-transition);
+  transition: outline-color var(--sg-transition), transform var(--sg-transition);
 }
 
 .sg-sb-brand:hover,
 .sg-sb-brand:focus-visible {
-  border-color: var(--sg-primary);
-  outline: none;
+  outline-color: var(--sg-primary);
 }
 
-/* Avatar recadré dans le cadre (AwesomeBB impose sa propre taille aux images) */
+/* Avatar recadré sur tout le cadre (AwesomeBB impose sa propre taille aux images ;
+   hors du flux, la hauteur à 100 % ne dépend plus de la grille) */
 .sg-sb-brand img {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100% !important;
   height: 100% !important;
@@ -67,7 +72,7 @@ body > header {
   max-height: none !important;
   object-fit: cover;
   object-position: center;
-  border-radius: calc(var(--sg-radius) - 1px);
+  border-radius: var(--sg-radius);
 }
 
 /* Logo du forum (visiteurs, ou membre sans avatar) */

@@ -369,27 +369,17 @@
   line-height: 1.65;
 }
 
-/* Contexte : texte long, voile de côté sur toute la hauteur */
+/* Contexte : carte de texte sur motif kikkō (comme le staff) */
 .sg-c-context {
-  min-height: 360px;
   justify-content: center;
+  padding: 30px 32px;
 }
 
-.sg-c-context .sg-hero__body {
-  height: 100%;
-  box-sizing: border-box;
-  justify-content: center;
-  padding: 32px 30px;
-  max-width: 68%;
-  background: none;
-}
-
-.sg-c-context::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: linear-gradient(90deg, rgba(var(--sg-ink-overlay), 0.94) 0%, rgba(var(--sg-ink-overlay), 0.78) 50%, rgba(var(--sg-ink-overlay), 0.15) 100%);
+.sg-c-context .sg-prose p {
+  max-width: 68ch;
+  color: var(--sg-text-muted);
+  font-size: 0.95rem;
+  line-height: 1.7;
 }
 
 .sg-season__line {
@@ -1080,9 +1070,6 @@
     grid-template-columns: 1fr;
   }
 
-  .sg-c-context .sg-hero__body {
-    max-width: none;
-  }
 }
 
 @media (max-width: 768px) {
