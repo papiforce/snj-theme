@@ -57,14 +57,16 @@ dans le panneau d'administration (PA), puis on commit.
   sans bordure ; au survol la couleur remplit tout le raccourci (accents 1, 2, 3 puis primaire). Ils remplissent toute
   la hauteur restante de la carte. Annonces et Rumeurs défilent seules (8 s). Scénarios : `taken: true` pour un
   scénario pris (grisé, sceau « Pris », non cliquable), les disponibles en premier.
-  **Séparateur** réutilisable `.sg-divider` (`05-ornaments.css`) : filets, losanges et un signe au centre ; sur
-  l'accueil, 時 entre les widgets et les catégories, à la place de la barre de liens rapides d'AwesomeBB. En clair, Guide, Annexe et Rumeurs utilisent des variantes claires au ton de la bannière (`*-light.webp`, `grade-cards.py --light`) et passent au papier
+  **Séparateur** réutilisable `.sg-divider` (`05-ornaments.css`), en rupture avec l'ancien séparateur de SnJ (filets,
+  losanges, kanji doré — à ne pas reproduire) : deux bandes de yagasuri 矢絣 (pennes de flèches, motif réservé aux
+  séparations) qui convergent vers un mon rond à deux anneaux entrelacés (accent 1 et accent 2). Sur l'accueil, entre
+  les widgets et les catégories, à la place de la barre de liens rapides d'AwesomeBB. En clair, Guide, Annexe et Rumeurs utilisent des variantes claires au ton de la bannière (`*-light.webp`, `grade-cards.py --light`) et passent au papier
   et à l'encre (classe `sg-tone`). Seules les cartes Guide, Staff, Vote et Discord se soulèvent au survol.
   **Motifs Edo : un motif = une famille d'information**, uniquement sur les cartes de texte (jamais sur les cartes
   illustrées, les fils ni la carte Discord) : seigaiha 青海波 (vagues) → parcours et aide (onboarding, guides,
   tutoriels) ; kikkō 亀甲 (carapace de tortue) → univers et références durables (contexte, règlement, chronologie) ;
   shippō 七宝 (cercles entrelacés) → communauté et liens (staff, votes, partenaires, membres).
-  Peu de kanji (seulement dans les tuiles de scénarios et le signe central des séparateurs). Annonces, Rumeurs et Saison sont des données provisoires
+  Peu de kanji (seulement dans les tuiles de scénarios). Annonces, Rumeurs et Saison sont des données provisoires
   (objet `DATA`) à brancher plus tard sur l'API de l'annexe. Pas d'animation de bordure au survol.
   Les `<header>` sont interdits dans nos composants : AwesomeBB les fixe tous en haut de page.
 - **Variables CSS** préfixées `--sg-*`. On rebranche les `--t_*` d'AwesomeBB sur nos tokens.
