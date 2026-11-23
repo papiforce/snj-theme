@@ -69,12 +69,11 @@ body {
   border-radius: calc(var(--sg-radius) - 1px);
 }
 
-.sg-sb-kanji {
-  font-family: var(--sg-font-jp);
-  font-weight: 700;
-  font-size: 1.6rem;
-  line-height: 1;
-  color: var(--sg-primary);
+/* Logo du forum (visiteurs, ou membre sans avatar) */
+.sg-sb-brand--logo img {
+  box-sizing: border-box;
+  padding: 6px;
+  object-fit: contain;
 }
 
 /* --- Groupes d'icônes ------------------------------------------------- */
@@ -112,6 +111,13 @@ body {
 
 .sg-sb-item .material-symbols-outlined {
   font-size: 22px;
+}
+
+/* Logos de marque en SVG (Discord…), calés sur la taille des Material Symbols */
+.sg-sb-svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
 }
 
 .sg-sb-item:hover,
@@ -248,8 +254,8 @@ body {
     box-shadow: none;
   }
 
-  .sg-sb-kanji {
-    font-size: 1.25rem;
+  .sg-sb-hide-mobile {
+    display: none !important;
   }
 
   .sg-sb-item {
