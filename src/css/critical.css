@@ -1,0 +1,194 @@
+/* ==========================================================================
+   SENGOKU NO JIDAI — THÈME FORUM (AwesomeBB)
+   critical.css — à coller dans PA › Affichage › Couleurs › CSS principal
+   Contient UNIQUEMENT l'indispensable : tokens, thèmes clair/sombre,
+   rebranchement des variables AwesomeBB, typographie de base.
+   Les composants vont dans src/css/components/*.css (servis par CDN).
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. TOKENS FIXES (identiques dans les deux thèmes)
+   -------------------------------------------------------------------------- */
+:root {
+  /* Encre & papier — repris de l'annexe */
+  --sg-ink-950: #0a0908;
+  --sg-ink-900: #110f0d;
+  --sg-ink-800: #1a1714;
+  --sg-ink-700: #25211d;
+  --sg-paper-50: #fbf8f1;
+  --sg-paper-100: #e8dfc9;
+  --sg-paper-200: #f4efe3;
+  --sg-paper-300: #b8ad95;
+  --sg-paper-400: #ece5d4;
+
+  /* Hagane — couleur primaire */
+  --sg-hagane-300: #c3d0dd;
+  --sg-hagane-400: #9fb0c3;
+  --sg-hagane-700: #3e5266;
+  --sg-hagane-800: #2f3f50;
+
+  /* Typographie */
+  --sg-font-display: "Zen Antique", "Noto Serif JP", serif;
+  --sg-font-body: "Inria Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --sg-font-jp: "Noto Serif JP", serif;
+
+  /* Espacements & rayons */
+  --sg-space-1: 4px;
+  --sg-space-2: 8px;
+  --sg-space-3: 12px;
+  --sg-space-4: 16px;
+  --sg-space-6: 24px;
+  --sg-space-8: 32px;
+  --sg-radius-sm: 6px;
+  --sg-radius: 10px;
+  --sg-radius-lg: 14px;
+
+  --sg-transition: 0.2s ease;
+}
+
+/* --------------------------------------------------------------------------
+   2. THÈME SOMBRE (défaut si l'appareil est en sombre)
+   -------------------------------------------------------------------------- */
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --sg-bg: var(--sg-ink-950);
+  --sg-surface: var(--sg-ink-900);
+  --sg-surface-2: var(--sg-ink-800);
+  --sg-surface-3: var(--sg-ink-700);
+  --sg-text: var(--sg-paper-100);
+  --sg-text-muted: var(--sg-paper-300);
+  --sg-border: rgba(232, 223, 201, 0.1);
+  --sg-border-strong: rgba(232, 223, 201, 0.2);
+  --sg-primary: var(--sg-hagane-400);
+  --sg-primary-hover: var(--sg-hagane-300);
+  --sg-primary-fg: var(--sg-ink-950);
+  --sg-primary-soft: rgba(159, 176, 195, 0.14);
+  --sg-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+/* --------------------------------------------------------------------------
+   3. THÈME CLAIR
+   -------------------------------------------------------------------------- */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --sg-bg: var(--sg-paper-200);
+  --sg-surface: var(--sg-paper-50);
+  --sg-surface-2: var(--sg-paper-400);
+  --sg-surface-3: #e2d9c4;
+  --sg-text: #1d1915;
+  --sg-text-muted: #5d554a;
+  --sg-border: rgba(29, 25, 21, 0.12);
+  --sg-border-strong: rgba(29, 25, 21, 0.22);
+  --sg-primary: var(--sg-hagane-700);
+  --sg-primary-hover: var(--sg-hagane-800);
+  --sg-primary-fg: var(--sg-paper-50);
+  --sg-primary-soft: rgba(62, 82, 102, 0.1);
+  --sg-shadow: 0 8px 24px rgba(60, 45, 20, 0.12);
+}
+
+/* --------------------------------------------------------------------------
+   4. REBRANCHEMENT DES VARIABLES AWESOMEBB
+   Forumactif génère des --t_* ; on les fait pointer sur nos tokens pour que
+   tout ce qui n'est pas encore refait suive déjà le thème.
+   -------------------------------------------------------------------------- */
+:root {
+  --bodyline_back: var(--sg-surface);
+  --header_th_color: var(--sg-text);
+  --mobi_forumcat_bgcolor: var(--sg-surface-2);
+  --t_body_alink: var(--sg-primary-hover);
+  --t_body_bgcolor: var(--sg-primary);
+  --t_body_bgcolordd: var(--sg-primary);
+  --t_body_hlink: var(--sg-primary-hover);
+  --t_body_link: var(--sg-primary);
+  --t_body_text: var(--sg-text);
+  --t_body_vlink: var(--sg-primary);
+  --t_fontface1: var(--sg-font-body);
+  --t_fontface2: var(--sg-font-body);
+  --t_header_bg: none;
+  --t_header_colorbg: var(--sg-surface);
+  --t_h1_header_color: var(--sg-text);
+  --t_tr_color1: var(--sg-text);
+  --t_tr_color2: var(--sg-surface-2);
+}
+
+/* --------------------------------------------------------------------------
+   5. BASE
+   -------------------------------------------------------------------------- */
+html,
+body {
+  background: var(--sg-bg);
+  color: var(--sg-text);
+}
+
+body {
+  font-family: var(--sg-font-body);
+  font-size: 16px;
+  line-height: 1.65;
+  transition: background-color var(--sg-transition), color var(--sg-transition);
+}
+
+a {
+  color: var(--sg-primary);
+  transition: color var(--sg-transition);
+}
+
+a:hover {
+  color: var(--sg-primary-hover);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--sg-font-display);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  color: var(--sg-text);
+}
+
+::selection {
+  background: var(--sg-primary);
+  color: var(--sg-primary-fg);
+}
+
+/* --------------------------------------------------------------------------
+   6. EN-TÊTE
+   -------------------------------------------------------------------------- */
+body > header {
+  background: var(--sg-surface);
+  border-bottom: 1px solid var(--sg-border);
+  color: var(--sg-text);
+}
+
+#logo-text h1 {
+  font-family: var(--sg-font-display);
+  color: var(--sg-text);
+}
+
+#header-banner {
+  background: var(--sg-surface-2);
+  color: var(--sg-text);
+}
+
+/* Bouton clair/sombre (injecté par src/js/theme-toggle.js) */
+#sg-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin: 0 var(--sg-space-1);
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--sg-text);
+  cursor: pointer;
+  transition: background-color var(--sg-transition);
+}
+
+#sg-theme-toggle:hover,
+#sg-theme-toggle:focus-visible {
+  background: var(--sg-primary-soft);
+  outline: none;
+}
