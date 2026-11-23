@@ -35,10 +35,6 @@ body > header {
   font-family: var(--sg-font-body);
 }
 
-body {
-  padding-left: calc(var(--sg-sidebar-w) + var(--sg-sidebar-gap) * 2);
-}
-
 /* --- Emblème / avatar -------------------------------------------------- */
 .sg-sb-brand {
   position: relative;
@@ -224,11 +220,6 @@ body {
 
 /* --- Mobile : barre en bas --------------------------------------------- */
 @media (max-width: 768px) {
-  body {
-    padding-left: 0;
-    padding-bottom: calc(var(--sg-bottombar-h) + env(safe-area-inset-bottom, 0px));
-  }
-
   #sg-sidebar {
     top: auto;
     bottom: 0;

@@ -37,10 +37,6 @@ body > header {
   font-family: var(--sg-font-body);
 }
 
-body {
-  padding-left: calc(var(--sg-sidebar-w) + var(--sg-sidebar-gap) * 2);
-}
-
 /* --- Emblème / avatar -------------------------------------------------- */
 .sg-sb-brand {
   position: relative;
@@ -226,11 +222,6 @@ body {
 
 /* --- Mobile : barre en bas --------------------------------------------- */
 @media (max-width: 768px) {
-  body {
-    padding-left: 0;
-    padding-bottom: calc(var(--sg-bottombar-h) + env(safe-area-inset-bottom, 0px));
-  }
-
   #sg-sidebar {
     top: auto;
     bottom: 0;
@@ -302,11 +293,54 @@ body {
   }
 }
 
+/* --- 15-layout.css --- */
+/* ==========================================================================
+   SNJ — Mise en page générale
+   Le contenu (bannière, catégories, pied de page) occupe toute la largeur
+   disponible à droite de la barre latérale, sans jamais passer dessous.
+   (AwesomeBB force le padding du <body> : on décale donc les blocs eux-mêmes.)
+   ========================================================================== */
+
+:root {
+  --sg-content-left: calc(var(--sg-sidebar-gap) * 2 + var(--sg-sidebar-w));
+  --sg-content-right: var(--sg-sidebar-gap);
+}
+
+#header-banner,
+#wrap,
+body > footer,
+#page-footer {
+  box-sizing: border-box;
+  width: auto !important;
+  max-width: none !important;
+  margin-left: var(--sg-content-left) !important;
+  margin-right: var(--sg-content-right) !important;
+}
+
+#wrap {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --sg-content-left: var(--sg-space-2);
+    --sg-content-right: var(--sg-space-2);
+  }
+
+  /* Espace réservé sous le contenu pour la barre du bas */
+  body::after {
+    content: "";
+    display: block;
+    height: calc(var(--sg-bottombar-h) + env(safe-area-inset-bottom, 0px));
+  }
+}
+
 /* --- 20-banner.css --- */
 /* ==========================================================================
    SNJ — Bannière (#header-banner d'AwesomeBB)
    Image étalonnée par thème (assets/banner-light.webp / banner-dark.webp,
-   générées par scripts/grade-banner.py), logo + wordmark centrés.
+   générées par scripts/grade-banner.py) et wordmark fondu dans l'image.
    Tout est en CSS : pas de JavaScript, donc pas d'apparition différée.
    Les chemins ../assets/ sont relatifs à dist/snj.css, donc toujours
    servis à la même version que ce fichier.
@@ -317,10 +351,14 @@ body {
   isolation: isolate;
   display: grid;
   place-items: center;
-  height: clamp(280px, 38vw, 460px);
-  margin: 0;
+  height: clamp(280px, 34vw, 480px);
+  margin-top: var(--sg-space-6) !important;
+  margin-bottom: var(--sg-space-6) !important;
   padding: 0;
   overflow: hidden;
+  border: 1px solid var(--sg-border);
+  border-radius: var(--sg-radius-lg);
+  box-shadow: var(--sg-shadow);
   background: var(--sg-bg) !important;
   color: var(--sg-text);
 }
@@ -331,35 +369,28 @@ body {
   position: absolute;
   inset: 0;
   z-index: -2;
-  background: url("../assets/banner-dark.webp") center 40% / cover no-repeat;
+  background: url("../assets/banner-dark.webp") center 45% / cover no-repeat;
 }
 
 :root[data-theme="light"] #header-banner::before {
   background-image: url("../assets/banner-light.webp");
+  background-position: center 40%;
 }
 
-:root[data-theme="light"] #header-banner {
-  --sg-banner-scrim: 35%;
-}
-
-/* Voile : vignette + fondu vers le fond de page en bas */
+/* Voile : vignette douce sur les bords et le bas */
 #header-banner::after {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   background:
-    radial-gradient(ellipse 45% 55% at 50% 48%, color-mix(in srgb, var(--sg-bg) var(--sg-banner-scrim, 55%), transparent) 0%, transparent 100%),
-    radial-gradient(ellipse at 50% 45%, transparent 45%, color-mix(in srgb, var(--sg-bg) 70%, transparent) 100%),
-    linear-gradient(to bottom, transparent 55%, var(--sg-bg) 100%);
+    radial-gradient(ellipse at 50% 40%, transparent 50%, color-mix(in srgb, var(--sg-bg) 55%, transparent) 100%),
+    linear-gradient(to bottom, transparent 60%, color-mix(in srgb, var(--sg-bg) 65%, transparent) 100%);
 }
 
-/* Logo + wordmark */
+/* Wordmark */
 #header-banner .wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--sg-space-3);
+  display: block;
   max-width: none;
   margin: 0;
   padding: 0 var(--sg-space-4);
@@ -368,27 +399,38 @@ body {
 }
 
 #header-banner .wrap::before {
-  content: "";
-  display: block;
-  width: clamp(104px, 13vw, 168px);
-  aspect-ratio: 1;
-  background: url("../assets/snj-logo-320.webp") center / contain no-repeat;
-  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.55));
+  content: none;
 }
 
-/* En clair, l'or du logo est assombri (comme l'or clair de l'annexe) pour rester lisible sur le papier */
-:root[data-theme="light"] #header-banner .wrap::before {
-  filter: brightness(0.72) saturate(1.15) drop-shadow(0 4px 14px rgba(29, 25, 21, 0.25));
-}
-
+/*
+ * Le wordmark se fond dans l'image au lieu d'être posé dessus :
+ * - mode de fusion (overlay en sombre, multiply en clair) : les lettres prennent
+ *   la lumière et les couleurs de l'image ;
+ * - dégradé dans les lettres : elles se dissolvent vers le bas, comme dans la brume ;
+ * - lueur diffuse derrière, de la couleur de l'image, pour la lisibilité.
+ */
 #header-banner .wrap::after {
   content: "Sengoku no Jidai";
+  display: block;
   font-family: var(--sg-font-display);
-  font-size: clamp(2rem, 5.2vw, 3.6rem);
-  line-height: 1.05;
-  letter-spacing: 0.04em;
-  color: var(--sg-text);
-  text-shadow: 0 2px 18px color-mix(in srgb, var(--sg-bg) 85%, transparent);
+  font-size: clamp(2.6rem, 7.2vw, 6.2rem);
+  line-height: 1;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: linear-gradient(to bottom, #fff6e0 0%, #f3dfae 55%, rgba(243, 223, 174, 0.15) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  mix-blend-mode: overlay;
+  filter: drop-shadow(0 0 28px rgba(255, 196, 120, 0.35));
+}
+
+:root[data-theme="light"] #header-banner .wrap::after {
+  background: linear-gradient(to bottom, #141b22 0%, #26323e 55%, rgba(38, 50, 62, 0.2) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  mix-blend-mode: multiply;
+  filter: drop-shadow(0 0 24px rgba(244, 239, 227, 0.6));
 }
 
 /* Le titre natif reste lisible par les lecteurs d'écran, mais n'est plus affiché */
@@ -406,6 +448,8 @@ body {
 
 @media (max-width: 768px) {
   #header-banner {
-    height: 240px;
+    height: 220px;
+    margin-top: var(--sg-space-2) !important;
+    margin-bottom: var(--sg-space-4) !important;
   }
 }

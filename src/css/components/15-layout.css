@@ -1,0 +1,41 @@
+/* ==========================================================================
+   SNJ — Mise en page générale
+   Le contenu (bannière, catégories, pied de page) occupe toute la largeur
+   disponible à droite de la barre latérale, sans jamais passer dessous.
+   (AwesomeBB force le padding du <body> : on décale donc les blocs eux-mêmes.)
+   ========================================================================== */
+
+:root {
+  --sg-content-left: calc(var(--sg-sidebar-gap) * 2 + var(--sg-sidebar-w));
+  --sg-content-right: var(--sg-sidebar-gap);
+}
+
+#header-banner,
+#wrap,
+body > footer,
+#page-footer {
+  box-sizing: border-box;
+  width: auto !important;
+  max-width: none !important;
+  margin-left: var(--sg-content-left) !important;
+  margin-right: var(--sg-content-right) !important;
+}
+
+#wrap {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --sg-content-left: var(--sg-space-2);
+    --sg-content-right: var(--sg-space-2);
+  }
+
+  /* Espace réservé sous le contenu pour la barre du bas */
+  body::after {
+    content: "";
+    display: block;
+    height: calc(var(--sg-bottombar-h) + env(safe-area-inset-bottom, 0px));
+  }
+}

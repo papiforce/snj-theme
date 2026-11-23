@@ -16,8 +16,10 @@ def gradient_map(lum, stops):
         out[..., ch] = np.interp(lum, pos, cols[:, ch])
     return out
 
-def grade(src, dst, stops, keep, gamma, grain, width=1600):
+def grade(src, dst, stops, keep, gamma, grain, width=1600, crop=None):
     im = Image.open(src).convert('RGB')
+    if crop:  # (haut, bas) en pixels à retirer, ex. bandes noires
+        im = im.crop((0, crop[0], im.width, im.height - crop[1]))
     h = round(im.height * width / im.width)
     im = im.resize((width, h), Image.LANCZOS).filter(ImageFilter.GaussianBlur(0.6))
     a = np.asarray(im, dtype=np.float32) / 255
@@ -31,12 +33,12 @@ def grade(src, dst, stops, keep, gamma, grain, width=1600):
 
 if __name__ == '__main__':
     light_src, dark_src = sys.argv[1], sys.argv[2]
-    # Clair : estampe encre Hagane sur papier
+    # Clair : brume à l'encre Hagane sur papier (bandes noires du haut/bas retirées)
     grade(light_src, 'assets/banner-light.webp',
-          [(0.0, hex2rgb('#26313d')), (0.45, hex2rgb('#5d7183')), (0.8, hex2rgb('#c9c2ad')), (1.0, hex2rgb('#f4efe3'))],
-          keep=0.18, gamma=0.95, grain=0.018)
-    # Sombre : encre et or terni
+          [(0.0, hex2rgb('#1f2830')), (0.5, hex2rgb('#6c7d8c')), (0.85, hex2rgb('#d9d6cc')), (1.0, hex2rgb('#f4efe3'))],
+          keep=0.25, gamma=1.0, grain=0.014, width=1600, crop=(22, 27))
+    # Sombre : braises domptées, encre et or terni
     grade(dark_src, 'assets/banner-dark.webp',
-          [(0.0, hex2rgb('#0a0908')), (0.35, hex2rgb('#2a2119')), (0.7, hex2rgb('#7a6438')), (1.0, hex2rgb('#d9bf7f'))],
-          keep=0.15, gamma=1.15, grain=0.02)
+          [(0.0, hex2rgb('#0a0908')), (0.3, hex2rgb('#2a1d14')), (0.65, hex2rgb('#8a5a2e')), (1.0, hex2rgb('#d9bf7f'))],
+          keep=0.4, gamma=1.1, grain=0.016, width=1920)
     print('ok')
