@@ -160,10 +160,6 @@ body.sg-zones-on #index .forum.type-table-forum {
   display: none;
 }
 
-.sg-zone-select__button {
-  position: relative;
-}
-
 .sg-zone-select__current {
   display: flex;
   flex: 1;
@@ -171,16 +167,22 @@ body.sg-zones-on #index .forum.type-table-forum {
 }
 
 .sg-zone-select__button > .material-symbols-outlined {
-  position: absolute;
-  top: 50%;
-  left: 62px;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 44px;
+  margin-left: -1px;
+  background: var(--zc);
   color: var(--zc-on);
-  transform: translateY(-50%);
   transition: transform 0.25s var(--sg-ease);
 }
 
 .sg-zone-select.is-open .sg-zone-select__button > .material-symbols-outlined {
-  transform: translateY(-50%) rotate(180deg);
+  transform: rotate(180deg);
+}
+
+.sg-zone-select__button .sg-zone-tab__label {
+  padding-right: 6px;
 }
 
 .sg-zone-select__list {
