@@ -58,10 +58,15 @@ body > header {
   outline: none;
 }
 
+/* Avatar recadré dans le cadre (AwesomeBB impose sa propre taille aux images) */
 .sg-sb-brand img {
-  width: 100%;
-  height: 100%;
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
   object-fit: cover;
+  object-position: center;
   border-radius: calc(var(--sg-radius) - 1px);
 }
 

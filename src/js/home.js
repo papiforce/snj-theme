@@ -4,9 +4,11 @@
    Placement : "Sur l'index" uniquement.
    Dépend de : src/css/components/30-home.css (servi par jsDelivr).
 
-   Ordre des zones :
-   - visiteur : Rejoindre → Univers → Se préparer → Vie du forum → Communauté
-   - membre   : Vie du forum → Univers → Se préparer → Communauté (pas d'onboarding)
+   Une seule grille « bento » (12 colonnes), cartes variées : grandes cartes illustrées,
+   carte à couverture, cartes à motifs de l'ère Edo, carrousels, carte Discord.
+   - visiteur : Onboarding → Contexte, Saison → Guide, Annexe → Annonces, Rumeurs, Derniers sujets
+                → Scénarios, Staff, Vote + Discord
+   - membre   : pas d'onboarding, Annonces / Rumeurs / Derniers sujets en premier
 
    Annonces, Rumeurs et Saison sont pour l'instant des données écrites ici
    (reprises de l'annexe). Elles seront branchées sur l'API de l'annexe plus tard :
@@ -155,24 +157,6 @@
     return link(href, { class: 'sg-more' }, [label, icon('arrow_forward')]);
   }
 
-  function cardHead(kanji, title) {
-    /* <div> et pas <header> : AwesomeBB fixe tous les <header> en haut de page */
-    return h('div', { class: 'sg-card__head' }, [
-      h('span', { class: 'sg-kanji', 'aria-hidden': 'true', text: kanji }),
-      h('h3', { class: 'sg-card__title', text: title })
-    ]);
-  }
-
-  function zone(num, kanji, title, rowClass, cards) {
-    return h('section', { class: 'sg-zone', 'aria-label': title }, [
-      h('h2', { class: 'sg-zone__title' }, [
-        h('span', { class: 'sg-zone__num', 'aria-hidden': 'true', text: kanji }),
-        title
-      ]),
-      h('div', { class: 'sg-row ' + rowClass }, cards)
-    ]);
-  }
-
   /* Dossier assets/ à la même version que le CSS chargé (pas de SHA en dur) */
   function assetsBase() {
     var l = document.querySelector('link[href*="snj-theme@"]');
@@ -246,6 +230,21 @@
   }
 
   /* ----------------------------------------------------------------------
+     Briques de cartes
+     ---------------------------------------------------------------------- */
+  var NATIONS = { 'Hi no Kuni': 'hi', 'Mizu no Kuni': 'mizu', 'Kaminari no Kuni': 'kaminari', 'Tsuchi no Kuni': 'tsuchi', 'Kaze no Kuni': 'kaze', 'Autres': 'autres' };
+
+  function img(name) { return "background-image:url('" + assetsBase() + name + "')"; }
+
+  function title(text, size) {
+    return h('h3', { class: 'sg-title sg-title--' + (size || 'm'), text: text });
+  }
+
+  function eyebrow(text) {
+    return h('span', { class: 'sg-eyebrow', text: text });
+  }
+
+  /* ----------------------------------------------------------------------
      Widgets
      ---------------------------------------------------------------------- */
   function onboarding() {
@@ -253,61 +252,79 @@
       return h('li', { class: 'sg-step' }, [
         link(s.href, { class: 'sg-step__link' }, [
           h('span', { class: 'sg-step__num', text: String(i + 1) }),
-          h('span', { class: 'sg-step__icon' }, [icon(s.icon)]),
-          h('span', { class: 'sg-step__title', text: s.title }),
-          h('span', { class: 'sg-step__text', text: fr(s.text) })
+          h('span', { class: 'sg-step__body' }, [
+            h('span', { class: 'sg-step__title' }, [icon(s.icon), s.title]),
+            h('span', { class: 'sg-step__text', text: fr(s.text) })
+          ])
         ])
       ]);
     });
-    return h('article', { class: 'sg-card sg-card--onboarding' }, [
+    return h('article', { class: 'sg-card sg-c-onboarding sg-pat sg-pat--seigaiha' }, [
+      h('div', { class: 'sg-onboarding__intro' }, [
+        eyebrow('Nouveau venu'),
+        title('Rejoindre Sengoku no Jidai', 'l'),
+        h('p', { class: 'sg-card__text', text: fr('Cinq étapes pour passer du visiteur au shinobi.') })
+      ]),
       h('ol', { class: 'sg-steps' }, steps)
     ]);
   }
 
   function context() {
-    return h('article', { class: 'sg-card sg-card--context' }, [
-      cardHead('文脈', 'Contexte'),
-      h('div', { class: 'sg-prose' }, DATA.context.text.map(function (p) { return h('p', { text: fr(p) }); })),
-      more(DATA.context.href, 'Lire la suite')
+    return h('article', { class: 'sg-card sg-c-context sg-hero' }, [
+      h('div', { class: 'sg-hero__img', style: img('land-autres.webp') }),
+      h('div', { class: 'sg-hero__body' }, [
+        eyebrow("L'univers"),
+        title('Contexte', 'xl'),
+        h('div', { class: 'sg-prose' }, DATA.context.text.map(function (p) { return h('p', { text: fr(p) }); })),
+        more(DATA.context.href, 'Lire la suite')
+      ])
     ]);
   }
 
   function season() {
     var s = DATA.season;
-    return h('article', { class: 'sg-card sg-card--season sg-card--media' }, [
-      h('div', { class: 'sg-media', style: "background-image:url('" + assetsBase() + s.image + "')" }),
-      h('div', { class: 'sg-card__overlay' }, [
-        h('span', { class: 'sg-eyebrow', text: 'Saison en cours' }),
-        h('h3', { class: 'sg-season__name', text: s.name }),
-        h('span', { class: 'sg-season__year', text: 'An ' + s.year }),
-        h('p', { class: 'sg-season__text', text: fr(s.text) })
+    return h('article', { class: 'sg-card sg-c-season sg-hero' }, [
+      h('div', { class: 'sg-hero__img', style: img(s.image) }),
+      h('div', { class: 'sg-hero__body' }, [
+        eyebrow('Saison en cours'),
+        h('div', { class: 'sg-season__line' }, [title(s.name, 'xl'), h('span', { class: 'sg-season__year', text: 'An ' + s.year })]),
+        h('p', { class: 'sg-hero__text', text: fr(s.text) })
       ])
     ]);
   }
 
   function guide() {
-    return link(DATA.guide.href, { class: 'sg-card sg-card--guide sg-card--link' }, [
-      h('span', { class: 'sg-watermark', 'aria-hidden': 'true', text: '導' }),
-      cardHead('導', 'Guide du joueur'),
-      h('p', { class: 'sg-card__text', text: fr(DATA.guide.text) }),
-      h('span', { class: 'sg-more' }, ['Lire le guide', icon('arrow_forward')])
+    return link(DATA.guide.href, { class: 'sg-card sg-c-guide sg-hero sg-card--link' }, [
+      h('div', { class: 'sg-hero__img', style: img('land-hi.webp') }),
+      h('div', { class: 'sg-hero__body' }, [
+        eyebrow('Avant de commencer'),
+        title('Guide du joueur', 'xxl'),
+        h('p', { class: 'sg-hero__text', text: fr(DATA.guide.text) }),
+        h('span', { class: 'sg-btn sg-btn--light' }, ['Lire le guide', icon('arrow_forward')])
+      ])
     ]);
   }
 
   function annexe() {
-    return h('article', { class: 'sg-card sg-card--annexe' }, [
-      cardHead('付録', 'Annexe'),
-      h('ul', { class: 'sg-shortcuts' }, DATA.annexe.map(function (s) {
-        return h('li', null, [link(s.href, { class: 'sg-shortcut' }, [icon(s.icon), s.label])]);
-      })),
-      more(ANNEXE + '/', "Ouvrir l'annexe")
+    return h('article', { class: 'sg-card sg-c-annexe sg-cover' }, [
+      link(ANNEXE + '/', { class: 'sg-cover__img', style: img('land-mizu.webp'), 'aria-label': "Ouvrir l'annexe" }, [
+        title('Annexe', 'l')
+      ]),
+      h('div', { class: 'sg-cover__body' }, [
+        h('ul', { class: 'sg-shortcuts' }, DATA.annexe.map(function (s) {
+          return h('li', null, [link(s.href, { class: 'sg-shortcut' }, [icon(s.icon), s.label])]);
+        }))
+      ])
     ]);
   }
 
   function scenarios() {
     var list = DATA.scenarios.slice(0, 5);
-    return h('article', { class: 'sg-card sg-card--scenarios' }, [
-      cardHead('筋書き', 'Scénarios'),
+    return h('article', { class: 'sg-card sg-c-scenarios' }, [
+      h('div', { class: 'sg-card__top' }, [
+        h('div', null, [eyebrow('Personnages à reprendre'), title('Scénarios', 'l')]),
+        more(DATA.scenariosHref, 'Tous les scénarios')
+      ]),
       h('ul', { class: 'sg-tiles' }, list.map(function (s) {
         return h('li', null, [
           link(s.href, { class: 'sg-tile', 'aria-label': 'Scénario : ' + s.name }, [
@@ -316,8 +333,7 @@
             h('span', { class: 'sg-tile__name', text: s.name })
           ])
         ]);
-      })),
-      more(DATA.scenariosHref, 'Voir tous les scénarios')
+      }))
     ]);
   }
 
@@ -329,23 +345,30 @@
         a.text ? h('p', { class: 'sg-item__text', text: fr(a.text) }) : null
       ]);
     });
-    return h('article', { class: 'sg-card sg-card--feed' }, [cardHead('告知', 'Annonces'), carousel('Annonces', slides)]);
+    return h('article', { class: 'sg-card sg-c-announcements sg-feed' }, [title('Annonces', 's'), carousel('Annonces', slides)]);
   }
 
   function rumors() {
     var slides = DATA.rumors.map(function (r) {
-      return h('div', { class: 'sg-item' }, [
-        h('div', { class: 'sg-item__meta' }, [h('span', { class: 'sg-nation', 'aria-hidden': 'true', text: r.kanji }), h('span', { text: r.nation })]),
-        h('h4', { class: 'sg-item__title', text: fr(r.title) }),
-        h('p', { class: 'sg-item__text', text: fr(r.text) })
+      var key = NATIONS[r.nation] || 'autres';
+      return h('div', { class: 'sg-rumor sg-nation--' + key }, [
+        h('span', { class: 'sg-rumor__img', style: img('land-' + key + '.webp') }),
+        h('div', { class: 'sg-rumor__body' }, [
+          h('span', { class: 'sg-rumor__nation', text: r.nation }),
+          h('h4', { class: 'sg-rumor__title', text: fr(r.title) }),
+          h('p', { class: 'sg-rumor__text', text: fr(r.text) })
+        ])
       ]);
     });
-    return h('article', { class: 'sg-card sg-card--feed' }, [cardHead('噂', 'Rumeurs'), carousel('Rumeurs', slides, { autoplay: 8000 })]);
+    return h('article', { class: 'sg-card sg-c-rumors sg-feed' }, [
+      h('div', { class: 'sg-c-rumors__head' }, [eyebrow('On murmure que…'), title('Rumeurs', 'm')]),
+      carousel('Rumeurs', slides, { autoplay: 8000 })
+    ]);
   }
 
   function latest() {
     var body = h('div', { class: 'sg-latest' }, [h('p', { class: 'sg-muted', text: 'Chargement des derniers sujets…' })]);
-    var card = h('article', { class: 'sg-card sg-card--feed' }, [cardHead('新着', 'Derniers sujets'), body]);
+    var card = h('article', { class: 'sg-card sg-c-latest sg-feed' }, [title('Derniers sujets', 's'), body]);
 
     fetch('/latest', { credentials: 'same-origin' })
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
@@ -358,12 +381,11 @@
           var author = row.querySelector('.block-topics-author strong');
           var last = row.querySelector('.block-topics-lastpost a[href*="#"], .block-topics-lastpost a:last-child');
           var m = row.textContent.replace(/\s+/g, ' ').match(/,\s*([^,]+)$/);
-          var date = m ? m[1].trim() : '';
           return {
             title: a ? a.textContent.trim() : '',
             href: last ? last.getAttribute('href') : (a ? a.getAttribute('href') : '/latest'),
             author: author ? author.textContent.trim() : '',
-            date: date
+            date: m ? m[1].trim() : ''
           };
         });
         var slides = [];
@@ -387,8 +409,8 @@
   }
 
   function staff() {
-    return h('article', { class: 'sg-card sg-card--staff' }, [
-      cardHead('人員', 'Le staff'),
+    return h('article', { class: 'sg-card sg-c-staff sg-pat sg-pat--kikko' }, [
+      title('Le staff', 'm'),
       h('ul', { class: 'sg-staff' }, DATA.staff.map(function (m) {
         return h('li', { class: 'sg-member' }, [
           h('img', { class: 'sg-member__avatar', src: m.avatar, alt: '', loading: 'lazy', referrerpolicy: 'no-referrer' }),
@@ -396,16 +418,15 @@
           h('span', { class: 'sg-member__role', text: m.role })
         ]);
       })),
-      link(DISCORD, { class: 'sg-btn sg-btn--ghost' }, [icon('chat'), 'Contacter le staff sur Discord'])
+      link(DISCORD, { class: 'sg-btn sg-btn--ghost' }, [icon('chat'), 'Contacter sur Discord'])
     ]);
   }
 
   function topsites() {
-    return h('article', { class: 'sg-card sg-card--vote' }, [
-      cardHead('頂点', 'Voter pour le forum'),
-      h('p', { class: 'sg-card__text', text: fr('Un vote par jour et par site : ça aide le forum à se faire connaître.') }),
-      h('ul', { class: 'sg-votes' }, DATA.topsites.map(function (t) {
-        return h('li', null, [link(t.href, { class: 'sg-vote' }, [h('span', { class: 'sg-vote__num', 'aria-hidden': 'true', text: t.num }), t.label])]);
+    return h('article', { class: 'sg-card sg-c-vote sg-pat sg-pat--shippo' }, [
+      title('Voter pour le forum', 's'),
+      h('ul', { class: 'sg-votes' }, DATA.topsites.map(function (t, i) {
+        return h('li', null, [link(t.href, { class: 'sg-vote' }, [String(i + 1), h('span', { class: 'sg-vote__label', text: t.label })])]);
       }))
     ]);
   }
@@ -419,15 +440,18 @@
     var p = document.createElementNS(ns, 'path');
     p.setAttribute('d', DISCORD_PATH);
     svg.appendChild(p);
-    return link(DISCORD, { class: 'sg-card sg-card--discord sg-card--link', 'aria-label': 'Rejoindre le serveur Discord' }, [
-      svg,
-      h('span', { class: 'sg-discord__word', text: 'Discord' }),
+    return link(DISCORD, { class: 'sg-card sg-c-discord sg-card--link', 'aria-label': 'Rejoindre le serveur Discord' }, [
+      h('span', { class: 'sg-discord__brand' }, [svg, h('span', { class: 'sg-discord__word', text: 'Discord' })]),
       h('span', { class: 'sg-discord__cta' }, ['Rejoindre le serveur', icon('arrow_forward')])
     ]);
   }
 
+  function stack(cards, cls) {
+    return h('div', { class: 'sg-stack ' + cls }, cards);
+  }
+
   /* ----------------------------------------------------------------------
-     Montage
+     Montage : une seule grille, ordre selon visiteur ou membre
      ---------------------------------------------------------------------- */
   function mount() {
     if (document.getElementById('sg-home')) return;
@@ -439,22 +463,25 @@
     var ud = window._userdata || {};
     var logged = String(ud.session_logged_in) === '1';
 
-    var zones = {
-      join: zone(0, '壱', 'Rejoindre Sengoku no Jidai', 'sg-row--full', [onboarding()]),
-      world: zone(0, '弐', "Découvrir l'univers", 'sg-row--world', [context(), season()]),
-      prepare: zone(0, '参', 'Se préparer', 'sg-row--3', [guide(), annexe(), scenarios()]),
-      life: zone(0, '肆', 'La vie du forum', 'sg-row--3', [announcements(), rumors(), latest()]),
-      community: zone(0, '伍', 'La communauté', 'sg-row--3', [staff(), topsites(), discord()])
+    var c = {
+      onboarding: onboarding,
+      context: context,
+      season: season,
+      guide: guide,
+      annexe: annexe,
+      announcements: announcements,
+      rumors: rumors,
+      latest: latest,
+      scenarios: scenarios,
+      staff: staff,
+      community: function () { return stack([topsites(), discord()], 'sg-c-community'); }
     };
 
-    var order = logged ? ['life', 'world', 'prepare', 'community'] : ['join', 'world', 'prepare', 'life', 'community'];
-    var nums = ['壱', '弐', '参', '肆', '伍'];
-    var home = h('div', { id: 'sg-home', class: logged ? 'is-member' : 'is-visitor' });
-    order.forEach(function (k, i) {
-      zones[k].querySelector('.sg-zone__num').textContent = nums[i];
-      home.appendChild(zones[k]);
-    });
+    var order = logged
+      ? ['announcements', 'rumors', 'latest', 'context', 'season', 'guide', 'annexe', 'scenarios', 'staff', 'community']
+      : ['onboarding', 'context', 'season', 'guide', 'annexe', 'announcements', 'rumors', 'latest', 'scenarios', 'staff', 'community'];
 
+    var home = h('div', { id: 'sg-home', class: logged ? 'is-member' : 'is-visitor' }, order.map(function (k) { return c[k](); }));
     wrap.insertBefore(home, wrap.firstChild);
   }
 
