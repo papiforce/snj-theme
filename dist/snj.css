@@ -361,7 +361,7 @@ body > footer,
   isolation: isolate;
   display: grid;
   place-items: center;
-  height: clamp(280px, 34vw, 480px);
+  height: 580px;
   margin-top: var(--sg-space-6) !important;
   margin-bottom: var(--sg-space-6) !important;
   padding: 0;
