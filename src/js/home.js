@@ -191,8 +191,11 @@
     ]);
     if (slides.length < 2) root.classList.add('sg-carousel--single');
 
+    var resetTimer = null;
+
     function go(i) {
       index = (i + slides.length) % slides.length;
+      if (resetTimer) resetTimer();
       track.style.transform = 'translateX(' + (-100 * index) + '%)';
       slides.forEach(function (s, j) {
         s.setAttribute('aria-hidden', j === index ? 'false' : 'true');
@@ -215,15 +218,53 @@
       startX = null;
     });
 
+    /* Défilement automatique + minuteur circulaire (coin supérieur droit de la carte).
+       Survol ou focus : pause (icône au centre du minuteur), reprise au temps restant.
+       Changement manuel de diapositive : le minuteur repart de zéro. */
     if (opts.autoplay && !reducedMotion && slides.length > 1) {
-      var timer = null;
-      var play = function () { stop(); timer = setInterval(function () { go(index + 1); }, opts.autoplay); };
-      var stop = function () { if (timer) clearInterval(timer); timer = null; };
-      root.addEventListener('mouseenter', stop);
-      root.addEventListener('mouseleave', play);
-      root.addEventListener('focusin', stop);
-      root.addEventListener('focusout', play);
-      play();
+      var duration = opts.autoplay;
+      var remaining = duration;
+      var startedAt = 0;
+      var timeout = null;
+      var hovered = false;
+      var focused = false;
+      var ring = h('span', { class: 'sg-ctimer', 'aria-hidden': 'true' });
+      ring.style.setProperty('--sg-ctimer-d', duration + 'ms');
+      ring.innerHTML = '<svg viewBox="0 0 24 24"><circle class="sg-ctimer__track" cx="12" cy="12" r="10"/>' +
+        '<circle class="sg-ctimer__bar" cx="12" cy="12" r="10" pathLength="100"/></svg>';
+      ring.appendChild(icon('pause'));
+      var bar = ring.querySelector('.sg-ctimer__bar');
+
+      var running = function () { return !hovered && !focused; };
+      var restartBar = function () {
+        bar.style.animation = 'none';
+        void bar.getBoundingClientRect();
+        bar.style.animation = '';
+      };
+      var schedule = function () {
+        clearTimeout(timeout);
+        if (!running()) { ring.classList.add('is-paused'); return; }
+        ring.classList.remove('is-paused');
+        startedAt = Date.now();
+        timeout = setTimeout(function () { go(index + 1); }, remaining);
+      };
+      var hold = function () {
+        if (timeout && !ring.classList.contains('is-paused')) remaining = Math.max(0, remaining - (Date.now() - startedAt));
+        clearTimeout(timeout);
+        timeout = null;
+        ring.classList.add('is-paused');
+      };
+      resetTimer = function () {
+        remaining = duration;
+        restartBar();
+        schedule();
+      };
+
+      root.addEventListener('mouseenter', function () { hovered = true; ring.classList.add('is-hover'); hold(); });
+      root.addEventListener('mouseleave', function () { hovered = false; ring.classList.remove('is-hover'); schedule(); });
+      root.addEventListener('focusin', function () { focused = true; hold(); });
+      root.addEventListener('focusout', function () { focused = false; schedule(); });
+      root.sgTimer = ring;
     }
 
     go(0);
@@ -367,7 +408,8 @@
         a.text ? h('p', { class: 'sg-item__text', text: fr(a.text) }) : null
       ]);
     });
-    return h('article', { class: 'sg-card sg-c-announcements sg-feed' }, [title('Annonces', 's'), carousel('Annonces', slides, { autoplay: 8000 })]);
+    var car = carousel('Annonces', slides, { autoplay: 8000 });
+    return h('article', { class: 'sg-card sg-c-announcements sg-feed' }, [title('Annonces', 's'), car, car.sgTimer]);
   }
 
   function rumors() {
@@ -382,9 +424,10 @@
         ])
       ]);
     });
+    var car = carousel('Rumeurs', slides, { autoplay: 8000 });
     return h('article', { class: 'sg-card sg-c-rumors sg-feed sg-tone' }, [
       h('div', { class: 'sg-c-rumors__head' }, [eyebrow('On murmure que…'), title('Rumeurs', 'm')]),
-      carousel('Rumeurs', slides, { autoplay: 8000 })
+      car, car.sgTimer
     ]);
   }
 
@@ -433,11 +476,13 @@
   function staff() {
     return h('article', { class: 'sg-card sg-c-staff sg-pat sg-pat--shippo' }, [
       title('Le staff', 'm'),
+      /* Avatars en portrait seulement ; le pseudo apparaît au survol, comme les scénarios */
       h('ul', { class: 'sg-staff' }, DATA.staff.map(function (m) {
-        return h('li', { class: 'sg-member' }, [
-          h('img', { class: 'sg-member__avatar', src: m.avatar, alt: '', loading: 'lazy', referrerpolicy: 'no-referrer' }),
-          h('span', { class: 'sg-member__name', text: m.name }),
-          h('span', { class: 'sg-member__role', text: m.role })
+        return h('li', null, [
+          h('div', { class: 'sg-tile sg-tile--photo', role: 'img', 'aria-label': m.name + ', ' + m.role, title: m.name + ' — ' + m.role }, [
+            h('img', { class: 'sg-tile__img', src: m.avatar, alt: '', loading: 'lazy', referrerpolicy: 'no-referrer' }),
+            h('span', { class: 'sg-tile__name', 'aria-hidden': 'true', text: m.name })
+          ])
         ]);
       })),
       h('div', { class: 'sg-actions' }, [
