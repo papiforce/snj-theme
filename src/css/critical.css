@@ -175,25 +175,3 @@ body > header {
   background: var(--sg-surface-2);
   color: var(--sg-text);
 }
-
-/* Bouton clair/sombre (injecté par src/js/theme-toggle.js) */
-#sg-theme-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  margin: 0 var(--sg-space-1);
-  border: 0;
-  border-radius: 50%;
-  background: transparent;
-  color: var(--sg-text);
-  cursor: pointer;
-  transition: background-color var(--sg-transition);
-}
-
-#sg-theme-toggle:hover,
-#sg-theme-toggle:focus-visible {
-  background: var(--sg-primary-soft);
-  outline: none;
-}

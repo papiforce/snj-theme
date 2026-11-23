@@ -129,7 +129,9 @@ body {
   outline: none;
 }
 
-.sg-sb-item[aria-current="page"] {
+/* Actif : page en cours, ou panneau ouvert (notifications) — seul état en couleur primaire */
+.sg-sb-item[aria-current="page"],
+.sg-sb-item[aria-expanded="true"] {
   color: var(--sg-primary);
   background: var(--sg-primary-soft);
 }
@@ -182,13 +184,19 @@ body {
   white-space: nowrap;
   padding: 6px 10px;
   border-radius: var(--sg-radius-sm);
-  background: var(--sg-surface-3);
-  border: 1px solid var(--sg-border-strong);
+  /* mêmes fond, bordure et ombre que la barre */
+  background: var(--sg-surface);
+  border: 1px solid var(--sg-border);
   box-shadow: var(--sg-shadow);
   color: var(--sg-text);
   font: 700 0.82rem/1.2 var(--sg-font-body);
   letter-spacing: 0.02em;
   transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+/* Pas d'infobulle quand le panneau de l'icône est ouvert */
+.sg-sb-item[aria-expanded="true"]::after {
+  display: none;
 }
 
 .sg-sb-item:hover::after,
