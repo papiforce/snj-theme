@@ -1582,3 +1582,29 @@ body > footer,
     transform: none !important;
   }
 }
+
+/* --- Ajustements de remplissage ----------------------------------------------- */
+
+/* La carte Vote prend sa hauteur naturelle, Discord occupe le reste de la colonne */
+.sg-stack > .sg-c-vote {
+  flex: none;
+}
+
+/* Les tuiles de scénarios remplissent la hauteur de la carte */
+.sg-c-scenarios .sg-tiles {
+  flex: 1;
+}
+
+.sg-c-scenarios .sg-tile {
+  aspect-ratio: auto;
+  height: 100%;
+  min-height: 160px;
+}
+
+/* Annonce centrée verticalement dans sa carte */
+.sg-c-announcements .sg-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+}
