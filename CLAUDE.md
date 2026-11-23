@@ -39,11 +39,14 @@ dans le panneau d'administration (PA), puis on commit.
   (inspiré de Themis Trials), coins arrondis.
 - **Bannière** : clair = brume au clair de lune, sombre = renard dans les braises (`scripts/grade-banner.py`).
   Pas de logo ; wordmark « Sengoku no Jidai » fondu dans l'image (modes de fusion + dégradé).
-- **Accueil** (`home.js` + `30-home.css`) : zones numérotées 壱 à 伍. Visiteur : Rejoindre (onboarding : Guide, Annexe,
-  Fiche, Validation, Configuration du profil) → Univers (Contexte, Saison) → Se préparer (Guide, Annexe, Scénarios)
-  → Vie du forum (Annonces, Rumeurs, Derniers sujets en carrousels) → Communauté (Staff, Top-sites, Discord).
-  Membre : pas d'onboarding, la Vie du forum passe en premier. Annonces, Rumeurs et Saison sont des données
-  provisoires (objet `DATA`) à brancher plus tard sur l'API de l'annexe. Pas d'animation de bordure au survol.
+- **Accueil** (`home.js` + `30-home.css`) : grille « bento » de 12 colonnes, sans titres de zones, cartes variées
+  (illustrées, couverture, motifs Edo seigaiha / kikkō / shippō, carrousels, carte Vote pleine, Discord).
+  Visiteur : Onboarding (Guide, Annexe, Fiche, Validation, Configuration du profil) → Contexte + Saison → Guide + Annexe
+  → Annonces + Rumeurs + Derniers sujets → Scénarios + Staff + Vote/Discord. Membre : pas d'onboarding, Annonces,
+  Rumeurs et Derniers sujets en premier. Illustrations : paysages des nations de l'annexe (`assets/land-*.webp`,
+  `scripts/grade-cards.py`). Rumeurs : une illustration et la couleur de la nation (`--sg-nation-*`).
+  Peu de kanji (seulement dans les tuiles de scénarios). Annonces, Rumeurs et Saison sont des données provisoires
+  (objet `DATA`) à brancher plus tard sur l'API de l'annexe. Pas d'animation de bordure au survol.
   Les `<header>` sont interdits dans nos composants : AwesomeBB les fixe tous en haut de page.
 - **Variables CSS** préfixées `--sg-*`. On rebranche les `--t_*` d'AwesomeBB sur nos tokens.
 - **CSS hors forum** : servi par jsDelivr depuis ce dépôt, avec une adresse versionnée (SHA de commit ou tag).
