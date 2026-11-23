@@ -539,7 +539,11 @@ body > footer,
   transition: transform 0.35s var(--sg-ease), box-shadow 0.35s var(--sg-ease), background-color 0.3s ease;
 }
 
-.sg-card:not(.sg-feed):not(.sg-c-onboarding):hover {
+/* Seules ces cartes se soulèvent au survol */
+.sg-c-guide:hover,
+.sg-c-staff:hover,
+.sg-c-vote:hover,
+.sg-c-discord:hover {
   transform: translateY(-3px);
   box-shadow: var(--sg-shadow);
 }
@@ -1577,7 +1581,10 @@ body > footer,
     transition: none !important;
   }
 
-  .sg-card:hover,
+  .sg-c-guide:hover,
+  .sg-c-staff:hover,
+  .sg-c-vote:hover,
+  .sg-c-discord:hover,
   .sg-hero:hover .sg-hero__img {
     transform: none !important;
   }
@@ -1607,4 +1614,47 @@ body > footer,
   flex-direction: column;
   justify-content: center;
   height: 100%;
+}
+
+/* --- Images à variante claire + ton « bannière claire » (Contexte, Guide, Rumeurs) --- */
+.sg-has-light {
+  background-image: var(--img);
+}
+
+:root[data-theme="light"] .sg-has-light {
+  background-image: var(--img-light);
+}
+
+/* En clair, ces cartes passent au papier et à l'encre, comme la bannière :
+   on retourne les variables de voile et de texte sur image. */
+:root[data-theme="light"] .sg-tone {
+  --sg-ink-overlay: 244, 239, 227;
+  --sg-on-image: #1d1915;
+  --sg-on-image-muted: rgba(29, 25, 21, 0.78);
+  --sg-on-image-accent: #3e5266;
+}
+
+:root[data-theme="light"] .sg-tone .sg-btn--light {
+  background: rgba(29, 25, 21, 0.08);
+}
+
+:root[data-theme="light"] .sg-tone:hover .sg-btn--light {
+  background: rgba(29, 25, 21, 0.14);
+}
+
+:root[data-theme="light"] .sg-tone .sg-rumor__nation {
+  background: color-mix(in srgb, var(--nation) 16%, transparent);
+  color: color-mix(in srgb, var(--nation) 80%, #000);
+}
+
+:root[data-theme="light"] .sg-c-rumors .sg-carousel__nav:hover {
+  background: rgba(29, 25, 21, 0.08);
+}
+
+:root[data-theme="light"] .sg-c-rumors .sg-carousel__dot {
+  background: rgba(29, 25, 21, 0.25);
+}
+
+:root[data-theme="light"] .sg-c-rumors .sg-carousel__dot[aria-current="true"] {
+  background: #1d1915;
 }

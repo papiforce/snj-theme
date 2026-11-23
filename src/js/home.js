@@ -236,6 +236,12 @@
 
   function img(name) { return "background-image:url('" + assetsBase() + name + "')"; }
 
+  /* Image avec une variante claire, au ton de la bannière (CSS : --img / --img-light) */
+  function imgPair(dark, light) {
+    var b = assetsBase();
+    return "--img:url('" + b + dark + "');--img-light:url('" + b + light + "')";
+  }
+
   function title(text, size) {
     return h('h3', { class: 'sg-title sg-title--' + (size || 'm'), text: text });
   }
@@ -270,8 +276,8 @@
   }
 
   function context() {
-    return h('article', { class: 'sg-card sg-c-context sg-hero' }, [
-      h('div', { class: 'sg-hero__img', style: img('land-autres.webp') }),
+    return h('article', { class: 'sg-card sg-c-context sg-hero sg-tone' }, [
+      h('div', { class: 'sg-hero__img sg-has-light', style: imgPair('card-context.webp', 'card-context-light.webp') }),
       h('div', { class: 'sg-hero__body' }, [
         eyebrow("L'univers"),
         title('Contexte', 'xl'),
@@ -294,8 +300,8 @@
   }
 
   function guide() {
-    return link(DATA.guide.href, { class: 'sg-card sg-c-guide sg-hero sg-card--link' }, [
-      h('div', { class: 'sg-hero__img', style: img('land-hi.webp') }),
+    return link(DATA.guide.href, { class: 'sg-card sg-c-guide sg-hero sg-tone sg-card--link' }, [
+      h('div', { class: 'sg-hero__img sg-has-light', style: imgPair('card-guide.webp', 'card-guide-light.webp') }),
       h('div', { class: 'sg-hero__body' }, [
         eyebrow('Avant de commencer'),
         title('Guide du joueur', 'xxl'),
@@ -352,7 +358,7 @@
     var slides = DATA.rumors.map(function (r) {
       var key = NATIONS[r.nation] || 'autres';
       return h('div', { class: 'sg-rumor sg-nation--' + key }, [
-        h('span', { class: 'sg-rumor__img', style: img('land-' + key + '.webp') }),
+        h('span', { class: 'sg-rumor__img sg-has-light', style: imgPair('land-' + key + '.webp', 'land-' + key + '-light.webp') }),
         h('div', { class: 'sg-rumor__body' }, [
           h('span', { class: 'sg-rumor__nation', text: r.nation }),
           h('h4', { class: 'sg-rumor__title', text: fr(r.title) }),
@@ -360,7 +366,7 @@
         ])
       ]);
     });
-    return h('article', { class: 'sg-card sg-c-rumors sg-feed' }, [
+    return h('article', { class: 'sg-card sg-c-rumors sg-feed sg-tone' }, [
       h('div', { class: 'sg-c-rumors__head' }, [eyebrow('On murmure que…'), title('Rumeurs', 'm')]),
       carousel('Rumeurs', slides, { autoplay: 8000 })
     ]);
