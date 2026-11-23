@@ -58,9 +58,13 @@ dans le panneau d'administration (PA), puis on commit.
   Raccourcis de l'Annexe (inspirés de Themis Trials) : pastille sumi et gofun pour l'icône, panneau arrondi
   (`12px 0 0 12px / 50% 0 0 50%`) avec le libellé, sans bordure ; au survol (0,9 s) la couleur remplit tout le
   raccourci. Libellé toujours sur une ligne, taille calculée sur la largeur du raccourci (unités `cqi`). Ils remplissent
-  toute la hauteur restante de la carte. Staff : bouton « Voir le staff et les crédits » (`DATA.staffHref`, flèche qui
-  glisse) au-dessus de « Contacter sur Discord ». Annonces et Rumeurs défilent seules (8 s). Scénarios : `taken: true` pour un
-  scénario pris (grisé, sceau « Pris », non cliquable), les disponibles en premier.
+  toute la hauteur restante de la carte. Staff : avatars seuls, en portrait (tuile `.sg-tile--photo`, photo nette, sans kanji),
+  pseudo révélé au survol avec le même zoom que les scénarios ; bouton « Voir le staff et les crédits »
+  (`DATA.staffHref`, flèche qui glisse) au-dessus de « Contacter sur Discord ». Annonces et Rumeurs défilent seules
+  (8 s) avec un minuteur circulaire `.sg-ctimer` dans le coin supérieur droit de la carte : pause au survol ou au focus
+  (icône pause au centre), reprise au temps restant, remise à zéro à chaque changement de diapositive. Scénarios :
+  voile dégradé transparent en haut, encre (sombre) ou papier (clair) en bas, pour la lisibilité des noms ;
+  `taken: true` pour un scénario pris (grisé, sceau « Pris », non cliquable), les disponibles en premier.
   **Séparateur** réutilisable `.sg-divider` (`05-ornaments.css`), en rupture avec l'ancien séparateur de SnJ (filets,
   losanges, kanji doré — à ne pas reproduire) : une ligne qui forme un triangle pointé vers le bas en son milieu,
   surmontée du logo de SnJ au trait (`assets/snj-logo-outline.svg`, aussi dans `home.js`), en sumi et gofun. Espace
