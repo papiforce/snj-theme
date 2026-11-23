@@ -61,11 +61,11 @@
 
     /* 5 scénarios au maximum */
     scenarios: [
-      { kanji: '海', name: 'Jinchūriki de Kyūbi', href: '/t166-jinchuriki-de-kyubi', image: 'https://i.pinimg.com/736x/35/ab/40/35ab40d5d75f4477f29dcd21e5d04436.jpg' },
-      { kanji: '森', name: 'Akimichi Chōso', href: '/t731-akimichi-choso-disponible', image: 'https://i.pinimg.com/736x/e6/3a/c1/e63ac1b449f6bd37e4216a92f358100f.jpg' },
+      { kanji: '海', name: 'Jinchūriki de Kyūbi', href: '/t166-jinchuriki-de-kyubi', taken: true, image: 'https://i.pinimg.com/736x/35/ab/40/35ab40d5d75f4477f29dcd21e5d04436.jpg' },
+      { kanji: '森', name: 'Akimichi Chōso', href: '/t731-akimichi-choso-disponible', taken: true, image: 'https://i.pinimg.com/736x/e6/3a/c1/e63ac1b449f6bd37e4216a92f358100f.jpg' },
       { kanji: '朱', name: 'Goka Ai', href: '/t729-goka-ai-disponible', image: 'https://i.pinimg.com/736x/9a/c0/43/9ac043c90e9fd7452b76800e2b3a11de.jpg' },
-      { kanji: '道', name: 'Nara Shikoe', href: '/t732-nara-shikoe-disponible', image: 'https://i.pinimg.com/736x/34/08/c4/3408c481e79f499880ca79f082a1a8fd.jpg' },
-      { kanji: '霧', name: 'Aburame Makoi', href: '/t734-aburame-makoi-disponible', image: 'https://i.pinimg.com/736x/25/39/b2/2539b24e5d1665c2aee5919990089a9a.jpg' }
+      { kanji: '道', name: 'Nara Shikoe', href: '/t732-nara-shikoe-disponible', taken: true, image: 'https://i.pinimg.com/736x/34/08/c4/3408c481e79f499880ca79f082a1a8fd.jpg' },
+      { kanji: '霧', name: 'Aburame Makoi', href: '/t734-aburame-makoi-disponible', taken: true, image: 'https://i.pinimg.com/736x/25/39/b2/2539b24e5d1665c2aee5919990089a9a.jpg' }
     ],
     scenariosHref: '/f5-scenarios',
 
@@ -314,21 +314,39 @@
         title('Annexe', 'l')
       ]),
       h('div', { class: 'sg-cover__body' }, [
-        h('ul', { class: 'sg-shortcuts' }, DATA.annexe.map(function (s) {
-          return h('li', null, [link(s.href, { class: 'sg-shortcut' }, [icon(s.icon), s.label])]);
+        h('ul', { class: 'sg-shortcuts' }, DATA.annexe.map(function (s, i) {
+          var ico = icon(s.icon);
+          ico.classList.add('sg-shortcut__icon');
+          return h('li', null, [link(s.href, { class: 'sg-shortcut sg-shortcut--' + (i + 1) }, [
+            ico,
+            h('span', { class: 'sg-shortcut__label', text: s.label })
+          ])]);
         }))
       ])
     ]);
   }
 
   function scenarios() {
-    var list = DATA.scenarios.slice(0, 5);
+    /* Scénarios disponibles d'abord, puis ceux déjà pris */
+    var list = DATA.scenarios.filter(function (s) { return !s.taken; })
+      .concat(DATA.scenarios.filter(function (s) { return s.taken; }))
+      .slice(0, 5);
     return h('article', { class: 'sg-card sg-c-scenarios' }, [
       h('div', { class: 'sg-card__top' }, [
         h('div', null, [eyebrow('Personnages à reprendre'), title('Scénarios', 'l')]),
         more(DATA.scenariosHref, 'Tous les scénarios')
       ]),
       h('ul', { class: 'sg-tiles' }, list.map(function (s) {
+        if (s.taken) {
+          return h('li', null, [
+            h('div', { class: 'sg-tile sg-tile--taken', role: 'img', 'aria-label': 'Scénario pris : ' + s.name }, [
+              h('span', { class: 'sg-tile__img', style: "background-image:url('" + s.image + "')" }),
+              h('span', { class: 'sg-tile__kanji', 'aria-hidden': 'true', text: s.kanji }),
+              h('span', { class: 'sg-tile__seal', 'aria-hidden': 'true' }, [icon('lock'), 'Pris']),
+              h('span', { class: 'sg-tile__name', 'aria-hidden': 'true', text: s.name })
+            ])
+          ]);
+        }
         return h('li', null, [
           link(s.href, { class: 'sg-tile', 'aria-label': 'Scénario : ' + s.name }, [
             h('span', { class: 'sg-tile__img', style: "background-image:url('" + s.image + "')" }),
@@ -348,7 +366,7 @@
         a.text ? h('p', { class: 'sg-item__text', text: fr(a.text) }) : null
       ]);
     });
-    return h('article', { class: 'sg-card sg-c-announcements sg-feed' }, [title('Annonces', 's'), carousel('Annonces', slides)]);
+    return h('article', { class: 'sg-card sg-c-announcements sg-feed' }, [title('Annonces', 's'), carousel('Annonces', slides, { autoplay: 8000 })]);
   }
 
   function rumors() {
@@ -486,6 +504,21 @@
 
     var home = h('div', { id: 'sg-home', class: logged ? 'is-member' : 'is-visitor' }, order.map(function (k) { return c[k](); }));
     wrap.insertBefore(home, wrap.firstChild);
+
+    /* Séparateur entre les widgets et les catégories, à la place de la barre
+       de liens rapides d'AwesomeBB (masquée par le CSS quand il la précède) */
+    var bar = document.querySelector('#index .action-bar-top');
+    var sep = divider('時');
+    if (bar) bar.parentNode.insertBefore(sep, bar);
+    else home.parentNode.insertBefore(sep, home.nextSibling);
+  }
+
+  /* Séparateur ornemental (voir src/css/components/05-ornaments.css) */
+  function divider(mark) {
+    var parts = [h('span', { class: 'sg-divider__line' }), h('span', { class: 'sg-divider__gem' })];
+    if (mark) parts.push(h('span', { class: 'sg-divider__mark', 'aria-hidden': 'true', text: mark }), h('span', { class: 'sg-divider__gem' }));
+    parts.push(h('span', { class: 'sg-divider__line' }));
+    return h('div', { class: 'sg-divider', role: 'separator' }, parts);
   }
 
   if (document.readyState === 'loading') {

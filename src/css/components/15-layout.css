@@ -3,10 +3,18 @@
    Le contenu (bannière, catégories, pied de page) occupe toute la largeur
    disponible à droite de la barre latérale, sans jamais passer dessous.
    (AwesomeBB force le padding du <body> : on décale donc les blocs eux-mêmes.)
+   Le contenu est limité à 1200px (barre non comprise) ; la barre et le contenu
+   forment un ensemble centré horizontalement. Les pourcentages se rapportent
+   à la largeur de la fenêtre sans la barre de défilement (barre fixe : fenêtre ;
+   blocs du contenu : <body>, qui occupe toute la largeur).
    ========================================================================== */
 
 :root {
-  --sg-content-left: calc(var(--sg-sidebar-gap) * 2 + var(--sg-sidebar-w));
+  --sg-content-max: 1200px;
+  --sg-shell-w: calc(var(--sg-sidebar-w) + var(--sg-sidebar-gap) + var(--sg-content-max));
+  /* Bord gauche de l'ensemble barre + contenu */
+  --sg-shell-left: max(var(--sg-sidebar-gap), calc(50% - var(--sg-shell-w) / 2));
+  --sg-content-left: calc(var(--sg-shell-left) + var(--sg-sidebar-w) + var(--sg-sidebar-gap));
   --sg-content-right: var(--sg-sidebar-gap);
 }
 
@@ -16,7 +24,7 @@ body > footer,
 #page-footer {
   box-sizing: border-box;
   width: auto !important;
-  max-width: none !important;
+  max-width: var(--sg-content-max) !important;
   margin-left: var(--sg-content-left) !important;
   margin-right: var(--sg-content-right) !important;
 }

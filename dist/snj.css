@@ -1,4 +1,100 @@
 /* snj-theme — généré par scripts/build.mjs, ne pas modifier à la main */
+/* --- 05-ornaments.css --- */
+/* ==========================================================================
+   SNJ — Ornements réutilisables
+   Séparateur : deux filets qui s'effacent, deux losanges et un signe au centre.
+
+   <div class="sg-divider" role="separator">
+     <span class="sg-divider__line"></span>
+     <span class="sg-divider__gem"></span>
+     <span class="sg-divider__mark" aria-hidden="true">時</span>   (facultatif)
+     <span class="sg-divider__gem"></span>
+     <span class="sg-divider__line"></span>
+   </div>
+
+   Sans signe, mettre un seul losange. Le signe peut aussi être une icône
+   Material Symbols (<span class="sg-divider__mark material-symbols-outlined">…</span>).
+   Variables : --sg-divider-space (marge haute et basse), --sg-divider-color.
+   ========================================================================== */
+
+.sg-divider {
+  --sg-divider-space: 64px;
+  --sg-divider-color: var(--sg-primary);
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: var(--sg-divider-space) 0;
+  color: var(--sg-divider-color);
+}
+
+/* Filets : naissent du bord, s'intensifient puis s'effacent avant les losanges */
+.sg-divider__line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--sg-border-strong) 35%, var(--sg-border-strong) 65%, transparent);
+}
+
+.sg-divider__line:first-child {
+  margin-right: 28px;
+}
+
+.sg-divider__line:last-child {
+  margin-left: 28px;
+}
+
+/* Losange : contour fin et petit losange plein en son centre */
+.sg-divider__gem {
+  position: relative;
+  flex: none;
+  width: 13px;
+  height: 13px;
+  box-sizing: border-box;
+  border: 1.5px solid currentColor;
+  transform: rotate(45deg);
+}
+
+.sg-divider__gem::after {
+  content: "";
+  position: absolute;
+  inset: 2.5px;
+  background: currentColor;
+  opacity: 0.45;
+}
+
+.sg-divider__mark {
+  flex: none;
+  padding: 0 6px;
+  font-family: var(--sg-font-jp);
+  font-size: 1.6rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.sg-divider__mark.material-symbols-outlined {
+  font-family: "Material Symbols Outlined";
+  font-size: 26px;
+}
+
+@media (max-width: 768px) {
+  .sg-divider {
+    --sg-divider-space: 40px;
+    gap: 12px;
+  }
+
+  .sg-divider__line:first-child {
+    margin-right: 10px;
+  }
+
+  .sg-divider__line:last-child {
+    margin-left: 10px;
+  }
+}
+
+/* Accueil : le séparateur remplace la barre de liens rapides d'AwesomeBB */
+.sg-divider + .action-bar-top {
+  display: none !important;
+}
+
 /* --- 10-sidebar.css --- */
 /* ==========================================================================
    SNJ — Barre latérale (navigation principale)
@@ -24,7 +120,7 @@ body > header {
   position: fixed;
   z-index: 1000;
   top: 0;
-  left: var(--sg-sidebar-gap);
+  left: var(--sg-shell-left, var(--sg-sidebar-gap));
   width: var(--sg-sidebar-w);
   height: 100vh;
   height: 100dvh;
@@ -225,7 +321,7 @@ body > header {
   position: fixed !important;
   top: auto !important;
   right: auto !important;
-  left: calc(var(--sg-sidebar-w) + var(--sg-sidebar-gap) * 2) !important;
+  left: calc(var(--sg-shell-left, var(--sg-sidebar-gap)) + var(--sg-sidebar-w) + var(--sg-sidebar-gap)) !important;
   bottom: var(--sg-space-6) !important;
   z-index: 1001;
 }
@@ -309,10 +405,18 @@ body > header {
    Le contenu (bannière, catégories, pied de page) occupe toute la largeur
    disponible à droite de la barre latérale, sans jamais passer dessous.
    (AwesomeBB force le padding du <body> : on décale donc les blocs eux-mêmes.)
+   Le contenu est limité à 1200px (barre non comprise) ; la barre et le contenu
+   forment un ensemble centré horizontalement. Les pourcentages se rapportent
+   à la largeur de la fenêtre sans la barre de défilement (barre fixe : fenêtre ;
+   blocs du contenu : <body>, qui occupe toute la largeur).
    ========================================================================== */
 
 :root {
-  --sg-content-left: calc(var(--sg-sidebar-gap) * 2 + var(--sg-sidebar-w));
+  --sg-content-max: 1200px;
+  --sg-shell-w: calc(var(--sg-sidebar-w) + var(--sg-sidebar-gap) + var(--sg-content-max));
+  /* Bord gauche de l'ensemble barre + contenu */
+  --sg-shell-left: max(var(--sg-sidebar-gap), calc(50% - var(--sg-shell-w) / 2));
+  --sg-content-left: calc(var(--sg-shell-left) + var(--sg-sidebar-w) + var(--sg-sidebar-gap));
   --sg-content-right: var(--sg-sidebar-gap);
 }
 
@@ -322,7 +426,7 @@ body > footer,
 #page-footer {
   box-sizing: border-box;
   width: auto !important;
-  max-width: none !important;
+  max-width: var(--sg-content-max) !important;
   margin-left: var(--sg-content-left) !important;
   margin-right: var(--sg-content-right) !important;
 }
@@ -394,7 +498,7 @@ html::after {
   isolation: isolate;
   display: grid;
   place-items: center;
-  height: 580px;
+  height: 640px;
   margin-top: var(--sg-space-6) !important;
   margin-bottom: var(--sg-space-6) !important;
   padding: 0;
@@ -962,31 +1066,74 @@ html::after {
   list-style: none;
 }
 
+/* Raccourci : pastille de couleur pour l'icône, puis panneau arrondi avec le libellé.
+   Au survol, la couleur remplit tout le raccourci et le texte passe en --sg-on-accent.
+   Couleur donnée par --sc (un accent ou la primaire, jamais une couleur de nation). */
 .sg-shortcut,
 .sg-shortcut:visited {
+  --sc: var(--sg-primary);
+  position: relative;
   display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
-  border-radius: var(--sg-radius);
-  background: var(--sg-surface-2);
-  color: var(--sg-text);
-  font-size: 0.9rem;
-  font-weight: 700;
+  align-items: stretch;
+  min-height: 52px;
+  overflow: hidden;
+  border: 1px solid var(--sg-border);
+  border-radius: var(--sg-radius-lg);
+  background: var(--sc);
+  color: var(--sc);
   text-decoration: none;
-  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-.sg-shortcut .material-symbols-outlined {
-  font-size: 20px;
-  color: var(--sg-primary);
+.sg-shortcut__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 58px;
+  padding-right: 6px;
+  color: var(--sg-on-accent);
 }
 
-.sg-shortcut:hover,
+.sg-shortcut__icon.material-symbols-outlined {
+  font-size: 24px;
+}
+
+.sg-shortcut__label {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 0;
+  padding: 0 16px 0 22px;
+  border-radius: 26px 0 0 26px / 50% 0 0 50%;
+  background: linear-gradient(var(--sc), var(--sc)) left center / 0% 100% no-repeat, var(--sg-surface-2);
+  color: var(--sc);
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: right;
+  transition: background-size 0.45s var(--sg-ease), color 0.3s ease;
+}
+
+.sg-shortcut:hover .sg-shortcut__label,
+.sg-shortcut:focus-visible .sg-shortcut__label {
+  background-size: 100% 100%, auto;
+  color: var(--sg-on-accent);
+}
+
 .sg-shortcut:focus-visible {
-  background: var(--sg-primary-soft);
-  color: var(--sg-primary);
-  outline: none;
+  outline: 2px solid var(--sc);
+  outline-offset: 2px;
+}
+
+.sg-shortcut--1 { --sc: var(--sg-accent-1); }
+.sg-shortcut--2 { --sc: var(--sg-accent-2); }
+.sg-shortcut--3 { --sc: var(--sg-accent-3); }
+.sg-shortcut--4 { --sc: var(--sg-primary); }
+
+@media (prefers-reduced-motion: reduce) {
+  .sg-shortcut__label {
+    transition: none;
+  }
 }
 
 /* --- Scénarios (tuiles, révélation au survol) ------------------------------- */
@@ -1076,6 +1223,53 @@ html::after {
 .sg-tile:focus-visible .sg-tile__name {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* Scénario déjà pris : grisé, sceau « Pris », nom toujours visible, aucun effet au survol */
+.sg-tile--taken {
+  cursor: default;
+}
+
+.sg-tile--taken .sg-tile__img {
+  opacity: 0.07;
+}
+
+.sg-tile--taken .sg-tile__kanji {
+  opacity: 0.22;
+}
+
+.sg-tile--taken .sg-tile__name {
+  background: none;
+  color: var(--sg-text-muted);
+  font-weight: 400;
+  text-decoration: line-through;
+  text-decoration-color: var(--sg-border-strong);
+  opacity: 1;
+  transform: none;
+}
+
+.sg-tile__seal {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px 2px 6px;
+  border: 1px solid var(--sg-border-strong);
+  border-radius: 999px;
+  background: var(--sg-surface);
+  color: var(--sg-text-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+.sg-tile__seal .material-symbols-outlined {
+  font-size: 13px;
 }
 
 .sg-tile:focus-visible {

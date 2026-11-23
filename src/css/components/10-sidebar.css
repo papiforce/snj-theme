@@ -22,7 +22,7 @@ body > header {
   position: fixed;
   z-index: 1000;
   top: 0;
-  left: var(--sg-sidebar-gap);
+  left: var(--sg-shell-left, var(--sg-sidebar-gap));
   width: var(--sg-sidebar-w);
   height: 100vh;
   height: 100dvh;
@@ -223,7 +223,7 @@ body > header {
   position: fixed !important;
   top: auto !important;
   right: auto !important;
-  left: calc(var(--sg-sidebar-w) + var(--sg-sidebar-gap) * 2) !important;
+  left: calc(var(--sg-shell-left, var(--sg-sidebar-gap)) + var(--sg-sidebar-w) + var(--sg-sidebar-gap)) !important;
   bottom: var(--sg-space-6) !important;
   z-index: 1001;
 }

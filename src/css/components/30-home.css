@@ -457,31 +457,74 @@
   list-style: none;
 }
 
+/* Raccourci : pastille de couleur pour l'icône, puis panneau arrondi avec le libellé.
+   Au survol, la couleur remplit tout le raccourci et le texte passe en --sg-on-accent.
+   Couleur donnée par --sc (un accent ou la primaire, jamais une couleur de nation). */
 .sg-shortcut,
 .sg-shortcut:visited {
+  --sc: var(--sg-primary);
+  position: relative;
   display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
-  border-radius: var(--sg-radius);
-  background: var(--sg-surface-2);
-  color: var(--sg-text);
-  font-size: 0.9rem;
-  font-weight: 700;
+  align-items: stretch;
+  min-height: 52px;
+  overflow: hidden;
+  border: 1px solid var(--sg-border);
+  border-radius: var(--sg-radius-lg);
+  background: var(--sc);
+  color: var(--sc);
   text-decoration: none;
-  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-.sg-shortcut .material-symbols-outlined {
-  font-size: 20px;
-  color: var(--sg-primary);
+.sg-shortcut__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 58px;
+  padding-right: 6px;
+  color: var(--sg-on-accent);
 }
 
-.sg-shortcut:hover,
+.sg-shortcut__icon.material-symbols-outlined {
+  font-size: 24px;
+}
+
+.sg-shortcut__label {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 0;
+  padding: 0 16px 0 22px;
+  border-radius: 26px 0 0 26px / 50% 0 0 50%;
+  background: linear-gradient(var(--sc), var(--sc)) left center / 0% 100% no-repeat, var(--sg-surface-2);
+  color: var(--sc);
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: right;
+  transition: background-size 0.45s var(--sg-ease), color 0.3s ease;
+}
+
+.sg-shortcut:hover .sg-shortcut__label,
+.sg-shortcut:focus-visible .sg-shortcut__label {
+  background-size: 100% 100%, auto;
+  color: var(--sg-on-accent);
+}
+
 .sg-shortcut:focus-visible {
-  background: var(--sg-primary-soft);
-  color: var(--sg-primary);
-  outline: none;
+  outline: 2px solid var(--sc);
+  outline-offset: 2px;
+}
+
+.sg-shortcut--1 { --sc: var(--sg-accent-1); }
+.sg-shortcut--2 { --sc: var(--sg-accent-2); }
+.sg-shortcut--3 { --sc: var(--sg-accent-3); }
+.sg-shortcut--4 { --sc: var(--sg-primary); }
+
+@media (prefers-reduced-motion: reduce) {
+  .sg-shortcut__label {
+    transition: none;
+  }
 }
 
 /* --- Scénarios (tuiles, révélation au survol) ------------------------------- */
@@ -571,6 +614,53 @@
 .sg-tile:focus-visible .sg-tile__name {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* Scénario déjà pris : grisé, sceau « Pris », nom toujours visible, aucun effet au survol */
+.sg-tile--taken {
+  cursor: default;
+}
+
+.sg-tile--taken .sg-tile__img {
+  opacity: 0.07;
+}
+
+.sg-tile--taken .sg-tile__kanji {
+  opacity: 0.22;
+}
+
+.sg-tile--taken .sg-tile__name {
+  background: none;
+  color: var(--sg-text-muted);
+  font-weight: 400;
+  text-decoration: line-through;
+  text-decoration-color: var(--sg-border-strong);
+  opacity: 1;
+  transform: none;
+}
+
+.sg-tile__seal {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px 2px 6px;
+  border: 1px solid var(--sg-border-strong);
+  border-radius: 999px;
+  background: var(--sg-surface);
+  color: var(--sg-text-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+.sg-tile__seal .material-symbols-outlined {
+  font-size: 13px;
 }
 
 .sg-tile:focus-visible {

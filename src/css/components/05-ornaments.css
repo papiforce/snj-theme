@@ -1,0 +1,94 @@
+/* ==========================================================================
+   SNJ — Ornements réutilisables
+   Séparateur : deux filets qui s'effacent, deux losanges et un signe au centre.
+
+   <div class="sg-divider" role="separator">
+     <span class="sg-divider__line"></span>
+     <span class="sg-divider__gem"></span>
+     <span class="sg-divider__mark" aria-hidden="true">時</span>   (facultatif)
+     <span class="sg-divider__gem"></span>
+     <span class="sg-divider__line"></span>
+   </div>
+
+   Sans signe, mettre un seul losange. Le signe peut aussi être une icône
+   Material Symbols (<span class="sg-divider__mark material-symbols-outlined">…</span>).
+   Variables : --sg-divider-space (marge haute et basse), --sg-divider-color.
+   ========================================================================== */
+
+.sg-divider {
+  --sg-divider-space: 64px;
+  --sg-divider-color: var(--sg-primary);
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: var(--sg-divider-space) 0;
+  color: var(--sg-divider-color);
+}
+
+/* Filets : naissent du bord, s'intensifient puis s'effacent avant les losanges */
+.sg-divider__line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--sg-border-strong) 35%, var(--sg-border-strong) 65%, transparent);
+}
+
+.sg-divider__line:first-child {
+  margin-right: 28px;
+}
+
+.sg-divider__line:last-child {
+  margin-left: 28px;
+}
+
+/* Losange : contour fin et petit losange plein en son centre */
+.sg-divider__gem {
+  position: relative;
+  flex: none;
+  width: 13px;
+  height: 13px;
+  box-sizing: border-box;
+  border: 1.5px solid currentColor;
+  transform: rotate(45deg);
+}
+
+.sg-divider__gem::after {
+  content: "";
+  position: absolute;
+  inset: 2.5px;
+  background: currentColor;
+  opacity: 0.45;
+}
+
+.sg-divider__mark {
+  flex: none;
+  padding: 0 6px;
+  font-family: var(--sg-font-jp);
+  font-size: 1.6rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.sg-divider__mark.material-symbols-outlined {
+  font-family: "Material Symbols Outlined";
+  font-size: 26px;
+}
+
+@media (max-width: 768px) {
+  .sg-divider {
+    --sg-divider-space: 40px;
+    gap: 12px;
+  }
+
+  .sg-divider__line:first-child {
+    margin-right: 10px;
+  }
+
+  .sg-divider__line:last-child {
+    margin-left: 10px;
+  }
+}
+
+/* Accueil : le séparateur remplace la barre de liens rapides d'AwesomeBB */
+.sg-divider + .action-bar-top {
+  display: none !important;
+}
