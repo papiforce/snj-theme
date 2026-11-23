@@ -12,9 +12,9 @@ dans le panneau d'administration (PA), puis on commit.
 | Dossier | Contenu | Où ça va sur Forumactif |
 |---|---|---|
 | `src/css/critical.css` | Tokens, thèmes clair/sombre, base | PA › Affichage › Couleurs › CSS principal |
-| `src/css/components/` | CSS des composants (catégories, sujets, messages…) | Servi par CDN, chargé depuis `overall_header` |
+| `src/css/components/` | CSS des composants (barre latérale, catégories, sujets…), préfixés par un numéro d'ordre | Assemblés dans `dist/snj.css` par `node scripts/build.mjs`, servis par jsDelivr |
 | `src/templates/` | Templates HTML et extraits à insérer | PA › Affichage › Templates |
-| `src/js/` | Un fichier par script | PA › Modules › Gestion des codes JavaScript |
+| `src/js/` | Un fichier par script (`layout.js` = barre latérale + thème) | PA › Modules › Gestion des codes JavaScript |
 | `docs/` | Décisions, notes de migration | — |
 
 ## Décisions
@@ -26,11 +26,23 @@ dans le panneau d'administration (PA), puis on commit.
 - **Polices** : titres en **Zen Antique**, texte en **Inria Sans** (comme l'annexe). Cinzel abandonnée.
 - **Thème** : celui de l'appareil par défaut ; le choix du membre est mémorisé dans le navigateur
   (`localStorage`, clé `snj-theme`). Attribut `data-theme` sur `<html>`.
+- **Icônes** : **Material Symbols Outlined uniquement**, partout (c'est la bibliothèque native d'AwesomeBB).
+  Jamais de Font Awesome ni d'autre bibliothèque. Pas d'icônes de marque (Discord…) : on choisit une icône générique.
+- **Navigation** : barre latérale fixe à gauche avec icônes et infobulle à droite (inspirée de Themis Trials),
+  barre fixe en bas d'écran sur mobile. Elle remplace l'en-tête natif d'AwesomeBB.
 - **Variables CSS** préfixées `--sg-*`. On rebranche les `--t_*` d'AwesomeBB sur nos tokens.
 - **CSS hors forum** : servi par jsDelivr depuis ce dépôt, avec une adresse versionnée (tag).
   Le CSS indispensable reste dans le CSS principal du forum pour que le forum reste lisible si le CDN tombe.
 - **Messages libres** (sans modèle) : doivent rester lisibles et épurés.
 - **Migration** : bascule de tout le forum en une fois.
+
+## Publier une nouvelle version du CSS des composants
+
+1. Modifier `src/css/components/*.css`, puis `node scripts/build.mjs`.
+2. Commit, puis tag `vX.Y.Z` et push du tag.
+3. Dans `overall_header`, remplacer `@vX.Y.Z` dans le lien jsDelivr, enregistrer et **publier** le template.
+
+Une adresse versionnée ne change jamais : une version ratée n'atteint pas le forum tant qu'on n'a pas changé le lien.
 
 ## Règles
 

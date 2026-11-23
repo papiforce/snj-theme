@@ -147,6 +147,11 @@ h4 {
   color: var(--sg-text);
 }
 
+/* Icônes : Material Symbols Outlined partout (bibliothèque native d'AwesomeBB) */
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
 ::selection {
   background: var(--sg-primary);
   color: var(--sg-primary-fg);
