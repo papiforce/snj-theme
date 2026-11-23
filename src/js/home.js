@@ -156,7 +156,8 @@
   }
 
   function cardHead(kanji, title) {
-    return h('header', { class: 'sg-card__head' }, [
+    /* <div> et pas <header> : AwesomeBB fixe tous les <header> en haut de page */
+    return h('div', { class: 'sg-card__head' }, [
       h('span', { class: 'sg-kanji', 'aria-hidden': 'true', text: kanji }),
       h('h3', { class: 'sg-card__title', text: title })
     ]);
@@ -356,8 +357,8 @@
           var a = row.querySelector('a.topictitle');
           var author = row.querySelector('.block-topics-author strong');
           var last = row.querySelector('.block-topics-lastpost a[href*="#"], .block-topics-lastpost a:last-child');
-          var raw = (row.querySelector('.block-topics-author') || row).textContent;
-          var date = (raw.split(',').slice(1).join(',') || '').trim();
+          var m = row.textContent.replace(/\s+/g, ' ').match(/,\s*([^,]+)$/);
+          var date = m ? m[1].trim() : '';
           return {
             title: a ? a.textContent.trim() : '',
             href: last ? last.getAttribute('href') : (a ? a.getAttribute('href') : '/latest'),
