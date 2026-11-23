@@ -24,6 +24,10 @@ dans le panneau d'administration (PA), puis on commit.
 - **Ambiance** : japonaise médiévale sombre.
 - **Couleur primaire** : Hagane (acier bleuté) — `#9fb0c3` en sombre, `#3e5266` en clair.
   Toutes les autres couleurs existantes (nations, clans, or de Kaminari `#c9a558`) sont conservées.
+- **Accents** (réutilisables partout, jamais une couleur de nation) : `--sg-accent-1` **Asagi** 浅葱 (sarcelle,
+  `#6fb3ae` sombre / `#3d8a87` clair) et `--sg-accent-2` **Ume** 梅 (prune, `#c27390` / `#a8506f`), avec leurs
+  variantes `-rgb`. Halos flous aux coins (accent 1 en haut à droite, accent 2 en bas à gauche, inspirés de Themis
+  Trials) sur `html::before/::after`, intensité `--sg-glow-strength` (0,6 sombre / 0,5 clair) ; le `<body>` est transparent.
 - **Polices** : titres en **Zen Antique**, texte en **Inria Sans** (comme l'annexe). Cinzel abandonnée.
 - **Thème** : celui de l'appareil par défaut ; le choix du membre est mémorisé dans le navigateur
   (`localStorage`, clé `snj-theme`). Attribut `data-theme` sur `<html>`.
