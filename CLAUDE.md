@@ -24,9 +24,10 @@ dans le panneau d'administration (PA), puis on commit.
 - **Ambiance** : japonaise médiévale sombre.
 - **Couleur primaire** : Hagane (acier bleuté) — `#9fb0c3` en sombre, `#3e5266` en clair.
   Toutes les autres couleurs existantes (nations, clans, or de Kaminari `#c9a558`) sont conservées.
-- **Accents** (réutilisables partout, jamais une couleur de nation) : `--sg-accent-1` **Asagi** 浅葱 (sarcelle,
-  `#6fb3ae` sombre / `#3d8a87` clair) et `--sg-accent-2` **Ume** 梅 (prune, `#c27390` / `#a8506f`), avec leurs
-  variantes `-rgb`. Halos flous aux coins (accent 1 en haut à droite, accent 2 en bas à gauche, inspirés de Themis
+- **Accents** (réutilisables partout, jamais une couleur de nation ni proche d'elle) : `--sg-accent-1` **Asagi** 浅葱
+  (sarcelle, `#6fb3ae` sombre / `#3d8a87` clair), `--sg-accent-2` **Ume** 梅 (prune, `#c27390` / `#a8506f`) et
+  `--sg-accent-3` **Wakatake** 若竹 (jeune bambou, vert jade, `#6fc29b` / `#2f8a5f`), avec leurs variantes `-rgb`.
+  Texte posé sur un accent : `--sg-on-accent` (encre en sombre, papier en clair). Halos flous aux coins (accent 1 en haut à droite, accent 2 en bas à gauche, inspirés de Themis
   Trials) sur `html::before/::after`, intensité `--sg-glow-strength` (0,6 sombre / 0,5 clair) ; le `<body>` est transparent.
 - **Polices** : titres en **Zen Antique**, texte en **Inria Sans** (comme l'annexe). Cinzel abandonnée.
 - **Thème** : celui de l'appareil par défaut ; le choix du membre est mémorisé dans le navigateur
@@ -40,9 +41,9 @@ dans le panneau d'administration (PA), puis on commit.
   Haut : avatar du membre, ou logo SnJ (`assets/snj-logo.webp`) pour les visiteurs.
   Navigation : Accueil, Membres (masqué sur mobile), Discord, Annexe, Carte.
   Bas : Notifications (avec pastille), Panneau d'administration (admins), Déconnexion, thème clair/sombre.
-- **Mise en page** : bannière, catégories et pied de page prennent toute la largeur disponible à droite de la barre
-  (inspiré de Themis Trials), coins arrondis.
-- **Bannière** : clair = brume au clair de lune, sombre = renard dans les braises (`scripts/grade-banner.py`).
+- **Mise en page** : bannière, catégories et pied de page font au plus **1200px** (`--sg-content-max`, barre non comprise) ;
+  la barre et le contenu forment un ensemble centré horizontalement (`--sg-shell-left`), coins arrondis.
+- **Bannière** : 640px de haut sur ordinateur (220px sur mobile). Clair = brume au clair de lune, sombre = renard dans les braises (`scripts/grade-banner.py`).
   Pas de logo ; wordmark « Sengoku no Jidai » fondu dans l'image (modes de fusion + dégradé).
 - **Accueil** (`home.js` + `30-home.css`) : grille « bento » de 12 colonnes, sans titres de zones, cartes variées
   (illustrées, couverture, motifs Edo seigaiha / kikkō / shippō, carrousels, carte Vote pleine, Discord).
@@ -52,13 +53,18 @@ dans le panneau d'administration (PA), puis on commit.
   `scripts/grade-cards.py`). Rumeurs : une illustration et la couleur de la nation (`--sg-nation-*`).
   Contexte sans image (trop d'images sinon), sur le même motif kikkō que le Staff.
   Images du Guide et de l'Annexe fournies par Vinny (`assets/card-guide*.webp`, `assets/card-annexe*.webp`).
-  Les 4 raccourcis de l'Annexe remplissent toute la hauteur restante de la carte. En clair, Guide, Annexe et Rumeurs utilisent des variantes claires au ton de la bannière (`*-light.webp`, `grade-cards.py --light`) et passent au papier
+  Raccourcis de l'Annexe (inspirés de Themis Trials) : pastille de couleur pour l'icône, panneau arrondi avec le libellé,
+  sans bordure ; au survol la couleur remplit tout le raccourci (accents 1, 2, 3 puis primaire). Ils remplissent toute
+  la hauteur restante de la carte. Annonces et Rumeurs défilent seules (8 s). Scénarios : `taken: true` pour un
+  scénario pris (grisé, sceau « Pris », non cliquable), les disponibles en premier.
+  **Séparateur** réutilisable `.sg-divider` (`05-ornaments.css`) : filets, losanges et un signe au centre ; sur
+  l'accueil, 時 entre les widgets et les catégories, à la place de la barre de liens rapides d'AwesomeBB. En clair, Guide, Annexe et Rumeurs utilisent des variantes claires au ton de la bannière (`*-light.webp`, `grade-cards.py --light`) et passent au papier
   et à l'encre (classe `sg-tone`). Seules les cartes Guide, Staff, Vote et Discord se soulèvent au survol.
   **Motifs Edo : un motif = une famille d'information**, uniquement sur les cartes de texte (jamais sur les cartes
   illustrées, les fils ni la carte Discord) : seigaiha 青海波 (vagues) → parcours et aide (onboarding, guides,
   tutoriels) ; kikkō 亀甲 (carapace de tortue) → univers et références durables (contexte, règlement, chronologie) ;
   shippō 七宝 (cercles entrelacés) → communauté et liens (staff, votes, partenaires, membres).
-  Peu de kanji (seulement dans les tuiles de scénarios). Annonces, Rumeurs et Saison sont des données provisoires
+  Peu de kanji (seulement dans les tuiles de scénarios et le signe central des séparateurs). Annonces, Rumeurs et Saison sont des données provisoires
   (objet `DATA`) à brancher plus tard sur l'API de l'annexe. Pas d'animation de bordure au survol.
   Les `<header>` sont interdits dans nos composants : AwesomeBB les fixe tous en haut de page.
 - **Variables CSS** préfixées `--sg-*`. On rebranche les `--t_*` d'AwesomeBB sur nos tokens.
