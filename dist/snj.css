@@ -741,6 +741,11 @@ html::after {
 .sg-c-staff { grid-column: span 3; }
 .sg-c-community { grid-column: span 3; }
 
+/* Pages des forums : Guide, Saison et Annexe sur une ligne */
+#sg-home.is-forum > .sg-c-guide { grid-column: span 5; }
+#sg-home.is-forum > .sg-c-season { grid-column: span 4; }
+#sg-home.is-forum > .sg-c-annexe { grid-column: span 3; }
+
 /* --- Carte de base --------------------------------------------------------- */
 .sg-card {
   position: relative;
@@ -2007,6 +2012,15 @@ html::after {
   }
 
   #sg-home > .sg-c-onboarding {
+    grid-column: span 12;
+  }
+
+  #sg-home.is-forum > .sg-c-guide,
+  #sg-home.is-forum > .sg-c-season {
+    grid-column: span 6;
+  }
+
+  #sg-home.is-forum > .sg-c-annexe {
     grid-column: span 12;
   }
 

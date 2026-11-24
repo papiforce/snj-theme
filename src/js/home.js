@@ -1,7 +1,7 @@
 /* ==========================================================================
    SNJ — Widgets de la page d'accueil
    PA › Modules › HTML & JavaScript › Gestion des codes JavaScript
-   Placement : "Sur l'index" uniquement.
+   Placement : "Sur l'index" et "Sur les sous-forums" (pages des forums : Guide, Saison et Annexe).
    Dépend de : src/css/components/30-home.css (servi par jsDelivr).
 
    Une seule grille « bento » (12 colonnes), cartes variées : grandes cartes illustrées,
@@ -578,6 +578,14 @@
     if (!wrap) return;
     var cssReady = getComputedStyle(document.documentElement).getPropertyValue('--sg-home').trim() !== '';
     if (!cssReady) return;
+
+    /* Page d'un forum (/f4-presentations, /f4p20-…) : Guide, Saison et Annexe, puis le séparateur */
+    if (!document.getElementById('index') && /^\/f\d+/.test(location.pathname)) {
+      var row = h('div', { id: 'sg-home', class: 'is-forum' }, [guide(), season(), annexe()]);
+      wrap.insertBefore(row, wrap.firstChild);
+      row.parentNode.insertBefore(divider(), row.nextSibling);
+      return;
+    }
 
     var ud = window._userdata || {};
     var logged = String(ud.session_logged_in) === '1';
