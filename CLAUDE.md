@@ -296,9 +296,15 @@ dans le panneau d'administration (PA), puis on commit.
   « Enregistrer » (plein) ; sur mobile en pleine largeur, « Envoyer » au-dessus. **Autres blocs** du formulaire
   (règles du forum, sondage, calendrier, SEO, pièces jointes…) en **panneaux repliables** `.sg-panel` (titre en Zen
   Antique, chevron ; fermés, sauf les règles) ; leurs listes passent en `combo`, leurs champs au contour arrondi.
-  **Aperçu** (`#preview`) : carte pointillée « Aperçu ». **Revue du sujet** : « Derniers messages du sujet » en
-  cartes compactes `.sg-rev` (portrait 48 × 64, « par X le … » en tête, message coupé à 240px avec un fondu et
-  « Lire la suite »). En bas : séparateur de fin et fil d'Ariane repris. Non testés faute d'envoyer un formulaire :
+  **Aperçu** (`#preview`) : carte pointillée « Aperçu ». **Revue du sujet** : « Derniers messages du sujet » au **pattern « fumi »**
+  de la page du sujet (`section.sg-review.sg-fumi` : le CSS des messages vise `:is(#topic, .sg-fumi)`), préférences
+  « Position du profil » et « Densité » comprises, couleur de la catégorie : rôle, portrait 200 × 400, pseudo, fiche
+  réduite, lettre avec la date (et la modification). Forumactif n'y donne que portrait, pseudo coloré, date et
+  contenu : `reviewAuthors()` lit l'identifiant, le rang et la fiche des auteurs sur la 1re et la dernière page du
+  sujet (par pseudo), puis pose le rôle (`staffRoles`) et la fiche. Pas de J'aime ni de menu (aucun lien natif).
+  **« Lire la suite »** gardé, **centré** (`.sg-rev__more`, « Réduire » une fois déplié) : le message est coupé à la
+  hauteur du profil (`--rev-clamp`, 240px au moins, 240px sur mobile), avec un fondu ; recalculé quand la fiche
+  arrive et au redimensionnement. En bas : séparateur de fin et fil d'Ariane repris. Non testés faute d'envoyer un formulaire :
   aperçu, modification, erreurs, pièces jointes.
 - **Permissions : laissez-passer « tegata »** (`layout.js`, fonction `perms`, + `58-perms.css`) : pattern **réservé
   aux permissions**, sur toutes les pages où Forumactif affiche le bloc « Permission de ce forum » (pages de forum,
