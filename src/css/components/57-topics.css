@@ -35,6 +35,7 @@ body.sg-topics-on #wrap > .posts {
 .sg-topics__grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: 1fr; /* toutes les cartes ont la même hauteur */
   gap: var(--sg-space-6) var(--sg-space-6);
   margin: 0;
   padding: 10px 14px; /* place des rouleaux qui dépassent */
