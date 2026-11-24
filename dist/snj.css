@@ -3689,7 +3689,6 @@ body.sg-pagehead-on a.btn-fixed {
    Pattern réservé aux SOUS-FORUMS, partout où ils sont listés. Il se distingue des cartes de
    forum de l'accueil (image en fond, panneau, kanji en filigrane, dangerosité) par :
      - l'image en haut, découpée en toit (silhouette de l'ema), avec le trou du cordon ;
-     - la mention « Sous-forum » au-dessus du titre ;
      - un format compact : compteurs en ligne, dernier message en pied de carte ;
      - sans image : motif asanoha 麻の葉 (feuille de chanvre) à la couleur de la catégorie, sur un halo.
        L'asanoha est réservé à ce repli (il ne désigne pas une famille d'information).
@@ -3703,7 +3702,10 @@ body.sg-subforums-on #wrap > .forum.type-table-forum {
 
 .sg-subforums {
   --ph: var(--sg-primary);
+  /* Sous les cartes, le même filet que celui qui ouvre le pied de page */
   margin: 0 0 var(--sg-space-8);
+  padding-bottom: var(--sg-space-8);
+  border-bottom: 1px solid var(--sg-border);
   font-size: 16px; /* AwesomeBB réduit la taille du texte dans #wrap */
   line-height: 1.6;
 }
@@ -3715,36 +3717,6 @@ body.sg-subforums-on #wrap > .forum.type-table-forum {
 .sg-subforums.sg-tone-kaminari { --ph: var(--sg-nation-kaminari); }
 .sg-subforums.sg-tone-tsuchi { --ph: var(--sg-nation-tsuchi); }
 .sg-subforums.sg-tone-autres { --ph: var(--sg-nation-autres); }
-
-.sg-subforums__head {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: var(--sg-space-4);
-}
-
-.sg-subforums__title {
-  margin: 0;
-  color: var(--sg-text-muted);
-  font-family: var(--sg-font-body);
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
-.sg-subforums__count {
-  display: inline-grid;
-  place-items: center;
-  min-width: 22px;
-  height: 22px;
-  padding: 0 7px;
-  border-radius: 999px;
-  background: var(--sg-surface-2);
-  color: var(--sg-text);
-  font-size: 0.75rem;
-  font-weight: 700;
-}
 
 .sg-subforums__grid {
   display: grid;
@@ -3859,14 +3831,6 @@ body.sg-subforums-on #wrap > .forum.type-table-forum {
   gap: 6px;
   padding: 18px 22px 16px;
   border-top: 3px solid var(--ph);
-}
-
-.sg-ema__eyebrow {
-  color: var(--sg-text-muted);
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
 }
 
 .sg-ema__title {

@@ -100,12 +100,12 @@ dans le panneau d'administration (PA), puis on commit.
 - **Sous-forums : cartes « ema »** (`layout.js`, fonction `subforums`, + `56-subforums.css`) : pattern **réservé aux
   sous-forums**, partout où ils sont listés ; à ne pas confondre avec les cartes de forum de l'accueil (image en fond,
   panneau, kanji, dangerosité). L'ema 絵馬 (tablette votive) : image en haut découpée en toit (`clip-path`) avec le trou
-  du cordon sous le faîte, filet de 3px à la couleur de la catégorie (`--ph`), mention « Sous-forum », titre en Zen Antique,
+  du cordon sous le faîte, filet de 3px à la couleur de la catégorie (`--ph`), titre en Zen Antique (pas de mention « Sous-forum »),
   description sur 2 lignes, compteurs en ligne (icônes à la couleur de la catégorie), sous-sous-forums en pastilles,
   dernier message en pied (avatar, sujet complet, auteur coloré, date) ou « Aucun message pour l'instant ».
   Image : `data-image` de la `.sg-meta` du sous-forum, sinon l'`<img>` de sa description ; à défaut, motif **asanoha**
   麻の葉 (feuille de chanvre, réservé à ce repli) à la couleur de la catégorie sur un halo, sans voile sombre. Non lu : pastille « Nouveau » en Asagi. Grille de 2 colonnes, cartes de même proportion (1 colonne
-  ≤ 768px), titre de section « Sous-forums » + effectif. Toute la carte est cliquable (lien du titre étendu).
+  ≤ 768px), sans titre de section ; sous la grille, le même filet que celui du pied de page (1px `--sg-border`). Toute la carte est cliquable (lien du titre étendu).
 - **Catégories de l'accueil** (`forums.js` + `40-zones.css`) : à gauche un sélecteur collant (Gestion, Hi, Mizu, Kaze,
   Kaminari, Tsuchi no Kuni, Shōkoku — « les petits pays », ex-Reste du Sekai) au style des raccourcis de l'Annexe, pastille = badge pour Gestion
   (sumi et gofun) et kanji du pays sinon (火 水 風 雷 土, 他 comme sur l'annexe), couleur de la nation ; onglet actif

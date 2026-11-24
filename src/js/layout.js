@@ -416,10 +416,6 @@
     var head = document.querySelector('.sg-pagehead');
     if (head) (head.className.match(/sg-tone-[a-z]+/) || []).forEach(function (c) { section.classList.add(c); });
     section.setAttribute('aria-label', 'Sous-forums');
-    var top = el('div', 'sg-subforums__head');
-    top.appendChild(el('h2', 'sg-subforums__title', 'Sous-forums'));
-    top.appendChild(el('span', 'sg-subforums__count', String(rows.length)));
-    section.appendChild(top);
     var grid = el('ul', 'sg-subforums__grid');
 
     rows.forEach(function (row) {
@@ -450,7 +446,6 @@
       card.appendChild(cover);
 
       var body = el('div', 'sg-ema__body');
-      body.appendChild(el('span', 'sg-ema__eyebrow', 'Sous-forum'));
       var title = el('h3', 'sg-ema__title');
       var a = el('a', 'sg-ema__link', link.textContent.trim());
       a.href = link.getAttribute('href');
