@@ -1459,6 +1459,10 @@
           e.appendChild(ico('edit_note'));
           e.appendChild(el('span', null, 'Modifié ' + edited.date));
           meta.appendChild(e);
+          /* La mention complète, en petit, toujours au bas du message (juste sous le contenu) */
+          var note = el('p', 'sg-post__edited');
+          note.appendChild(edited.node);
+          content.parentNode.insertBefore(note, content.nextSibling);
         }
         hd.insertBefore(meta, hd.firstChild);
 
@@ -1501,7 +1505,10 @@
         if (av) card.appendChild(av);
         if (author) card.appendChild(author);
         var facts = authorFacts(aside.querySelector('.post-author-details'));
-        if (facts) card.appendChild(facts);
+        if (facts) {
+          card.appendChild(smallDivider());
+          card.appendChild(facts);
+        }
         aside.appendChild(card);
       }
     });
@@ -1578,6 +1585,51 @@
 
     topic.classList.add('sg-topic-on');
     document.body.classList.add('sg-topicpage-on');
+    alignPostHash();
+  }
+
+  /* Arrivée par un lien vers un message (#3, #post-3) : le navigateur cale l'en-tête de la lettre tout en haut,
+     rôle coupé (et, sur mobile, profil caché au-dessus). On cale le haut du message, avec 24px d'air. Refait au
+     chargement complet (images, widgets) tant que le lecteur n'a pas défilé lui-même. */
+  function alignPostHash() {
+    var last = null;
+    var align = function () {
+      var id = decodeURIComponent((location.hash || '').slice(1));
+      var target = id && document.getElementById(id);
+      var post = target && target.closest && target.closest('.sg-post');
+      if (!post) return;
+      if (last !== null && Math.abs(window.pageYOffset - last) > 2) return;
+      window.scrollTo(0, Math.max(0, post.getBoundingClientRect().top + window.pageYOffset - 24));
+      last = window.pageYOffset;
+    };
+    align();
+    if (document.readyState !== 'complete') window.addEventListener('load', function () { setTimeout(align, 0); });
+    window.addEventListener('hashchange', function () { last = null; align(); });
+  }
+
+  /* Logo de Sengoku no Jidai au trait (même tracé que dans home.js : assets/snj-logo-outline.svg) */
+  var LOGO_OUTLINE = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">' +
+    '<circle cx="50.4" cy="50.4" r="38.4" vector-effect="non-scaling-stroke"/>' +
+    '<path vector-effect="non-scaling-stroke" d="M73.3 51.0Q72.5 50.3 70.6 49.4Q68.8 48.4 66.4 48.3Q64.1 48.2 61.9 49.1Q59.7 49.9 58.2 51.2Q56.7 52.6 55.6 54.4Q54.6 56.2 54.2 58.1Q53.9 60.0 54.2 61.6Q54.6 63.2 55.5 64.7Q56.4 66.3 57.4 67.5Q58.5 68.8 58.5 69.1Q58.6 69.5 57.3 71.1Q56.0 72.7 54.6 73.7Q53.2 74.7 53.3 75.1Q53.3 75.6 56.3 75.6Q59.3 75.7 62.4 74.8Q65.5 74.0 67.9 72.7Q70.3 71.3 72.0 69.6Q73.8 67.9 74.6 66.6Q75.3 65.4 75.9 64.0Q76.6 62.5 76.7 60.2Q76.9 57.8 76.7 56.8Q76.6 55.8 76.1 54.7Q75.6 53.6 74.8 52.6Q74.1 51.7 73.3 51.0Z"/>' +
+    '<path vector-effect="non-scaling-stroke" d="M31.1 43.2Q30.8 43.1 30.4 43.4Q29.9 43.8 28.9 45.1Q27.9 46.4 26.5 49.3Q25.1 52.2 24.6 54.6Q24.1 57.0 24.3 60.0Q24.4 62.9 25.3 65.2Q26.1 67.4 27.0 68.7Q27.9 70.0 28.8 70.8Q29.7 71.7 30.7 72.3Q31.8 73.0 32.9 73.4Q34.0 73.8 36.3 73.8Q38.5 73.8 40.6 72.9Q42.6 72.0 43.8 71.0Q44.9 70.0 45.5 69.0Q46.2 68.1 46.7 67.0Q47.1 66.0 47.3 64.6Q47.5 63.2 47.3 61.0Q47.1 58.9 46.1 56.9Q45.1 54.9 43.5 53.6Q42.0 52.2 40.1 51.6Q38.2 51.0 35.4 50.9Q32.6 50.9 32.3 50.4Q32.0 50.0 31.7 48.5Q31.4 47.1 31.4 45.2Q31.4 43.3 31.1 43.2Z"/>' +
+    '<path vector-effect="non-scaling-stroke" d="M37.2 30.3Q36.7 31.6 36.7 34.1Q36.7 36.6 37.5 38.4Q38.3 40.2 39.8 41.8Q41.4 43.4 43.6 44.4Q45.8 45.3 48.3 45.4Q50.9 45.4 52.5 44.8Q54.0 44.2 55.4 42.9Q56.8 41.6 58.0 39.3Q59.2 37.1 59.7 36.6Q60.3 36.0 61.9 36.4Q63.6 36.7 65.3 37.6Q67.0 38.5 67.2 38.5Q67.5 38.5 67.6 38.3Q67.7 38.1 66.7 35.8Q65.7 33.5 63.8 31.1Q61.9 28.7 59.8 27.0Q57.6 25.3 55.1 24.3Q52.7 23.3 51.3 23.2Q49.9 23.0 48.0 23.0Q46.1 23.1 44.1 23.8Q42.1 24.4 41.1 25.1Q40.2 25.8 39.4 26.6Q38.6 27.5 38.1 28.2Q37.6 29.0 37.2 30.3Z"/>' +
+    '</svg>';
+
+  /* Petit séparateur avec le logo (version réduite de .sg-divider : carte du profil d'un message) */
+  function smallDivider() {
+    var d = uiEl('div', 'sg-divider sg-divider--sm');
+    d.setAttribute('role', 'separator');
+    var logo = uiEl('span', 'sg-divider__logo');
+    logo.setAttribute('aria-hidden', 'true');
+    logo.innerHTML = LOGO_OUTLINE;
+    var rule = uiEl('span', 'sg-divider__rule');
+    rule.setAttribute('aria-hidden', 'true');
+    rule.appendChild(uiEl('span', 'sg-divider__line'));
+    rule.insertAdjacentHTML('beforeend', '<svg class="sg-divider__notch" viewBox="0 0 48 25" aria-hidden="true"><path d="M0 .5L24 24.5L48 .5"/></svg>');
+    rule.appendChild(uiEl('span', 'sg-divider__line'));
+    d.appendChild(logo);
+    d.appendChild(rule);
+    return d;
   }
 
   /* Magatama du logo de Sengoku no Jidai (formes pleines) : marque du staff, comme dans les statistiques */
@@ -1689,33 +1741,48 @@
     return list.children.length ? list : null;
   }
 
-  /* Mention native de modification (« Dernière édition par X le …, édité N fois ») : la date, et l'élément retiré */
+  /* Mention native de modification (« Dernière édition par X le …, édité N fois ») : sa date, et la mention
+     sortie du contenu dans un élément à part (node), que topicPage place au bas du message. Forumactif l'écrit
+     tantôt dans une balise, tantôt en texte brut après des <br> : le texte brut est alors enveloppé. */
   function editedInfo(content) {
     var re = /Derni[èe]re [ée]dition par\s+(.+?)\s+le\s+(.+?),\s*[ée]dit[ée]\s+(\d+)\s+fois/i;
-    var hit = null;
+    var skip = function (n) { return n.closest && n.closest('blockquote, .codebox, .spoiler'); };
+    var node = null;
     Array.prototype.slice.call(content.querySelectorAll('*')).reverse().some(function (n) {
-      if (n.closest('blockquote, .codebox, .spoiler') || !re.test(n.textContent)) return false;
-      hit = n;
+      if (skip(n) || !re.test(n.textContent)) return false;
+      node = n;
       return true;
     });
-    var m = (hit ? hit.textContent : content.textContent).match(re);
+    if (!node) {
+      /* Texte brut : le dernier nœud texte qui contient la mention, hors citations */
+      var walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, null);
+      var t, last = null;
+      while ((t = walker.nextNode())) if (re.test(t.nodeValue) && !skip(t.parentNode)) last = t;
+      if (last) {
+        var at = last.nodeValue.search(/Derni[èe]re [ée]dition par/i);
+        if (at > 0) last = last.splitText(at);
+        node = document.createElement('span');
+        last.parentNode.insertBefore(node, last);
+        node.appendChild(last);
+      }
+    }
+    if (!node) return null;
+    var m = node.textContent.match(re);
     if (!m) return null;
+    /* La mention et ses enveloppes devenues vides */
+    var box = node.parentNode;
+    node.parentNode.removeChild(node);
+    while (box && box !== content && !box.textContent.trim() && !box.querySelector('img')) {
+      var up = box.parentNode;
+      box.remove();
+      box = up;
+    }
+    /* Les <br> laissés en fin de message par la mention */
+    while (content.lastChild && (content.lastChild.nodeName === 'BR' || (content.lastChild.nodeType === 3 && !content.lastChild.textContent.trim()))) content.lastChild.remove();
     var date = m[2].trim();
     /* « le Lun 23 Mar 2026 - 10:00 » ; « Aujourd'hui à … » / « Hier à … » restent tels quels */
     var dateText = /^(aujourd|hier)/i.test(date) ? date.charAt(0).toLowerCase() + date.slice(1) : 'le ' + date;
-    if (hit) {
-      /* La mention et ses enveloppes devenues vides */
-      var box = hit.parentNode;
-      hit.remove();
-      while (box && box !== content && !box.textContent.trim() && !box.querySelector('img')) {
-        var up = box.parentNode;
-        box.remove();
-        box = up;
-      }
-      /* Les <br> laissés en fin de message par la mention */
-      while (content.lastChild && (content.lastChild.nodeName === 'BR' || (content.lastChild.nodeType === 3 && !content.lastChild.textContent.trim()))) content.lastChild.remove();
-    }
-    return { date: dateText, full: m[0].replace(/\s+/g, ' ').trim(), count: +m[3] };
+    return { date: dateText, full: m[0].replace(/\s+/g, ' ').trim(), count: +m[3], node: node };
   }
 
   /* Copie d'un lien dans le presse-papiers, avec un message discret en bas d'écran */

@@ -76,6 +76,26 @@
   stroke-linejoin: miter;
 }
 
+/* Petite version (carte du profil d'un message) : sans espace propre, logo et triangle réduits */
+.sg-divider--sm {
+  --sg-divider-space: 0px;
+  gap: 6px;
+}
+
+.sg-divider--sm .sg-divider__logo {
+  width: 22px;
+  height: 22px;
+}
+
+.sg-divider--sm .sg-divider__rule {
+  height: 12px;
+}
+
+.sg-divider--sm .sg-divider__notch {
+  width: 24px;
+  height: 12px;
+}
+
 /* Séparateur de fin : sans logo, triangle pointé vers le haut (sous les catégories de l'accueil) */
 .sg-divider--end .sg-divider__rule {
   transform: scaleY(-1);
@@ -5721,7 +5741,7 @@ html[data-profile="right"] #topic .post-wrap.sg-post {
   flex-direction: column;
   align-self: stretch;
   min-width: 0;
-  border: 1px solid var(--sg-border);
+  border: 0;
   border-radius: var(--sg-radius-lg);
   background: var(--sg-surface);
 }
@@ -5740,6 +5760,10 @@ html[data-profile="right"] #topic .post-wrap.sg-post {
   gap: 12px;
   width: auto;
   min-width: 0;
+  /* Toujours visible pendant la lecture d'un long message */
+  position: sticky;
+  top: 24px;
+  align-self: start;
   margin: 0;
   padding: 0;
   border: 0;
@@ -5748,17 +5772,22 @@ html[data-profile="right"] #topic .post-wrap.sg-post {
   text-align: center;
 }
 
-/* Carte du profil : portrait, pseudo et fiche, sur un halo à la couleur de l'auteur (le rôle reste au-dessus) */
+/* Carte du profil : portrait, pseudo, petit séparateur et fiche, sans fond (le rôle reste au-dessus) */
 .sg-post__card {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 12px;
   width: 100%;
-  padding: 20px 20px 22px;
-  border: 1px solid var(--sg-border);
-  border-radius: var(--sg-radius-lg);
-  background: linear-gradient(to bottom, color-mix(in srgb, var(--author) 12%, transparent), transparent 60%), var(--sg-surface);
+  padding: 0 16px;
+  border: 0;
+  background: none;
+}
+
+/* Petit séparateur avec le logo, entre le pseudo et la fiche */
+.sg-post__card .sg-divider--sm {
+  order: 3;
+  align-self: stretch;
 }
 
 #topic .sg-post .post-author-status:empty,
@@ -5821,8 +5850,8 @@ html[data-profile="right"] #topic .post-wrap.sg-post {
   transition: none;
 }
 
-/* Rôle au-dessus de la carte du profil : bandeau (pas de pastille) sur motif shippō (communauté, staff),
-   encadré à la couleur de l'auteur, magatama plein du logo de SnJ, de la couleur du texte, pour le staff */
+/* Rôle au-dessus de la carte du profil : bandeau (pas de pastille) plein à la couleur de l'auteur, motif shippō
+   (communauté, staff), texte et magatama plein du logo de SnJ (staff) dans la couleur du fond, selon le thème */
 .sg-role {
   position: relative;
   isolation: isolate;
@@ -5834,10 +5863,11 @@ html[data-profile="right"] #topic .post-wrap.sg-post {
   width: 100%;
   padding: 9px 12px;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--author) 60%, transparent);
+  border: 1px solid var(--author);
   border-radius: 10px;
-  background: color-mix(in srgb, var(--author) 8%, var(--sg-surface));
-  color: var(--sg-text);
+  background: var(--author);
+  /* Texte, magatama et motif dans la couleur du fond de page : clair en thème clair, sombre en thème sombre */
+  color: var(--sg-surface);
 }
 
 .sg-role::before {
@@ -5845,7 +5875,7 @@ html[data-profile="right"] #topic .post-wrap.sg-post {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background-color: color-mix(in srgb, var(--author) 30%, transparent);
+  background-color: color-mix(in srgb, var(--sg-surface) 32%, transparent);
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='%23000' stroke-width='1.4'%3E%3Ccircle cx='0' cy='0' r='20'/%3E%3Ccircle cx='40' cy='0' r='20'/%3E%3Ccircle cx='0' cy='40' r='20'/%3E%3Ccircle cx='40' cy='40' r='20'/%3E%3Ccircle cx='20' cy='20' r='20'/%3E%3C/g%3E%3C/svg%3E") repeat center / 24px 24px;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='%23000' stroke-width='1.4'%3E%3Ccircle cx='0' cy='0' r='20'/%3E%3Ccircle cx='40' cy='0' r='20'/%3E%3Ccircle cx='0' cy='40' r='20'/%3E%3Ccircle cx='40' cy='40' r='20'/%3E%3Ccircle cx='20' cy='20' r='20'/%3E%3C/g%3E%3C/svg%3E") repeat center / 24px 24px;
 }
@@ -5880,9 +5910,9 @@ html[data-profile="right"] #topic .post-wrap.sg-post {
   order: 3;
   gap: 6px;
   width: 100%;
-  margin: 2px 0 0;
-  padding: 12px 0 0;
-  border-top: 1px dashed var(--sg-border);
+  margin: 0;
+  padding: 0;
+  border: 0;
   list-style: none;
   font-size: 0.85rem;
   line-height: 1.4;
@@ -5901,7 +5931,7 @@ html[data-profile="right"] #topic .post-wrap.sg-post {
 
 .sg-post__fact .material-symbols-outlined {
   flex: none;
-  color: var(--author);
+  color: inherit;
   font-size: 18px;
   line-height: 1.1;
 }
@@ -5924,9 +5954,9 @@ html[data-profile="right"] #topic .post-wrap.sg-post {
   gap: 12px;
   min-width: 0;
   margin: 0;
-  padding: 10px 12px 10px 26px;
+  padding: 10px 8px 0 16px;
   border: 0;
-  border-bottom: 1px dashed var(--sg-border);
+  box-shadow: none;
   border-radius: 0;
   background: none;
   color: var(--sg-text);
@@ -6006,7 +6036,7 @@ html[data-profile="right"] #topic .post-wrap.sg-post {
   flex: 1;
   min-height: 120px;
   margin: 0;
-  padding: 22px 26px 26px;
+  padding: 16px 16px 20px;
   background: none;
   color: var(--sg-text);
   font-size: 1rem;
@@ -6023,6 +6053,16 @@ html[data-profile="right"] #topic .post-wrap.sg-post {
 #topic .sg-post .post-content img {
   max-width: 100%;
   height: auto;
+}
+
+/* Mention de modification de Forumactif, sortie du contenu : en petit, toujours au bas du message
+   (le contenu, en flex: 1, la pousse vers le bas de la lettre) */
+#wrap .sg-post__edited {
+  margin: 0;
+  padding: 0 16px 16px;
+  color: var(--sg-text-muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
 }
 
 /* Citations, code et spoilers natifs (blockquote, .codebox, .spoiler) */
@@ -6343,6 +6383,7 @@ html[data-profile="right"] #topic .post-wrap.sg-post {
   }
 
   #topic .sg-post .post-aside {
+    position: static;
     gap: 8px;
   }
 
@@ -6352,8 +6393,12 @@ html[data-profile="right"] #topic .post-wrap.sg-post {
     grid-template-columns: auto minmax(0, 1fr);
     align-items: center;
     gap: 4px 14px;
-    padding: 12px 14px;
+    padding: 0;
     text-align: left;
+  }
+
+  .sg-post__card .sg-divider--sm {
+    display: none;
   }
 
   #topic .sg-post .post-author-avatar {
@@ -6386,11 +6431,7 @@ html[data-profile="right"] #topic .post-wrap.sg-post {
   }
 
   #topic .sg-post .post-header {
-    padding: 6px 6px 6px 16px;
-  }
-
-  #topic .sg-post .post-content {
-    padding: 18px 16px 20px;
+    padding: 6px 6px 0 16px;
   }
 
   #topic .sg-post .post-footer,
