@@ -742,9 +742,9 @@ html::after {
 .sg-c-community { grid-column: span 3; }
 
 /* Pages des forums : Guide, Saison et Annexe sur une ligne */
-#sg-home.is-forum > .sg-c-guide { grid-column: span 5; }
-#sg-home.is-forum > .sg-c-season { grid-column: span 4; }
-#sg-home.is-forum > .sg-c-annexe { grid-column: span 3; }
+#sg-home.is-forum > .sg-c-guide,
+#sg-home.is-forum > .sg-c-season,
+#sg-home.is-forum > .sg-c-annexe { grid-column: span 4; }
 
 /* Même espace au-dessus et en dessous du séparateur : marge native du titre du forum retirée */
 #sg-home.is-forum ~ .page-header {
