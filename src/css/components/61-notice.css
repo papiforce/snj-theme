@@ -1,0 +1,133 @@
+/* ==========================================================================
+   SNJ — Page de confirmation ou d'information : sceau « hanko » 判子
+   Construite par src/js/layout.js (noticePage). Pattern réservé aux pages où Forumactif n'affiche qu'un
+   message (template message_body) : carte centrée, sceau carré au kanji qui se pose comme un tampon,
+   titre court, message, liens natifs devenus boutons. Ton : fait (Asagi 済), refusé (Ume 否), avis (Hagane 報).
+   ========================================================================== */
+
+body.sg-noticepage #wrap > .sg-notice-native {
+  display: none !important;
+}
+
+.sg-notice {
+  --tone: var(--sg-primary);
+  position: relative;
+  box-sizing: border-box;
+  width: min(560px, 100%);
+  margin: 0 auto var(--sg-divider-space, 56px);
+  padding: 44px 32px 32px;
+  border: 0;
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-surface);
+  box-shadow: none;
+  color: var(--sg-text);
+  text-align: center;
+}
+
+.sg-notice--done { --tone: var(--sg-accent-1); }
+.sg-notice--error { --tone: var(--sg-accent-2); }
+
+/* Le sceau : carré aux coins adoucis, double filet à la couleur du ton, kanji en Zen Antique ; il se pose
+   avec un léger rebond et garde une inclinaison de tampon appliqué à la main */
+.sg-notice__seal {
+  display: grid;
+  place-items: center;
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 22px;
+  border: 2px solid var(--tone);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--tone) 12%, transparent);
+  box-shadow: inset 0 0 0 4px var(--sg-surface), inset 0 0 0 5px color-mix(in srgb, var(--tone) 55%, transparent);
+  color: var(--tone);
+  transform: rotate(-6deg);
+  animation: sg-notice-stamp 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) 0.12s both;
+}
+
+.sg-notice__kanji {
+  font-family: var(--sg-font-display);
+  font-size: 2.3rem;
+  line-height: 1;
+  transition: none;
+}
+
+@keyframes sg-notice-stamp {
+  from {
+    opacity: 0;
+    transform: rotate(-14deg) scale(1.45);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(-6deg) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sg-notice__seal {
+    animation: none;
+  }
+}
+
+#wrap .sg-notice__title {
+  margin: 0 0 10px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--sg-text);
+  font-family: var(--sg-font-display);
+  font-size: 1.75rem;
+  font-weight: 400;
+  line-height: 1.2;
+  text-transform: none;
+}
+
+/* Petit filet sous le titre, à la couleur du ton (rappel du filet des en-têtes de page) */
+#wrap .sg-notice__title::after {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 2px;
+  margin: 14px auto 0;
+  border-radius: 2px;
+  background: var(--tone);
+}
+
+.sg-notice__text {
+  max-width: 44ch;
+  margin: 0 auto;
+  color: var(--sg-text-muted);
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.sg-notice__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+/* Séparateur avec le logo, au-dessus de la carte (même espace que partout) */
+body.sg-noticepage #wrap > .sg-divider--notice {
+  margin-bottom: var(--sg-divider-space, 56px);
+}
+
+@media (max-width: 768px) {
+  .sg-notice {
+    padding: 36px 20px 24px;
+  }
+
+  #wrap .sg-notice__title {
+    font-size: 1.5rem;
+  }
+
+  .sg-notice__actions {
+    flex-direction: column;
+  }
+
+  #wrap .sg-notice__actions a.sg-action {
+    justify-content: center;
+    width: 100%;
+  }
+}

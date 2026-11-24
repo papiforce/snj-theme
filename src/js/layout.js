@@ -441,6 +441,7 @@
     topicPage();
     perms();
     writePage();
+    noticePage();
     applyTheme(storedTheme() || currentTheme());
   }
 
@@ -2755,6 +2756,137 @@
         }).catch(function () { location.href = href; });
       }
     });
+  }
+
+  /* --------------------------------------------------------------------
+     Page de confirmation ou d'information : sceau « hanko » 判子 (le sceau qu'on appose pour valider un
+     document). Pattern réservé aux pages où Forumactif n'affiche qu'un message (template message_body : un seul
+     .block « Informations » dans #wrap) : message enregistré, supprimé, sujet verrouillé, profil mis à jour,
+     erreur de droits… Une carte centrée : sceau carré au kanji (済 fait, Asagi ; 否 refusé, Ume ; 報 avis,
+     Hagane) qui se pose comme un tampon, titre court en Zen Antique tiré du message, message, puis les liens
+     natifs (« Cliquez ici pour… ») déplacés et devenus boutons aux libellés courts. Au-dessus, le séparateur
+     avec le logo, comme sur la page d'écriture. La page ne redirige plus (noForcedRedirect).
+     -------------------------------------------------------------------- */
+  var NOTICE_TONES = {
+    done: { kanji: '済', label: 'Fait' },
+    error: { kanji: '否', label: 'Refusé' },
+    info: { kanji: '報', label: 'Avis' }
+  };
+  var NOTICE_TITLES = [
+    [/message[^.]*(enregistr|envoy|publi)/i, 'Message publié'],
+    [/message[^.]*modifi/i, 'Message modifié'],
+    [/message[^.]*supprim/i, 'Message supprimé'],
+    [/sujet[^.]*supprim/i, 'Sujet supprimé'],
+    [/sujet[^.]*déverrouill/i, 'Sujet déverrouillé'],
+    [/sujet[^.]*verrouill/i, 'Sujet verrouillé'],
+    [/sujet[^.]*déplac/i, 'Sujet déplacé'],
+    [/sujet[^.]*(divis|scind)/i, 'Sujet divisé'],
+    [/(fusionn)/i, 'Sujets fusionnés'],
+    [/profil[^.]*(mis à jour|enregistr|modifi)/i, 'Profil enregistré'],
+    [/(message privé|MP)[^.]*envoy/i, 'Message envoyé'],
+    [/(vote|sondage)[^.]*(enregistr|pris en compte)/i, 'Vote enregistré'],
+    [/(favori)/i, 'Favoris mis à jour'],
+    [/(surveill|suivi)/i, 'Suivi mis à jour']
+  ];
+  var NOTICE_LINKS = [
+    [/voir (votre|le|ce|mon) message|voir le message/i, 'Voir le message', 'visibility'],
+    [/sujet/i, 'Retour au sujet', 'forum'],
+    [/forum/i, 'Retour au forum', 'view_agenda'],
+    [/(index|accueil)/i, 'Retour à l’accueil', 'home'],
+    [/profil/i, 'Voir mon profil', 'person'],
+    [/(message|boîte) priv|messagerie/i, 'Ma messagerie', 'mail']
+  ];
+
+  function noticePage() {
+    var wrap = document.getElementById('wrap');
+    if (!wrap || wrap.querySelector('.sg-notice')) return;
+    var kids = Array.prototype.slice.call(wrap.children).filter(function (c) { return !/^(SCRIPT|STYLE)$/.test(c.tagName); });
+    if (kids.length !== 1 || !kids[0].classList.contains('block')) return;
+    var block = kids[0];
+    var hd = block.querySelector(':scope > .block-header');
+    var body = block.querySelector(':scope > .block-content');
+    if (!hd || !body || body.querySelector('form, input, textarea, select')) return;
+
+    /* Le message, ligne par ligne (Forumactif sépare par des <br>) : les lignes avec un lien deviennent des boutons */
+    var lines = [[]];
+    Array.prototype.slice.call(body.childNodes).forEach(function (n) {
+      if (n.nodeName === 'BR') lines.push([]);
+      else lines[lines.length - 1].push(n);
+    });
+    var text = [], links = [];
+    lines.forEach(function (nodes) {
+      var holder = document.createElement('span');
+      nodes.forEach(function (n) { holder.appendChild(n.cloneNode(true)); });
+      var t = holder.textContent.replace(/\s+/g, ' ').trim();
+      if (!t) return;
+      var a = null;
+      nodes.forEach(function (n) {
+        if (a || n.nodeType !== 1) return;
+        a = n.tagName === 'A' ? n : n.querySelector('a[href]');
+      });
+      if (a) links.push({ a: a, text: t });
+      else text.push(t);
+    });
+    var message = text.join(' ');
+    var title = hd.textContent.replace(/\s+/g, ' ').trim();
+    var all = title + ' ' + message;
+    var tone = /(désolé|erreur|impossible|ne pouvez|ne pouvez pas|n'existe|n’existe|interdit|refus|pas autoris|pas la permission|incorrect|invalide|échou)/i.test(all) ? 'error'
+      : /(succès|enregistr|supprim|envoy|mis à jour|modifi|verrouill|déplac|ajout|publi|fusionn|divis)/i.test(all) ? 'done' : 'info';
+    if (/^(informations?|information|message)$/i.test(title) || !title) {
+      title = tone === 'error' ? 'Action impossible' : tone === 'done' ? 'C’est fait' : 'Information';
+      for (var i = 0; i < NOTICE_TITLES.length && tone === 'done'; i++) {
+        if (NOTICE_TITLES[i][0].test(message)) { title = NOTICE_TITLES[i][1]; break; }
+      }
+    }
+
+    var card = uiEl('section', 'sg-notice sg-notice--' + tone);
+    card.setAttribute('role', tone === 'error' ? 'alert' : 'status');
+    card.setAttribute('aria-labelledby', 'sg-notice-title');
+    var seal = uiEl('div', 'sg-notice__seal');
+    seal.setAttribute('aria-hidden', 'true');
+    seal.appendChild(uiEl('span', 'sg-notice__kanji', NOTICE_TONES[tone].kanji));
+    card.appendChild(seal);
+    var h = uiEl('h1', 'sg-notice__title', title);
+    h.id = 'sg-notice-title';
+    card.appendChild(h);
+    if (message) card.appendChild(uiEl('p', 'sg-notice__text', message));
+    if (links.length) {
+      var acts = uiEl('div', 'sg-notice__actions');
+      links.forEach(function (l, i) {
+        var phrase = l.text.replace(/^cliquez\s+(ici\s+)?(pour\s+)?/i, '').replace(/[.!]\s*$/, '');
+        var label = phrase.charAt(0).toUpperCase() + phrase.slice(1), icon = 'arrow_forward';
+        for (var j = 0; j < NOTICE_LINKS.length; j++) {
+          if (NOTICE_LINKS[j][0].test(phrase)) { label = NOTICE_LINKS[j][1]; icon = NOTICE_LINKS[j][2]; break; }
+        }
+        var a = l.a;
+        a.className = 'sg-action' + (i ? ' sg-action--ghost' : '');
+        a.textContent = '';
+        a.appendChild(uiIco(icon));
+        a.appendChild(uiEl('span', null, label));
+        a.setAttribute('title', l.text);
+        acts.appendChild(a);
+      });
+      card.appendChild(acts);
+    }
+
+    /* Séparateur avec le logo au-dessus, comme sur la page d'écriture */
+    var top = uiEl('div', 'sg-divider sg-divider--notice');
+    top.setAttribute('role', 'separator');
+    var logo = uiEl('span', 'sg-divider__logo sg-divider__logo--mask');
+    logo.setAttribute('aria-hidden', 'true');
+    top.appendChild(logo);
+    var rule = uiEl('span', 'sg-divider__rule');
+    rule.setAttribute('aria-hidden', 'true');
+    rule.appendChild(uiEl('span', 'sg-divider__line'));
+    rule.insertAdjacentHTML('beforeend', '<svg class="sg-divider__notch" viewBox="0 0 48 25" aria-hidden="true"><path d="M0 .5L24 24.5L48 .5"/></svg>');
+    rule.appendChild(uiEl('span', 'sg-divider__line'));
+    top.appendChild(rule);
+
+    wrap.insertBefore(top, block);
+    wrap.insertBefore(card, block);
+    block.classList.add('sg-notice-native');
+    document.body.classList.add('sg-noticepage');
+    document.title = title;
   }
 
   function toast(message) {
