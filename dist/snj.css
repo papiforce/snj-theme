@@ -6946,17 +6946,19 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
   font-size: 0.95rem !important;
 }
 
-.sceditor-dropdown.sg-pop > div {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
+/* Selon l'outil, les champs sont enfants directs de la fenêtre ou d'un bloc : libellé à 6px de son champ,
+   14px entre deux champs */
+.sceditor-dropdown.sg-pop > div,
 .sceditor-dropdown.sg-pop > div > div {
   display: flex;
   flex-direction: column;
   gap: 6px;
   margin: 0;
+}
+
+.sceditor-dropdown.sg-pop > div + div,
+.sceditor-dropdown.sg-pop > div > div + div {
+  margin-top: 14px;
 }
 
 .sceditor-dropdown.sg-pop br {
@@ -7474,6 +7476,7 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
 
 /* Repliés par défaut : une barre qui annonce le nombre de messages et invite à cliquer */
 .sg-review__toggle {
+  font-family: var(--sg-font-body) !important;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -7484,7 +7487,7 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
   border-radius: var(--sg-radius-lg);
   background: var(--sg-surface);
   color: var(--sg-text);
-  font: inherit;
+  font-size: 1rem;
   text-align: left;
   cursor: pointer;
 }

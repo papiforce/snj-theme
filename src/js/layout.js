@@ -1760,6 +1760,7 @@
       a.addEventListener('focus', function () { show(a); });
       a.addEventListener('mouseleave', hide);
       a.addEventListener('blur', hide);
+      a.addEventListener('mousedown', hide);
       a.addEventListener('click', hide);
     });
     bar.addEventListener('scroll', hide, { passive: true });
@@ -2198,6 +2199,9 @@
         var nameNode = nameEl ? (nameEl.closest('span') || nameEl) : null;
         var dateText = details ? details.textContent.replace(/\s+/g, ' ').replace(/^.*?\sle\s/, '').trim() : '';
         var img = c.querySelector('.avatar-default img');
+        /* Les détails natifs (titre, auteur, date) sont parfois dans le contenu : on les en retire */
+        var foot = details && details.closest('.block-footer');
+        if (foot) foot.remove();
 
         var post = el('div', 'post-wrap sg-post sg-post--review');
         var aside = el('div', 'post-aside');
@@ -2212,7 +2216,9 @@
         }
         var author = el('div', 'post-author');
         var nm = el('div', 'post-author-name');
+        /* Pseudo coloré des détails natifs, sinon le nom porté par le portrait (texte alternatif) */
         if (nameNode) nm.appendChild(nameNode);
+        else if (img && img.alt) nm.appendChild(el('strong', null, img.alt));
         author.appendChild(nm);
         card.appendChild(author);
         aside.appendChild(card);
