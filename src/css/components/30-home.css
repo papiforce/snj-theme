@@ -1362,7 +1362,9 @@
   }
 
   #sg-home > *,
-  #sg-home.is-forum > * {
+  #sg-home.is-forum > .sg-c-guide,
+  #sg-home.is-forum > .sg-c-season,
+  #sg-home.is-forum > .sg-c-annexe {
     grid-column: span 12;
   }
 
