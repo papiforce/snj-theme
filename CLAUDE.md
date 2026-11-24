@@ -162,7 +162,8 @@ dans le panneau d'administration (PA), puis on commit.
   en blanc papier (`--sg-paper-50`), Gestion en `--sg-on-contrast`. Sur mobile (≤ 900px), menu déroulant personnalisé. À droite, les forums de la catégorie en cartes (inspirées de
   l'ancien SnJ) : image en fond avec voile selon le thème, panneau avec kanji en filigrane propre au forum, titre,
   description, bouton du clan (fiche de l'annexe), dangerosité sur 5 (zones RP uniquement), dernier message avec
-  avatar, sous-forums à droite ; au survol, le libellé d'un sous-forum passe en blanc papier (`--zc-hover`, sumi et
+  avatar, sous-forums à droite (libellé **toujours sur une ligne, coupé en ellipse**, sur tous les formats ; flèche
+  toujours visible ; nom complet en infobulle `title`) ; au survol, le libellé d'un sous-forum passe en blanc papier (`--zc-hover`, sumi et
   gofun pour Gestion). **Gestion** : cartes sans image sur motif seigaiha (`plainCard()`), titre, puis description et
   dernier message alignés sur une ligne (`.sg-zcard__row`, en colonne ≤ 900px), puis les sous-forums sur toute la
   largeur en **grille de 2 colonnes, 2 par page**, pagination par **chevrons** centrée (`.sg-zcard__pager` : boutons
