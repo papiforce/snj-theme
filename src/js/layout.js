@@ -2029,7 +2029,7 @@
       var scheme = getComputedStyle(document.documentElement).colorScheme || 'normal';
       var css = ':root{color-scheme:' + scheme + ';}' +
         'html,body{background:transparent!important;color:' + ref.color + '!important;}' +
-        'body{font-family:' + ref.fontFamily + ';font-size:16px;line-height:1.7;margin:12px 14px;}' +
+        'body{font-family:' + ref.fontFamily + '!important;font-size:16px!important;line-height:1.7;margin:12px 14px;}' +
         'a{color:' + link + ';}' +
         'blockquote,.quote,.code,pre{border-left:3px solid ' + muted + ';padding:6px 12px;margin:8px 0;opacity:.9;}' +
         'img{max-width:100%;height:auto;}';
