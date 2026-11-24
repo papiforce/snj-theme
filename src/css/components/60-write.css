@@ -1036,8 +1036,15 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
   color: var(--sg-accent-2);
 }
 
-.sg-poll__choices.is-min .sg-poll__remove {
+.sg-poll__choices.is-min .sg-poll__remove:not(.sg-poll__plus) {
   visibility: hidden;
+}
+
+/* Modification d'un sondage : « + » au bout de la ligne « Nouveau choix » */
+.sg-poll__plus:hover,
+.sg-poll__plus:focus-visible {
+  background: var(--sg-contrast);
+  color: var(--sg-on-contrast);
 }
 
 .sg-poll__add {

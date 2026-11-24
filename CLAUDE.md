@@ -323,7 +323,13 @@ dans le panneau d'administration (PA), puis on commit.
   en compteur − / valeur / + avec l'unité (« sans fin », « jour », « jours » ; flèches haut et bas) qui remplit
   `poll_length` masqué ; les quatre réglages (Choix multiple, Annulation du vote, Liste des participants, Votants de
   chaque choix ; « Quand le sondage est terminé » → « À la fin ») en **contrôles segmentés** `.sg-seg` (radios
-  natives déplacées et masquées), grille de 2 colonnes (1 sur mobile). Non testé : l'envoi d'un sondage.
+  natives déplacées et masquées), grille de 2 colonnes (1 sur mobile). **Modification d'un sondage existant** :
+  Forumactif ne donne pas de textarea mais un champ par choix (`poll_option_text[N]`) avec son bouton « Supprimer »
+  (`del_poll_option[N]`, envoi du formulaire) et « Ajouter ce choix » (`add_poll_option_text` + `add_poll_option`) :
+  ces champs sont repris dans la même liste (✕ et + cliquent les boutons natifs, masqués ; la page se recharge,
+  consigne « Ajouter ou retirer un choix recharge la page ») ; le reste du bloc natif est **gardé masqué** (jamais
+  vidé : tout champ continue d'être envoyé — vider le bloc faisait disparaître les choix et bloquait la
+  modification).
   **Aperçu** (`#preview`) : carte « Aperçu » sur fond de surface, sans contour ni ombre (celles d'AwesomeBB sur
   `.block-header` et `.block-content` sont retirées). **Revue du sujet** : « Derniers messages du sujet » **repliés par défaut** :
   le titre est un bouton (`.sg-review__toggle`, sans contour ; au survol, fond `--sg-surface-2` et chevron qui fait
@@ -354,7 +360,8 @@ dans le panneau d'administration (PA), puis on commit.
   **Fil d'Ariane repris dessous** (copie du `.sg-crumbs` de l'en-tête, `.sg-crumbs--end`), quand l'en-tête existe.
 - **Page de confirmation ou d'information : sceau « hanko »** 判子 (`layout.js`, fonction `noticePage`, +
   `61-notice.css`) : pattern **réservé aux pages où Forumactif n'affiche qu'un message** (template `message_body` :
-  un seul `.block` « Informations » dans `#wrap`, sans formulaire) : message publié, modifié, supprimé, sujet
+  un seul `.block` « Informations » dans `#wrap`, sans formulaire ; les autres enfants ne peuvent être que des
+  emplacements publicitaires de Forumactif, des `div` sans classe, comme sur `/modcp`) : message publié, modifié, supprimé, sujet
   verrouillé ou déplacé, profil enregistré, erreur de droits… Le bloc natif est masqué. Séparateur avec le logo en
   haut (comme l'écriture), puis une **carte centrée** (560px, fond de surface, sans contour ni ombre) : **sceau carré**
   au kanji, à double filet, incliné comme un tampon, qui **se pose avec un rebond** (sans animation si le système le
@@ -371,8 +378,19 @@ dans le panneau d'administration (PA), puis on commit.
   poster. ») : même famille (`errorBlocks()`, `61-notice.css`) : encart `.sg-alert` sur fond teinté d'Ume, sans
   contour ni ombre, **petit sceau 否** (40px, même rebond), message en gras, `role="alert"` ; sur la page d'écriture
   il rejoint la colonne de la lettre, juste au-dessus d'elle (inséré avant `#postingbox`, qui ne bouge pas).
+- **Sondage affiché : carte « tōhyō »** 投票 (le vote) (`layout.js`, fonction `pollCards`, + `62-poll.css`) :
+  pattern **réservé aux sondages**, partout où Forumactif les affiche (`.block` avec `form.poll` ou `dl.poll`) :
+  carte de surface sans contour sur **motif shippō** (communauté : votes), net à droite et estompé vers la gauche ;
+  en tête « Sondage » en petites capitales (icône `ballot` en Asagi), la **question en Zen Antique**, et pour le staff
+  un bouton rond **« Clore le sondage »** (cadenas, Ume au survol, confirmation par `confirmModal`) ; **vote** : une
+  ligne par choix (fond `--sg-surface-2`, pastille ronde — carrée si choix multiple —, coche Asagi et fond teinté
+  une fois choisi ; radios natives déplacées et masquées), **« Voter »** plein (désactivé tant que rien n'est
+  choisi ; le bouton natif devient un `<button>` de même nom et valeur) et « Voir les résultats » au contour ;
+  **résultats** (`?vote=viewresult`) : une barre arrondie par choix (Asagi, plus soutenue pour le choix en tête,
+  qui grandit à l'affichage), « N votes · P % », « Revenir au vote » et le total ; **mentions** natives (votes publics,
+  fin du sondage) en ligne discrète avec icône, sous un filet pointillé.
   Récapitulatif des patterns : **forum** (accueil) = image en fond + panneau + kanji ; **sous-forum** = ema
-  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ; **confirmation** = hanko (sceau au kanji) ;
+  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ; **confirmation** = hanko (sceau au kanji) ; **sondage** = tōhyō (carte sur shippō) ;
   **permission** = étiquette tegata aux coins coupés.
 - **Catégories de l'accueil** (`forums.js` + `40-zones.css`) : à gauche un sélecteur collant (Gestion, Hi, Mizu, Kaze,
   Kaminari, Tsuchi no Kuni, Shōkoku — « les petits pays », ex-Reste du Sekai) au style des raccourcis de l'Annexe, pastille = badge pour Gestion
