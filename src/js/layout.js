@@ -2331,12 +2331,13 @@
           var limit = 240;
           if (cols > 1 && aside && hd) limit = Math.max(240, aside.offsetHeight - hd.offsetHeight - 52);
           post.classList.remove('is-clamped');
-          /* Hauteur propre du message : sans l'étirement (flex: 1) qui lui fait prendre la hauteur du profil */
-          content.style.flex = 'none';
-          content.style.minHeight = '0';
-          var clamp = content.scrollHeight > limit + 40;
-          content.style.flex = '';
-          content.style.minHeight = '';
+          /* Hauteur propre du texte, mesurée sur son contenu : la boîte du message est étirée (flex: 1) à la
+             hauteur du profil, et AwesomeBB anime toute propriété changée (transition), d'où une mesure par Range */
+          var range = document.createRange();
+          range.selectNodeContents(content);
+          var cs = getComputedStyle(content);
+          var room = limit - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+          var clamp = range.getBoundingClientRect().height > room;
           post.style.setProperty('--rev-clamp', limit + 'px');
           post.classList.toggle('is-clamped', clamp);
           more.hidden = !clamp;
