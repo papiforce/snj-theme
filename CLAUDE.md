@@ -119,12 +119,20 @@ dans le panneau d'administration (PA), puis on commit.
   1 colonne ≤ 768px. Soulèvement au survol. **« Poster un nouveau sujet » deux fois** : le bouton d'origine reste à droite
   du titre de la page (en-tête), et un second, qui reprend son adresse, est **au-dessus de la grille, à gauche**
   (`.sg-topics__bar`, style `.sg-action`, pleine largeur sur mobile). À l'extrême droite de cette barre, bouton
-  **« Actions »** (icône `more_horiz`, contour sur fond de surface) qui ouvre un menu (`.sg-menu`, `role="menu"`, flèches,
-  Début/Fin, Échap, clic extérieur) : « Nouveaux messages depuis ma dernière visite », « Messages sans réponse », un
-  séparateur, « Suivre les sujets de ce forum » (« Ne plus suivre les sujets de ce forum » si le lien natif est en
+  **« Actions »** (icône `more_vert`, trois points verticaux, contour sur fond de surface) qui ouvre un menu (`.sg-menu`,
+  `role="menu"`, flèches, Début/Fin, Échap, clic extérieur) : « Nouveaux messages depuis ma dernière visite », « Messages
+  sans réponse », « Marquer tous les sujets comme lus », un séparateur, « Suivre les sujets de ce forum » (« Ne plus suivre les sujets de ce forum » si le lien natif est en
   `?unwatch=forum`), « Mes sujets suivis ». Adresses reprises des liens natifs (recherches limitées au forum, sinon
   globales) ; une entrée sans lien natif (visiteur) n'apparaît pas, et le bouton non plus s'il n'en reste aucune.
-  AwesomeBB ajoute un filet entre les `<li>` : il est retiré dans `#wrap .sg-menu__list > li`. Aucun sujet : encadré pointillé « Aucun sujet pour l'instant ».
+  AwesomeBB ajoute un filet entre les `<li>` : il est retiré dans `#wrap .sg-menu__list > li`.
+  **Deuxième ligne** (`.sg-topics__tools`), sous « Poster un nouveau sujet » : bouton **« Trier »** (`.sg-tool`, contour,
+  chevron qui pivote) qui ouvre une fenêtre (`.sg-sort__panel`, `role="dialog"`, Échap, clic extérieur) contenant le
+  **formulaire de tri natif déplacé** (`#sort-box form`, POST) : « Trier par » (liste restylée `.sg-select`), « Ordre »
+  en contrôle segmenté (Décroissant / Croissant, radios natives `sort_order`), bouton « Appliquer » ; puis, à sa droite,
+  **« Sauter vers »** : le formulaire natif `jumpbox` déplacé, sa liste restylée (envoi au changement, comme l'original).
+  La barre native sous les sujets (`#wrap > a.mark-buttons` « Surveiller » et « Marquer comme lus », `#sort-box`) est
+  masquée : ses liens sont dans « Actions ». AwesomeBB donne 20px de marge basse aux `<label>` et une largeur aux
+  `<select>` sur mobile : neutralisées sous `#wrap`. Sur mobile, tout passe en pleine largeur, l'un sous l'autre. Aucun sujet : encadré pointillé « Aucun sujet pour l'instant ».
   Les blocs natifs `#wrap > .posts` sont masqués. Attention : AwesomeBB stylise les éléments dont la classe contient
   « topic » (`align-items: center`, `white-space: nowrap` sur les titres) : les règles de la carte passent par `#wrap .sg-topic…`.
   Récapitulatif des patterns de cartes : **forum** (accueil) = image en fond + panneau + kanji ; **sous-forum** = ema
@@ -171,6 +179,10 @@ dans le panneau d'administration (PA), puis on commit.
   largeur du contenu (SVG ajusté au texte une fois la police chargée), sumi et gofun, estompé vers le bas, qui se
   remplit légèrement au survol. Les liens du pied de page doivent viser `#page-footer a…` (AwesomeBB les force en blanc).
 - **Modules JavaScript** : Forumactif les charge dans le `<head>` ; tout script attend `DOMContentLoaded`.
+  Ils sont regroupés dans un fichier `/NNNNN.js` mis en cache très longtemps. Il arrive que Forumactif réutilise le même
+  nom de fichier après une modification : la page charge alors l'ancienne version. Vérifier après chaque mise à jour
+  (le code servi par `fetch('/NNNNN.js', {cache: 'no-store'})` doit contenir la nouveauté) ; sinon, revalider le module
+  sans rien changer, ce qui produit un nouveau nom de fichier.
 - **Transitions** : AwesomeBB applique `* { transition: 0.16s }`. Un texte placé dans un enfant d'un élément dont la
   couleur s'anime saute pendant l'animation : mettre `transition: none` sur ces enfants (voir `40-zones.css`).
 - **Variables CSS** préfixées `--sg-*`. On rebranche les `--t_*` d'AwesomeBB sur nos tokens.
