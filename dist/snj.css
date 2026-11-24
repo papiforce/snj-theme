@@ -4153,8 +4153,10 @@ body.sg-topics-on #wrap > .posts {
 }
 
 /* --- Texte -------------------------------------------------------------------- */
-.sg-topic__title {
+/* #wrap : AwesomeBB force nowrap et flow-root sur les titres des éléments en .sg-topic */
+#wrap .sg-topic__title {
   display: -webkit-box;
+  white-space: normal;
   margin: 0;
   overflow: hidden;
   font-family: var(--sg-font-display);
@@ -4167,6 +4169,7 @@ body.sg-topics-on #wrap > .posts {
 
 #wrap a.sg-topic__link,
 #wrap a.sg-topic__link:visited {
+  white-space: normal;
   color: var(--sg-text);
   text-decoration: none;
 }
