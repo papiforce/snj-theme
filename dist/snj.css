@@ -3353,20 +3353,15 @@ body.sg-stats-on #index .block-subtle {
    ========================================================================== */
 
 body.sg-footer-on > footer,
-body.sg-footer-on #page-footer .navbar {
+body.sg-footer-on #page-footer > :not(.sg-footer) {
   display: none !important;
 }
 
 #page-footer {
-  padding: var(--sg-space-8) 0 0 !important;
+  padding: 0 !important;
   background: transparent !important;
   border: 0 !important;
   box-shadow: none !important;
-}
-
-#page-footer > .wrap {
-  padding: 0 !important;
-  background: transparent !important;
 }
 
 .sg-footer {
@@ -3417,15 +3412,15 @@ body.sg-footer-on #page-footer .navbar {
   width: 100%;
   height: auto;
   overflow: visible;
-  -webkit-mask-image: linear-gradient(to bottom, #000 30%, rgba(0, 0, 0, 0.15) 100%);
-  mask-image: linear-gradient(to bottom, #000 30%, rgba(0, 0, 0, 0.15) 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 35%, rgba(0, 0, 0, 0.3) 100%);
+  mask-image: linear-gradient(to bottom, #000 35%, rgba(0, 0, 0, 0.3) 100%);
 }
 
 .sg-footer__wordmark text {
   font-family: var(--sg-font-display);
   font-size: 120px;
   fill: transparent;
-  stroke: rgba(var(--sg-contrast-rgb), 0.45);
+  stroke: rgba(var(--sg-contrast-rgb), 0.6);
   stroke-width: 1.2px;
   vector-effect: non-scaling-stroke;
   transition: fill 0.6s ease, stroke 0.6s ease;
@@ -3433,7 +3428,7 @@ body.sg-footer-on #page-footer .navbar {
 
 .sg-footer:hover .sg-footer__wordmark text {
   fill: rgba(var(--sg-contrast-rgb), 0.04);
-  stroke: rgba(var(--sg-contrast-rgb), 0.7);
+  stroke: rgba(var(--sg-contrast-rgb), 0.85);
 }
 
 @media (max-width: 768px) {
