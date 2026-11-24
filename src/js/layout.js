@@ -15,6 +15,7 @@
      icon : nom d'une icône Material Symbols (https://fonts.google.com/icons)
      svg  : clé de l'objet SVG ci-dessous (logos de marque uniquement)
      hideOnMobile : masqué dans la barre du bas sur mobile
+     guestHideOnMobile : masqué dans la barre du bas sur mobile pour les visiteurs seulement
      ---------------------------------------------------------------------- */
   var NAV = [
     { label: 'Accueil', icon: 'home', href: '/' },
