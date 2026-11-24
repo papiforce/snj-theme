@@ -124,6 +124,8 @@ dans le panneau d'administration (PA), puis on commit.
   Le CSS indispensable reste dans le CSS principal du forum pour que le forum reste lisible si le CDN tombe.
 - **Messages libres** (sans modèle) : doivent rester lisibles et épurés.
 - **Migration** : bascule de tout le forum en une fois.
+  Alendria (test) : activation des nouveaux membres sur « Aucune activation » (comptes de test sans e-mail de
+  confirmation). **Ne pas reporter en production**, qui garde l'activation par l'utilisateur (e-mail).
 
 ## Publier une nouvelle version du CSS des composants
 
