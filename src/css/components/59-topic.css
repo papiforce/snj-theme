@@ -12,7 +12,7 @@
           (citer, modifier, supprimer, adresse IP, copier le lien) ;
         - contenu lisible (corps 1rem, interligne 1,75), citations et code restylés.
    3. « Répondre au sujet » (.sg-treply) centré à la place de la réponse rapide (.quick-reply, masquée).
-   4. Bas de page (.sg-tfoot) : séparateur de fin, « Sauter vers », outils de modération.
+   4. Bas de page (.sg-tfoot) : séparateur de fin, « Sauter vers », liste « Modération ».
    ========================================================================== */
 
 /* Natifs remplacés ou déplacés */
@@ -677,63 +677,25 @@ html[data-profile="right"] #topic .post-wrap.sg-post {
   margin: 0 0 var(--sg-space-8);
 }
 
-.sg-modtools {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
+/* Modération : liste déroulante (menu) au style des listes personnalisées, à droite de « Sauter vers » ;
+   les icônes natives (.topic-admin) sont masquées */
+#topic .topic-admin.sg-hidden {
+  display: none !important;
+}
+
+.sg-tfoot__row .sg-menu--mod {
   margin-left: auto;
 }
 
-.sg-modtools__label {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-right: 4px;
-  color: var(--sg-text-muted);
-  font-size: 0.9rem;
-  font-weight: 700;
-}
-
-.sg-modtools__label .material-symbols-outlined {
+.sg-menu--mod .sg-menu__toggle .material-symbols-outlined:first-child {
   color: var(--ph);
-  font-size: 20px;
 }
 
-#topic .sg-modtools .topic-admin {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  background: none;
-}
-
-#topic .sg-modtools .topic-admin a,
-#topic .sg-modtools .topic-admin button {
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  margin: 0;
-  padding: 0;
-  border: 1px solid var(--sg-border-strong, var(--sg-border));
-  border-radius: 50%;
-  background: var(--sg-surface);
-  box-shadow: none;
-  color: var(--sg-text-muted);
-}
-
-#topic .sg-modtools .topic-admin a:hover,
-#topic .sg-modtools .topic-admin a:focus-visible,
-#topic .sg-modtools .topic-admin button:hover {
-  background: var(--sg-contrast);
-  color: var(--sg-on-contrast);
-}
-
-#topic .sg-modtools .topic-admin .material-symbols-outlined {
-  font-size: 20px;
+/* Actions destructives (corbeille, suppression) : en Ume, après un filet */
+#wrap a.sg-menu__item--danger,
+#wrap a.sg-menu__item--danger:visited,
+#wrap a.sg-menu__item--danger .material-symbols-outlined {
+  color: var(--sg-accent-2);
 }
 
 /* Message discret « Lien copié » */
@@ -863,7 +825,8 @@ html[data-profile="right"] #topic .post-wrap.sg-post {
     height: 44px;
   }
 
-  .sg-modtools {
+  .sg-tfoot__row .sg-menu--mod {
+    flex: 1 1 100%;
     margin-left: 0;
   }
 

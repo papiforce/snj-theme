@@ -719,13 +719,15 @@
      items = [adresse ou fonction, icône, libellé] ; null = séparateur ;
      { pref: 'profile' | 'density', icon, label: function (actif) } = interrupteur (menuitemcheckbox), qui
      enregistre la préférence et laisse le menu ouvert.
-     opts : { label: 'Actions', icon: 'more_vert', iconFirst: false, iconOnly: false, cls: '' }.
+     opts : { label: 'Actions', icon: 'more_vert', iconFirst: false, iconOnly: false, cls: '', lead: '' (icône avant le
+     libellé, en plus de icon après : allure de liste déroulante), toggleCls: '' (classe en plus sur le bouton) }.
+     Une entrée [adresse, icône, libellé, 'danger'] est marquée comme destructive (.sg-menu__item--danger).
      Utilisé sur les pages de forum (topics) et de sujet (topicPage). */
   function actionsMenu(items, menuId, opts) {
     var el = uiEl, ico = uiIco;
     opts = opts || {};
     var wrapM = el('div', 'sg-menu' + (opts.cls ? ' ' + opts.cls : ''));
-    var toggle = el('button', 'sg-menu__toggle');
+    var toggle = el('button', 'sg-menu__toggle' + (opts.toggleCls ? ' ' + opts.toggleCls : ''));
     toggle.type = 'button';
     toggle.setAttribute('aria-haspopup', 'menu');
     toggle.setAttribute('aria-expanded', 'false');
@@ -734,6 +736,10 @@
     if (opts.iconOnly) {
       toggle.setAttribute('aria-label', tLabel);
       toggle.setAttribute('title', tLabel);
+      toggle.appendChild(tIcon);
+    } else if (opts.lead) {
+      toggle.appendChild(ico(opts.lead));
+      toggle.appendChild(el('span', null, tLabel));
       toggle.appendChild(tIcon);
     } else if (opts.iconFirst) {
       toggle.appendChild(tIcon);
@@ -793,6 +799,7 @@
         item.addEventListener('click', function (ev) { ev.preventDefault(); close(false); run(); });
       } else item.href = it[0];
       item.setAttribute('role', 'menuitem');
+      if (it[3] === 'danger') item.classList.add('sg-menu__item--danger');
       item.tabIndex = -1;
       item.appendChild(ico(it[1]));
       item.appendChild(el('span', null, it[2]));
@@ -1575,17 +1582,36 @@
       var fidM = crumbsLinks.length ? (crumbsLinks[crumbsLinks.length - 1].getAttribute('href').match(/^\/f(\d+)/) || [])[1] : '';
       var jf = jumpBox(fidM ? 'f' + fidM : '');
       if (jf) row.appendChild(jf);
+      /* Outils de modération : une liste déroulante « Modération » (menu) à la place des icônes natives.
+         Libellés et icônes d'après le mode du lien natif ; les actions destructives en dernier, après un filet. */
       var admin = topic.querySelector('.topic-admin');
-      if (admin && admin.querySelector('a, button, input')) {
-        var mod = el('div', 'sg-modtools');
-        mod.setAttribute('role', 'group');
-        mod.setAttribute('aria-label', 'Modération');
-        var ml = el('span', 'sg-modtools__label');
-        ml.appendChild(ico('gavel'));
-        ml.appendChild(el('span', null, 'Modération'));
-        mod.appendChild(ml);
-        mod.appendChild(admin);
-        row.appendChild(mod);
+      var MOD = {
+        lock: [1, 'lock', 'Verrouiller le sujet'],
+        unlock: [1, 'lock_open', 'Déverrouiller le sujet'],
+        move: [2, 'drive_file_move', 'Déplacer le sujet'],
+        split: [3, 'call_split', 'Diviser le sujet'],
+        merge: [4, 'merge', 'Fusionner avec un autre sujet'],
+        trash: [6, 'delete', 'Mettre à la corbeille', 'danger'],
+        'delete': [7, 'delete_forever', 'Supprimer définitivement', 'danger']
+      };
+      var modItems = admin ? Array.prototype.slice.call(admin.querySelectorAll('a[href]')).map(function (a, i) {
+        var href = a.getAttribute('href');
+        var mode = /^\/merge/.test(href) ? 'merge' : ((href.match(/[?&]mode=([a-z]+)/) || [])[1] || '');
+        var spec = MOD[mode];
+        var nat = a.querySelector('.material-symbols-outlined, i');
+        if (!spec) spec = [5, nat ? nat.textContent.trim() : 'build', a.getAttribute('title') || a.textContent.trim()];
+        return { rank: spec[0] * 100 + i, item: [href, spec[1], spec[2], spec[3]] };
+      }).sort(function (x, y) { return x.rank - y.rank; }) : [];
+      if (modItems.length) {
+        var list = [];
+        modItems.forEach(function (m, i) {
+          if (i && m.item[3] === 'danger' && modItems[i - 1].item[3] !== 'danger') list.push(null);
+          list.push(m.item);
+        });
+        row.appendChild(actionsMenu(list, 'sg-mod-menu', {
+          label: 'Modération', lead: 'gavel', icon: 'expand_more', toggleCls: 'sg-tool', cls: 'sg-menu--mod'
+        }));
+        admin.classList.add('sg-hidden');
       }
       if (row.children.length) foot.appendChild(row);
       anchor.parentNode.insertBefore(foot, anchor);
