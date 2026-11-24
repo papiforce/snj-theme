@@ -2140,6 +2140,17 @@ body.sg-zones-on #index .forum.type-table-forum {
   transition: background-size 0.9s var(--sg-ease), color 0.45s ease 0.2s;
 }
 
+/* AwesomeBB applique « * { transition: 0.16s } » : sur ces enfants, la couleur héritée
+   se relancerait à chaque image pendant l'animation du parent (saut visible).
+   Le texte suit donc la couleur du parent sans transition propre. */
+.sg-zone-tab__name,
+.sg-zone-tab__sub,
+.sg-zone-tab__sign,
+.sg-zone-tab__sign *,
+.sg-zcard__subs a > span {
+  transition: none;
+}
+
 .sg-zone-tab__name {
   max-width: 100%;
   overflow: hidden;
@@ -2275,17 +2286,26 @@ body.sg-zones-on #index .forum.type-table-forum {
 }
 
 /* Voile sur l'image : encre en sombre, papier en clair */
+/* Voile + trame de points (comme les cartes de lieux de l'ancien SnJ) */
+.sg-zcard {
+  --sg-zdots: rgba(244, 239, 227, 0.13);
+  --sg-zveil: linear-gradient(90deg, rgba(10, 9, 8, 0.5), rgba(10, 9, 8, 0.12));
+}
+
+:root[data-theme="light"] .sg-zcard {
+  --sg-zdots: rgba(62, 82, 102, 0.16);
+  --sg-zveil: linear-gradient(90deg, rgba(244, 239, 227, 0.55), rgba(244, 239, 227, 0.25));
+}
+
 .sg-zcard:not(.sg-zcard--plain)::after {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: linear-gradient(90deg, rgba(10, 9, 8, 0.5), rgba(10, 9, 8, 0.12));
+  background:
+    radial-gradient(circle at center, var(--sg-zdots) 0.9px, transparent 1.4px) 0 0 / 5px 5px,
+    var(--sg-zveil);
   pointer-events: none;
-}
-
-:root[data-theme="light"] .sg-zcard:not(.sg-zcard--plain)::after {
-  background: linear-gradient(90deg, rgba(244, 239, 227, 0.55), rgba(244, 239, 227, 0.25));
 }
 
 .sg-zcard__main {

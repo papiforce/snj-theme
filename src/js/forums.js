@@ -313,6 +313,7 @@
       current.replaceChildren(sign(zone), label(zone));
       trigger.setAttribute('style', zoneStyle(zone));
       if (user) {
+        scrollToTop();
         try { localStorage.setItem(STORE, zone.slug); } catch (e) {}
         try {
           var url = new URL(location.href);
@@ -320,6 +321,13 @@
           history.replaceState(history.state, '', url);
         } catch (e) {}
       }
+    }
+
+    /* Après un changement de catégorie, défilement doux jusqu'au séparateur (ou au sélecteur) */
+    function scrollToTop() {
+      var target = document.querySelector('.sg-divider') || root;
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      try { target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }); } catch (e) { target.scrollIntoView(); }
     }
 
     function initial() {
