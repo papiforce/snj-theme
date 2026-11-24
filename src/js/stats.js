@@ -391,7 +391,6 @@
             /* Couleur du groupe telle que réglée dans le PA, pour les groupes sans ton connu */
             style: meta.tone ? null : '--flag:' + ((g.style.match(/#[0-9a-f]{3,6}/i) || ['var(--sg-primary)'])[0])
           }, [
-            h('span', { class: 'sg-nobori__pole', 'aria-hidden': 'true' }),
             h('span', { class: 'sg-nobori__cloth' }, [
               h('span', { class: 'sg-nobori__mon', 'aria-hidden': 'true' }, [meta.kanji ? document.createTextNode(meta.kanji) : icon(meta.icon || 'flag')]),
               h('span', { class: 'sg-nobori__name', text: g.name })

@@ -395,29 +395,6 @@ body.sg-stats-on #index .block-subtle {
   text-decoration: none;
 }
 
-/* Hampe horizontale avec ses deux embouts */
-.sg-nobori__pole {
-  position: relative;
-  width: 100%;
-  height: 4px;
-  border-radius: 2px;
-  background: rgba(var(--sg-contrast-rgb), 0.55);
-}
-
-.sg-nobori__pole::before,
-.sg-nobori__pole::after {
-  content: "";
-  position: absolute;
-  top: -2px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: rgba(var(--sg-contrast-rgb), 0.7);
-}
-
-.sg-nobori__pole::before { left: -3px; }
-.sg-nobori__pole::after { right: -3px; }
-
 /* Étoffe : couleur du groupe, reflet vertical, bas en queue d'aronde */
 .sg-nobori__cloth {
   display: flex;
@@ -426,7 +403,6 @@ body.sg-stats-on #index .block-subtle {
   gap: 12px;
   width: 86%;
   height: 248px; /* « Kaminari no Kuni » tient en entier */
-  margin-top: -8px;
   padding: 14px 0 30px;
   background:
     linear-gradient(90deg, rgba(255, 255, 255, 0.1), transparent 35%, transparent 70%, rgba(0, 0, 0, 0.16)),
