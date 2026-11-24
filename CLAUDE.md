@@ -205,7 +205,9 @@ dans le panneau d'administration (PA), puis on commit.
   **rôle** (`postRoles`) en haut, hors de la carte : **bandeau** `.sg-role` (pas une pastille) **plein à la couleur de
   l'auteur** (`--author`, lue en JS sur son pseudo après `08-groups.css`, relue à chaque changement de thème), arrondi
   10px, motif **shippō**, texte et magatama dans la couleur du fond (`--sg-surface` : sombre en thème sombre, clair en
-  thème clair), libellé en Zen Antique ; **Staffeux** ou **Modérateur** d'après les groupes du forum (`staffRoles` : `/groups` puis `/g2-staffeux`,
+  thème clair), libellé en Zen Antique ; **Staffeux** ou **Modérateur** d'après les groupes du forum, et dans ce cas **à la couleur du groupe**, comme les
+  bannières « Les groupes » de l'accueil, quel que soit le thème ou le pays (`roleBand()`, `.sg-role--g-staff` : sumi
+  et gofun, texte `--sg-on-contrast` ; `.sg-role--g-mod` : Hagane, texte `--sg-surface`) (`staffRoles` : `/groups` puis `/g2-staffeux`,
   `/g9-moderateurs`…, cache `snj-roles` de 15 min) avec le **magatama plein** du logo (`MAGATAMA_SVG`) **de la couleur
   du texte** ; sinon le rang Forumactif, sans magatama ; le rang natif (« Admin ») est masqué. Dessous, la **carte du
   profil** `.sg-post__card`, **sans fond ni bordure** (padding `0 16px`) : **portrait 200 × 400** (56 × 112
@@ -258,12 +260,25 @@ dans le panneau d'administration (PA), puis on commit.
   masque CSS depuis `assets/snj-logo-outline.svg`), puis l'en-tête au pattern des forums : fil d'Ariane lu sur la page
   du sujet ou du forum (`/t3-` ou `/f4-` : **sans le tiret, `/t3` renvoie une 404**), liens d'origine repris tels quels
   (icône maison), le verbe en dernier niveau ; **titre = le verbe** (« Répondre au sujet », « Nouveau sujet »,
-  « Modifier le message ») ; description « Dans « <sujet ou forum, en lien> » » ; couleur de la catégorie (`--ph`).
+  « Modifier le message ») ; description « Dans « <sujet ou forum> » » en texte simple (pas de lien : le fil d'Ariane y mène déjà) ; couleur de la catégorie (`--ph`).
   **Colonne de l'auteur** (collante, masquée sur mobile) : rôle (`.sg-role`, d'après `staffRoles`), portrait 200 × 400
-  (`_userdata.avatar`), pseudo. **Lettre** (fond de surface, arrondie, sans bordure) : titre du message en Zen Antique
-  sans cadre, sur un filet (« Titre du message (facultatif) » / « Titre du sujet »), description du sujet, éditeur
-  restylé (barre d'outils à plat en groupes, icônes d'origine inversées en thème sombre ; le panneau de smileys et
-  l'aide « Le HTML est désactivé… » sont masqués, les smileys restent dans la barre d'outils). **Mode visuel** de
+  (`_userdata.avatar`), pseudo. **Lettre** (fond de surface, arrondie, sans bordure) : sur une ligne (`.sg-write__titlerow`), le champ du titre
+  (« Titre du message (facultatif) » / « Titre du sujet ») au style des listes personnalisées (`.sg-write__field` :
+  contour arrondi, fond de surface, 46px ; Forumactif impose `border-radius: 0 !important` et un fond transparent à
+  `.input-subtle`, d'où nos `!important`) et à sa droite la **couleur du titre** (liste personnalisée avec pastilles,
+  option `swatch` de `combo()`, 180px ; dessous sur mobile). **Cinq couleurs** (`TITLE_COLORS`), enregistrées sous les
+  codes natifs de Forumactif et affichées avec nos tokens (`--sg-title-*`, `08-groups.css`) : Défaut (`''`, couleur
+  du texte), Rouge (`#FF0000` → Hi), Orange (`#FF9933` → **Kaki** 柿 `#d98a4e` / `#b5602a`, **hors palette**, demandé
+  par Vinny), Vert (`#006600` → Kaze), Hagane (`#0000FF` → primaire) ; une couleur ancienne hors liste est gardée. Le
+  titre se colore à l'écriture ; sur les cartes de sujets et l'en-tête du sujet, `titleToneOf()` lit le code natif et
+  pose `.sg-tcolor--hi|kaki|kaze|hagane` (non vérifié sur un vrai sujet coloré). Description du sujet au même style.
+  Éditeur sans bordures (ni le conteneur, ni la barre d'outils), zone de saisie en `padding: 16px !important` (16px
+  aussi dans l'iframe du mode visuel). **Barre d'outils** (`editorToolbar()`) : retirés (`TB_REMOVE`) tableau, taille,
+  police, supprimer le formatage, plus/moins de boutons, défilements horizontal et vertical, aléatoire, Twemoji, date,
+  heure, coller sans formatage, **basculer le mode d'édition** (l'éditeur reste dans le dernier mode utilisé) ; les
+  groupes vides sont masqués. Icônes d'origine remplacées par des Material Symbols (`TB_ICONS` ; YouTube en SVG de
+  Simple Icons) ; SCEditor rejette le texte hors champ (`text-indent: -9999px`), annulé sur nos icônes. Le panneau
+  de smileys et l'aide « Le HTML est désactivé… » sont masqués. **Mode visuel** de
   l'éditeur : la zone d'écriture est une iframe que le CSS de la page n'atteint pas : `editorFrameTheme()` y injecte
   la couleur du texte, la police et surtout le **même `color-scheme` que la page** (sinon le navigateur peint un fond
   blanc opaque derrière l'iframe), relu 260ms après un changement de thème (transition d'AwesomeBB).
