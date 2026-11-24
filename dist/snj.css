@@ -5715,6 +5715,23 @@ html[data-profile="right"] #topic .post-wrap.sg-post {
   grid-template-areas: "letter aside";
 }
 
+/* Préférence « Densité (compact) » : 16px entre les messages, profil et lettre réunis sur un même fond
+   (plus d'écart entre les deux zones, une seule carte arrondie), le profil gardant une marge intérieure */
+html[data-density="compact"] #topic .post-wrap.sg-post {
+  gap: 0;
+  margin-bottom: 16px;
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-surface);
+}
+
+html[data-density="compact"] #topic .sg-post .post-aside {
+  padding: 16px 0 16px 16px;
+}
+
+html[data-density="compact"][data-profile="right"] #topic .sg-post .post-aside {
+  padding: 16px 16px 16px 0;
+}
+
 /* La lettre : en-tête et contenu dans une même carte */
 .sg-post__letter {
   grid-area: letter;
@@ -6347,6 +6364,15 @@ html[data-profile="right"] #topic .post-wrap.sg-post {
   #topic .sg-post .post-aside {
     position: static;
     gap: 8px;
+  }
+
+  html[data-density="compact"] #topic .post-wrap.sg-post {
+    gap: 0;
+  }
+
+  html[data-density="compact"] #topic .sg-post .post-aside,
+  html[data-density="compact"][data-profile="right"] #topic .sg-post .post-aside {
+    padding: 16px 16px 0;
   }
 
   /* Carte : portrait | pseudo et fiche */
