@@ -5947,6 +5947,7 @@ html[data-profile="right"] #topic .post-wrap.sg-post {
 #topic .sg-post .post-header {
   position: relative;
   z-index: 2;
+  scroll-margin-top: 24px; /* arrivée par un lien de message (#3) : le rôle reste visible au-dessus */
   grid-area: head;
   display: flex;
   align-items: center;

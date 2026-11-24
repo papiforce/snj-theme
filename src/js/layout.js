@@ -1589,22 +1589,24 @@
   }
 
   /* Arrivée par un lien vers un message (#3, #post-3) : le navigateur cale l'en-tête de la lettre tout en haut,
-     rôle coupé (et, sur mobile, profil caché au-dessus). On cale le haut du message, avec 24px d'air. Refait au
-     chargement complet (images, widgets) tant que le lecteur n'a pas défilé lui-même. */
+     rôle coupé (et, sur mobile, profil caché au-dessus). On cale le haut du message, avec 24px d'air (sur
+     ordinateur, la marge de défilement de l'en-tête suffit déjà). Refait au chargement complet (images, widgets,
+     et le saut du navigateur vers l'ancre) tant que le lecteur n'a pas défilé lui-même. */
   function alignPostHash() {
-    var last = null;
+    var touched = false;
+    var mark = function () { touched = true; };
+    ['wheel', 'touchmove', 'keydown', 'mousedown'].forEach(function (t) { window.addEventListener(t, mark, { passive: true, once: true }); });
     var align = function () {
+      if (touched) return;
       var id = decodeURIComponent((location.hash || '').slice(1));
       var target = id && document.getElementById(id);
       var post = target && target.closest && target.closest('.sg-post');
       if (!post) return;
-      if (last !== null && Math.abs(window.pageYOffset - last) > 2) return;
       window.scrollTo(0, Math.max(0, post.getBoundingClientRect().top + window.pageYOffset - 24));
-      last = window.pageYOffset;
     };
     align();
-    if (document.readyState !== 'complete') window.addEventListener('load', function () { setTimeout(align, 0); });
-    window.addEventListener('hashchange', function () { last = null; align(); });
+    if (document.readyState !== 'complete') window.addEventListener('load', function () { setTimeout(align, 0); setTimeout(align, 400); });
+    window.addEventListener('hashchange', function () { touched = false; align(); });
   }
 
   /* Logo de Sengoku no Jidai au trait (même tracé que dans home.js : assets/snj-logo-outline.svg) */
