@@ -68,6 +68,8 @@ body.sg-topicpage-on .sg-post .post-header > h2 {
 /* --- 2. Messages « fumi » -------------------------------------------------------- */
 #topic .post-wrap.sg-post {
   --author: var(--ph);
+  position: relative;
+  isolation: isolate; /* l'en-tête natif du message a un z-index de 500 : on le contient dans la carte */
   display: grid;
   grid-template-columns: 232px minmax(0, 1fr);
   grid-template-areas:
