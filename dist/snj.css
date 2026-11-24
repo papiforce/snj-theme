@@ -6700,8 +6700,9 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
   margin: 0;
   padding: 0 16px;
   border: 1px solid var(--sg-border-strong, var(--sg-border));
-  border-radius: var(--sg-radius-lg);
-  background: var(--sg-surface);
+  /* Forumactif impose « border-radius: 0 !important » et un fond transparent à .input-subtle */
+  border-radius: var(--sg-radius-lg) !important;
+  background: var(--sg-surface) !important;
   box-shadow: none;
   color: var(--sg-text);
   font: inherit;
@@ -6710,12 +6711,12 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
 }
 
 #wrap .sg-writeform input.sg-write__field:hover {
-  background: var(--sg-surface-2);
+  background: var(--sg-surface-2) !important;
 }
 
 #wrap .sg-writeform input.sg-write__field:focus {
   border-color: var(--sg-accent-1);
-  background: var(--sg-surface);
+  background: var(--sg-surface) !important;
 }
 
 #wrap .sg-writeform input.sg-write__field::placeholder {
