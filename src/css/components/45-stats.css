@@ -356,8 +356,19 @@ body.sg-stats-on #index .block-subtle {
 }
 
 .sg-person__staff {
-  font-size: 15px;
+  display: inline-block;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-left: 2px;
   color: var(--sg-text-muted);
+}
+
+.sg-person__staff svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
 
 .sg-people__more {

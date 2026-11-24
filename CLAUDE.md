@@ -101,10 +101,10 @@ dans le panneau d'administration (PA), puis on commit.
   (repris de la production ; dangerosité provisoire, tirée au hasard). Index : sous-forums affichés (PA › Affichage ›
   Page d'accueil › Structure et hiérarchie). La liste native n'est masquée que si le sélecteur est monté.
 - **Statistiques de l'accueil** (`stats.js` + `45-stats.css`) : remplacent le bloc « Qui est en ligne », sous le
-  séparateur de fin. Grille bento : Chroniques (messages en compteur animé, membres, messages par membre, kikkō),
+  séparateur de fin. Grille bento : Chroniques (messages en compteur animé, shinobis, messages par shinobi, kikkō),
   Dernier inscrit (portrait, sceau 新 qui se tamponne au survol), En ce moment (point « en direct » Asagi, jauge
-  enregistrés / invisibles / invités, record en discret), Récemment connectés (24 h, pseudos en pastilles colorées,
-  icône `shield` pour le staff, « + N autres » au-delà de 24, shippō), Groupes (bannières **nobori** : une par groupe,
+  enregistrés / invisibles / invités, record en discret), « Aperçus récemment » (connectés des 24 h, pseudos en pastilles colorées,
+  logo de SnJ au trait pour le staff, « + N autres » au-delà de 24, shippō), Groupes (bannières **nobori** : une par groupe,
   mon kanji ou icône, nom vertical, effectif, ondulation au survol). Nombre de messages, de membres et dernier inscrit :
   extrait `src/templates/index_body-snippet.html` ajouté au template `index_body` (absents d'AwesomeBB par défaut).
   Connectés des 24 h activés (PA › Affichage › Page d'accueil › Généralités).
