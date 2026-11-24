@@ -1591,17 +1591,18 @@
         move: [2, 'drive_file_move', 'Déplacer le sujet'],
         split: [3, 'call_split', 'Diviser le sujet'],
         merge: [4, 'merge', 'Fusionner avec un autre sujet'],
-        trash: [6, 'delete', 'Mettre à la corbeille', 'danger'],
-        'delete': [7, 'delete_forever', 'Supprimer définitivement', 'danger']
+        trash: null, /* retiré à la demande : la suppression suffit */
+        'delete': [7, 'delete', 'Supprimer', 'danger']
       };
       var modItems = admin ? Array.prototype.slice.call(admin.querySelectorAll('a[href]')).map(function (a, i) {
         var href = a.getAttribute('href');
         var mode = /^\/merge/.test(href) ? 'merge' : ((href.match(/[?&]mode=([a-z]+)/) || [])[1] || '');
+        if (MOD[mode] === null) return null;
         var spec = MOD[mode];
         var nat = a.querySelector('.material-symbols-outlined, i');
         if (!spec) spec = [5, nat ? nat.textContent.trim() : 'build', a.getAttribute('title') || a.textContent.trim()];
         return { rank: spec[0] * 100 + i, item: [href, spec[1], spec[2], spec[3]] };
-      }).sort(function (x, y) { return x.rank - y.rank; }) : [];
+      }).filter(Boolean).sort(function (x, y) { return x.rank - y.rank; }) : [];
       if (modItems.length) {
         var list = [];
         modItems.forEach(function (m, i) {
