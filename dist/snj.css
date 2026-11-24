@@ -6666,6 +6666,11 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
   border: 0;
 }
 
+/* Saut de ligne natif entre l'aide et l'éditeur : un espace vide de 20px au-dessus de l'éditeur */
+#wrap .sg-writeform #message-box > br {
+  display: none;
+}
+
 #wrap .sg-writeform #textarea_content {
   width: 100%;
   margin: 0;
