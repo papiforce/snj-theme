@@ -442,6 +442,7 @@
     perms();
     writePage();
     noticePage();
+    errorBlocks();
     applyTheme(storedTheme() || currentTheme());
   }
 
@@ -2887,6 +2888,24 @@
     block.classList.add('sg-notice-native');
     document.body.classList.add('sg-noticepage');
     document.title = title;
+  }
+
+  /* Erreurs de saisie (template error_body : .block.block-error, ex. « Vous devez entrer un message avant de
+     poster. ») : encart du design system, de la famille du sceau « hanko » : petit sceau 否 en Ume, message, sur
+     un fond teinté d'Ume, sans contour. Sur la page d'écriture, l'encart rejoint la colonne de la lettre, juste
+     au-dessus d'elle (le bloc de l'éditeur, lui, n'est pas déplacé). */
+  function errorBlocks() {
+    Array.prototype.slice.call(document.querySelectorAll('#wrap .block.block-error:not(.sg-alert)')).forEach(function (b) {
+      b.classList.add('sg-alert');
+      b.setAttribute('role', 'alert');
+      var seal = uiEl('span', 'sg-alert__seal');
+      seal.setAttribute('aria-hidden', 'true');
+      seal.appendChild(uiEl('span', null, '否'));
+      b.insertBefore(seal, b.firstChild);
+      var box = document.getElementById('postingbox');
+      var form = box && box.parentNode && box.parentNode.classList && box.parentNode.classList.contains('sg-writeform') ? box.parentNode : null;
+      if (form && !form.contains(b)) form.insertBefore(b, box);
+    });
   }
 
   function toast(message) {

@@ -7982,3 +7982,60 @@ body.sg-noticepage #wrap > .sg-divider--notice {
     width: 100%;
   }
 }
+
+/* --- Erreurs de saisie (error_body, errorBlocks) : encart de la famille du sceau « hanko » ---------------- */
+#wrap .block.block-error.sg-alert {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 0 0 16px;
+  padding: 14px 18px;
+  border: 0;
+  border-radius: var(--sg-radius-lg);
+  background: color-mix(in srgb, var(--sg-accent-2) 14%, var(--sg-surface));
+  box-shadow: none;
+  color: var(--sg-text);
+}
+
+#wrap .sg-alert > .block-content {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  color: var(--sg-text);
+  font-size: 0.98rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+/* Petit sceau 否 (refusé), incliné comme un tampon, posé avec le même rebond que celui des confirmations */
+.sg-alert__seal {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1.5px solid var(--sg-accent-2);
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--sg-accent-2) 12%, transparent);
+  box-shadow: inset 0 0 0 3px color-mix(in srgb, var(--sg-accent-2) 14%, var(--sg-surface)), inset 0 0 0 4px color-mix(in srgb, var(--sg-accent-2) 55%, transparent);
+  color: var(--sg-accent-2);
+  font-family: var(--sg-font-display);
+  font-size: 1.2rem;
+  line-height: 1;
+  transform: rotate(-6deg);
+  animation: sg-notice-stamp 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) 0.1s both;
+}
+
+.sg-alert__seal > span {
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sg-alert__seal {
+    animation: none;
+  }
+}
