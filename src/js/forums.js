@@ -300,20 +300,35 @@
     blocks[0].parentNode.insertBefore(root, blocks[0]);
     document.body.classList.add('sg-zones-on');
 
+    /* Séparateur de fin (inversé, sans logo) à la place de la barre de liens native sous les catégories */
+    var bar = document.querySelector('#index .action-bar-bottom');
+    if (bar && !document.querySelector('.sg-divider--end')) {
+      var rule = h('span', { class: 'sg-divider__rule', 'aria-hidden': 'true' }, [h('span', { class: 'sg-divider__line' })]);
+      rule.insertAdjacentHTML('beforeend', '<svg class="sg-divider__notch" viewBox="0 0 48 25" aria-hidden="true"><path d="M0 .5L24 24.5L48 .5"/></svg>');
+      rule.appendChild(h('span', { class: 'sg-divider__line' }));
+      bar.parentNode.insertBefore(h('div', { class: 'sg-divider sg-divider--end', role: 'separator' }, [rule]), bar);
+    }
+
     function select(slug, user) {
       var i = 0;
       ZONES.forEach(function (z, k) { if (z.slug === slug) i = k; });
       var zone = ZONES[i];
+      var turn = ++selecting;
       tabs.forEach(function (t, k) {
         t.setAttribute('aria-selected', k === i ? 'true' : 'false');
         t.tabIndex = k === i ? 0 : -1;
       });
       options.forEach(function (o, k) { o.setAttribute('aria-selected', k === i ? 'true' : 'false'); });
-      panels.forEach(function (p, k) { p.hidden = k !== i; });
       current.replaceChildren(sign(zone), label(zone));
       trigger.setAttribute('style', zoneStyle(zone));
+      var show = function () {
+        if (turn !== selecting) return; /* un autre onglet a été choisi entre-temps */
+        panels.forEach(function (p, k) { p.hidden = k !== i; });
+      };
+      if (!user) show();
       if (user) {
-        scrollToTop();
+        /* D'abord le défilement, ensuite l'affichage des forums de la catégorie */
+        scrollToTop(show);
         try { localStorage.setItem(STORE, zone.slug); } catch (e) {}
         try {
           var url = new URL(location.href);
@@ -323,11 +338,27 @@
       }
     }
 
-    /* Après un changement de catégorie, défilement doux jusqu'au séparateur (ou au sélecteur) */
-    function scrollToTop() {
-      var target = document.querySelector('.sg-divider') || root;
+    /* Après un changement de catégorie, défilement doux jusqu'au séparateur (ou au sélecteur),
+       puis appel de done une fois la page immobile */
+    var selecting = 0;
+    function scrollToTop(done) {
+      var target = document.querySelector('.sg-divider:not(.sg-divider--end)') || root;
       var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      try { target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }); } catch (e) { target.scrollIntoView(); }
+      if (reduce || Math.abs(target.getBoundingClientRect().top) < 2) {
+        target.scrollIntoView({ block: 'start' });
+        done();
+        return;
+      }
+      try { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) { target.scrollIntoView(); }
+      /* Fin du défilement : position stable pendant 6 images (scrollend n'existe pas partout), 1,5 s au plus */
+      var last = -1, still = 0, start = Date.now();
+      (function watch() {
+        var y = window.scrollY;
+        still = y === last ? still + 1 : 0;
+        last = y;
+        if (still >= 6 || Date.now() - start > 1500) done();
+        else requestAnimationFrame(watch);
+      })();
     }
 
     function initial() {

@@ -15,6 +15,7 @@
 }
 
 /* La liste native reste visible tant que le script n'a pas monté le sélecteur */
+body.sg-zones-on #index .action-bar-bottom,
 body.sg-zones-on #index .forum.type-table-forum {
   display: none !important;
 }

@@ -76,6 +76,11 @@
   stroke-linejoin: miter;
 }
 
+/* Séparateur de fin : sans logo, triangle pointé vers le haut (sous les catégories de l'accueil) */
+.sg-divider--end .sg-divider__rule {
+  transform: scaleY(-1);
+}
+
 @media (max-width: 768px) {
   .sg-divider {
     --sg-divider-space: 40px;
@@ -2084,6 +2089,7 @@ html::after {
 }
 
 /* La liste native reste visible tant que le script n'a pas monté le sélecteur */
+body.sg-zones-on #index .action-bar-bottom,
 body.sg-zones-on #index .forum.type-table-forum {
   display: none !important;
 }

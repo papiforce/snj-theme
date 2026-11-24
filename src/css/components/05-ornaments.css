@@ -74,6 +74,11 @@
   stroke-linejoin: miter;
 }
 
+/* Séparateur de fin : sans logo, triangle pointé vers le haut (sous les catégories de l'accueil) */
+.sg-divider--end .sg-divider__rule {
+  transform: scaleY(-1);
+}
+
 @media (max-width: 768px) {
   .sg-divider {
     --sg-divider-space: 40px;
