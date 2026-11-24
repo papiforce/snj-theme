@@ -181,8 +181,10 @@ dans le panneau d'administration (PA), puis on commit.
   Couleur de la catégorie posée sur `#topic` (`#topic.sg-tone-…`). Classe `body.sg-topicpage` (et `sg-topicpage-on`).
   **Barre du sujet** (`.sg-tbar`, `z-index: 5`) : **« Préférences »** à l'extrême gauche (icône `tune`, même bouton
   que « Actions ») avec deux interrupteurs (piste sumi et gofun, Asagi une fois activé, pastille qui glisse avec un
-  léger rebond) : « Position du profil (défaut / inversé) » et « Densité (défaut / compact) » (effet visuel de la
-  densité **à faire**). Gardées comme le thème (`localStorage` + cookie, `snj-profile` = `right`|`default`,
+  léger rebond) : « Position du profil (défaut / inversé) » et « Densité (défaut / compact) ». **Compact**
+  (`html[data-density="compact"]`) : 16px entre les messages (48px par défaut), plus d'écart entre le profil et la
+  lettre, les deux zones **réunies sur un même fond** (`--sg-surface` sur `.post-wrap`, une seule carte arrondie) ; la
+  colonne du profil prend 16px de marge intérieure (côté de la lettre exclu ; sur mobile `16px 16px 0`). Gardées comme le thème (`localStorage` + cookie, `snj-profile` = `right`|`default`,
   `snj-density` = `compact`|`default`), réappliquées au chargement, au retour arrière et d'un onglet à l'autre ;
   attributs `data-profile="right"` et `data-density="compact"` sur `<html>`. Profil inversé = profil à droite de la
   lettre (sur ordinateur ; sur mobile le profil reste au-dessus). « Actions » à droite : Ajouter à mes favoris, Suivre /
