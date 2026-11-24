@@ -301,6 +301,7 @@
     footer();
     pageHead();
     subforums();
+    topics();
     applyTheme(storedTheme() || currentTheme());
   }
 
@@ -522,6 +523,158 @@
     section.appendChild(grid);
     native.parentNode.insertBefore(section, native);
     document.body.classList.add('sg-subforums-on');
+  }
+
+  /* --------------------------------------------------------------------
+     Sujets : cartes « makimono » (巻物, rouleau), grille de 2 colonnes.
+     Pattern réservé aux SUJETS, partout où ils sont listés : pas d'image, deux
+     rouleaux verticaux qui dépassent en haut et en bas, à la couleur de la
+     catégorie. Statut en pastilles (annonce, épinglé, verrouillé, nouveau,
+     participation), titre, description, auteur, compteurs et dernier message.
+     -------------------------------------------------------------------- */
+  function topics() {
+    if (document.querySelector('.sg-topics')) return;
+    if (!/^\/f\d+/.test(location.pathname)) return;
+    var blocks = Array.prototype.slice.call(document.querySelectorAll('#wrap > .posts'));
+    if (!blocks.length) return;
+
+    var el = function (tag, cls, text) {
+      var e = document.createElement(tag);
+      if (cls) e.className = cls;
+      if (text !== undefined) e.textContent = text;
+      return e;
+    };
+    var ico = function (name) { var i = el('span', 'material-symbols-outlined', name); i.setAttribute('aria-hidden', 'true'); return i; };
+    var num = function (node) { return node ? parseInt(node.textContent.replace(/[^\d]/g, ''), 10) || 0 : 0; };
+    var plural = function (n, one, many) { return n + ' ' + (n > 1 ? many : one); };
+    /* Pseudo coloré : on garde la couleur du groupe telle que Forumactif l'écrit */
+    var person = function (a, cls) {
+      var out = el('a', cls);
+      out.href = a.getAttribute('href');
+      var colored = a.querySelector('span[style]');
+      var name = el('span', colored ? colored.className : '', a.textContent.trim());
+      if (colored) name.setAttribute('style', colored.getAttribute('style'));
+      out.appendChild(name);
+      return out;
+    };
+
+    var section = el('section', 'sg-topics');
+    var head = document.querySelector('.sg-pagehead');
+    if (head) (head.className.match(/sg-tone-[a-z]+/) || []).forEach(function (c) { section.classList.add(c); });
+    section.setAttribute('aria-label', 'Sujets');
+    var grid = el('ul', 'sg-topics__grid');
+
+    blocks.forEach(function (block) {
+      Array.prototype.slice.call(block.querySelectorAll('.posts-section')).forEach(function (row) {
+        var link = row.querySelector('.posts-description h3 a');
+        if (!link) return;
+        var icon = row.querySelector('.posts-icon');
+        var cls = icon ? icon.className : '';
+        var flags = [];
+        if (/folder_global/.test(cls)) flags.push(['public', 'Annonce globale', 'announce']);
+        else if (/folder_announce/.test(cls)) flags.push(['campaign', 'Annonce', 'announce']);
+        if (/folder_sticky/.test(cls)) flags.push(['push_pin', 'Épinglé', 'sticky']);
+        if (/locked/.test(cls)) flags.push(['lock', 'Verrouillé', 'locked']);
+        var unread = /post_new|folder_new/.test(cls);
+        var part = row.querySelector('.participate-check');
+        var participated = part && getComputedStyle(part).display !== 'none';
+
+        var card = el('li', 'sg-scroll' + (unread ? ' is-new' : '') + (flags.length ? ' is-' + flags[0][2] : ''));
+        var top = el('div', 'sg-scroll__flags');
+        flags.forEach(function (f) {
+          var chip = el('span', 'sg-scroll__flag sg-scroll__flag--' + f[2]);
+          chip.appendChild(ico(f[0]));
+          chip.appendChild(el('span', null, f[1]));
+          top.appendChild(chip);
+        });
+        if (unread) top.appendChild(el('span', 'sg-scroll__new', 'Nouveau'));
+        if (participated) {
+          var mine = el('span', 'sg-scroll__mine');
+          mine.setAttribute('title', 'Vous avez posté dans ce sujet');
+          mine.appendChild(ico('history_edu'));
+          top.appendChild(mine);
+        }
+        if (top.children.length) card.appendChild(top);
+
+        var title = el('h3', 'sg-scroll__title');
+        var a = el('a', 'sg-scroll__link', link.textContent.trim());
+        a.href = link.getAttribute('href');
+        title.appendChild(a);
+        card.appendChild(title);
+
+        var desc = row.querySelector('.topic-description');
+        if (desc && desc.textContent.trim()) card.appendChild(el('p', 'sg-scroll__desc', desc.textContent.trim()));
+
+        var author = row.querySelector('.posts-description p a[href^="/u"]');
+        if (author) {
+          var by = el('p', 'sg-scroll__by');
+          by.appendChild(document.createTextNode('par '));
+          by.appendChild(person(author, 'sg-scroll__author'));
+          card.appendChild(by);
+        }
+
+        /* Pages du sujet, s'il en a plusieurs */
+        var pages = Array.prototype.slice.call(row.querySelectorAll('.posts-description .pagination a, .posts-description a[href*="-p"]'))
+          .filter(function (p) { return /^\d+$/.test(p.textContent.trim()); });
+        if (pages.length) {
+          var pl = el('p', 'sg-scroll__pages');
+          pl.appendChild(ico('auto_stories'));
+          pages.forEach(function (p) {
+            var pa = el('a', 'sg-scroll__page', p.textContent.trim());
+            pa.href = p.getAttribute('href');
+            pl.appendChild(pa);
+          });
+          card.appendChild(pl);
+        }
+
+        var foot = el('div', 'sg-scroll__foot');
+        var stats = el('p', 'sg-scroll__stats');
+        var replies = num(row.querySelector('.posts-statistics-replies'));
+        var views = num(row.querySelector('.posts-statistics-views'));
+        stats.appendChild(ico('forum'));
+        stats.appendChild(el('span', null, plural(replies, 'réponse', 'réponses')));
+        stats.appendChild(ico('visibility'));
+        stats.appendChild(el('span', null, plural(views, 'vue', 'vues')));
+        foot.appendChild(stats);
+
+        var last = row.querySelector('.posts-lastpost');
+        var lastTime = last && last.querySelector('a.posts-lastpost-time');
+        if (last && lastTime) {
+          var lp = el('div', 'sg-scroll__last');
+          var avatarImg = last.querySelector('.avatar-default img');
+          var av = el('span', 'sg-scroll__avatar');
+          if (avatarImg) {
+            var im = el('img');
+            im.src = avatarImg.getAttribute('src');
+            im.alt = '';
+            im.loading = 'lazy';
+            av.appendChild(im);
+          } else av.appendChild(ico('person'));
+          lp.appendChild(av);
+          var info = el('div', 'sg-scroll__lastinfo');
+          var lastAuthor = last.querySelector('.posts-lastpost-author a[href^="/u"]');
+          if (lastAuthor) info.appendChild(person(lastAuthor, 'sg-scroll__lastauthor'));
+          var t = el('a', 'sg-scroll__time', lastTime.textContent.replace(/access_time/, '').trim());
+          t.href = lastTime.getAttribute('href');
+          t.setAttribute('title', 'Voir le dernier message');
+          info.appendChild(t);
+          lp.appendChild(info);
+          foot.appendChild(lp);
+        }
+        card.appendChild(foot);
+        grid.appendChild(card);
+      });
+    });
+
+    if (!grid.children.length) {
+      var empty = el('p', 'sg-topics__empty');
+      empty.appendChild(ico('history_edu'));
+      empty.appendChild(el('span', null, 'Aucun sujet pour l’instant.'));
+      section.appendChild(empty);
+    } else section.appendChild(grid);
+
+    blocks[0].parentNode.insertBefore(section, blocks[0]);
+    document.body.classList.add('sg-topics-on');
   }
 
   /* --------------------------------------------------------------------

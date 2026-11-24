@@ -4006,3 +4006,343 @@ body.sg-subforums-on #wrap > .forum.type-table-forum {
     transition: none;
   }
 }
+
+/* --- 57-topics.css --- */
+/* ==========================================================================
+   SNJ — Sujets : cartes « makimono » (construites par src/js/layout.js, fonction topics)
+   Le makimono 巻物 est le rouleau horizontal peint ou calligraphié.
+   Pattern réservé aux SUJETS, partout où ils sont listés. Il se distingue :
+     - des cartes de forum de l'accueil (image en fond, panneau, kanji, dangerosité) ;
+     - des ema des sous-forums (image découpée en toit) ;
+   par l'absence d'image et par deux rouleaux verticaux, à gauche et à droite, qui dépassent
+   en haut et en bas, à la couleur de la catégorie (--ph).
+   Contenu : pastilles de statut (Annonce, Épinglé, Verrouillé), « Nouveau » en Asagi,
+   participation (pinceau), titre en Zen Antique, description, auteur, pages du sujet,
+   puis en pied : réponses et vues, dernier message (avatar, auteur coloré, date).
+   Annonces : rouleaux en Ume ; sujets verrouillés : carte atténuée.
+   Grille de 2 colonnes, cartes de même proportion (1 colonne ≤ 768px).
+   ========================================================================== */
+
+body.sg-topics-on #wrap > .posts {
+  display: none !important;
+}
+
+.sg-topics {
+  --ph: var(--sg-primary);
+  margin: 0 0 var(--sg-space-8);
+  font-size: 16px; /* AwesomeBB réduit la taille du texte dans #wrap */
+  line-height: 1.6;
+}
+
+.sg-topics.sg-tone-gestion { --ph: var(--sg-contrast); }
+.sg-topics.sg-tone-hi { --ph: var(--sg-nation-hi); }
+.sg-topics.sg-tone-mizu { --ph: var(--sg-nation-mizu); }
+.sg-topics.sg-tone-kaze { --ph: var(--sg-nation-kaze); }
+.sg-topics.sg-tone-kaminari { --ph: var(--sg-nation-kaminari); }
+.sg-topics.sg-tone-tsuchi { --ph: var(--sg-nation-tsuchi); }
+.sg-topics.sg-tone-autres { --ph: var(--sg-nation-autres); }
+
+.sg-topics__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sg-space-6) var(--sg-space-6);
+  margin: 0;
+  padding: 10px 14px; /* place des rouleaux qui dépassent */
+  list-style: none;
+}
+
+/* --- Carte ------------------------------------------------------------------- */
+.sg-scroll {
+  --rod: var(--ph);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding: 20px 34px 0;
+  background:
+    linear-gradient(to bottom, rgba(var(--sg-contrast-rgb), 0.03), transparent 40%),
+    var(--sg-surface);
+  border-top: 1px solid var(--sg-border);
+  border-bottom: 1px solid var(--sg-border);
+  transition: transform 0.35s var(--sg-ease), box-shadow 0.35s var(--sg-ease);
+}
+
+/* Les deux rouleaux : ils dépassent en haut et en bas, embouts arrondis */
+.sg-scroll::before,
+.sg-scroll::after {
+  content: "";
+  position: absolute;
+  top: -8px;
+  bottom: -8px;
+  width: 12px;
+  border-radius: 6px;
+  background:
+    linear-gradient(to bottom, rgba(var(--sg-ink-overlay), 0.35) 0 7px, transparent 7px calc(100% - 7px), rgba(var(--sg-ink-overlay), 0.35) calc(100% - 7px)),
+    linear-gradient(90deg, color-mix(in srgb, var(--rod) 55%, #000), var(--rod) 45%, color-mix(in srgb, var(--rod) 70%, #000));
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.sg-scroll::before { left: -6px; }
+.sg-scroll::after { right: -6px; }
+
+.sg-scroll:hover,
+.sg-scroll:focus-within {
+  transform: translateY(-3px);
+  box-shadow: var(--sg-shadow);
+}
+
+/* Annonces : rouleaux en Ume ; verrouillés : carte atténuée */
+.sg-scroll.is-announce {
+  --rod: var(--sg-accent-2);
+}
+
+.sg-scroll.is-locked {
+  opacity: 0.72;
+}
+
+/* --- Statut -------------------------------------------------------------------- */
+.sg-scroll__flags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.sg-scroll__flag,
+.sg-scroll__new {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px 2px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.sg-scroll__flag .material-symbols-outlined {
+  font-size: 15px;
+}
+
+.sg-scroll__flag {
+  background: var(--sg-surface-2);
+  color: var(--sg-text);
+}
+
+.sg-scroll__flag--announce {
+  background: var(--sg-accent-2);
+  color: var(--sg-on-accent);
+}
+
+.sg-scroll__new {
+  padding: 2px 10px;
+  background: var(--sg-accent-1);
+  color: var(--sg-on-accent);
+}
+
+.sg-scroll__mine {
+  display: inline-grid;
+  place-items: center;
+  margin-left: auto;
+  color: var(--ph);
+}
+
+.sg-scroll__mine .material-symbols-outlined {
+  font-size: 20px;
+}
+
+/* --- Texte -------------------------------------------------------------------- */
+.sg-scroll__title {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  font-family: var(--sg-font-display);
+  font-size: 1.4rem;
+  font-weight: 400;
+  line-height: 1.2;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+#wrap a.sg-scroll__link,
+#wrap a.sg-scroll__link:visited {
+  color: var(--sg-text);
+  text-decoration: none;
+}
+
+/* Toute la carte est cliquable par le titre */
+.sg-scroll__link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.sg-scroll__desc {
+  margin: 0;
+  overflow: hidden;
+  color: var(--sg-text-muted);
+  font-size: 0.92rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sg-scroll__by {
+  margin: 0;
+  color: var(--sg-text-muted);
+  font-size: 0.85rem;
+}
+
+#wrap a.sg-scroll__author,
+#wrap a.sg-scroll__lastauthor {
+  position: relative;
+  z-index: 1;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.sg-scroll__pages {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin: 2px 0 0;
+  color: var(--sg-text-muted);
+}
+
+.sg-scroll__pages .material-symbols-outlined {
+  margin-right: 4px;
+  font-size: 17px;
+}
+
+#wrap a.sg-scroll__page {
+  position: relative;
+  z-index: 1;
+  display: inline-grid;
+  place-items: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  border: 1px solid var(--sg-border);
+  border-radius: 6px;
+  color: var(--sg-text);
+  font-size: 0.78rem;
+  text-decoration: none;
+}
+
+/* --- Pied : compteurs et dernier message -------------------------------------- */
+.sg-scroll__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  margin-top: auto;
+  padding: 12px 0 16px;
+  border-top: 1px dashed var(--sg-border);
+}
+
+.sg-scroll__title + .sg-scroll__foot,
+.sg-scroll__desc + .sg-scroll__foot,
+.sg-scroll__by + .sg-scroll__foot,
+.sg-scroll__pages + .sg-scroll__foot {
+  margin-top: 10px;
+}
+
+.sg-scroll__stats {
+  display: flex;
+  align-items: center;
+  gap: 4px 6px;
+  margin: 0;
+  color: var(--sg-text-muted);
+  font-size: 0.85rem;
+}
+
+.sg-scroll__stats .material-symbols-outlined {
+  font-size: 17px;
+  color: var(--ph);
+}
+
+.sg-scroll__stats .material-symbols-outlined + span + .material-symbols-outlined {
+  margin-left: 10px;
+}
+
+.sg-scroll__last {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.sg-scroll__avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--sg-surface-2);
+  color: var(--sg-text-muted);
+}
+
+.sg-scroll__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sg-scroll__lastinfo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+#wrap a.sg-scroll__time,
+#wrap a.sg-scroll__time:visited {
+  position: relative;
+  z-index: 1;
+  color: var(--sg-text-muted);
+  text-decoration: none;
+}
+
+#wrap a.sg-scroll__time:hover,
+#wrap a.sg-scroll__page:hover {
+  color: var(--sg-text);
+  text-decoration: underline;
+}
+
+/* --- Aucun sujet ----------------------------------------------------------------- */
+.sg-topics__empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 0;
+  padding: 36px 20px;
+  border: 1px dashed var(--sg-border);
+  border-radius: var(--sg-radius-lg);
+  color: var(--sg-text-muted);
+}
+
+@media (max-width: 768px) {
+  .sg-topics__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sg-scroll {
+    padding: 18px 26px 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sg-scroll,
+  .sg-scroll:hover {
+    transition: none;
+    transform: none;
+  }
+}
