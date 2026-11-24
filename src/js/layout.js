@@ -530,7 +530,8 @@
      Pattern réservé aux SUJETS, partout où ils sont listés : pas d'image, le motif
      yagasuri en fond à la couleur de la catégorie. Statut en pastilles (annonce,
      épinglé, verrouillé, nouveau), titre, description, auteur, compteurs et dernier
-     message. Au-dessus de la grille, le bouton « Poster un nouveau sujet ».
+     message. Au-dessus de la grille, « Poster un nouveau sujet » à gauche et le menu
+     « Actions » à droite (nouveaux messages, sans réponse, suivi du forum, sujets suivis).
      -------------------------------------------------------------------- */
   function topics() {
     if (document.querySelector('.sg-topics')) return;
@@ -669,15 +670,103 @@
        à droite du titre de la page (en-tête) : celui-ci reprend seulement son adresse */
     var post = document.querySelector('.sg-pagehead__actions a[href*="mode=newtopic"]') ||
       document.querySelector('#wrap a[href*="mode=newtopic"]');
+    var bar = null;
     if (post) {
-      var bar = el('div', 'sg-topics__bar');
+      bar = el('div', 'sg-topics__bar');
       var btn = el('a', 'sg-action');
       btn.href = post.getAttribute('href');
       btn.appendChild(ico('edit_square'));
       btn.appendChild(el('span', null, 'Poster un nouveau sujet'));
       bar.appendChild(btn);
-      section.insertBefore(bar, section.firstChild);
     }
+
+    /* Bouton « Actions » (trois points) à l'extrême droite : menu des recherches du forum et du suivi.
+       On reprend les adresses des liens natifs (recherches limitées au forum en priorité). */
+    var find = function (re) {
+      return Array.prototype.slice.call(document.querySelectorAll('a[href]')).filter(function (x) {
+        return re.test(x.getAttribute('href'));
+      })[0];
+    };
+    var fid = (location.pathname.match(/^\/f(\d+)/) || [])[1];
+    var search = function (id) {
+      return find(new RegExp('search_id=' + id + '&search_where=f' + fid + '(?!\\d)')) || find(new RegExp('search_id=' + id + '(?![a-z])'));
+    };
+    var watch = find(/[?&](un)?watch=forum/);
+    var watched = watch && /[?&]unwatch=forum/.test(watch.getAttribute('href'));
+    var items = [
+      [search('newposts'), 'new_releases', 'Nouveaux messages depuis ma dernière visite'],
+      [search('unanswered'), 'mark_chat_unread', 'Messages sans réponse'],
+      null,
+      [watch, watched ? 'notifications_off' : 'notifications_active', watched ? 'Ne plus suivre les sujets de ce forum' : 'Suivre les sujets de ce forum'],
+      [search('watchsearch'), 'bookmarks', 'Mes sujets suivis']
+    ].filter(function (it) { return it === null || it[0]; });
+    while (items.length && items[0] === null) items.shift();
+    while (items.length && items[items.length - 1] === null) items.pop();
+
+    if (items.length) {
+      bar = bar || el('div', 'sg-topics__bar');
+      var menuId = 'sg-topics-menu';
+      var wrapM = el('div', 'sg-menu');
+      var toggle = el('button', 'sg-menu__toggle');
+      toggle.type = 'button';
+      toggle.setAttribute('aria-haspopup', 'menu');
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.setAttribute('aria-controls', menuId);
+      toggle.appendChild(el('span', null, 'Actions'));
+      toggle.appendChild(ico('more_horiz'));
+      var menu = el('ul', 'sg-menu__list');
+      menu.id = menuId;
+      menu.setAttribute('role', 'menu');
+      menu.hidden = true;
+      items.forEach(function (it) {
+        if (it === null) { var sep = el('li', 'sg-menu__sep'); sep.setAttribute('role', 'separator'); menu.appendChild(sep); return; }
+        var li = el('li');
+        li.setAttribute('role', 'none');
+        var item = el('a', 'sg-menu__item');
+        item.href = it[0].getAttribute('href');
+        item.setAttribute('role', 'menuitem');
+        item.tabIndex = -1;
+        item.appendChild(ico(it[1]));
+        item.appendChild(el('span', null, it[2]));
+        li.appendChild(item);
+        menu.appendChild(li);
+      });
+      wrapM.appendChild(toggle);
+      wrapM.appendChild(menu);
+      bar.appendChild(wrapM);
+
+      var entries = function () { return Array.prototype.slice.call(menu.querySelectorAll('.sg-menu__item')); };
+      var open = function (focusIndex) {
+        menu.hidden = false;
+        toggle.setAttribute('aria-expanded', 'true');
+        wrapM.classList.add('is-open');
+        if (focusIndex !== undefined) { var e = entries(); (e[focusIndex < 0 ? e.length - 1 : focusIndex] || e[0]).focus(); }
+      };
+      var close = function (refocus) {
+        if (menu.hidden) return;
+        menu.hidden = true;
+        toggle.setAttribute('aria-expanded', 'false');
+        wrapM.classList.remove('is-open');
+        if (refocus) toggle.focus();
+      };
+      toggle.addEventListener('click', function () { if (menu.hidden) open(); else close(); });
+      toggle.addEventListener('keydown', function (ev) {
+        if (ev.key === 'ArrowDown' || ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); open(0); }
+        else if (ev.key === 'ArrowUp') { ev.preventDefault(); open(-1); }
+      });
+      menu.addEventListener('keydown', function (ev) {
+        var e = entries(), i = e.indexOf(document.activeElement);
+        if (ev.key === 'ArrowDown') { ev.preventDefault(); e[(i + 1) % e.length].focus(); }
+        else if (ev.key === 'ArrowUp') { ev.preventDefault(); e[(i - 1 + e.length) % e.length].focus(); }
+        else if (ev.key === 'Home') { ev.preventDefault(); e[0].focus(); }
+        else if (ev.key === 'End') { ev.preventDefault(); e[e.length - 1].focus(); }
+        else if (ev.key === 'Escape') { ev.preventDefault(); close(true); }
+        else if (ev.key === 'Tab') close(false);
+      });
+      document.addEventListener('click', function (ev) { if (!wrapM.contains(ev.target)) close(false); });
+    }
+
+    if (bar) section.insertBefore(bar, section.firstChild);
 
     blocks[0].parentNode.insertBefore(section, blocks[0]);
     document.body.classList.add('sg-topics-on');

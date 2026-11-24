@@ -4043,11 +4043,107 @@ body.sg-topics-on #wrap > .posts {
 .sg-topics.sg-tone-tsuchi { --ph: var(--sg-nation-tsuchi); }
 .sg-topics.sg-tone-autres { --ph: var(--sg-nation-autres); }
 
-/* --- Bouton « Poster un nouveau sujet » (style .sg-action de 55-pagehead.css) --- */
+/* --- Barre : « Poster un nouveau sujet » à gauche (style .sg-action de 55-pagehead.css), « Actions » à droite --- */
 .sg-topics__bar {
   display: flex;
-  justify-content: flex-start;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   margin: 0 0 var(--sg-space-5, 20px);
+}
+
+/* --- Menu « Actions » (trois points) ---------------------------------------------- */
+.sg-menu {
+  position: relative;
+  margin-left: auto;
+}
+
+.sg-menu__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 46px;
+  padding: 0 14px 0 18px;
+  border: 1px solid var(--sg-border-strong, var(--sg-border));
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-surface);
+  color: var(--sg-text);
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sg-menu__toggle:hover,
+.sg-menu.is-open .sg-menu__toggle {
+  background: var(--sg-surface-2);
+}
+
+.sg-menu__toggle:focus-visible,
+#wrap .sg-menu__item:focus-visible {
+  outline: 2px solid var(--sg-accent-1);
+  outline-offset: 2px;
+}
+
+.sg-menu__toggle .material-symbols-outlined {
+  font-size: 22px;
+}
+
+.sg-menu__toggle > * {
+  transition: none;
+}
+
+.sg-menu__list {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 20;
+  min-width: 320px;
+  margin: 0;
+  padding: 6px;
+  border: 1px solid var(--sg-border);
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-surface);
+  box-shadow: var(--sg-shadow);
+  list-style: none;
+}
+
+.sg-menu__list[hidden] {
+  display: none;
+}
+
+#wrap a.sg-menu__item,
+#wrap a.sg-menu__item:visited {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: var(--sg-text);
+  font-size: 0.92rem;
+  line-height: 1.35;
+  text-decoration: none;
+}
+
+#wrap a.sg-menu__item:hover,
+#wrap a.sg-menu__item:focus-visible {
+  background: var(--sg-surface-2);
+}
+
+.sg-menu__item .material-symbols-outlined {
+  flex: none;
+  color: var(--ph);
+  font-size: 20px;
+}
+
+.sg-menu__item > * {
+  transition: none;
+}
+
+.sg-menu__sep {
+  height: 1px;
+  margin: 6px 8px;
+  background: var(--sg-border);
 }
 
 .sg-topics__grid {
@@ -4341,7 +4437,22 @@ body.sg-topics-on #wrap > .posts {
   }
 
   .sg-topics__bar {
-    justify-content: stretch;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sg-menu {
+    margin-left: 0;
+  }
+
+  .sg-menu__toggle {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .sg-menu__list {
+    left: 0;
+    min-width: 0;
   }
 
   #wrap .sg-topics__bar a.sg-action {
