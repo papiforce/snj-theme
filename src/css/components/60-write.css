@@ -717,70 +717,15 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
   font-size: 22px;
 }
 
-#wrap .sg-rev.block-comment {
-  display: grid;
-  grid-template-columns: 48px minmax(0, 1fr);
-  gap: 14px;
-  margin: 0 0 12px;
-  padding: 14px 16px;
-  border: 0;
-  border-radius: var(--sg-radius-lg);
-  background: var(--sg-surface);
-  box-shadow: none;
-  color: var(--sg-text);
-}
-
-#wrap .sg-rev .avatar-default {
-  width: 48px;
-  margin: 0;
-}
-
-#wrap .sg-rev .avatar-default img {
-  display: block;
-  width: 48px;
-  height: 64px;
-  border-radius: 8px;
-  object-fit: cover;
-}
-
-#wrap .sg-rev > .block-content {
-  min-width: 0;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  background: none;
-  box-shadow: none; /* ombre d'AwesomeBB : dessinait une seconde carte dans la carte */
-}
-
-.sg-rev__meta {
-  margin: 0 0 8px;
-  overflow: hidden;
-  color: var(--sg-text-muted);
-  font-size: 0.85rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.sg-rev__meta a {
-  font-weight: 700;
-  text-decoration: none;
-}
-
-#wrap .sg-rev .content {
+/* Les messages suivent le pattern « fumi » de la page du sujet (59-topic.css, portée .sg-fumi), préférences
+   comprises (profil inversé, densité compacte) ; seul « Lire la suite » leur est propre */
+.sg-fumi .sg-post--review .post-content {
   position: relative;
-  color: var(--sg-text);
-  font-size: 0.95rem;
-  line-height: 1.7;
-  overflow-wrap: anywhere;
 }
 
-#wrap .sg-rev .content img {
-  max-width: 100%;
-  height: auto;
-}
-
-/* Long message : coupé à 240px avec un fondu, « Lire la suite » le déplie */
-#wrap .sg-rev.is-clamped:not(.is-expanded) .content {
+/* Long message : coupé à 240px avec un fondu, « Lire la suite » (centré) le déplie */
+.sg-fumi .sg-post--review.is-clamped:not(.is-expanded) .post-content {
+  flex: none;
   max-height: 240px;
   overflow: hidden;
   -webkit-mask-image: linear-gradient(to bottom, #000 70%, transparent);
@@ -789,18 +734,24 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
 
 .sg-rev__more {
   display: inline-flex;
+  align-self: center;
   align-items: center;
   gap: 4px;
-  min-height: 36px;
-  margin: 6px 0 0;
-  padding: 0 10px 0 0;
+  min-height: 40px;
+  margin: 0 0 12px;
+  padding: 0 14px;
   border: 0;
+  border-radius: 999px;
   background: none;
   color: var(--sg-text);
   font: inherit;
   font-size: 0.88rem;
   font-weight: 700;
   cursor: pointer;
+}
+
+.sg-rev__more:hover {
+  background: var(--sg-surface-2);
 }
 
 .sg-rev__more > * {
@@ -811,7 +762,7 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
   transition: transform 0.25s var(--sg-ease);
 }
 
-.sg-rev.is-expanded .sg-rev__more .material-symbols-outlined {
+.sg-post--review.is-expanded .sg-rev__more .material-symbols-outlined {
   transform: rotate(180deg);
 }
 

@@ -1706,6 +1706,67 @@
     headers: 'title', color: 'format_color_text', subscript: 'subscript', superscript: 'superscript'
   };
   var YOUTUBE_SVG = '<svg class="sg-tb__svg" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>';
+  /* Profils des auteurs des derniers messages (page d'écriture) : lus sur la 1re et la dernière page du sujet,
+     par pseudo ; complète chaque message « fumi » avec le rôle (ou le rang) et la fiche réduite */
+  function reviewAuthors(form, rposts) {
+    var tIn = form.querySelector('input[name="t"]');
+    var t = (tIn && tIn.value) || (location.search.match(/[?&]t=(\d+)/) || [])[1];
+    if (!t || !rposts.length) return;
+    var get = function (url) {
+      return fetch(url, { credentials: 'same-origin' }).then(function (r) { return r.ok ? r.text() : ''; })
+        .then(function (html) { return new DOMParser().parseFromString(html, 'text/html'); });
+    };
+    var people = {};
+    var read = function (doc) {
+      Array.prototype.slice.call(doc.querySelectorAll('.post-wrap')).forEach(function (pw) {
+        var a = pw.querySelector('.post-author-name a[href]');
+        if (!a) return;
+        var name = a.textContent.replace(/\s+/g, ' ').trim();
+        var rank = pw.querySelector('.post-author-title');
+        people[name] = {
+          uid: ((a.getAttribute('href') || '').match(/^\/u(\d+)/) || [])[1],
+          rank: rank ? rank.textContent.replace(/\s+/g, ' ').trim() : '',
+          dl: pw.querySelector('.post-author-details')
+        };
+      });
+      return doc;
+    };
+    get('/t' + t + '-').then(read).then(function (doc) {
+      var last = 0, href = '';
+      Array.prototype.slice.call(doc.querySelectorAll('.pagination a[href]')).forEach(function (a) {
+        var h = a.getAttribute('href');
+        var m = h.match(/^\/t\d+p(\d+)-/);
+        if (m && +m[1] > last) { last = +m[1]; href = h; }
+      });
+      return href ? get(href).then(read) : null;
+    }).then(function () {
+      staffRoles(function (roles) {
+        rposts.forEach(function (r) {
+          var who = people[r.name];
+          if (!who) return;
+          var aside = r.post.querySelector('.post-aside');
+          var card = r.post.querySelector('.sg-post__card');
+          if (!aside.querySelector('.sg-role')) {
+            var role = who.uid && roles[who.uid];
+            if (role) aside.insertBefore(roleBand(role), aside.firstChild);
+            else if (who.rank) {
+              var band = uiEl('div', 'sg-role');
+              band.appendChild(uiEl('span', 'sg-role__label', who.rank));
+              aside.insertBefore(band, aside.firstChild);
+            }
+          }
+          var facts = !card.querySelector('.sg-post__facts') && authorFacts(who.dl);
+          if (facts) {
+            var rule = uiEl('hr', 'sg-post__rule');
+            rule.setAttribute('aria-hidden', 'true');
+            card.appendChild(rule);
+            card.appendChild(facts);
+          }
+        });
+      });
+    }).catch(function () {});
+  }
+
   function editorToolbar(scope) {
     var tries = 0;
     var run = function () {
@@ -1816,6 +1877,10 @@
       ['sg-tone-gestion', 'sg-tone-hi', 'sg-tone-mizu', 'sg-tone-kaze', 'sg-tone-kaminari', 'sg-tone-tsuchi', 'sg-tone-autres']
         .forEach(function (c) { head.classList.remove(c); form.classList.remove(c); });
       if (t) { head.classList.add('sg-tone-' + t); form.classList.add('sg-tone-' + t); }
+      /* Les derniers messages du sujet (au pattern « fumi ») prennent aussi la couleur de la catégorie */
+      var rv = document.querySelector('.sg-review');
+      if (rv) Array.prototype.slice.call(form.classList).filter(function (c) { return /^sg-tone-/.test(c); })
+        .concat(rv.className.match(/sg-tone-[a-z]+/g) || []).forEach(function (c) { rv.classList.toggle(c, form.classList.contains(c)); });
     };
     /* Contexte (fil d'Ariane, titre du sujet ou du forum) lu sur la page du sujet ou du forum */
     var t = val('t') || params.t, p = val('p') || params.p, f = val('f') || params.f;
@@ -2055,48 +2120,114 @@
       if (ph) { ph.textContent = ''; ph.appendChild(ico('visibility')); ph.appendChild(el('span', null, 'Aperçu')); }
     }
 
-    /* 3. Revue du sujet : derniers messages en cartes compactes */
+    /* 3. Revue du sujet : les derniers messages au pattern « fumi » de la page du sujet (rôle, portrait, pseudo,
+       fiche, lettre ; préférences « Position du profil » et « Densité » appliquées), coupés à 240px avec
+       « Lire la suite ». Forumactif ne donne ici que le portrait, le pseudo, la date et le contenu : le profil
+       des auteurs (identifiant, rang, fiche) est lu sur la page du sujet. */
     var reviewTitle = document.querySelector('#wrap > .page-title');
     var comments = Array.prototype.slice.call(document.querySelectorAll('#wrap > .block-comment'));
     var after = form;
     if (comments.length) {
-      var review = el('section', 'sg-review');
+      var review = el('section', 'sg-review sg-fumi');
       review.setAttribute('aria-label', 'Derniers messages du sujet');
       var rh = el('h2', 'sg-review__title');
       rh.appendChild(ico('history'));
       rh.appendChild(el('span', null, 'Derniers messages du sujet'));
       review.appendChild(rh);
+      var rposts = [];
       comments.forEach(function (c) {
-        c.classList.add('sg-rev');
-        var details = c.querySelector('.block-comment-details');
         var bodyC = c.querySelector('.content');
-        if (details && bodyC) {
-          var meta = el('div', 'sg-rev__meta');
-          Array.prototype.slice.call(details.childNodes).forEach(function (n) { meta.appendChild(n); });
-          var footer = details.closest('.block-footer');
-          if (footer) footer.remove();
-          bodyC.parentNode.insertBefore(meta, bodyC);
+        if (!bodyC) return;
+        var details = c.querySelector('.block-comment-details');
+        var nameEl = details && details.querySelector('[style*="color"], strong');
+        var nameNode = nameEl ? (nameEl.closest('span') || nameEl) : null;
+        var dateText = details ? details.textContent.replace(/\s+/g, ' ').replace(/^.*?\sle\s/, '').trim() : '';
+        var img = c.querySelector('.avatar-default img');
+
+        var post = el('div', 'post-wrap sg-post sg-post--review');
+        var aside = el('div', 'post-aside');
+        var card = el('div', 'sg-post__card');
+        if (img) {
+          var avW = el('div', 'post-author-avatar');
+          var big = el('div', 'avatar-big');
+          img.removeAttribute('style');
+          big.appendChild(img);
+          avW.appendChild(big);
+          card.appendChild(avW);
         }
-        review.appendChild(c);
-        if (bodyC) {
-          requestAnimationFrame(function () {
-            if (bodyC.scrollHeight <= 260) return;
-            c.classList.add('is-clamped');
-            var more = el('button', 'sg-rev__more');
-            more.type = 'button';
-            more.appendChild(el('span', null, 'Lire la suite'));
-            more.appendChild(ico('expand_more'));
-            more.addEventListener('click', function () {
-              var open = c.classList.toggle('is-expanded');
-              more.firstChild.textContent = open ? 'Réduire' : 'Lire la suite';
-            });
-            bodyC.parentNode.appendChild(more);
+        var author = el('div', 'post-author');
+        var nm = el('div', 'post-author-name');
+        if (nameNode) nm.appendChild(nameNode);
+        author.appendChild(nm);
+        card.appendChild(author);
+        aside.appendChild(card);
+
+        var letter = el('div', 'sg-post__letter');
+        var hd = el('div', 'post-header');
+        var meta = el('div', 'sg-post__meta');
+        if (dateText) {
+          var d = el('span', 'sg-post__date');
+          d.setAttribute('title', 'Publié');
+          d.appendChild(ico('schedule'));
+          d.appendChild(el('span', null, dateText));
+          meta.appendChild(d);
+        }
+        hd.appendChild(meta);
+        var body = el('div', 'post');
+        bodyC.classList.add('post-content');
+        body.appendChild(bodyC);
+        var edited = editedInfo(bodyC);
+        if (edited) {
+          var e = el('span', 'sg-post__date sg-post__date--edit');
+          e.setAttribute('title', edited.full);
+          e.appendChild(ico('edit_note'));
+          e.appendChild(el('span', null, 'Modifié ' + edited.date));
+          meta.appendChild(e);
+          var note = el('p', 'sg-post__edited');
+          note.appendChild(edited.node);
+          body.appendChild(note);
+        }
+        letter.appendChild(hd);
+        letter.appendChild(body);
+        post.appendChild(aside);
+        post.appendChild(letter);
+        review.appendChild(post);
+        c.remove();
+        rposts.push({ post: post, name: nm.textContent.replace(/\s+/g, ' ').trim() });
+
+        requestAnimationFrame(function () {
+          if (bodyC.scrollHeight <= 260) return;
+          post.classList.add('is-clamped');
+          var more = el('button', 'sg-rev__more');
+          more.type = 'button';
+          more.appendChild(el('span', null, 'Lire la suite'));
+          more.appendChild(ico('expand_more'));
+          more.setAttribute('aria-expanded', 'false');
+          more.addEventListener('click', function () {
+            var open = post.classList.toggle('is-expanded');
+            more.firstChild.textContent = open ? 'Réduire' : 'Lire la suite';
+            more.setAttribute('aria-expanded', open ? 'true' : 'false');
           });
-        }
+          body.insertBefore(more, bodyC.nextSibling);
+        });
       });
       form.parentNode.insertBefore(review, form.nextSibling);
       if (reviewTitle) reviewTitle.classList.add('sg-hidden');
       after = review;
+
+      /* Couleur de l'auteur (rang sans rôle du staff), relue à chaque changement de thème */
+      var paintReview = function () {
+        rposts.forEach(function (r) {
+          var n = r.post.querySelector('.post-author-name [style*="color"]') || r.post.querySelector('.post-author-name *');
+          if (n) r.post.style.setProperty('--author', getComputedStyle(n).color);
+        });
+      };
+      paintReview();
+      if (window.MutationObserver) {
+        new MutationObserver(function () { requestAnimationFrame(paintReview); })
+          .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+      }
+      reviewAuthors(form, rposts);
     }
 
     /* 4. Séparateur de fin et fil d'Ariane repris */

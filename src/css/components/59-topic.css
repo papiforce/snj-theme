@@ -74,7 +74,9 @@ body.sg-topicpage-on .sg-post .post-author-title {
 }
 
 /* --- 2. Messages « fumi » -------------------------------------------------------- */
-#topic .post-wrap.sg-post {
+/* Pages de sujet (#topic) et toute liste de messages au même pattern (.sg-fumi : derniers messages du sujet sur
+   la page d'écriture…) ; :is() garde la spécificité de l'identifiant */
+:is(#topic, .sg-fumi) .post-wrap.sg-post {
   --author: var(--ph);
   position: relative;
   isolation: isolate; /* l'en-tête natif du message a un z-index de 500 : on le contient dans la carte */
@@ -94,30 +96,30 @@ body.sg-topicpage-on .sg-post .post-author-title {
 
 /* Un message dont le menu est ouvert passe devant les suivants (et la réponse rapide) :
    sinon le menu, qui peut déborder de la carte, glisserait dessous */
-#topic .post-wrap.sg-post:has(.sg-menu.is-open) {
+:is(#topic, .sg-fumi) .post-wrap.sg-post:has(.sg-menu.is-open) {
   z-index: 10;
 }
 
 /* Préférence « Position du profil (inversé) » : lettre à gauche, profil à droite */
-html[data-profile="right"] #topic .post-wrap.sg-post {
+html[data-profile="right"] :is(#topic, .sg-fumi) .post-wrap.sg-post {
   grid-template-columns: minmax(0, 1fr) 248px;
   grid-template-areas: "letter aside";
 }
 
 /* Préférence « Densité (compact) » : 16px entre les messages, profil et lettre réunis sur un même fond
    (plus d'écart entre les deux zones, une seule carte arrondie), le profil gardant une marge intérieure */
-html[data-density="compact"] #topic .post-wrap.sg-post {
+html[data-density="compact"] :is(#topic, .sg-fumi) .post-wrap.sg-post {
   gap: 0;
   margin-bottom: 16px;
   border-radius: var(--sg-radius-lg);
   background: var(--sg-surface);
 }
 
-html[data-density="compact"] #topic .sg-post .post-aside {
+html[data-density="compact"] :is(#topic, .sg-fumi) .sg-post .post-aside {
   padding: 16px 0 16px 16px;
 }
 
-html[data-density="compact"][data-profile="right"] #topic .sg-post .post-aside {
+html[data-density="compact"][data-profile="right"] :is(#topic, .sg-fumi) .sg-post .post-aside {
   padding: 16px 16px 16px 0;
 }
 
@@ -134,12 +136,12 @@ html[data-density="compact"][data-profile="right"] #topic .sg-post .post-aside {
 }
 
 /* Le corps natif ne sert que d'enveloppe : ses enfants deviennent des zones de la grille */
-#topic .sg-post .post-body {
+:is(#topic, .sg-fumi) .sg-post .post-body {
   display: contents;
 }
 
 /* Profil de l'auteur */
-#topic .sg-post .post-aside {
+:is(#topic, .sg-fumi) .sg-post .post-aside {
   grid-area: aside;
   display: flex;
   flex-direction: column;
@@ -182,12 +184,12 @@ html[data-density="compact"][data-profile="right"] #topic .sg-post .post-aside {
   background: var(--sg-border);
 }
 
-#topic .sg-post .post-author-status:empty,
-#topic .sg-post .post-author-rpg:empty {
+:is(#topic, .sg-fumi) .sg-post .post-author-status:empty,
+:is(#topic, .sg-fumi) .sg-post .post-author-rpg:empty {
   display: none;
 }
 
-#topic .sg-post .post-author {
+:is(#topic, .sg-fumi) .sg-post .post-author {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -197,14 +199,14 @@ html[data-density="compact"][data-profile="right"] #topic .sg-post .post-aside {
   padding: 0;
 }
 
-#topic .sg-post .post-author-avatar {
+:is(#topic, .sg-fumi) .sg-post .post-author-avatar {
   position: relative;
   order: 1;
   margin: 0;
 }
 
-#topic .sg-post .avatar-big,
-#topic .sg-post .avatar-big a {
+:is(#topic, .sg-fumi) .sg-post .avatar-big,
+:is(#topic, .sg-fumi) .sg-post .avatar-big a {
   display: block;
   margin: 0;
   padding: 0;
@@ -212,7 +214,7 @@ html[data-density="compact"][data-profile="right"] #topic .sg-post .post-aside {
   background: none;
 }
 
-#topic .sg-post .avatar-big img {
+:is(#topic, .sg-fumi) .sg-post .avatar-big img {
   display: block;
   width: 200px;
   height: 400px; /* format 200 × 400 */
@@ -223,7 +225,7 @@ html[data-density="compact"][data-profile="right"] #topic .sg-post .post-aside {
   object-fit: cover;
 }
 
-#topic .sg-post .post-author-name {
+:is(#topic, .sg-fumi) .sg-post .post-author-name {
   display: block;
   font-family: var(--sg-font-display);
   font-size: 1.3rem;
@@ -231,14 +233,14 @@ html[data-density="compact"][data-profile="right"] #topic .sg-post .post-aside {
   overflow-wrap: anywhere;
 }
 
-#topic .sg-post .post-author-name a,
-#topic .sg-post .post-author-name strong {
+:is(#topic, .sg-fumi) .sg-post .post-author-name a,
+:is(#topic, .sg-fumi) .sg-post .post-author-name strong {
   font-weight: 400;
   text-decoration: none;
 }
 
 /* La couleur du pseudo est lue en JS : pas de transition qui fausserait la lecture */
-#topic .sg-post .post-author-name * {
+:is(#topic, .sg-fumi) .sg-post .post-author-name * {
   transition: none;
 }
 
@@ -353,7 +355,7 @@ html[data-density="compact"][data-profile="right"] #topic .sg-post .post-aside {
 /* En-tête de la lettre. Forumactif donne le même z-index (500) à l'en-tête et au corps (.post) :
    le corps, placé après, recouvrait le menu « trois points » qui déborde de l'en-tête et captait ses clics.
    L'en-tête passe au-dessus du corps (le message est isolé : ces niveaux restent internes à la carte). */
-#topic .sg-post .post-header {
+:is(#topic, .sg-fumi) .sg-post .post-header {
   position: relative;
   z-index: 2;
   scroll-margin-top: 24px; /* arrivée par un lien de message (#3) : le rôle reste visible au-dessus */
@@ -428,7 +430,7 @@ html[data-density="compact"][data-profile="right"] #topic .sg-post .post-aside {
 }
 
 /* La lettre */
-#topic .sg-post .post {
+:is(#topic, .sg-fumi) .sg-post .post {
   position: relative;
   z-index: 1;
   grid-area: body;
@@ -443,7 +445,7 @@ html[data-density="compact"][data-profile="right"] #topic .sg-post .post-aside {
   color: var(--sg-text);
 }
 
-#topic .sg-post .post-content {
+:is(#topic, .sg-fumi) .sg-post .post-content {
   flex: 1;
   min-height: 120px;
   margin: 0;
@@ -455,13 +457,13 @@ html[data-density="compact"][data-profile="right"] #topic .sg-post .post-aside {
   overflow-wrap: anywhere;
 }
 
-#topic .sg-post .post-content a {
+:is(#topic, .sg-fumi) .sg-post .post-content a {
   color: var(--sg-primary);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
-#topic .sg-post .post-content img {
+:is(#topic, .sg-fumi) .sg-post .post-content img {
   max-width: 100%;
   height: auto;
 }
@@ -477,7 +479,7 @@ html[data-density="compact"][data-profile="right"] #topic .sg-post .post-aside {
 }
 
 /* Citations, code et spoilers natifs (blockquote, .codebox, .spoiler) */
-#topic .sg-post .post-content blockquote {
+:is(#topic, .sg-fumi) .sg-post .post-content blockquote {
   margin: 12px 0;
   padding: 12px 16px;
   border: 0;
@@ -487,7 +489,7 @@ html[data-density="compact"][data-profile="right"] #topic .sg-post .post-aside {
   color: var(--sg-text);
 }
 
-#topic .sg-post .post-content blockquote cite {
+:is(#topic, .sg-fumi) .sg-post .post-content blockquote cite {
   display: block;
   margin-bottom: 6px;
   color: var(--sg-text-muted);
@@ -496,23 +498,23 @@ html[data-density="compact"][data-profile="right"] #topic .sg-post .post-aside {
   font-weight: 700;
 }
 
-#topic .sg-post .post-content .codebox,
-#topic .sg-post .post-content pre,
-#topic .sg-post .post-content code {
+:is(#topic, .sg-fumi) .sg-post .post-content .codebox,
+:is(#topic, .sg-fumi) .sg-post .post-content pre,
+:is(#topic, .sg-fumi) .sg-post .post-content code {
   border-radius: 8px;
   background: var(--sg-surface-2);
   color: var(--sg-text);
 }
 
-#topic .sg-post .post-content .spoiler,
-#topic .sg-post .post-content .spoiler_content {
+:is(#topic, .sg-fumi) .sg-post .post-content .spoiler,
+:is(#topic, .sg-fumi) .sg-post .post-content .spoiler_content {
   border-radius: 10px;
   background: var(--sg-surface-2);
   color: var(--sg-text);
 }
 
 /* Pied de la lettre (vide une fois le J'aime déplacé dans l'en-tête : masqué) */
-#topic .sg-post .post-footer {
+:is(#topic, .sg-fumi) .sg-post .post-footer {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -524,13 +526,13 @@ html[data-density="compact"][data-profile="right"] #topic .sg-post .post-aside {
   background: none;
 }
 
-#topic .sg-post .fa_like_div {
+:is(#topic, .sg-fumi) .sg-post .fa_like_div {
   display: flex;
   gap: 8px;
   margin: 0;
 }
 
-#topic .sg-post .rep-button {
+:is(#topic, .sg-fumi) .sg-post .rep-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -549,8 +551,8 @@ html[data-density="compact"][data-profile="right"] #topic .sg-post .post-aside {
   cursor: pointer;
 }
 
-#topic .sg-post .rep-button > span,
-#topic .sg-post .rep-button .rep-cat {
+:is(#topic, .sg-fumi) .sg-post .rep-button > span,
+:is(#topic, .sg-fumi) .sg-post .rep-button .rep-cat {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -561,42 +563,42 @@ html[data-density="compact"][data-profile="right"] #topic .sg-post .post-aside {
   color: inherit;
 }
 
-#topic .sg-post .rep-button .material-symbols-outlined {
+:is(#topic, .sg-fumi) .sg-post .rep-button .material-symbols-outlined {
   font-size: 22px;
 }
 
-#topic .sg-post .rep-button:hover,
-#topic .sg-post .rep-button:focus-visible {
+:is(#topic, .sg-fumi) .sg-post .rep-button:hover,
+:is(#topic, .sg-fumi) .sg-post .rep-button:focus-visible {
   background: var(--sg-surface-2);
   color: var(--sg-text);
 }
 
 /* J'aime : cœur vide ; une fois aimé (.fa_liked), cœur plein rouge et compteur */
-#topic .sg-post .rep-button .material-symbols-outlined {
+:is(#topic, .sg-fumi) .sg-post .rep-button .material-symbols-outlined {
   font-variation-settings: "FILL" 0;
 }
 
-#topic .sg-post .fa_like:hover .material-symbols-outlined {
+:is(#topic, .sg-fumi) .sg-post .fa_like:hover .material-symbols-outlined {
   color: var(--sg-like);
 }
 
-#topic .sg-post .rep-button.fa_liked {
+:is(#topic, .sg-fumi) .sg-post .rep-button.fa_liked {
   color: var(--sg-text);
 }
 
-#topic .sg-post .rep-button.fa_liked .material-symbols-outlined {
+:is(#topic, .sg-fumi) .sg-post .rep-button.fa_liked .material-symbols-outlined {
   color: var(--sg-like);
   font-variation-settings: "FILL" 1;
 }
 
-#topic .sg-post .rep-nb {
+:is(#topic, .sg-fumi) .sg-post .rep-nb {
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 
 /* Signature : sous un filet pointillé, en plus petit */
-#topic .sg-post .signature_div,
-#topic .sg-post .post-signature {
+:is(#topic, .sg-fumi) .sg-post .signature_div,
+:is(#topic, .sg-fumi) .sg-post .post-signature {
   margin: 0;
   padding: 14px 26px 18px;
   border-top: 1px dashed var(--sg-border);
@@ -753,8 +755,8 @@ html[data-density="compact"][data-profile="right"] #topic .sg-post .post-aside {
 /* --- Tablette et mobile ------------------------------------------------------------------ */
 @media (max-width: 768px) {
   /* Le profil passe au-dessus de la lettre (quelle que soit la préférence de position), en bandeau compact */
-  #topic .post-wrap.sg-post,
-  html[data-profile="right"] #topic .post-wrap.sg-post {
+  :is(#topic, .sg-fumi) .post-wrap.sg-post,
+  html[data-profile="right"] :is(#topic, .sg-fumi) .post-wrap.sg-post {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
       "aside"
@@ -762,17 +764,17 @@ html[data-density="compact"][data-profile="right"] #topic .sg-post .post-aside {
     gap: 10px;
   }
 
-  #topic .sg-post .post-aside {
+  :is(#topic, .sg-fumi) .sg-post .post-aside {
     position: static;
     gap: 8px;
   }
 
-  html[data-density="compact"] #topic .post-wrap.sg-post {
+  html[data-density="compact"] :is(#topic, .sg-fumi) .post-wrap.sg-post {
     gap: 0;
   }
 
-  html[data-density="compact"] #topic .sg-post .post-aside,
-  html[data-density="compact"][data-profile="right"] #topic .sg-post .post-aside {
+  html[data-density="compact"] :is(#topic, .sg-fumi) .sg-post .post-aside,
+  html[data-density="compact"][data-profile="right"] :is(#topic, .sg-fumi) .sg-post .post-aside {
     padding: 16px 16px 0;
   }
 
@@ -790,12 +792,12 @@ html[data-density="compact"][data-profile="right"] #topic .sg-post .post-aside {
     display: none;
   }
 
-  #topic .sg-post .post-author-avatar {
+  :is(#topic, .sg-fumi) .sg-post .post-author-avatar {
     grid-column: 1;
     grid-row: 1 / span 2;
   }
 
-  #topic .sg-post .post-author {
+  :is(#topic, .sg-fumi) .sg-post .post-author {
     grid-column: 2;
     grid-row: 1;
     align-self: end;
@@ -803,7 +805,7 @@ html[data-density="compact"][data-profile="right"] #topic .sg-post .post-aside {
     gap: 4px;
   }
 
-  #topic .sg-post .avatar-big img {
+  :is(#topic, .sg-fumi) .sg-post .avatar-big img {
     width: 56px;
     height: 112px; /* même format 1:2, réduit */
     border-radius: 10px;
@@ -819,13 +821,13 @@ html[data-density="compact"][data-profile="right"] #topic .sg-post .post-aside {
     font-size: 0.82rem;
   }
 
-  #topic .sg-post .post-header {
+  :is(#topic, .sg-fumi) .sg-post .post-header {
     padding: 6px 6px 0 16px;
   }
 
-  #topic .sg-post .post-footer,
-  #topic .sg-post .signature_div,
-  #topic .sg-post .post-signature {
+  :is(#topic, .sg-fumi) .sg-post .post-footer,
+  :is(#topic, .sg-fumi) .sg-post .signature_div,
+  :is(#topic, .sg-fumi) .sg-post .post-signature {
     padding-left: 16px;
     padding-right: 16px;
   }
@@ -858,7 +860,7 @@ html[data-density="compact"][data-profile="right"] #topic .sg-post .post-aside {
     max-width: calc(100vw - 32px);
   }
 
-  #topic .sg-post .rep-button {
+  :is(#topic, .sg-fumi) .sg-post .rep-button {
     min-width: 44px;
     height: 44px;
   }
