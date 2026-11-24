@@ -237,6 +237,79 @@
     }
   }
 
+  /* Menu du compte, sur l'avatar : pseudo, profil, paramètres du profil, panneau d'administration
+     (admins), déconnexion. Ouvert au survol et au focus clavier ; sur écran tactile (pas de survol),
+     le premier toucher sur l'avatar ouvre le menu au lieu de suivre le lien du profil. */
+  function accountMenu(brand, ud) {
+    var wrap = document.createElement('div');
+    wrap.className = 'sg-sb-account';
+    brand.removeAttribute('data-label'); /* le menu remplace l'infobulle */
+    brand.setAttribute('aria-haspopup', 'true');
+    brand.setAttribute('aria-expanded', 'false');
+    brand.setAttribute('aria-controls', 'sg-account-menu');
+    wrap.appendChild(brand);
+
+    var panel = document.createElement('div');
+    panel.className = 'sg-sb-menu';
+    panel.id = 'sg-account-menu';
+    var name = document.createElement('p');
+    name.className = 'sg-sb-menu__name';
+    name.textContent = ud.username || 'Mon compte';
+    name.title = ud.username || '';
+    panel.appendChild(name);
+
+    var list = document.createElement('ul');
+    list.className = 'sg-sb-menu__list';
+    list.setAttribute('aria-label', 'Mon compte');
+    var add = function (href, ic, label, cls) {
+      if (!href) return;
+      var li = document.createElement('li');
+      if (cls) li.className = cls;
+      var a = document.createElement('a');
+      a.className = 'sg-sb-menu__item';
+      a.href = href;
+      a.appendChild(icon(ic));
+      var t = document.createElement('span');
+      t.textContent = label;
+      a.appendChild(t);
+      li.appendChild(a);
+      list.appendChild(li);
+    };
+    add('/u' + ud.user_id, 'person', 'Mon profil');
+    add('/profile?mode=editprofile&page_profil=informations', 'manage_accounts', 'Paramètres du profil');
+    add(nativeLink('dashboard'), 'dashboard', "Panneau d'administration");
+    add(nativeLink('power_settings_new'), 'logout', 'Déconnexion', 'sg-sb-menu__logout');
+    panel.appendChild(list);
+    wrap.appendChild(panel);
+
+    /* is-open : ouvert au toucher ; is-dismissed : fermé par Échap malgré le survol ou le focus */
+    var setOpen = function (on) {
+      wrap.classList.toggle('is-open', on);
+      brand.setAttribute('aria-expanded', on ? 'true' : 'false');
+    };
+    wrap.addEventListener('mouseenter', function () { if (!wrap.classList.contains('is-dismissed')) brand.setAttribute('aria-expanded', 'true'); });
+    wrap.addEventListener('mouseleave', function () {
+      wrap.classList.remove('is-dismissed');
+      if (!wrap.classList.contains('is-open') && !wrap.contains(document.activeElement)) brand.setAttribute('aria-expanded', 'false');
+    });
+    wrap.addEventListener('focusin', function () { if (!wrap.classList.contains('is-dismissed')) brand.setAttribute('aria-expanded', 'true'); });
+    wrap.addEventListener('focusout', function (e) {
+      if (!wrap.contains(e.relatedTarget)) { wrap.classList.remove('is-dismissed'); setOpen(false); }
+    });
+    var touch = window.matchMedia ? window.matchMedia('(hover: none)') : null;
+    brand.addEventListener('click', function (e) {
+      if (touch && touch.matches && !wrap.classList.contains('is-open')) {
+        e.preventDefault();
+        setOpen(true);
+      }
+    });
+    document.addEventListener('click', function (e) { if (!wrap.contains(e.target)) setOpen(false); });
+    wrap.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { setOpen(false); wrap.classList.add('is-dismissed'); brand.focus(); }
+    });
+    return wrap;
+  }
+
   /* ----------------------------------------------------------------------
      Construction de la barre
      ---------------------------------------------------------------------- */
@@ -276,7 +349,8 @@
       brand.className += ' sg-sb-brand--logo';
     }
     brand.appendChild(img);
-    bar.appendChild(brand);
+    if (logged) bar.appendChild(accountMenu(brand, ud));
+    else bar.appendChild(brand);
 
     /* Navigation */
     var nav = document.createElement('nav');
@@ -323,11 +397,7 @@
       bottom.appendChild(notif);
       syncBadge(nativeNotif, notif.querySelector('.sg-sb-badge'));
 
-      var admin = nativeLink('dashboard');
-      if (admin) bottom.appendChild(item({ label: "Panneau d'administration", icon: 'dashboard', href: admin }));
-
-      var logout = nativeLink('power_settings_new');
-      if (logout) bottom.appendChild(item({ label: 'Déconnexion', icon: 'logout', href: logout }));
+      /* Panneau d'administration et déconnexion : dans le menu de l'avatar (accountMenu) */
     } else {
       bottom.appendChild(item({ label: 'Connexion', icon: 'login', href: '/login' }));
       bottom.appendChild(item({ label: 'Inscription', icon: 'person_add', href: '/register' }));
