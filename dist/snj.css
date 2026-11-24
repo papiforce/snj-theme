@@ -3868,9 +3868,19 @@ body.sg-topicpage #topic > .topic-actions:not(.bottom) {
 }
 
 @media (max-width: 768px) {
+  /* Ordre mobile : fil d'Ariane, titre, description, puis les boutons d'action */
   .sg-pagehead__row {
-    flex-direction: column;
-    align-items: stretch;
+    display: contents;
+  }
+
+  .sg-pagehead__crumbs,
+  .sg-pagehead > .sg-crumbs { order: 0; }
+  .sg-pagehead__title { order: 1; }
+  .sg-pagehead__desc { order: 2; }
+  .sg-pagehead__actions { order: 3; }
+
+  .sg-pagehead__title--line {
+    flex: none;
   }
 
   #wrap a.sg-action {
@@ -5940,6 +5950,11 @@ body.sg-topicpage-on .sg-post .post-author-title {
   font-variation-settings: "FILL" 1;
 }
 
+#topic .sg-post .fa_like,
+#topic .sg-post .fa_liked {
+  padding: 0 12px;
+}
+
 #topic .sg-post .rep-nb {
   font-weight: 700;
   font-variant-numeric: tabular-nums;
@@ -6155,8 +6170,16 @@ body.sg-topicpage-on .sg-post .post-author-title {
     text-align: left;
   }
 
+  /* Bandeau : rôle sur toute la largeur, puis portrait | pseudo | contacts */
   #topic .sg-post .post-author-avatar {
-    grid-row: 1 / span 2;
+    grid-column: 1;
+    grid-row: 2 / span 2;
+  }
+
+  #topic .sg-post .post-author {
+    grid-column: 2;
+    grid-row: 2 / span 2;
+    align-self: center;
   }
 
   #topic .sg-post .avatar-big img {
@@ -6168,6 +6191,8 @@ body.sg-topicpage-on .sg-post .post-author-title {
 
   .sg-role {
     grid-column: 1 / -1;
+    grid-row: 1;
+    margin-bottom: 8px;
   }
 
   #topic .sg-post .post-author {
@@ -6181,7 +6206,7 @@ body.sg-topicpage-on .sg-post .post-author-title {
 
   .sg-post__contact {
     grid-column: 3;
-    grid-row: 1 / span 2;
+    grid-row: 2 / span 2;
     margin: 0;
   }
 

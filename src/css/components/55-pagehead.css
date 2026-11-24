@@ -223,9 +223,19 @@ body.sg-topicpage #topic > .topic-actions:not(.bottom) {
 }
 
 @media (max-width: 768px) {
+  /* Ordre mobile : fil d'Ariane, titre, description, puis les boutons d'action */
   .sg-pagehead__row {
-    flex-direction: column;
-    align-items: stretch;
+    display: contents;
+  }
+
+  .sg-pagehead__crumbs,
+  .sg-pagehead > .sg-crumbs { order: 0; }
+  .sg-pagehead__title { order: 1; }
+  .sg-pagehead__desc { order: 2; }
+  .sg-pagehead__actions { order: 3; }
+
+  .sg-pagehead__title--line {
+    flex: none;
   }
 
   #wrap a.sg-action {
