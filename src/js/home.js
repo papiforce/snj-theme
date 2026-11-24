@@ -479,7 +479,10 @@
           var cat = row.querySelector('.block-topics-category');
           return !(cat && DATA.latestHidden.test(cat.textContent + ' ' + (cat.getAttribute('href') || '')));
         }).slice(0, DATA.latestCount);
-        if (!rows.length) throw new Error('vide');
+        if (!rows.length) {
+          body.replaceChildren(h('p', { class: 'sg-muted', text: 'Aucun sujet pour l’instant.' }));
+          return;
+        }
         var topics = rows.map(function (row) {
           var a = row.querySelector('a.topictitle');
           var poster = row.querySelector('.block-topics-lastpost strong a') || row.querySelector('.block-topics-author a');
