@@ -39,6 +39,11 @@
   var STORE = 'snj-onglet';
   var DEFAULT = 'gestion';
 
+  /* Forumactif charge les modules dans le <head> : on attend la page */
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+
+  function init() {
   var index = document.getElementById('index');
   if (!index || document.getElementById('sg-zones')) return;
   /* Le CSS des composants doit être chargé, sinon on laisse la liste native */
@@ -330,4 +335,5 @@
 
   /* Retour arrière depuis le cache du navigateur : réapplique l'onglet de l'adresse */
   window.addEventListener('pageshow', function () { select(initial(), false); });
+  }
 })();
