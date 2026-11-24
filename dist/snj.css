@@ -663,6 +663,19 @@ html::after {
     margin-top: var(--sg-space-2) !important;
     margin-bottom: var(--sg-space-4) !important;
   }
+
+  /* Sur mobile, le nom passe sur deux lignes sans jamais couper un mot */
+  #header-banner .wrap::after {
+    font-size: clamp(1.9rem, 9vw, 2.6rem);
+    text-wrap: balance;
+    word-break: keep-all;
+    overflow-wrap: normal;
+  }
+
+  /* La nappe de brume du thème clair garde une marge réduite pour laisser la place au texte */
+  :root[data-theme="light"] #header-banner .wrap {
+    padding: 24px 16px;
+  }
 }
 
 /* Lien vers l'accueil sur toute la bannière (ajouté par layout.js) */
