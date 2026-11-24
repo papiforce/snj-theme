@@ -21,7 +21,7 @@
     { label: 'Membres', icon: 'group', href: '/memberlist', hideOnMobile: true },
     { label: 'Discord', svg: 'discord', href: 'https://discord.com/invite/bnK7vyGjXV', external: true },
     { label: 'Annexe', icon: 'menu_book', href: 'https://snj-base-de-donnees.vercel.app/', external: true },
-    { label: 'Carte', icon: 'map', href: '/t16-iii-carte' }
+    { label: 'Carte', icon: 'map', href: '/t16-iii-carte', guestHideOnMobile: true }
   ];
 
   /* Fichiers du thème servis par jsDelivr (version figée = SHA du commit) */
@@ -352,6 +352,7 @@
     nav.setAttribute('aria-label', 'Forum');
     NAV.forEach(function (l) {
       var el = item(l);
+      if (!logged && l.guestHideOnMobile) el.className += ' sg-sb-hide-mobile';
       if (!l.external && isCurrent(l.href)) el.setAttribute('aria-current', 'page');
       nav.appendChild(el);
     });
@@ -394,7 +395,8 @@
       /* Panneau d'administration et déconnexion : dans le menu de l'avatar (accountMenu) */
     } else {
       bottom.appendChild(item({ label: 'Connexion', icon: 'login', href: '/login' }));
-      bottom.appendChild(item({ label: 'Inscription', icon: 'person_add', href: '/register' }));
+      /* Visiteurs sur mobile : ni Carte ni Inscription dans la barre du bas */
+      bottom.appendChild(item({ label: 'Inscription', icon: 'person_add', href: '/register', hideOnMobile: true }));
     }
 
     bottom.appendChild(item({ id: 'sg-theme-toggle', label: 'Thème', icon: 'light_mode', onClick: toggleTheme }));
