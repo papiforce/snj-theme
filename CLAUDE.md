@@ -110,15 +110,15 @@ dans le panneau d'administration (PA), puis on commit.
 - **Sujets : cartes à motif yagasuri** (`layout.js`, fonction `topics`, + `57-topics.css`) : pattern **réservé aux sujets**,
   partout où ils sont listés. Les rouleaux makimono ont été **abandonnés** (à ne pas reproduire). Carte arrondie sans image,
   sur le fond de surface, avec en fond le motif **yagasuri** 矢絣 (empennes de flèches ; une flèche lancée = un message
-  posté), **réservé aux sujets**, à la couleur de la catégorie (`--ph`, Ume pour les annonces), net à droite et estompé
-  vers la gauche, comme le seigaiha des cartes Gestion. Pastilles de statut (Annonce / Annonce globale en Ume, Épinglé,
+  posté), **réservé aux sujets**, à la couleur de la catégorie (`--ph`, Ume pour le motif des annonces), net à droite et estompé
+  vers la gauche, comme le seigaiha des cartes Gestion. Pastilles de statut (Annonce / Annonce globale en couleur primaire `--sg-primary` / `--sg-primary-fg`, Épinglé,
   Verrouillé), « Nouveau » en Asagi ; **pas d'icône dans le coin supérieur droit** (l'indicateur de participation a été
   retiré). Titre en Zen Antique (2 lignes max), description sur 1 ligne, « par » + auteur coloré, pages du sujet en
   pastilles ; en pied (pointillé) réponses et vues, dernier message (avatar, auteur coloré, date vers le message).
   Verrouillés : carte atténuée (72 %). Grille de 2 colonnes, **même hauteur pour toutes les cartes** (`grid-auto-rows: 1fr`) ;
-  1 colonne ≤ 768px. Soulèvement au survol. **Au-dessus de la grille, bouton « Poster un nouveau sujet »** (`.sg-topics__bar`,
-  style `.sg-action`, aligné à droite, pleine largeur sur mobile) : le lien d'origine est **déplacé** depuis l'en-tête de
-  page, qui n'a donc plus ce bouton. Aucun sujet : encadré pointillé « Aucun sujet pour l'instant ».
+  1 colonne ≤ 768px. Soulèvement au survol. **« Poster un nouveau sujet » deux fois** : le bouton d'origine reste à droite
+  du titre de la page (en-tête), et un second, qui reprend son adresse, est **au-dessus de la grille, à gauche**
+  (`.sg-topics__bar`, style `.sg-action`, pleine largeur sur mobile). Aucun sujet : encadré pointillé « Aucun sujet pour l'instant ».
   Les blocs natifs `#wrap > .posts` sont masqués. Attention : AwesomeBB stylise les éléments dont la classe contient
   « topic » (`align-items: center`, `white-space: nowrap` sur les titres) : les règles de la carte passent par `#wrap .sg-topic…`.
   Récapitulatif des patterns de cartes : **forum** (accueil) = image en fond + panneau + kanji ; **sous-forum** = ema
