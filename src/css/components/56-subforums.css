@@ -109,6 +109,11 @@ body.sg-subforums-on #wrap > .forum.type-table-forum {
     var(--sg-surface-2);
 }
 
+/* Sans image, pas de voile sombre : il salirait le motif (surtout en clair) */
+.sg-ema__cover.is-empty::after {
+  content: none;
+}
+
 /* Sans image : motif asanoha 麻の葉 (feuille de chanvre) à la couleur de la catégorie */
 .sg-ema__cover.is-empty::before {
   background: color-mix(in srgb, var(--ph) 55%, transparent);
