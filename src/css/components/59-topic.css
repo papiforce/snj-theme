@@ -398,6 +398,7 @@ html[data-profile="right"] #topic .post-wrap.sg-post {
   padding: 0;
   border: 0;
   background: none;
+  box-shadow: none; /* ombre d'AwesomeBB : dessinait un filet sous l'en-tête et une ombre sous la lettre */
   color: var(--sg-text);
 }
 
