@@ -14,7 +14,7 @@ dans le panneau d'administration (PA), puis on commit.
 | `src/css/critical.css` | Tokens, thèmes clair/sombre, base | PA › Affichage › Couleurs › CSS principal |
 | `src/css/components/` | CSS des composants (barre latérale, catégories, sujets…), préfixés par un numéro d'ordre | Assemblés dans `dist/snj.css` par `node scripts/build.mjs`, servis par jsDelivr |
 | `src/templates/` | Templates HTML et extraits à insérer | PA › Affichage › Templates |
-| `src/js/` | Un fichier par script : `layout.js` (barre latérale, thème, pied de page, en-tête, sous-forums, sujets et permissions ; toutes les pages, module 10), `home.js` (widgets de l'accueil et des pages de forum, index + sous-forums, module 11), `forums.js` (catégories de l'accueil, index, module 12), `stats.js` (statistiques de l'accueil, index, module 13) | PA › Modules › Gestion des codes JavaScript |
+| `src/js/` | Un fichier par script : `layout.js` (barre latérale, thème, pied de page, en-tête, sous-forums, sujets, page de sujet et permissions ; toutes les pages, module 10), `home.js` (widgets de l'accueil et des pages de forum, index + sous-forums, module 11), `forums.js` (catégories de l'accueil, index, module 12), `stats.js` (statistiques de l'accueil, index, module 13) | PA › Modules › Gestion des codes JavaScript |
 | `docs/` | Décisions, notes de migration | — |
 
 ## Décisions
@@ -153,6 +153,41 @@ dans le panneau d'administration (PA), puis on commit.
   (`.sg-divider--end.sg-divider--topics`, inversé, sans logo) ; `.sg-topics` n'a pas de marge basse. Aucun sujet : encadré pointillé « Aucun sujet pour l'instant ».
   Les blocs natifs `#wrap > .posts` sont masqués. Attention : AwesomeBB stylise les éléments dont la classe contient
   « topic » (`align-items: center`, `white-space: nowrap` sur les titres) : les règles de la carte passent par `#wrap .sg-topic…`.
+- **Briques partagées** (`layout.js`, avant `topics()`) : `uiEl` / `uiIco` (création d'éléments et d'icônes),
+  `actionsMenu(items, id)` (bouton « Actions » trois points ; `items` = `[adresse ou fonction, icône, libellé]`,
+  `null` = séparateur), `combo(select, opts)` (listes personnalisées), `jumpBox(valeurCourante)` (« Sauter vers »),
+  `copyLink(texte)` (copie synchrone par champ temporaire + `execCommand`, l'API Clipboard en repli : elle peut rester
+  en attente d'une permission) et `toast(message)` (message discret `.sg-toast` en bas d'écran, au-dessus de la barre
+  mobile). À réutiliser sur toute nouvelle page plutôt que de les recopier.
+- **Page d'un sujet** (`layout.js`, `pageHead` + `topicPage`, + `59-topic.css`) :
+  **En-tête** : même pattern que les forums (`pageHead` reconnaît `/tN-…` et lit `#topic .topic-header`) ; le sujet
+  est le dernier niveau du fil d'Ariane (sans lien, en gras, coupé à 40ch) ; la cloche native des notifications du
+  sujet (`#push-bell`) suit le titre (bouton rond, sa couleur jaune neutralisée) ; « Répondre au sujet » en action
+  principale, « Poster un nouveau sujet » en secondaire à sa gauche (`.sg-action--ghost` : contour sur fond de surface).
+  Couleur de la catégorie posée sur `#topic` (`#topic.sg-tone-…`). Classe `body.sg-topicpage` (et `sg-topicpage-on`).
+  **Barre du sujet** (`.sg-tbar`, `z-index: 5` pour que le menu passe devant les messages) : « Sujet précédent » /
+  « Sujet suivant » (`.sg-tool`, liens natifs de `.quick-nav-topics`) et menu « Actions » : Ajouter à mes favoris,
+  Suivre / Ne plus suivre ce sujet, Copier le lien du sujet, Imprimer le sujet, Nouveaux messages depuis ma dernière
+  visite, Mes sujets suivis. Sur mobile : précédent / suivant sur une ligne pleine largeur, « Actions » dessous.
+  **Messages « fumi »** (文, la lettre) : pattern **réservé aux messages**, partout où ils s'affichent (sujets ; à
+  reprendre pour l'aperçu, les messages privés, les résultats de recherche par message). Le balisage natif est
+  conservé (citation, J'aime, éditeur continuent de fonctionner) : `.post-wrap.sg-post` en grille `232px | 1fr`,
+  `.post-body` en `display: contents`, chaque message `isolation: isolate` (l'en-tête natif a un `z-index: 500`).
+  Colonne de l'auteur : liseré gauche de 3px et léger halo à la couleur de son groupe (`--author`, lue en JS sur son
+  pseudo après `08-groups.css`, relue à chaque changement de thème ; couleur de la catégorie à défaut), portrait 3:4
+  cerné à sa couleur, pastille Asagi « en ligne », pseudo en Zen Antique, rang en pastille, fiche compacte
+  (libellé / valeur ; le gris `#444444` écrit en dur par Forumactif est neutralisé), contacts en icônes rondes
+  (profil, message privé, e-mail, site web ; la liste déroulante native est masquée). Lettre : en-tête (numéro
+  « #n » à la couleur de l'auteur, lien permanent, compté depuis le début du sujet ; date ; boutons citer / modifier /
+  supprimer / IP en icônes rondes, sur tous les formats), contenu (1rem, interligne 1,75 ; citations, code et spoilers
+  sur fond de surface), J'aime / Je n'aime pas en pastilles, signature sous un filet pointillé. ≤ 768px : profil en
+  bandeau au-dessus de la lettre (portrait 56px, fiche masquée, contacts à droite).
+  **Réponse rapide** : carte au même gabarit, intitulé « Répondre » ; l'éditeur natif (SCEditor) est conservé et
+  restylé (ses bordures et fonds sont en `!important` dans le CSS de Forumactif : on surcharge en `!important`).
+  **Bas de page** (`.sg-tfoot`) : séparateur de fin, « Sauter vers » (`jumpBox`, forum du sujet coché) à gauche,
+  outils de modération à droite (`.sg-modtools` : libellé « Modération » + icônes rondes de `.topic-admin`), puis
+  les permissions et le fil d'Ariane. Retirés : barre « Plus ! / Partagez », bouton fixe « Répondre au sujet »,
+  liste « Outils de modération » (doublon des icônes), lien « Arrêter de surveiller ce sujet » (dans « Actions »).
 - **Permissions : laissez-passer « tegata »** (`layout.js`, fonction `perms`, + `58-perms.css`) : pattern **réservé
   aux permissions**, sur toutes les pages où Forumactif affiche le bloc « Permission de ce forum » (pages de forum,
   pages de sujet…) ; le bloc natif est masqué. Le tegata 手形 est le sauf-conduit qu'on présentait aux barrières.
@@ -167,7 +202,8 @@ dans le panneau d'administration (PA), puis on commit.
   forum ») : toute l'étiquette est le lien, flèche à droite, contour à la couleur de la catégorie au survol.
   **Fil d'Ariane repris dessous** (copie du `.sg-crumbs` de l'en-tête, `.sg-crumbs--end`), quand l'en-tête existe.
   Récapitulatif des patterns : **forum** (accueil) = image en fond + panneau + kanji ; **sous-forum** = ema
-  (image en toit) ; **sujet** = motif yagasuri, sans image ; **permission** = étiquette tegata aux coins coupés.
+  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil à liseré + lettre) ;
+  **permission** = étiquette tegata aux coins coupés.
 - **Catégories de l'accueil** (`forums.js` + `40-zones.css`) : à gauche un sélecteur collant (Gestion, Hi, Mizu, Kaze,
   Kaminari, Tsuchi no Kuni, Shōkoku — « les petits pays », ex-Reste du Sekai) au style des raccourcis de l'Annexe, pastille = badge pour Gestion
   (sumi et gofun) et kanji du pays sinon (火 水 風 雷 土, 他 comme sur l'annexe), couleur de la nation ; onglet actif
