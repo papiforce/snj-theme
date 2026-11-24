@@ -47,6 +47,8 @@ dans le panneau d'administration (PA), puis on commit.
   la barre et le contenu forment un ensemble centré horizontalement (`--sg-shell-left`), coins arrondis.
 - **Bannière** : 640px de haut sur ordinateur (220px sur mobile). Clair = brume au clair de lune, sombre = renard dans les braises (`scripts/grade-banner.py`).
   Pas de logo ; wordmark « Sengoku no Jidai » fondu dans l'image (modes de fusion + dégradé).
+  Sur mobile, le nom passe sur deux lignes sans couper de mot (`word-break: keep-all`, taille réduite) et la nappe de
+  brume du thème clair n'a que 16px de marge latérale.
 - **Accueil** (`home.js` + `30-home.css`) : grille « bento » de 12 colonnes, sans titres de zones, cartes variées
   (illustrées, couverture, motifs Edo seigaiha / kikkō / shippō, carrousels, carte Vote pleine, Discord).
   Visiteur : Onboarding (Guide, Annexe, Fiche, Validation, Configuration du profil) → Contexte + Saison → Guide + Annexe
@@ -101,8 +103,8 @@ dans le panneau d'administration (PA), puis on commit.
   du cordon sous le faîte, filet de 3px à la couleur de la catégorie (`--ph`), mention « Sous-forum », titre en Zen Antique,
   description sur 2 lignes, compteurs en ligne (icônes à la couleur de la catégorie), sous-sous-forums en pastilles,
   dernier message en pied (avatar, sujet complet, auteur coloré, date) ou « Aucun message pour l'instant ».
-  Image : `data-image` de la `.sg-meta` du sous-forum, sinon l'`<img>` de sa description ; à défaut, halo à la couleur
-  de la catégorie. Non lu : pastille « Nouveau » en Asagi. Grille de 2 colonnes, cartes de même proportion (1 colonne
+  Image : `data-image` de la `.sg-meta` du sous-forum, sinon l'`<img>` de sa description ; à défaut, motif **asanoha**
+  麻の葉 (feuille de chanvre, réservé à ce repli) à la couleur de la catégorie sur un halo, sans voile sombre. Non lu : pastille « Nouveau » en Asagi. Grille de 2 colonnes, cartes de même proportion (1 colonne
   ≤ 768px), titre de section « Sous-forums » + effectif. Toute la carte est cliquable (lien du titre étendu).
 - **Catégories de l'accueil** (`forums.js` + `40-zones.css`) : à gauche un sélecteur collant (Gestion, Hi, Mizu, Kaze,
   Kaminari, Tsuchi no Kuni, Shōkoku — « les petits pays », ex-Reste du Sekai) au style des raccourcis de l'Annexe, pastille = badge pour Gestion
