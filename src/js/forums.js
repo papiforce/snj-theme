@@ -183,7 +183,7 @@
         zone.rp && f.danger !== null ? danger(f.danger) : null
       ]);
       var aside = f.subs.length ? h('ul', { class: 'sg-zcard__subs', 'aria-label': 'Sous-forums de ' + f.name }, f.subs.map(function (s) {
-        return h('li', null, [h('a', { href: s.href }, [h('span', { text: s.name }), icon('arrow_forward')])]);
+        return h('li', null, [h('a', { href: s.href, title: s.name }, [h('span', { text: s.name }), icon('arrow_forward')])]);
       })) : null;
 
       if (plain) return plainCard(f, panel, aside);
