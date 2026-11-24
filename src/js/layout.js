@@ -298,7 +298,64 @@
       home.setAttribute('aria-label', 'Sengoku no Jidai, accueil');
       banner.appendChild(home);
     }
+    footer();
     applyTheme(storedTheme() || currentTheme());
+  }
+
+  /* --------------------------------------------------------------------
+     Pied de page : liens de Forumactif centrés (sans Accueil ni Panneau
+     d'administration), puis « Sengoku no Jidai » au trait sur toute la largeur.
+     Les liens d'origine sont déplacés, pas copiés (le lien Cookies garde son action).
+     Les statistiques natives du pied de page (doublon de stats.js) sont masquées par le CSS.
+     -------------------------------------------------------------------- */
+  function footer() {
+    var pf = document.getElementById('page-footer');
+    if (!pf || pf.querySelector('.sg-footer')) return;
+
+    var list = document.createElement('ul');
+    list.className = 'sg-footer__links';
+    Array.prototype.slice.call(pf.querySelectorAll('a[href]')).forEach(function (a) {
+      var href = a.getAttribute('href') || '';
+      var li = a.closest('li');
+      if (href === '#top' || /^\/admin\//.test(href) || (li && li.classList.contains('footer-home'))) return;
+      if (/\/phpbb$/.test(href)) a.textContent = '© phpBB';
+      a.className = 'sg-footer__link';
+      var item = document.createElement('li');
+      item.appendChild(a);
+      list.appendChild(item);
+    });
+
+    var ns = 'http://www.w3.org/2000/svg';
+    var svg = document.createElementNS(ns, 'svg');
+    svg.setAttribute('class', 'sg-footer__wordmark');
+    svg.setAttribute('viewBox', '0 0 1000 140');
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    svg.setAttribute('aria-hidden', 'true');
+    var text = document.createElementNS(ns, 'text');
+    text.setAttribute('x', '0');
+    text.setAttribute('y', '100');
+    text.textContent = 'Sengoku no Jidai';
+    svg.appendChild(text);
+
+    var box = document.createElement('div');
+    box.className = 'sg-footer';
+    var nav = document.createElement('nav');
+    nav.setAttribute('aria-label', 'Liens du forum');
+    nav.appendChild(list);
+    box.appendChild(nav);
+    box.appendChild(svg);
+    pf.appendChild(box);
+    document.body.classList.add('sg-footer-on');
+
+    /* Le mot occupe toute la largeur : cadre ajusté au texte une fois la police chargée */
+    var fit = function () {
+      try {
+        var b = text.getBBox();
+        if (b.width) svg.setAttribute('viewBox', [b.x - 2, b.y - 2, b.width + 4, b.height + 4].join(' '));
+      } catch (e) {}
+    };
+    fit();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
   }
 
   if (document.readyState === 'loading') {

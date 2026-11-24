@@ -1,0 +1,101 @@
+/* ==========================================================================
+   SNJ — Pied de page (construit par src/js/layout.js, fonction footer)
+   - liens de Forumactif centrés (sans Accueil ni Panneau d'administration) ;
+   - « Sengoku no Jidai » au trait, en Zen Antique, sur toute la largeur du contenu,
+     en sumi et gofun, qui s'estompe vers le bas.
+   Les statistiques natives du pied de page (doublon du bloc stats.js) sont masquées.
+   ========================================================================== */
+
+body.sg-footer-on > footer,
+body.sg-footer-on #page-footer .navbar {
+  display: none !important;
+}
+
+#page-footer {
+  padding: var(--sg-space-8) 0 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+#page-footer > .wrap {
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+.sg-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sg-space-6);
+  padding-top: var(--sg-space-6);
+  border-top: 1px solid var(--sg-border);
+}
+
+.sg-footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+/* Point médian entre les liens */
+.sg-footer__links li + li::before {
+  content: "·";
+  margin: 0 14px;
+  color: var(--sg-text-muted);
+  opacity: 0.6;
+}
+
+.sg-footer__links a.sg-footer__link,
+.sg-footer__links a.sg-footer__link:visited {
+  color: var(--sg-text-muted);
+  font-weight: 400;
+  text-decoration: none;
+  transition: color 0.25s ease;
+}
+
+.sg-footer__links a.sg-footer__link:hover,
+.sg-footer__links a.sg-footer__link:focus-visible {
+  color: var(--sg-text);
+}
+
+/* Le nom du forum au trait, sur toute la largeur */
+.sg-footer__wordmark {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  -webkit-mask-image: linear-gradient(to bottom, #000 30%, rgba(0, 0, 0, 0.15) 100%);
+  mask-image: linear-gradient(to bottom, #000 30%, rgba(0, 0, 0, 0.15) 100%);
+}
+
+.sg-footer__wordmark text {
+  font-family: var(--sg-font-display);
+  font-size: 120px;
+  fill: transparent;
+  stroke: rgba(var(--sg-contrast-rgb), 0.45);
+  stroke-width: 1.2px;
+  vector-effect: non-scaling-stroke;
+  transition: fill 0.6s ease, stroke 0.6s ease;
+}
+
+.sg-footer:hover .sg-footer__wordmark text {
+  fill: rgba(var(--sg-contrast-rgb), 0.04);
+  stroke: rgba(var(--sg-contrast-rgb), 0.7);
+}
+
+@media (max-width: 768px) {
+  .sg-footer__links {
+    font-size: 0.8rem;
+  }
+
+  .sg-footer__links li + li::before {
+    margin: 0 8px;
+  }
+}
