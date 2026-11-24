@@ -2010,7 +2010,53 @@
     endNav.appendChild(ol.cloneNode(true));
     div.parentNode.insertBefore(endNav, div.nextSibling);
 
+    editorFrameTheme(form);
     document.body.classList.add('sg-writepage-on');
+  }
+
+  /* Mode visuel de SCEditor : la zone d'écriture est une iframe que le CSS de la page n'atteint pas (fond blanc,
+     texte noir, même en thème sombre). On y injecte les couleurs et la police du thème, lues sur la lettre,
+     à l'ouverture de l'éditeur, à chaque rechargement de l'iframe et à chaque changement de thème. */
+  function editorFrameTheme(scope) {
+    var paint = function () {
+      var frame = scope.querySelector('.sceditor-container iframe');
+      var doc = frame && frame.contentDocument;
+      if (!doc || !doc.head) return false;
+      var ref = getComputedStyle(scope.querySelector('#postingbox') || scope);
+      var link = getComputedStyle(scope).getPropertyValue('--sg-primary').trim() || ref.color;
+      var muted = getComputedStyle(scope).getPropertyValue('--sg-text-muted').trim() || ref.color;
+      /* Même color-scheme que la page : sinon le navigateur peint un fond opaque (blanc) derrière l'iframe */
+      var scheme = getComputedStyle(document.documentElement).colorScheme || 'normal';
+      var css = ':root{color-scheme:' + scheme + ';}' +
+        'html,body{background:transparent!important;color:' + ref.color + '!important;}' +
+        'body{font-family:' + ref.fontFamily + ';font-size:16px;line-height:1.7;margin:12px 14px;}' +
+        'a{color:' + link + ';}' +
+        'blockquote,.quote,.code,pre{border-left:3px solid ' + muted + ';padding:6px 12px;margin:8px 0;opacity:.9;}' +
+        'img{max-width:100%;height:auto;}';
+      var st = doc.getElementById('sg-frame-theme');
+      if (!st) {
+        st = doc.createElement('style');
+        st.id = 'sg-frame-theme';
+        doc.head.appendChild(st);
+      }
+      st.textContent = css;
+      if (!frame._sgBound) {
+        frame._sgBound = true;
+        frame.addEventListener('load', function () { setTimeout(paint, 0); });
+      }
+      return true;
+    };
+    var tries = 0;
+    var wait = function () { if (!paint() && ++tries < 40) setTimeout(wait, 150); };
+    wait();
+    if (window.MutationObserver) {
+      new MutationObserver(function () { requestAnimationFrame(paint); })
+        .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    }
+    /* Changement de mode (source ↔ visuel) : SCEditor peut réécrire le document de l'iframe */
+    scope.addEventListener('click', function (ev) {
+      if (ev.target.closest && ev.target.closest('.sceditor-button')) setTimeout(paint, 50);
+    });
   }
 
   /* Magatama du logo de Sengoku no Jidai (formes pleines) : marque du staff, comme dans les statistiques */
