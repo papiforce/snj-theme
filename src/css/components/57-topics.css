@@ -291,7 +291,9 @@ body.sg-topics-on #wrap > #sort-box {
   border: 0;
 }
 
-.sg-field__label {
+/* #wrap : AwesomeBB ajoute une marge basse de 20px aux <label> */
+#wrap .sg-field__label {
+  margin: 0;
   padding: 0;
   color: var(--sg-text-muted);
   font-size: 0.75rem;
@@ -356,14 +358,34 @@ body.sg-topics-on #wrap > #sort-box {
   color: var(--sg-on-contrast);
 }
 
+/* Bouton « Appliquer » : même style que .sg-action (55-pagehead.css), écrit pour un <button> */
 #wrap button.sg-sort__submit {
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
+  gap: 8px;
   width: 100%;
+  height: 46px;
+  padding: 0 20px;
   border: 0;
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-contrast);
+  color: var(--sg-on-contrast);
   font: inherit;
   font-size: 0.95rem;
   font-weight: 700;
   cursor: pointer;
+}
+
+#wrap button.sg-sort__submit:hover,
+#wrap button.sg-sort__submit:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: var(--sg-shadow);
+}
+
+#wrap button.sg-sort__submit:focus-visible {
+  outline: 2px solid var(--sg-accent-1);
+  outline-offset: 2px;
 }
 
 /* « Sauter vers » */
@@ -376,7 +398,7 @@ body.sg-topics-on #wrap > #sort-box {
   margin: 0;
 }
 
-.sg-jump__label {
+#wrap .sg-jump__label {
   display: inline-flex;
   flex: none;
   align-items: center;
