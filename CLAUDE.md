@@ -14,7 +14,7 @@ dans le panneau d'administration (PA), puis on commit.
 | `src/css/critical.css` | Tokens, thèmes clair/sombre, base | PA › Affichage › Couleurs › CSS principal |
 | `src/css/components/` | CSS des composants (barre latérale, catégories, sujets…), préfixés par un numéro d'ordre | Assemblés dans `dist/snj.css` par `node scripts/build.mjs`, servis par jsDelivr |
 | `src/templates/` | Templates HTML et extraits à insérer | PA › Affichage › Templates |
-| `src/js/` | Un fichier par script : `layout.js` (barre latérale, thème, pied de page, en-tête et sous-forums des pages de forum ; toutes les pages, module 10), `home.js` (widgets de l'accueil et des pages de forum, index + sous-forums, module 11), `forums.js` (catégories de l'accueil, index, module 12), `stats.js` (statistiques de l'accueil, index, module 13) | PA › Modules › Gestion des codes JavaScript |
+| `src/js/` | Un fichier par script : `layout.js` (barre latérale, thème, pied de page, en-tête, sous-forums et sujets des pages de forum ; toutes les pages, module 10), `home.js` (widgets de l'accueil et des pages de forum, index + sous-forums, module 11), `forums.js` (catégories de l'accueil, index, module 12), `stats.js` (statistiques de l'accueil, index, module 13) | PA › Modules › Gestion des codes JavaScript |
 | `docs/` | Décisions, notes de migration | — |
 
 ## Décisions
@@ -106,6 +106,17 @@ dans le panneau d'administration (PA), puis on commit.
   Image : `data-image` de la `.sg-meta` du sous-forum, sinon l'`<img>` de sa description ; à défaut, motif **asanoha**
   麻の葉 (feuille de chanvre, réservé à ce repli) à la couleur de la catégorie sur un halo, sans voile sombre. Non lu : pastille « Nouveau » en Asagi. Grille de 2 colonnes, cartes de même proportion (1 colonne
   ≤ 768px), sans titre de section ; sous la grille, le même filet que celui du pied de page (1px `--sg-border`). Toute la carte est cliquable (lien du titre étendu).
+- **Sujets : cartes « makimono »** (`layout.js`, fonction `topics`, + `57-topics.css`) : pattern **réservé aux sujets**,
+  partout où ils sont listés. Le makimono 巻物 (rouleau) : pas d'image, deux rouleaux verticaux à gauche et à droite qui
+  dépassent de 8px en haut et en bas, à la couleur de la catégorie (`--ph`, embouts assombris). Pastilles de statut
+  (Annonce / Annonce globale en Ume, Épinglé, Verrouillé), « Nouveau » en Asagi, pinceau (`history_edu`) si le membre a
+  participé ; titre en Zen Antique (2 lignes max), description sur 1 ligne, « par » + auteur coloré, pages du sujet en
+  pastilles ; en pied (pointillé) réponses et vues, dernier message (avatar, auteur coloré, date vers le message).
+  Annonces : rouleaux en Ume ; verrouillés : carte atténuée (72 %). Grille de 2 colonnes, **même hauteur pour toutes les
+  cartes** (`grid-auto-rows: 1fr`), 40px entre les lignes ; 1 colonne ≤ 768px. Soulèvement au survol. Aucun sujet :
+  encadré pointillé « Aucun sujet pour l'instant ». Les blocs natifs `#wrap > .posts` sont masqués.
+  Récapitulatif des patterns de cartes : **forum** (accueil) = image en fond + panneau + kanji ; **sous-forum** = ema
+  (image en toit) ; **sujet** = makimono (rouleaux, sans image).
 - **Catégories de l'accueil** (`forums.js` + `40-zones.css`) : à gauche un sélecteur collant (Gestion, Hi, Mizu, Kaze,
   Kaminari, Tsuchi no Kuni, Shōkoku — « les petits pays », ex-Reste du Sekai) au style des raccourcis de l'Annexe, pastille = badge pour Gestion
   (sumi et gofun) et kanji du pays sinon (火 水 風 雷 土, 他 comme sur l'annexe), couleur de la nation ; onglet actif
