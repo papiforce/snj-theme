@@ -163,7 +163,7 @@ body > header {
   border: 0;
 }
 
-#sg-sidebar .sg-sb-menu__logout {
+#sg-sidebar .sg-sb-menu__list > li.sg-sb-menu__logout {
   margin-top: 6px;
   padding-top: 6px;
   border-top: 1px solid var(--sg-border);
