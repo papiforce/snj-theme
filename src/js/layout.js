@@ -1708,7 +1708,7 @@
   var YOUTUBE_SVG = '<svg class="sg-tb__svg" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>';
   /* Profils des auteurs des derniers messages (page d'écriture) : lus sur la 1re et la dernière page du sujet,
      par pseudo ; complète chaque message « fumi » avec le rôle (ou le rang) et la fiche réduite */
-  function reviewAuthors(form, rposts) {
+  function reviewAuthors(form, rposts, done) {
     var tIn = form.querySelector('input[name="t"]');
     var t = (tIn && tIn.value) || (location.search.match(/[?&]t=(\d+)/) || [])[1];
     if (!t || !rposts.length) return;
@@ -1763,6 +1763,7 @@
             card.appendChild(facts);
           }
         });
+        if (done) requestAnimationFrame(done);
       });
     }).catch(function () {});
   }
@@ -2195,22 +2196,38 @@
         c.remove();
         rposts.push({ post: post, name: nm.textContent.replace(/\s+/g, ' ').trim() });
 
-        requestAnimationFrame(function () {
-          if (bodyC.scrollHeight <= 260) return;
-          post.classList.add('is-clamped');
-          var more = el('button', 'sg-rev__more');
-          more.type = 'button';
-          more.appendChild(el('span', null, 'Lire la suite'));
-          more.appendChild(ico('expand_more'));
-          more.setAttribute('aria-expanded', 'false');
-          more.addEventListener('click', function () {
-            var open = post.classList.toggle('is-expanded');
-            more.firstChild.textContent = open ? 'Réduire' : 'Lire la suite';
-            more.setAttribute('aria-expanded', open ? 'true' : 'false');
-          });
-          body.insertBefore(more, bodyC.nextSibling);
+        var more = el('button', 'sg-rev__more');
+        more.type = 'button';
+        more.hidden = true;
+        more.appendChild(el('span', null, 'Lire la suite'));
+        more.appendChild(ico('expand_more'));
+        more.setAttribute('aria-expanded', 'false');
+        more.addEventListener('click', function () {
+          var open = post.classList.toggle('is-expanded');
+          more.firstChild.textContent = open ? 'Réduire' : 'Lire la suite';
+          more.setAttribute('aria-expanded', open ? 'true' : 'false');
         });
+        body.insertBefore(more, bodyC.nextSibling);
       });
+      /* « Lire la suite » : le message est coupé à la hauteur du profil (la lettre s'arrête au bas du profil),
+         240px au moins (et sur mobile, où le profil est au-dessus) ; recalculé quand la fiche arrive */
+      var clampReview = function () {
+        rposts.forEach(function (r) {
+          var post = r.post, content = post.querySelector('.post-content'), more = post.querySelector('.sg-rev__more');
+          if (!content || !more || post.classList.contains('is-expanded')) return;
+          var aside = post.querySelector('.post-aside'), hd = post.querySelector('.post-header');
+          var cols = getComputedStyle(post).gridTemplateColumns.split(' ').length;
+          var limit = 240;
+          if (cols > 1 && aside && hd) limit = Math.max(240, aside.offsetHeight - hd.offsetHeight - 52);
+          post.classList.remove('is-clamped');
+          var clamp = content.scrollHeight > limit + 40;
+          post.style.setProperty('--rev-clamp', limit + 'px');
+          post.classList.toggle('is-clamped', clamp);
+          more.hidden = !clamp;
+        });
+      };
+      requestAnimationFrame(clampReview);
+      window.addEventListener('resize', function () { requestAnimationFrame(clampReview); });
       form.parentNode.insertBefore(review, form.nextSibling);
       if (reviewTitle) reviewTitle.classList.add('sg-hidden');
       after = review;
@@ -2227,7 +2244,7 @@
         new MutationObserver(function () { requestAnimationFrame(paintReview); })
           .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
       }
-      reviewAuthors(form, rposts);
+      reviewAuthors(form, rposts, clampReview);
     }
 
     /* 4. Séparateur de fin et fil d'Ariane repris */

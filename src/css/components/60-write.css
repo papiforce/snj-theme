@@ -723,13 +723,18 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
   position: relative;
 }
 
-/* Long message : coupé à 240px avec un fondu, « Lire la suite » (centré) le déplie */
+/* Long message : coupé à la hauteur du profil (240px au moins, --rev-clamp calculé en JS) avec un fondu,
+   « Lire la suite » (centré) le déplie */
 .sg-fumi .sg-post--review.is-clamped:not(.is-expanded) .post-content {
   flex: none;
-  max-height: 240px;
+  max-height: var(--rev-clamp, 240px);
   overflow: hidden;
   -webkit-mask-image: linear-gradient(to bottom, #000 70%, transparent);
   mask-image: linear-gradient(to bottom, #000 70%, transparent);
+}
+
+.sg-rev__more[hidden] {
+  display: none;
 }
 
 .sg-rev__more {
