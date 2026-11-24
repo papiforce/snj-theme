@@ -77,7 +77,8 @@ dans le panneau d'administration (PA), puis on commit.
   **Motifs Edo : un motif = une famille d'information**, uniquement sur les cartes de texte (jamais sur les cartes
   illustrées, les fils ni la carte Discord) : seigaiha 青海波 (vagues) → parcours et aide (onboarding, guides,
   tutoriels) ; kikkō 亀甲 (carapace de tortue) → univers et références durables (contexte, règlement, chronologie) ;
-  shippō 七宝 (cercles entrelacés) → communauté et liens (staff, votes, partenaires, membres).
+  shippō 七宝 (cercles entrelacés) → communauté et liens (staff, votes, partenaires, membres) ; yagasuri 矢絣
+  (empennes de flèches) → sujets (cartes de sujets uniquement).
   Derniers sujets : sujets de la Corbeille (supprimés) exclus (`DATA.latestHidden`), titre et ligne « dernier
   participant · date » coupés en ellipse, avatar du dernier participant à droite (lu dans `/memberlist`, mis en cache
   `sessionStorage` `snj-avatars`). La bannière est un lien vers `/` (`.sg-banner-link`, ajouté par `layout.js`).
@@ -106,17 +107,22 @@ dans le panneau d'administration (PA), puis on commit.
   Image : `data-image` de la `.sg-meta` du sous-forum, sinon l'`<img>` de sa description ; à défaut, motif **asanoha**
   麻の葉 (feuille de chanvre, réservé à ce repli) à la couleur de la catégorie sur un halo, sans voile sombre. Non lu : pastille « Nouveau » en Asagi. Grille de 2 colonnes, cartes de même proportion (1 colonne
   ≤ 768px), sans titre de section ; sous la grille, le même filet que celui du pied de page (1px `--sg-border`). Toute la carte est cliquable (lien du titre étendu).
-- **Sujets : cartes « makimono »** (`layout.js`, fonction `topics`, + `57-topics.css`) : pattern **réservé aux sujets**,
-  partout où ils sont listés. Le makimono 巻物 (rouleau) : pas d'image, deux rouleaux verticaux à gauche et à droite qui
-  dépassent de 8px en haut et en bas, à la couleur de la catégorie (`--ph`, embouts assombris). Pastilles de statut
-  (Annonce / Annonce globale en Ume, Épinglé, Verrouillé), « Nouveau » en Asagi, pinceau (`history_edu`) si le membre a
-  participé ; titre en Zen Antique (2 lignes max), description sur 1 ligne, « par » + auteur coloré, pages du sujet en
+- **Sujets : cartes à motif yagasuri** (`layout.js`, fonction `topics`, + `57-topics.css`) : pattern **réservé aux sujets**,
+  partout où ils sont listés. Les rouleaux makimono ont été **abandonnés** (à ne pas reproduire). Carte arrondie sans image,
+  sur le fond de surface, avec en fond le motif **yagasuri** 矢絣 (empennes de flèches ; une flèche lancée = un message
+  posté), **réservé aux sujets**, à la couleur de la catégorie (`--ph`, Ume pour les annonces), net à droite et estompé
+  vers la gauche, comme le seigaiha des cartes Gestion. Pastilles de statut (Annonce / Annonce globale en Ume, Épinglé,
+  Verrouillé), « Nouveau » en Asagi ; **pas d'icône dans le coin supérieur droit** (l'indicateur de participation a été
+  retiré). Titre en Zen Antique (2 lignes max), description sur 1 ligne, « par » + auteur coloré, pages du sujet en
   pastilles ; en pied (pointillé) réponses et vues, dernier message (avatar, auteur coloré, date vers le message).
-  Annonces : rouleaux en Ume ; verrouillés : carte atténuée (72 %). Grille de 2 colonnes, **même hauteur pour toutes les
-  cartes** (`grid-auto-rows: 1fr`), 40px entre les lignes ; 1 colonne ≤ 768px. Soulèvement au survol. Aucun sujet :
-  encadré pointillé « Aucun sujet pour l'instant ». Les blocs natifs `#wrap > .posts` sont masqués.
+  Verrouillés : carte atténuée (72 %). Grille de 2 colonnes, **même hauteur pour toutes les cartes** (`grid-auto-rows: 1fr`) ;
+  1 colonne ≤ 768px. Soulèvement au survol. **Au-dessus de la grille, bouton « Poster un nouveau sujet »** (`.sg-topics__bar`,
+  style `.sg-action`, aligné à droite, pleine largeur sur mobile) : le lien d'origine est **déplacé** depuis l'en-tête de
+  page, qui n'a donc plus ce bouton. Aucun sujet : encadré pointillé « Aucun sujet pour l'instant ».
+  Les blocs natifs `#wrap > .posts` sont masqués. Attention : AwesomeBB stylise les éléments dont la classe contient
+  « topic » (`align-items: center`, `white-space: nowrap` sur les titres) : les règles de la carte passent par `#wrap .sg-topic…`.
   Récapitulatif des patterns de cartes : **forum** (accueil) = image en fond + panneau + kanji ; **sous-forum** = ema
-  (image en toit) ; **sujet** = makimono (rouleaux, sans image).
+  (image en toit) ; **sujet** = motif yagasuri, sans image.
 - **Catégories de l'accueil** (`forums.js` + `40-zones.css`) : à gauche un sélecteur collant (Gestion, Hi, Mizu, Kaze,
   Kaminari, Tsuchi no Kuni, Shōkoku — « les petits pays », ex-Reste du Sekai) au style des raccourcis de l'Annexe, pastille = badge pour Gestion
   (sumi et gofun) et kanji du pays sinon (火 水 風 雷 土, 他 comme sur l'annexe), couleur de la nation ; onglet actif
