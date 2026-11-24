@@ -165,8 +165,9 @@ dans le panneau d'administration (PA), puis on commit.
   avatar, sous-forums à droite ; au survol, le libellé d'un sous-forum passe en blanc papier (`--zc-hover`, sumi et
   gofun pour Gestion). **Gestion** : cartes sans image sur motif seigaiha (`plainCard()`), titre, puis description et
   dernier message alignés sur une ligne (`.sg-zcard__row`, en colonne ≤ 900px), puis les sous-forums sur toute la
-  largeur en **grille de 2 colonnes, 2 par page**, pagination par points centrée (`.sg-zcard__pager`, mêmes points que
-  les carrousels ; 1 colonne ≤ 600px). Catégories sans forum : « Prochainement ».
+  largeur en **grille de 2 colonnes, 2 par page**, pagination par **chevrons** centrée (`.sg-zcard__pager` : boutons
+  ronds `.sg-zcard__page` précédent / suivant, grisés aux extrémités, page courante « 2 / 3 » entre les deux ; 1 colonne,
+  boutons de 44px espacés de 28px ≤ 600px). Catégories sans forum : « Prochainement ».
   Image des cartes sous un voile et une trame de points (comme l'ancien SnJ). Changement de catégorie : défilement doux
   jusqu'au séparateur **d'abord**, puis affichage des forums de la catégorie (le focus rendu au sélecteur utilise
   `preventScroll` pour ne pas couper le défilement). Sous les catégories, **séparateur de fin** `.sg-divider--end`
@@ -179,9 +180,11 @@ dans le panneau d'administration (PA), puis on commit.
   Page d'accueil › Structure et hiérarchie). La liste native n'est masquée que si le sélecteur est monté.
 - **Statistiques de l'accueil** (`stats.js` + `45-stats.css`) : remplacent le bloc « Qui est en ligne », sous le
   séparateur de fin. Grille bento : Chroniques (messages en compteur animé, shinobis, messages par shinobi, kikkō),
-  Dernier inscrit (portrait, sceau 新 qui se tamponne au survol), En ce moment (point « en direct » Asagi, jauge
+  Dernier inscrit (portrait, sceau 新 qui se tamponne au survol ; pseudo sur toute la largeur, coupé en ellipse ;
+  « Bienvenue sur / Sengoku no Jidai. » toujours sur 2 lignes, `white-space: pre-line`), En ce moment (point « en direct » Asagi, jauge
   enregistrés / invisibles / invités, record en discret), « Aperçus récemment » (connectés des 24 h, pseudos en pastilles colorées,
-  magatama pleins du logo de SnJ pour le staff, « + N autres » au-delà de 24, shippō), Groupes (bannières **nobori** sans hampe : une par groupe,
+  magatama pleins du logo de SnJ pour le staff, « + N autres » au-delà de 24, shippō ; lien « Voir qui arpente le
+  Sekai » vers `/viewonline`, toujours au bas de la carte), Groupes (bannières **nobori** sans hampe : une par groupe,
   mon kanji ou icône, nom vertical, effectif, ondulation au survol). Nombre de messages, de membres et dernier inscrit :
   extrait `src/templates/index_body-snippet.html` ajouté au template `index_body` (absents d'AwesomeBB par défaut).
   Connectés des 24 h activés (PA › Affichage › Page d'accueil › Généralités).
