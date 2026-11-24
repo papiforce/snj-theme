@@ -153,10 +153,10 @@ body.sg-stats-on #index .block-subtle {
 
 .sg-newest__body {
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: 4px;
   min-width: 0;
-  padding-right: 48px; /* place du sceau */
 }
 
 .sg-newest__name {
@@ -171,6 +171,12 @@ body.sg-stats-on #index .block-subtle {
 .sg-newest__text {
   color: var(--sg-text-muted);
   font-size: 0.9rem;
+  white-space: pre-line; /* toujours sur 2 lignes : « Bienvenue sur » / « Sengoku no Jidai. » */
+}
+
+/* « Voir qui arpente le Sekai » : toujours au bas de la carte */
+.sg-s-recent .sg-recent__more {
+  margin-top: auto;
 }
 
 /* Sceau : cachet carré au trait, double filet, posé en biais */

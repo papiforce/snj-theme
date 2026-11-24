@@ -196,7 +196,7 @@
     }
 
     /* Carte sans image (Gestion) : titre, puis description et dernier message alignés sur une même ligne,
-       puis les sous-forums sur toute la largeur, en grille de 2 colonnes, 2 par page, pagination par points */
+       puis les sous-forums sur toute la largeur, en grille de 2 colonnes, 2 par page, pagination par chevrons */
     var PER_PAGE = 2;
     function plainCard(f, panel, aside) {
       var desc = panel.querySelector('.sg-zcard__desc');
@@ -206,23 +206,25 @@
       if (aside) {
         var items = Array.prototype.slice.call(aside.children);
         var pages = Math.ceil(items.length / PER_PAGE);
-        var dots = [];
+        var page = 0, prev, next, count;
         var show = function (n) {
+          page = n;
           items.forEach(function (li, i) { li.hidden = Math.floor(i / PER_PAGE) !== n; });
-          dots.forEach(function (d, i) { d.setAttribute('aria-current', i === n ? 'true' : 'false'); });
+          if (prev) {
+            prev.disabled = n === 0;
+            next.disabled = n === pages - 1;
+            count.textContent = (n + 1) + ' / ' + pages;
+          }
         };
         parts.push(aside);
+        /* Pagination par chevrons, centrée, avec la page courante entre les deux */
         if (pages > 1) {
-          var nav = h('div', { class: 'sg-zcard__pager', role: 'group', 'aria-label': 'Pages des sous-forums de ' + f.name });
-          for (var p = 0; p < pages; p++) {
-            (function (n) {
-              var d = h('button', { type: 'button', class: 'sg-carousel__dot', 'aria-label': 'Page ' + (n + 1) + ' sur ' + pages });
-              d.addEventListener('click', function () { show(n); });
-              dots.push(d);
-              nav.appendChild(d);
-            })(p);
-          }
-          parts.push(nav);
+          prev = h('button', { type: 'button', class: 'sg-zcard__page', 'aria-label': 'Sous-forums précédents' }, [icon('chevron_left')]);
+          next = h('button', { type: 'button', class: 'sg-zcard__page', 'aria-label': 'Sous-forums suivants' }, [icon('chevron_right')]);
+          count = h('span', { class: 'sg-zcard__count', 'aria-live': 'polite' });
+          prev.addEventListener('click', function () { if (page > 0) show(page - 1); });
+          next.addEventListener('click', function () { if (page < pages - 1) show(page + 1); });
+          parts.push(h('div', { class: 'sg-zcard__pager', role: 'group', 'aria-label': 'Pages des sous-forums de ' + f.name }, [prev, count, next]));
         }
         show(0);
       }

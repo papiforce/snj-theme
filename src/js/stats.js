@@ -332,7 +332,7 @@
       h('div', { class: 'sg-newest__body' }, [
         eyebrow('Dernier inscrit'),
         h('span', { class: 'sg-newest__name ' + p.cls, style: p.style, text: p.name }),
-        h('span', { class: 'sg-newest__text', text: 'Bienvenue sur Sengoku no Jidai.' })
+        h('span', { class: 'sg-newest__text', text: 'Bienvenue sur\nSengoku no Jidai.' })
       ]),
       /* Sceau 新 (« nouveau »), posé en biais */
       h('span', { class: 'sg-seal', 'aria-hidden': 'true', text: '新' })
@@ -389,7 +389,7 @@
       ]),
       h('p', { class: 'sg-card__text', text: 'Shinobis passés au cours des dernières 24 heures.' }),
       list.length ? ul : h('p', { class: 'sg-muted', text: 'Personne pour le moment.' }),
-      h('a', { class: 'sg-more', href: '/viewonline' }, ['Qui est en ligne', icon('arrow_forward')])
+      h('a', { class: 'sg-more sg-recent__more', href: '/viewonline' }, ['Voir qui arpente le Sekai', icon('arrow_forward')])
     ]);
   }
 

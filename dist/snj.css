@@ -2825,12 +2825,55 @@ a.sg-zcard__last:hover .sg-zcard__last-title {
   align-self: stretch;
 }
 
-/* Pagination par points, centrée (mêmes points que les carrousels, 30-home.css) */
+/* Pagination par chevrons, centrée ; la page courante entre les deux */
 .sg-zcard__pager {
   display: flex;
+  align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 12px;
   margin-top: -4px;
+}
+
+.sg-zcard__page {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--sg-border-strong, var(--sg-border));
+  border-radius: 50%;
+  background: var(--sg-surface);
+  color: var(--sg-text);
+  cursor: pointer;
+}
+
+.sg-zcard__page:hover:not(:disabled) {
+  background: var(--sg-contrast);
+  color: var(--sg-on-contrast);
+}
+
+.sg-zcard__page:focus-visible {
+  outline: 2px solid var(--sg-accent-1);
+  outline-offset: 2px;
+}
+
+.sg-zcard__page:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.sg-zcard__page .material-symbols-outlined {
+  font-size: 22px;
+  transition: none;
+}
+
+.sg-zcard__count {
+  min-width: 3.5em;
+  color: var(--sg-text-muted);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
 }
 
 /* Catégorie pas encore ouverte */
@@ -2875,6 +2918,16 @@ a.sg-zcard__last:hover .sg-zcard__last-title {
 @media (max-width: 600px) {
   .sg-zcard--plain .sg-zcard__subs {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Cibles tactiles de 44px, bien espacées */
+  .sg-zcard__pager {
+    gap: 28px;
+  }
+
+  .sg-zcard__page {
+    width: 44px;
+    height: 44px;
   }
 }
 
@@ -3098,10 +3151,10 @@ body.sg-stats-on #index .block-subtle {
 
 .sg-newest__body {
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: 4px;
   min-width: 0;
-  padding-right: 48px; /* place du sceau */
 }
 
 .sg-newest__name {
@@ -3116,6 +3169,12 @@ body.sg-stats-on #index .block-subtle {
 .sg-newest__text {
   color: var(--sg-text-muted);
   font-size: 0.9rem;
+  white-space: pre-line; /* toujours sur 2 lignes : « Bienvenue sur » / « Sengoku no Jidai. » */
+}
+
+/* « Voir qui arpente le Sekai » : toujours au bas de la carte */
+.sg-s-recent .sg-recent__more {
+  margin-top: auto;
 }
 
 /* Sceau : cachet carré au trait, double filet, posé en biais */
