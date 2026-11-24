@@ -300,6 +300,7 @@
     }
     footer();
     pageHead();
+    subforums();
     applyTheme(storedTheme() || currentTheme());
   }
 
@@ -386,6 +387,146 @@
 
     native.parentNode.insertBefore(head, native);
     document.body.classList.add('sg-pagehead-on');
+  }
+
+  /* --------------------------------------------------------------------
+     Sous-forums : cartes « ema » (絵馬, tablette votive au sommet en toit),
+     grille de 2 colonnes. Pattern réutilisable partout où le forum liste des
+     sous-forums ; distinct des cartes de forum de l'accueil (image en fond,
+     kanji, dangerosité). Données lues dans la liste native, masquée ensuite.
+     -------------------------------------------------------------------- */
+  function subforums() {
+    if (document.querySelector('.sg-subforums')) return;
+    if (!/^\/f\d+/.test(location.pathname)) return;
+    var native = document.querySelector('#wrap > .forum.type-table-forum');
+    var rows = native ? Array.prototype.slice.call(native.querySelectorAll('.forum-section')) : [];
+    if (!rows.length) return;
+
+    var el = function (tag, cls, text) {
+      var e = document.createElement(tag);
+      if (cls) e.className = cls;
+      if (text !== undefined) e.textContent = text;
+      return e;
+    };
+    var ico = function (name) { var i = el('span', 'material-symbols-outlined', name); i.setAttribute('aria-hidden', 'true'); return i; };
+    var num = function (node) { return node ? parseInt(node.textContent.replace(/[^\d]/g, ''), 10) || 0 : 0; };
+    var plural = function (n, one, many) { return n + ' ' + (n > 1 ? many : one); };
+
+    var section = el('section', 'sg-subforums');
+    var head = document.querySelector('.sg-pagehead');
+    if (head) (head.className.match(/sg-tone-[a-z]+/) || []).forEach(function (c) { section.classList.add(c); });
+    section.setAttribute('aria-label', 'Sous-forums');
+    var top = el('div', 'sg-subforums__head');
+    top.appendChild(el('h2', 'sg-subforums__title', 'Sous-forums'));
+    top.appendChild(el('span', 'sg-subforums__count', String(rows.length)));
+    section.appendChild(top);
+    var grid = el('ul', 'sg-subforums__grid');
+
+    rows.forEach(function (row) {
+      var link = row.querySelector('.forum-description h3 a');
+      if (!link) return;
+      var desc = row.querySelector('.forum-description p');
+      var meta = row.querySelector('.sg-meta');
+      var img = (meta && meta.getAttribute('data-image')) || (desc && desc.querySelector('img') ? desc.querySelector('img').getAttribute('src') : '');
+      var text = '';
+      if (desc) {
+        var copy = desc.cloneNode(true);
+        Array.prototype.slice.call(copy.querySelectorAll('img, .sg-meta')).forEach(function (n) { n.remove(); });
+        text = copy.textContent.replace(/\s+/g, ' ').trim();
+      }
+      var topics = num(row.querySelector('.forum-statistics-topics'));
+      var posts = num(row.querySelector('.forum-statistics-posts'));
+      var unread = row.classList.contains('forum_new');
+
+      var card = el('li', 'sg-ema' + (unread ? ' is-new' : ''));
+      var cover = el('a', 'sg-ema__cover');
+      cover.href = link.getAttribute('href');
+      cover.setAttribute('tabindex', '-1');
+      cover.setAttribute('aria-hidden', 'true');
+      if (img) cover.style.setProperty('--ema-img', "url('" + img.replace(/'/g, '%27') + "')");
+      else cover.classList.add('is-empty');
+      cover.appendChild(el('span', 'sg-ema__cord'));
+      if (unread) cover.appendChild(el('span', 'sg-ema__new', 'Nouveau'));
+      card.appendChild(cover);
+
+      var body = el('div', 'sg-ema__body');
+      body.appendChild(el('span', 'sg-ema__eyebrow', 'Sous-forum'));
+      var title = el('h3', 'sg-ema__title');
+      var a = el('a', 'sg-ema__link', link.textContent.trim());
+      a.href = link.getAttribute('href');
+      title.appendChild(a);
+      body.appendChild(title);
+      if (text) body.appendChild(el('p', 'sg-ema__desc', text));
+
+      var stats = el('p', 'sg-ema__stats');
+      stats.appendChild(ico('chat_bubble'));
+      stats.appendChild(el('span', null, plural(topics, 'sujet', 'sujets')));
+      stats.appendChild(ico('forum'));
+      stats.appendChild(el('span', null, plural(posts, 'message', 'messages')));
+      body.appendChild(stats);
+
+      /* Sous-sous-forums éventuels */
+      var children = Array.prototype.slice.call(row.querySelectorAll('.forum-description a.gensmall[href^="/f"]'));
+      if (children.length) {
+        var chips = el('ul', 'sg-ema__children');
+        children.forEach(function (c) {
+          var li = el('li');
+          var ca = el('a', 'sg-ema__child', c.textContent.trim());
+          ca.href = c.getAttribute('href');
+          li.appendChild(ca);
+          chips.appendChild(li);
+        });
+        body.appendChild(chips);
+      }
+      card.appendChild(body);
+
+      /* Dernier message */
+      var last = row.querySelector('.forum-lastpost');
+      var lastTopic = last && last.querySelector('a.topic-title');
+      var foot = el('div', 'sg-ema__last');
+      if (lastTopic) {
+        var avatarImg = last.querySelector('.avatar-default img');
+        var av = el('span', 'sg-ema__avatar');
+        if (avatarImg) {
+          var im = el('img');
+          im.src = avatarImg.getAttribute('src');
+          im.alt = '';
+          im.loading = 'lazy';
+          av.appendChild(im);
+        } else av.appendChild(ico('person'));
+        foot.appendChild(av);
+        var info = el('div', 'sg-ema__lastinfo');
+        var lt = el('a', 'sg-ema__lasttopic', lastTopic.getAttribute('title') || lastTopic.textContent.trim());
+        var jump = last.querySelector('a.last-post-icon');
+        lt.href = jump ? jump.getAttribute('href') : lastTopic.getAttribute('href');
+        info.appendChild(lt);
+        var by = el('span', 'sg-ema__lastby');
+        var author = last.querySelector('.forum-lastpost-author a[href^="/u"]');
+        if (author) {
+          var au = el('a', 'sg-ema__author');
+          au.href = author.getAttribute('href');
+          var colored = author.querySelector('span[style]');
+          var name = el('span', colored ? colored.className : '', author.textContent.trim());
+          if (colored) name.setAttribute('style', colored.getAttribute('style'));
+          au.appendChild(name);
+          by.appendChild(au);
+        }
+        var time = last.querySelector('.forum-lastpost-time');
+        if (time) by.appendChild(el('span', 'sg-ema__time', time.textContent.replace(/access_time/, '').trim()));
+        info.appendChild(by);
+        foot.appendChild(info);
+      } else {
+        foot.classList.add('is-empty');
+        foot.appendChild(ico('edit_note'));
+        foot.appendChild(el('span', null, 'Aucun message pour l’instant'));
+      }
+      card.appendChild(foot);
+      grid.appendChild(card);
+    });
+
+    section.appendChild(grid);
+    native.parentNode.insertBefore(section, native);
+    document.body.classList.add('sg-subforums-on');
   }
 
   /* --------------------------------------------------------------------

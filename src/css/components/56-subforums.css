@@ -1,0 +1,341 @@
+/* ==========================================================================
+   SNJ — Sous-forums : cartes « ema » (construites par src/js/layout.js, fonction subforums)
+   L'ema 絵馬 est la tablette votive en bois des sanctuaires, au sommet en toit.
+   Pattern réservé aux SOUS-FORUMS, partout où ils sont listés. Il se distingue des cartes de
+   forum de l'accueil (image en fond, panneau, kanji en filigrane, dangerosité) par :
+     - l'image en haut, découpée en toit (silhouette de l'ema), avec le trou du cordon ;
+     - la mention « Sous-forum » au-dessus du titre ;
+     - un format compact : compteurs en ligne, dernier message en pied de carte.
+   Grille de 2 colonnes, cartes de même proportion. Couleur de la catégorie : --ph.
+   Non lu : pastille « Nouveau » en Asagi sur l'image.
+   ========================================================================== */
+
+body.sg-subforums-on #wrap > .forum.type-table-forum {
+  display: none !important;
+}
+
+.sg-subforums {
+  --ph: var(--sg-primary);
+  margin: 0 0 var(--sg-space-8);
+  font-size: 16px; /* AwesomeBB réduit la taille du texte dans #wrap */
+  line-height: 1.6;
+}
+
+.sg-subforums.sg-tone-gestion { --ph: var(--sg-contrast); }
+.sg-subforums.sg-tone-hi { --ph: var(--sg-nation-hi); }
+.sg-subforums.sg-tone-mizu { --ph: var(--sg-nation-mizu); }
+.sg-subforums.sg-tone-kaze { --ph: var(--sg-nation-kaze); }
+.sg-subforums.sg-tone-kaminari { --ph: var(--sg-nation-kaminari); }
+.sg-subforums.sg-tone-tsuchi { --ph: var(--sg-nation-tsuchi); }
+.sg-subforums.sg-tone-autres { --ph: var(--sg-nation-autres); }
+
+.sg-subforums__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: var(--sg-space-4);
+}
+
+.sg-subforums__title {
+  margin: 0;
+  color: var(--sg-text-muted);
+  font-family: var(--sg-font-body);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.sg-subforums__count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--sg-surface-2);
+  color: var(--sg-text);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.sg-subforums__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sg-space-6) var(--sg-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* --- Carte ------------------------------------------------------------------ */
+.sg-ema {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* Image découpée en toit, comme le haut d'une tablette ema */
+.sg-ema__cover {
+  position: relative;
+  display: block;
+  height: 190px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--ph) 30%, var(--sg-surface-2));
+  clip-path: polygon(0 26%, 50% 0, 100% 26%, 100% 100%, 0 100%);
+}
+
+.sg-ema__cover::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--ema-img) center / cover no-repeat;
+  transition: transform 0.6s var(--sg-ease);
+}
+
+/* Voile bas : relie l'image au corps de la carte */
+.sg-ema__cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 55%, rgba(var(--sg-ink-overlay), 0.45));
+}
+
+.sg-ema__cover.is-empty::before {
+  background:
+    radial-gradient(circle at 50% 70%, color-mix(in srgb, var(--ph) 45%, transparent), transparent 70%),
+    var(--sg-surface-2);
+}
+
+.sg-ema:hover .sg-ema__cover::before,
+.sg-ema:focus-within .sg-ema__cover::before {
+  transform: scale(1.05);
+}
+
+/* Trou du cordon, sous le faîte */
+.sg-ema__cord {
+  position: absolute;
+  top: 16%;
+  left: 50%;
+  z-index: 1;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--sg-contrast);
+  border-radius: 50%;
+  background: var(--sg-bg);
+  transform: translateX(-50%);
+}
+
+.sg-ema__new {
+  position: absolute;
+  right: 14px;
+  bottom: 12px;
+  z-index: 1;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--sg-accent-1);
+  color: var(--sg-on-accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Corps et pied : la planchette */
+.sg-ema__body,
+.sg-ema__last {
+  background: var(--sg-surface);
+  border: 1px solid var(--sg-border);
+  border-top: 0;
+}
+
+.sg-ema__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px 22px 16px;
+  border-top: 3px solid var(--ph);
+}
+
+.sg-ema__eyebrow {
+  color: var(--sg-text-muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.sg-ema__title {
+  margin: 0;
+  font-family: var(--sg-font-display);
+  font-size: 1.55rem;
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+#wrap a.sg-ema__link,
+#wrap a.sg-ema__link:visited {
+  color: var(--sg-text);
+  text-decoration: none;
+}
+
+/* Toute la carte est cliquable par le titre */
+.sg-ema {
+  position: relative;
+}
+
+.sg-ema__link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.sg-ema__desc {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: var(--sg-text-muted);
+  font-size: 0.92rem;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.sg-ema__stats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  margin: 4px 0 0;
+  color: var(--sg-text-muted);
+  font-size: 0.85rem;
+}
+
+.sg-ema__stats .material-symbols-outlined {
+  font-size: 17px;
+  color: var(--ph);
+}
+
+.sg-ema__stats .material-symbols-outlined + span + .material-symbols-outlined {
+  margin-left: 10px;
+}
+
+.sg-ema__children {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+#wrap a.sg-ema__child,
+#wrap a.sg-ema__child:visited {
+  position: relative;
+  z-index: 1;
+  padding: 3px 10px;
+  border: 1px solid var(--sg-border);
+  border-radius: 999px;
+  color: var(--sg-text);
+  font-size: 0.8rem;
+  text-decoration: none;
+}
+
+/* Dernier message */
+.sg-ema__last {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 64px;
+  padding: 12px 22px 14px;
+  border-top: 1px dashed var(--sg-border);
+  border-radius: 0 0 var(--sg-radius-lg) var(--sg-radius-lg);
+}
+
+.sg-ema__last.is-empty {
+  color: var(--sg-text-muted);
+  font-size: 0.88rem;
+}
+
+.sg-ema__last.is-empty .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.sg-ema__avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--sg-surface-2);
+  color: var(--sg-text-muted);
+}
+
+.sg-ema__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sg-ema__lastinfo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+#wrap a.sg-ema__lasttopic,
+#wrap a.sg-ema__lasttopic:visited {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  color: var(--sg-text);
+  font-size: 0.92rem;
+  font-weight: 700;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sg-ema__lastby {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 8px;
+  color: var(--sg-text-muted);
+  font-size: 0.8rem;
+}
+
+#wrap a.sg-ema__author {
+  position: relative;
+  z-index: 1;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.sg-ema__time::before {
+  content: "·";
+  margin-right: 8px;
+}
+
+#wrap a.sg-ema__lasttopic:hover,
+#wrap a.sg-ema__child:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .sg-subforums__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sg-ema__cover {
+    height: 160px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sg-ema__cover::before {
+    transition: none;
+  }
+}
