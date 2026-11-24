@@ -4098,7 +4098,8 @@ body.sg-topics-on #wrap > .posts {
   top: calc(100% + 8px);
   right: 0;
   z-index: 20;
-  min-width: 320px;
+  width: max-content;
+  max-width: min(420px, 90vw);
   margin: 0;
   padding: 6px;
   border: 1px solid var(--sg-border);
@@ -4452,7 +4453,8 @@ body.sg-topics-on #wrap > .posts {
 
   .sg-menu__list {
     left: 0;
-    min-width: 0;
+    width: auto;
+    max-width: none;
   }
 
   #wrap .sg-topics__bar a.sg-action {
