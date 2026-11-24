@@ -1735,8 +1735,14 @@
       tone(meta && meta.tone);
       ol.textContent = '';
       if (links.length) {
+        /* Liens d'origine repris tels quels (icône maison comprise), comme dans pageHead */
         links.forEach(function (a, i) {
-          crumb(i === 1 && meta ? '/?onglet=' + meta.slug : a.getAttribute('href'), a.textContent.trim());
+          var li = el('li', 'sg-crumbs__item');
+          var link = document.importNode(a, true);
+          link.className = 'sg-crumbs__link';
+          if (i === 1 && meta) link.setAttribute('href', '/?onglet=' + meta.slug);
+          li.appendChild(link);
+          ol.appendChild(li);
         });
       } else crumb('/', 'Accueil');
       /* Le sujet en dernier lien ; pour un forum, son fil se termine déjà par lui */

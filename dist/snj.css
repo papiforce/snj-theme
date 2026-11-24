@@ -6817,6 +6817,16 @@ html[data-theme="dark"] .sg-writeform .sceditor-button div {
   min-width: 220px;
 }
 
+/* Type du sujet : les quatre choix sur une ligne (deux par ligne sur mobile) */
+.sg-write__opts .sg-seg {
+  grid-template-columns: repeat(4, auto);
+}
+
+.sg-write__opts .sg-seg__face {
+  padding: 0 14px;
+  white-space: nowrap;
+}
+
 /* Boutons : « Prévisualiser » (contour) puis « Envoyer » (plein), à droite, au pied de la lettre */
 #wrap .sg-writeform fieldset.form-buttons {
   margin: 0;
@@ -6980,6 +6990,45 @@ html[data-theme="dark"] .sg-writeform .sceditor-button div {
 
 #wrap .sg-panel.is-open > .block-content {
   display: block;
+}
+
+/* AwesomeBB écrit les panneaux en petit : texte courant à 0,95rem, libellés lisibles */
+#wrap .sg-panel > .block-content,
+#wrap .sg-panel > .block-content label,
+#wrap .sg-panel > .block-content dt,
+#wrap .sg-panel > .block-content dd {
+  color: var(--sg-text);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+#wrap .sg-panel > .block-content span[style*="color"],
+#wrap .sg-panel > .block-content .gensmall,
+#wrap .sg-panel > .block-content small {
+  color: var(--sg-text-muted) !important;
+  font-size: 0.85rem;
+}
+
+#wrap .sg-panel input[type="text"]:not([size]),
+#wrap .sg-panel input[type="url"],
+#wrap .sg-panel input:not([type]),
+#wrap .sg-panel textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#wrap .sg-panel input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  margin: 0 6px 0 0;
+  vertical-align: -3px;
+}
+
+#wrap .sg-panel label:has(input[type="radio"]) {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  margin-right: 16px;
 }
 
 /* Champs des panneaux : même contour arrondi que les listes personnalisées */
@@ -7175,6 +7224,10 @@ html[data-theme="dark"] .sg-writeform .sceditor-button div {
   .sg-write__opts .sg-field {
     flex: 1 1 100%;
     min-width: 0;
+  }
+
+  .sg-write__opts .sg-seg {
+    grid-template-columns: 1fr 1fr;
   }
 
   #wrap .sg-opt {
