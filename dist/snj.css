@@ -5452,6 +5452,8 @@ body.sg-topicpage-on .sg-post .post-header > h2 {
 
 /* --- 1. Barre du sujet ---------------------------------------------------------- */
 .sg-tbar {
+  position: relative;
+  z-index: 5; /* le menu « Actions » passe devant les messages */
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -5973,8 +5975,8 @@ body.sg-topicpage-on .sg-post .post-header > h2 {
 }
 
 #topic .quick-reply .sceditor-toolbar {
-  border: 0;
-  border-bottom: 1px solid var(--sg-border);
+  border: 0 !important;
+  border-bottom: 1px solid var(--sg-border) !important;
   background: none !important;
   color: var(--sg-text-muted);
 }

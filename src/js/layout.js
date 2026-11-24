@@ -1343,22 +1343,21 @@
 
   /* Copie d'un lien dans le presse-papiers, avec un message discret en bas d'écran */
   function copyLink(text) {
-    var done = function () { toast('Lien copié dans le presse-papiers'); };
-    /* Repli sans API Clipboard : champ temporaire et execCommand */
-    var fallback = function () {
-      var ta = uiEl('textarea');
-      ta.value = text;
-      ta.setAttribute('readonly', '');
-      ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
-      document.body.appendChild(ta);
-      ta.select();
-      var ok = false;
-      try { ok = document.execCommand('copy'); } catch (e) {}
-      ta.remove();
-      toast(ok ? 'Lien copié dans le presse-papiers' : 'Copie impossible : ' + text);
-    };
-    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, fallback);
-    else fallback();
+    /* D'abord une copie synchrone (champ temporaire + execCommand), fiable pendant le clic et sans
+       permission ; l'API Clipboard seulement en repli (elle peut rester en attente d'une permission). */
+    var ta = uiEl('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+    document.body.appendChild(ta);
+    ta.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) {}
+    ta.remove();
+    if (ok) { toast('Lien copié dans le presse-papiers'); return; }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { toast('Lien copié dans le presse-papiers'); }, function () { toast('Copie impossible : ' + text); });
+    } else toast('Copie impossible : ' + text);
   }
 
   function toast(message) {
