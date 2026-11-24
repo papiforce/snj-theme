@@ -277,6 +277,19 @@ dans le panneau d'administration (PA), puis on commit.
   (textarea et iframe) a le fond `--sg-surface-2` et l'arrondi de 12px, en `padding: 16px !important` (16px aussi
   dans l'iframe du mode visuel). **Toutes les icônes sur une seule ligne** (boutons de 32px, flex sans retour à la
   ligne, défilement horizontal sur petit écran ; filet retiré après le dernier groupe visible, `.sg-tb-last`).
+  **Survol** d'une icône en sumi et gofun plein (actif : teinte légère) et
+  **libellé en infobulle** au survol et au focus (`toolbarTips()` : une seule infobulle `.sg-tbtip` en position fixe,
+  posée sur la page, car la barre défile et couperait une infobulle CSS ; libellés natifs, `TB_LABELS` pour les plus
+  longs). **Fenêtres des outils** (spoiler, héberger une image, insérer une image, lien, enrichir un lien, vidéo
+  YouTube, format des titres, couleur) au design system (`editorPopups()` : SCEditor les recrée à chaque ouverture,
+  un `MutationObserver` les marque `.sg-pop`) : fond de surface, contour, ombre, libellés en petit, champs arrondis
+  sur `--sg-surface-2`, bouton « Insérer » sumi et gofun ; la fenêtre de Servimg est une page extérieure (cadre
+  seulement). Titres : « Grand titre » / « Titre » / « Sous-titre » en Zen Antique (`HEADER_LABELS`, balises h2 à h4
+  inchangées). **Couleur** : fenêtre reconstruite avec **uniquement les couleurs du design system**, pastille + nom
+  (`TEXT_COLORS` : Hagane, Sumi et gofun, Asagi, Ume, Kaki, les six pays) ; un clic insère `[color=#CODE]…[/color]`
+  (`insertText` de SCEditor) avec le code « sombre », que `08-groups.css` remplace à l'affichage par le token
+  (la couleur suit le thème ; Asagi, Ume et Kaki y ont été ajoutés). **Densité compacte** : le profil et la lettre
+  partagent le même fond (`form.sg-writeform` sur `--sg-surface`, sans écart, profil en marge intérieure de 16px).
   **Mode bloqué en texte (BBCode)**, celui qu'utilise Vinny : `lockEditorMode()` rebascule un éditeur ouvert en
   mode visuel (`toggleSourceMode()` de l'instance SCEditor). **Barre d'outils** (`editorToolbar()`) : retirés (`TB_REMOVE`) tableau, taille,
   police, supprimer le formatage, plus/moins de boutons, défilements horizontal et vertical, aléatoire, Twemoji, date,
@@ -296,15 +309,17 @@ dans le panneau d'administration (PA), puis on commit.
   « Enregistrer » (plein) ; sur mobile en pleine largeur, « Envoyer » au-dessus. **Autres blocs** du formulaire
   (règles du forum, sondage, calendrier, SEO, pièces jointes…) en **panneaux repliables** `.sg-panel` (titre en Zen
   Antique, chevron ; fermés, sauf les règles) ; leurs listes passent en `combo`, leurs champs au contour arrondi.
-  **Aperçu** (`#preview`) : carte pointillée « Aperçu ». **Revue du sujet** : « Derniers messages du sujet » au **pattern « fumi »**
-  de la page du sujet (`section.sg-review.sg-fumi` : le CSS des messages vise `:is(#topic, .sg-fumi)`), préférences
-  « Position du profil » et « Densité » comprises, couleur de la catégorie : rôle, portrait 200 × 400, pseudo, fiche
-  réduite, lettre avec la date (et la modification). Forumactif n'y donne que portrait, pseudo coloré, date et
-  contenu : `reviewAuthors()` lit l'identifiant, le rang et la fiche des auteurs sur la 1re et la dernière page du
-  sujet (par pseudo), puis pose le rôle (`staffRoles`) et la fiche. Pas de J'aime ni de menu (aucun lien natif).
+  **Aperçu** (`#preview`) : carte pointillée « Aperçu ». **Revue du sujet** : « Derniers messages du sujet » **repliés par défaut** :
+  le titre est un bouton (`.sg-review__toggle`, contour pointillé, plein une fois ouvert) avec le **nombre de messages**
+  en pastille Asagi, « Afficher » / « Masquer » et un chevron (`aria-expanded`). Messages au **pattern « fumi »** de la
+  page du sujet (`section.sg-review.sg-fumi` : le CSS des messages vise `:is(#topic, .sg-fumi)`), préférences
+  « Position du profil » et « Densité » comprises, couleur de la catégorie, mais un profil réduit à **l'avatar et au
+  pseudo** (ni rôle ni fiche ; la page du sujet n'est pas touchée). Forumactif n'y donne que portrait, pseudo coloré
+  (parfois absent : repli sur le texte alternatif du portrait), date et contenu ; ses détails, parfois glissés dans le
+  contenu (`.block-footer`), sont retirés. Pas de J'aime ni de menu (aucun lien natif).
   **« Lire la suite »** gardé, **centré** (`.sg-rev__more`, « Réduire » une fois déplié) : le message est coupé à la
-  hauteur du profil (`--rev-clamp`, 240px au moins, 240px sur mobile), avec un fondu ; recalculé quand la fiche
-  arrive et au redimensionnement. En bas : séparateur de fin et fil d'Ariane repris. Non testés faute d'envoyer un formulaire :
+  hauteur du profil (`--rev-clamp`, 240px au moins, 240px sur mobile), avec un fondu ; calculé à l'ouverture et au
+  redimensionnement. En bas : séparateur de fin et fil d'Ariane repris. Non testés faute d'envoyer un formulaire :
   aperçu, modification, erreurs, pièces jointes.
 - **Permissions : laissez-passer « tegata »** (`layout.js`, fonction `perms`, + `58-perms.css`) : pattern **réservé
   aux permissions**, sur toutes les pages où Forumactif affiche le bloc « Permission de ce forum » (pages de forum,
