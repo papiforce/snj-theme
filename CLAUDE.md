@@ -104,7 +104,7 @@ dans le panneau d'administration (PA), puis on commit.
   séparateur de fin. Grille bento : Chroniques (messages en compteur animé, shinobis, messages par shinobi, kikkō),
   Dernier inscrit (portrait, sceau 新 qui se tamponne au survol), En ce moment (point « en direct » Asagi, jauge
   enregistrés / invisibles / invités, record en discret), « Aperçus récemment » (connectés des 24 h, pseudos en pastilles colorées,
-  magatama pleins du logo de SnJ pour le staff, « + N autres » au-delà de 24, shippō), Groupes (bannières **nobori** : une par groupe,
+  magatama pleins du logo de SnJ pour le staff, « + N autres » au-delà de 24, shippō), Groupes (bannières **nobori** sans hampe : une par groupe,
   mon kanji ou icône, nom vertical, effectif, ondulation au survol). Nombre de messages, de membres et dernier inscrit :
   extrait `src/templates/index_body-snippet.html` ajouté au template `index_body` (absents d'AwesomeBB par défaut).
   Connectés des 24 h activés (PA › Affichage › Page d'accueil › Généralités).
