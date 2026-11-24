@@ -100,6 +100,55 @@
   }
 
   /* ----------------------------------------------------------------------
+     Préférences d'affichage des sujets (menu « Préférences » de la page d'un sujet)
+     Gardées comme le thème : localStorage + cookie de secours, réappliquées à chaque
+     affichage (retour arrière compris) et d'un onglet à l'autre. Attributs sur <html> :
+     data-profile="right" (profil à droite du message), data-density="compact".
+     ---------------------------------------------------------------------- */
+  var PREFS = {
+    profile: { key: 'snj-profile', on: 'right', attr: 'data-profile' },
+    density: { key: 'snj-density', on: 'compact', attr: 'data-density' }
+  };
+
+  function prefOn(name) {
+    var p = PREFS[name], v = null;
+    try { v = localStorage.getItem(p.key); } catch (e) {}
+    if (v === null) {
+      var m = document.cookie.match(new RegExp('(?:^|;\\s*)' + p.key + '=([a-z]+)'));
+      v = m ? m[1] : null;
+    }
+    return v === p.on;
+  }
+
+  function applyPref(name, on) {
+    var p = PREFS[name];
+    if (on) root.setAttribute(p.attr, p.on); else root.removeAttribute(p.attr);
+  }
+
+  function setPref(name, on) {
+    var p = PREFS[name], v = on ? p.on : 'default';
+    try { localStorage.setItem(p.key, v); } catch (e) {}
+    document.cookie = p.key + '=' + v + '; path=/; max-age=31536000; SameSite=Lax' +
+      (location.protocol === 'https:' ? '; Secure' : '');
+    applyPref(name, on);
+  }
+
+  function syncPrefs() {
+    Object.keys(PREFS).forEach(function (n) { applyPref(n, prefOn(n)); });
+  }
+
+  syncPrefs();
+  window.addEventListener('pageshow', syncPrefs);
+  window.addEventListener('storage', function (e) {
+    if (!e.key || /^snj-(profile|density)$/.test(e.key)) {
+      syncPrefs();
+      Array.prototype.slice.call(document.querySelectorAll('.sg-menu__item[data-pref]')).forEach(function (it) {
+        if (it._sgSync) it._sgSync();
+      });
+    }
+  });
+
+  /* ----------------------------------------------------------------------
      Outils
      ---------------------------------------------------------------------- */
   function icon(name) {
@@ -598,27 +647,78 @@
     return i;
   }
 
-  /* Menu « Actions » (trois points verticaux) : items = [adresse ou fonction, icône, libellé], null = séparateur.
+  /* Menu déroulant (« Actions », « Préférences », actions d'un message).
+     items = [adresse ou fonction, icône, libellé] ; null = séparateur ;
+     { pref: 'profile' | 'density', icon, label: function (actif) } = interrupteur (menuitemcheckbox), qui
+     enregistre la préférence et laisse le menu ouvert.
+     opts : { label: 'Actions', icon: 'more_vert', iconFirst: false, iconOnly: false, cls: '' }.
      Utilisé sur les pages de forum (topics) et de sujet (topicPage). */
-  function actionsMenu(items, menuId) {
+  function actionsMenu(items, menuId, opts) {
     var el = uiEl, ico = uiIco;
-    var wrapM = el('div', 'sg-menu');
+    opts = opts || {};
+    var wrapM = el('div', 'sg-menu' + (opts.cls ? ' ' + opts.cls : ''));
     var toggle = el('button', 'sg-menu__toggle');
     toggle.type = 'button';
     toggle.setAttribute('aria-haspopup', 'menu');
     toggle.setAttribute('aria-expanded', 'false');
     toggle.setAttribute('aria-controls', menuId);
-    toggle.appendChild(el('span', null, 'Actions'));
-    toggle.appendChild(ico('more_vert'));
+    var tLabel = opts.label || 'Actions', tIcon = ico(opts.icon || 'more_vert');
+    if (opts.iconOnly) {
+      toggle.setAttribute('aria-label', tLabel);
+      toggle.setAttribute('title', tLabel);
+      toggle.appendChild(tIcon);
+    } else if (opts.iconFirst) {
+      toggle.appendChild(tIcon);
+      toggle.appendChild(el('span', null, tLabel));
+    } else {
+      toggle.appendChild(el('span', null, tLabel));
+      toggle.appendChild(tIcon);
+    }
     var menu = el('ul', 'sg-menu__list');
     menu.id = menuId;
     menu.setAttribute('role', 'menu');
+    menu.setAttribute('aria-label', tLabel);
     menu.hidden = true;
     items.forEach(function (it) {
       if (it === null) { var sep = el('li', 'sg-menu__sep'); sep.setAttribute('role', 'separator'); menu.appendChild(sep); return; }
       var li = el('li');
       li.setAttribute('role', 'none');
       var item = el('a', 'sg-menu__item');
+      if (it.pref) {
+        /* Interrupteur : libellé qui suit l'état, switch à droite */
+        var name = it.pref;
+        item.href = '#';
+        item.classList.add('sg-menu__item--switch');
+        item.setAttribute('role', 'menuitemcheckbox');
+        item.setAttribute('data-pref', name);
+        item.tabIndex = -1;
+        item.appendChild(ico(it.icon));
+        var txt = el('span', 'sg-menu__text');
+        item.appendChild(txt);
+        var sw = el('span', 'sg-switch');
+        sw.setAttribute('aria-hidden', 'true');
+        sw.appendChild(el('span', 'sg-switch__thumb'));
+        item.appendChild(sw);
+        var sync = function () {
+          var on = prefOn(name);
+          item.setAttribute('aria-checked', on ? 'true' : 'false');
+          txt.textContent = it.label(on);
+        };
+        item._sgSync = sync;
+        sync();
+        item.addEventListener('click', function (ev) {
+          ev.preventDefault();
+          setPref(name, !prefOn(name));
+          sync();
+          if (it.onChange) it.onChange(prefOn(name));
+        });
+        item.addEventListener('keydown', function (ev) {
+          if (ev.key === ' ') { ev.preventDefault(); item.click(); }
+        });
+        li.appendChild(item);
+        menu.appendChild(li);
+        return;
+      }
       if (typeof it[0] === 'function') {
         var run = it[0];
         item.href = '#';
@@ -1238,58 +1338,101 @@
     while (items.length && items[items.length - 1] === null) items.pop();
     for (var k = items.length - 1; k > 0; k--) if (items[k] === null && items[k - 1] === null) items.splice(k, 1);
     if (items.length) bar.appendChild(actionsMenu(items, 'sg-topic-menu'));
+    /* « Préférences » à l'extrême gauche : position du profil et densité, mémorisées comme le thème */
+    bar.insertBefore(actionsMenu([
+      { pref: 'profile', icon: 'swap_horiz', label: function (on) { return 'Position du profil (' + (on ? 'inversé' : 'défaut') + ')'; } },
+      { pref: 'density', icon: 'density_medium', label: function (on) { return 'Densité (' + (on ? 'compact' : 'défaut') + ')'; } }
+    ], 'sg-prefs-menu', { label: 'Préférences', icon: 'tune', iconFirst: true, cls: 'sg-menu--start' }), bar.firstChild);
     var firstPost = topic.querySelector('.post-wrap');
-    if (bar.children.length && firstPost) firstPost.parentNode.insertBefore(bar, firstPost);
+    if (firstPost) firstPost.parentNode.insertBefore(bar, firstPost);
 
     /* 2. Messages « fumi » */
-    var offset = parseInt((location.pathname.match(/^\/t\d+p(\d+)-/) || [])[1] || '0', 10);
-    var LABELS = { 'btn-quote': 'Citer', 'btn-edit': 'Modifier', 'btn-delete': 'Supprimer', 'btn-ip': 'Adresse IP', 'btn-report': 'Signaler' };
+    var BTN = {
+      'btn-quote': ['format_quote', 'Citer ce message'],
+      'btn-edit': ['edit', 'Modifier le message'],
+      'btn-delete': ['delete', 'Supprimer le message'],
+      'btn-ip': ['lan', 'Voir l’adresse IP'],
+      'btn-report': ['flag', 'Signaler le message']
+    };
     var posts = Array.prototype.slice.call(topic.querySelectorAll('.post-wrap'));
-    posts.forEach(function (post, i) {
+    posts.forEach(function (post) {
       post.classList.add('sg-post');
       var hd = post.querySelector('.post-header');
-      var permalink = hd && hd.querySelector('.post-heading-wrap a[href]');
-      var date = hd && hd.querySelector('.post-date');
+      var body = post.querySelector('.post');
+      var content = post.querySelector('.post-content');
+      var aside = post.querySelector('.post-aside');
+
+      /* La lettre (en-tête + contenu) devient une carte séparée du profil */
+      if (hd && body) {
+        var letter = el('div', 'sg-post__letter');
+        body.parentNode.insertBefore(letter, body);
+        letter.appendChild(hd);
+        letter.appendChild(body);
+      }
+
       if (hd) {
+        var permalink = hd.querySelector('.post-heading-wrap a[href]');
+        var date = hd.querySelector('.post-date');
         var meta = el('div', 'sg-post__meta');
-        var num = el('a', 'sg-post__num', '#' + (offset + i + 1));
-        num.href = permalink ? permalink.getAttribute('href') : '#' + post.id;
-        num.setAttribute('title', 'Lien vers ce message');
-        meta.appendChild(num);
         if (date) {
           var d = el('span', 'sg-post__date');
+          d.setAttribute('title', 'Publié');
           d.appendChild(ico('schedule'));
           d.appendChild(el('span', null, date.textContent.trim()));
           meta.appendChild(d);
         }
+        /* Dernière modification : mention native « Dernière édition par X le …, édité N fois », retirée du contenu */
+        var edited = content && editedInfo(content);
+        if (edited) {
+          var e = el('span', 'sg-post__date sg-post__date--edit');
+          e.setAttribute('title', edited.full);
+          e.appendChild(ico('edit_note'));
+          e.appendChild(el('span', null, 'Modifié ' + edited.date));
+          meta.appendChild(e);
+        }
         hd.insertBefore(meta, hd.firstChild);
+
+        /* À droite : J'aime (cœur) puis le menu des actions du message (trois points) */
+        var acts = el('div', 'sg-post__actions');
+        var like = post.querySelector('.fa_like_div');
+        if (like) acts.appendChild(like);
+        var mItems = [];
         Array.prototype.slice.call(hd.querySelectorAll('.post-buttons li')).forEach(function (li) {
-          var a = li.querySelector('a');
-          var label = LABELS[(li.className.match(/btn-[a-z]+/) || [])[0]];
-          if (a && label) { a.setAttribute('title', label); a.setAttribute('aria-label', label); }
+          var a = li.querySelector('a[href]');
+          var spec = BTN[(li.className.match(/btn-[a-z]+/) || [])[0]];
+          if (a && spec) mItems.push([a.getAttribute('href'), spec[0], spec[1]]);
         });
+        var link = location.origin + location.pathname + '#' + (permalink ? (permalink.getAttribute('href').split('#')[1] || post.id) : post.id);
+        if (mItems.length) mItems.push(null);
+        mItems.push([function () { copyLink(link); }, 'link', 'Copier le lien du message']);
+        acts.appendChild(actionsMenu(mItems, 'sg-post-menu-' + (post.id || Math.random().toString(36).slice(2)),
+          { label: 'Actions du message', icon: 'more_vert', iconOnly: true, cls: 'sg-menu--icon' }));
+        hd.appendChild(acts);
       }
 
-      var aside = post.querySelector('.post-aside');
+      var foot = post.querySelector('.post-footer');
+      if (foot && !foot.children.length) foot.classList.add('sg-hidden');
+
       if (aside) {
-        /* Contacts : icônes Material Symbols à la place des images de Forumactif */
-        var links = Array.prototype.slice.call(aside.querySelectorAll('.post-author-contact a[href]'));
-        if (links.length) {
-          var contact = el('div', 'sg-post__contact');
-          links.forEach(function (a) {
-            var href = a.getAttribute('href') || '';
-            var spec = /privmsg/.test(href) ? ['mail', 'Message privé'] : /mode=email/.test(href) ? ['alternate_email', 'E-mail']
-              : /^\/u\d+/.test(href) ? ['person', 'Profil'] : /^https?:/.test(href) ? ['language', 'Site web'] : ['link', a.title || 'Lien'];
-            var b = el('a', 'sg-post__contact-link');
-            b.href = href;
-            if (a.target) b.target = a.target;
-            b.setAttribute('title', spec[1]);
-            b.setAttribute('aria-label', spec[1]);
-            b.appendChild(ico(spec[0]));
-            contact.appendChild(b);
-          });
-          aside.appendChild(contact);
+        /* Pseudo sans l'infobulle de profil de Forumactif (tooltipster) */
+        var nameLink = aside.querySelector('.post-author-name a');
+        if (nameLink) {
+          try { if (window.jQuery && jQuery.fn.tooltipster && nameLink.classList.contains('tooltipstered')) jQuery(nameLink).tooltipster('destroy'); } catch (err) {}
+          var clean = nameLink.cloneNode(true);
+          clean.classList.remove('tooltipstered');
+          clean.removeAttribute('title');
+          nameLink.parentNode.replaceChild(clean, nameLink);
         }
+
+        /* Carte du profil : portrait, pseudo, « Inscrit depuis » et localisation ; le rôle reste au-dessus, hors carte */
+        var card = el('div', 'sg-post__card');
+        var av = aside.querySelector('.post-author-avatar');
+        var author = aside.querySelector('.post-author');
+        if (av) card.appendChild(av);
+        if (author) card.appendChild(author);
+        var facts = authorFacts(aside.querySelector('.post-author-details'));
+        if (facts) card.appendChild(facts);
+        aside.appendChild(card);
       }
     });
 
@@ -1429,6 +1572,73 @@
         aside.insertBefore(band, aside.firstChild);
       });
     });
+  }
+
+  /* « Inscrit depuis … » à partir d'une date jj/mm/aaaa : jours (< 1 semaine), semaines (< 1 mois),
+     mois (< 1 an), puis années, au singulier ou au pluriel */
+  function memberSince(text, now) {
+    var m = (text || '').match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (!m) return '';
+    var start = new Date(+m[3], +m[2] - 1, +m[1]);
+    now = now || new Date();
+    var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    var days = Math.round((today - start) / 86400000);
+    if (days < 0) return '';
+    if (days === 0) return 'Inscrit aujourd’hui';
+    var plural = function (n, one, many) { return n + ' ' + (n > 1 ? many : one); };
+    var months = (today.getFullYear() - start.getFullYear()) * 12 + today.getMonth() - start.getMonth() - (today.getDate() < start.getDate() ? 1 : 0);
+    var span = days < 7 ? plural(days, 'jour', 'jours')
+      : months < 1 ? plural(Math.floor(days / 7), 'semaine', 'semaines')
+      : months < 12 ? months + ' mois'
+      : plural(Math.floor(months / 12), 'an', 'ans');
+    return 'Inscrit depuis ' + span;
+  }
+
+  /* Fiche réduite de l'auteur : « Inscrit depuis … » et localisation (icône + lieu), lus dans la fiche native */
+  function authorFacts(dl) {
+    if (!dl) return null;
+    var values = {};
+    Array.prototype.slice.call(dl.querySelectorAll('dt')).forEach(function (dt) {
+      var dd = dt.nextElementSibling;
+      if (!dd || dd.tagName !== 'DD') return;
+      var key = dt.textContent.replace(/[\s:]+$/, '').replace(/\s+/g, ' ').trim().toLowerCase();
+      values[key] = dd.textContent.replace(/\s+/g, ' ').trim();
+    });
+    var list = uiEl('ul', 'sg-post__facts');
+    var add = function (icon, text, title) {
+      if (!text) return;
+      var li = uiEl('li', 'sg-post__fact');
+      li.appendChild(uiIco(icon));
+      li.appendChild(uiEl('span', null, text));
+      if (title) li.setAttribute('title', title);
+      list.appendChild(li);
+    };
+    var reg = values['date d\'inscription'] || values['date d’inscription'];
+    add('event_available', memberSince(reg), reg ? 'Inscrit le ' + reg : '');
+    add('location_on', values.localisation, 'Localisation');
+    return list.children.length ? list : null;
+  }
+
+  /* Mention native de modification (« Dernière édition par X le …, édité N fois ») : la date, et l'élément retiré */
+  function editedInfo(content) {
+    var re = /Derni[èe]re [ée]dition par\s+(.+?)\s+le\s+(.+?),\s*[ée]dit[ée]\s+(\d+)\s+fois/i;
+    var hit = null;
+    Array.prototype.slice.call(content.querySelectorAll('*')).reverse().some(function (n) {
+      if (n.closest('blockquote, .codebox, .spoiler') || !re.test(n.textContent)) return false;
+      hit = n;
+      return true;
+    });
+    var m = (hit ? hit.textContent : content.textContent).match(re);
+    if (!m) return null;
+    var date = m[2].trim();
+    /* « le Lun 23 Mar 2026 - 10:00 » ; « Aujourd'hui à … » / « Hier à … » restent tels quels */
+    var dateText = /^(aujourd|hier)/i.test(date) ? date.charAt(0).toLowerCase() + date.slice(1) : 'le ' + date;
+    if (hit) {
+      hit.remove();
+      /* Les <br> laissés en fin de message par la mention */
+      while (content.lastChild && (content.lastChild.nodeName === 'BR' || (content.lastChild.nodeType === 3 && !content.lastChild.textContent.trim()))) content.lastChild.remove();
+    }
+    return { date: dateText, full: m[0].replace(/\s+/g, ' ').trim(), count: +m[3] };
   }
 
   /* Copie d'un lien dans le presse-papiers, avec un message discret en bas d'écran */

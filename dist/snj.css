@@ -4374,6 +4374,68 @@ body.sg-topics-on .sg-topics {
   background: var(--sg-border);
 }
 
+/* Entrée à interrupteur (menu « Préférences ») : libellé qui suit l'état, switch à droite.
+   Piste en sumi et gofun estompé, Asagi une fois activé ; la pastille glisse avec un léger rebond. */
+#wrap a.sg-menu__item--switch {
+  gap: 12px;
+  padding-right: 10px;
+}
+
+.sg-menu__item--switch .sg-menu__text {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.sg-switch {
+  position: relative;
+  flex: none;
+  width: 40px;
+  height: 22px;
+  margin-left: 12px;
+  border-radius: 999px;
+  background: rgba(var(--sg-contrast-rgb), 0.18);
+  box-shadow: inset 0 0 0 1px rgba(var(--sg-contrast-rgb), 0.22);
+  transition: background-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.sg-switch__thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--sg-contrast);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.25s ease;
+}
+
+.sg-menu__item--switch[aria-checked="true"] .sg-switch {
+  background: var(--sg-accent-1);
+  box-shadow: inset 0 0 0 1px var(--sg-accent-1);
+}
+
+.sg-menu__item--switch[aria-checked="true"] .sg-switch__thumb {
+  background: var(--sg-on-accent);
+  transform: translateX(18px);
+}
+
+.sg-menu__item--switch:active .sg-switch__thumb {
+  width: 19px;
+}
+
+.sg-menu__item--switch[aria-checked="true"]:active .sg-switch__thumb {
+  transform: translateX(15px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sg-switch,
+  .sg-switch__thumb {
+    transition: none;
+  }
+}
+
 /* --- Deuxième ligne : « Trier » puis « Sauter vers » -------------------------------- */
 .sg-topics__tools {
   display: flex;
@@ -5409,17 +5471,17 @@ a.sg-pass__card:focus-visible {
 /* --- 59-topic.css --- */
 /* ==========================================================================
    SNJ — Page d'un sujet (construite par src/js/layout.js : pageHead + topicPage)
-   1. Barre du sujet (.sg-tbar) : menu « Actions ».
+   1. Barre du sujet (.sg-tbar) : « Préférences » à gauche, « Actions » à droite.
    2. Messages « fumi » (文, la lettre) — pattern réservé aux MESSAGES, partout où ils s'affichent
       (sujets, puis aperçus, messages privés, résultats de recherche…) :
-        - carte arrondie en deux colonnes : profil de l'auteur à gauche, lettre à droite ;
-        - liseré gauche, cadre du portrait et numéro du message à la couleur du groupe de l'auteur
-          (--author, lue sur son pseudo ; couleur de la catégorie par défaut) ;
-        - rôle au-dessus du portrait (bandeau shippō + magatama pour le staff), portrait 200 × 400,
-          pseudo en Zen Antique, fiche
-          compacte (libellé / valeur), contacts en icônes ;
-        - en-tête de la lettre : numéro « #n » (lien permanent), date, boutons en icônes ;
-        - contenu lisible (corps 1rem, interligne 1,75), citations et code restylés, J'aime en cœur.
+        - deux colonnes séparées de 16px : profil de l'auteur à gauche, lettre (carte) à droite ;
+          préférence « Position du profil (inversé) » : html[data-profile="right"], profil à droite ;
+        - rôle au-dessus de la carte du profil (bandeau shippō encadré, magatama du logo pour le staff) ;
+        - carte du profil (halo à la couleur du groupe de l'auteur, --author lue sur son pseudo) :
+          portrait 200 × 400, pseudo en Zen Antique, « Inscrit depuis … » et localisation ;
+        - en-tête de la lettre : date de publication et de modification, J'aime (cœur), menu trois points
+          (citer, modifier, supprimer, adresse IP, copier le lien) ;
+        - contenu lisible (corps 1rem, interligne 1,75), citations et code restylés.
    3. Réponse rapide (.quick-reply) : carte au même gabarit, éditeur natif conservé et restylé.
    4. Bas de page (.sg-tfoot) : séparateur de fin, « Sauter vers », outils de modération.
    ========================================================================== */
@@ -5430,6 +5492,10 @@ body.sg-topicpage-on #topic > .topic-actions.bottom,
 body.sg-topicpage-on #topic > form.quickmod,
 body.sg-topicpage-on .sg-post .post-buttons-mobile,
 body.sg-topicpage-on .sg-post .post-author-contact,
+body.sg-topicpage-on .sg-post .post-buttons,
+body.sg-topicpage-on .sg-post .post-author-details,
+body.sg-topicpage-on .sg-post .post-aside > br,
+body.sg-topicpage-on .sg-post .post-footer.sg-hidden,
 body.sg-topicpage-on .sg-post .post-header > h2,
 body.sg-topicpage-on .sg-post .fa_dislike,
 body.sg-topicpage-on .sg-post .post-author-title {
@@ -5463,20 +5529,18 @@ body.sg-topicpage-on .sg-post .post-author-title {
   margin: 0 0 var(--sg-space-6);
 }
 
-.sg-tbar__nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-#wrap a.sg-tool,
-#wrap a.sg-tool:visited {
-  color: var(--sg-text);
-  text-decoration: none;
-}
-
 .sg-tbar .sg-menu {
   margin-left: auto;
+}
+
+/* « Préférences » à l'extrême gauche, son menu s'ouvre vers la droite */
+.sg-tbar .sg-menu--start {
+  margin-left: 0;
+}
+
+.sg-menu--start .sg-menu__list {
+  right: auto;
+  left: 0;
 }
 
 /* --- 2. Messages « fumi » -------------------------------------------------------- */
@@ -5486,18 +5550,35 @@ body.sg-topicpage-on .sg-post .post-author-title {
   isolation: isolate; /* l'en-tête natif du message a un z-index de 500 : on le contient dans la carte */
   display: grid;
   grid-template-columns: 248px minmax(0, 1fr);
-  grid-template-areas:
-    "aside head"
-    "aside body";
-  grid-template-rows: auto 1fr;
+  grid-template-areas: "aside letter";
+  align-items: start;
+  gap: 16px;
   margin: 0 0 var(--sg-space-6);
   padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: var(--sg-text);
+}
+
+/* Préférence « Position du profil (inversé) » : lettre à gauche, profil à droite */
+html[data-profile="right"] #topic .post-wrap.sg-post {
+  grid-template-columns: minmax(0, 1fr) 248px;
+  grid-template-areas: "letter aside";
+}
+
+/* La lettre : en-tête et contenu dans une même carte */
+.sg-post__letter {
+  grid-area: letter;
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  min-width: 0;
   overflow: hidden;
   border: 1px solid var(--sg-border);
   border-radius: var(--sg-radius-lg);
   background: var(--sg-surface);
-  box-shadow: none;
-  color: var(--sg-text);
 }
 
 /* Le corps natif ne sert que d'enveloppe : ses enfants deviennent des zones de la grille */
@@ -5511,16 +5592,28 @@ body.sg-topicpage-on .sg-post .post-author-title {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   width: auto;
   min-width: 0;
   margin: 0;
-  padding: 26px 20px 22px;
+  padding: 0;
   border: 0;
-  border-right: 1px solid var(--sg-border);
-  background: linear-gradient(to bottom, color-mix(in srgb, var(--author) 12%, transparent), transparent 55%), var(--sg-surface);
-  box-shadow: inset 3px 0 0 var(--author);
+  background: none;
+  box-shadow: none;
   text-align: center;
+}
+
+/* Carte du profil : portrait, pseudo et fiche, sur un halo à la couleur de l'auteur (le rôle reste au-dessus) */
+.sg-post__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 20px 20px 22px;
+  border: 1px solid var(--sg-border);
+  border-radius: var(--sg-radius-lg);
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--author) 12%, transparent), transparent 60%), var(--sg-surface);
 }
 
 #topic .sg-post .post-author-status:empty,
@@ -5560,8 +5653,7 @@ body.sg-topicpage-on .sg-post .post-author-title {
   max-width: 100%;
   border: 0;
   border-radius: 12px;
-  outline: 2px solid var(--author);
-  outline-offset: 3px;
+  outline: 0;
   object-fit: cover;
 }
 
@@ -5584,8 +5676,8 @@ body.sg-topicpage-on .sg-post .post-author-title {
   transition: none;
 }
 
-/* Rôle au-dessus du portrait : bandeau (pas de pastille) sur motif shippō (communauté, staff),
-   filets haut et bas à la couleur de l'auteur, magatama plein du logo de SnJ pour le staff */
+/* Rôle au-dessus de la carte du profil : bandeau (pas de pastille) sur motif shippō (communauté, staff),
+   encadré à la couleur de l'auteur, magatama plein du logo de SnJ, de la couleur du texte, pour le staff */
 .sg-role {
   position: relative;
   isolation: isolate;
@@ -5597,8 +5689,8 @@ body.sg-topicpage-on .sg-post .post-author-title {
   width: 100%;
   padding: 9px 12px;
   overflow: hidden;
-  border-top: 1px solid color-mix(in srgb, var(--author) 60%, transparent);
-  border-bottom: 1px solid color-mix(in srgb, var(--author) 60%, transparent);
+  border: 1px solid color-mix(in srgb, var(--author) 60%, transparent);
+  border-radius: 10px;
   background: color-mix(in srgb, var(--author) 8%, var(--sg-surface));
   color: var(--sg-text);
 }
@@ -5618,7 +5710,7 @@ body.sg-topicpage-on .sg-post .post-author-title {
   flex: none;
   width: 20px;
   height: 20px;
-  color: var(--author);
+  color: inherit;
 }
 
 .sg-role__mark svg {
@@ -5636,76 +5728,41 @@ body.sg-topicpage-on .sg-post .post-author-title {
   white-space: nowrap;
 }
 
-/* Fiche compacte : libellé à gauche, valeur à droite */
-#topic .sg-post .post-author-details {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 6px 10px;
-  order: 3;
+/* Fiche réduite : « Inscrit depuis … » et localisation, chacune avec son icône */
+.sg-post__facts {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   width: 100%;
-  margin: 6px 0 0;
-  padding: 14px 0 0;
+  margin: 2px 0 0;
+  padding: 12px 0 0;
   border-top: 1px dashed var(--sg-border);
-  font-size: 0.8rem;
+  list-style: none;
+  font-size: 0.85rem;
   line-height: 1.4;
   text-align: left;
 }
 
-#topic .sg-post .post-author-details dt,
-#topic .sg-post .post-author-details dd {
+#wrap .sg-post__fact {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
   margin: 0;
   padding: 0;
   border: 0;
-  background: none;
-}
-
-#topic .sg-post .post-author-details dt {
-  color: var(--sg-text-muted);
-}
-
-/* Forumactif écrit les libellés en gris foncé en dur (style="color:#444444") */
-#topic .sg-post .post-author-details dt span {
-  color: inherit !important;
-  font-weight: 400;
-}
-
-#topic .sg-post .post-author-details dd {
-  color: var(--sg-text);
-  font-weight: 700;
-  text-align: right;
-  overflow-wrap: anywhere;
-}
-
-/* Contacts en icônes */
-.sg-post__contact {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 6px;
-  order: 4;
-  margin-top: 4px;
-}
-
-#wrap a.sg-post__contact-link,
-#wrap a.sg-post__contact-link:visited {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border: 1px solid var(--sg-border);
-  border-radius: 50%;
-  color: var(--sg-text-muted);
-  text-decoration: none;
-}
-
-#wrap a.sg-post__contact-link:hover,
-#wrap a.sg-post__contact-link:focus-visible {
-  border-color: var(--author);
   color: var(--sg-text);
 }
 
-.sg-post__contact-link .material-symbols-outlined {
+.sg-post__fact .material-symbols-outlined {
+  flex: none;
+  color: var(--author);
   font-size: 18px;
+  line-height: 1.1;
+}
+
+.sg-post__fact span:last-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 /* En-tête de la lettre */
@@ -5717,7 +5774,7 @@ body.sg-topicpage-on .sg-post .post-author-title {
   gap: 12px;
   min-width: 0;
   margin: 0;
-  padding: 14px 18px 14px 26px;
+  padding: 10px 12px 10px 26px;
   border: 0;
   border-bottom: 1px dashed var(--sg-border);
   border-radius: 0;
@@ -5733,14 +5790,6 @@ body.sg-topicpage-on .sg-post .post-author-title {
   min-width: 0;
 }
 
-#wrap a.sg-post__num,
-#wrap a.sg-post__num:visited {
-  color: var(--author);
-  font-family: var(--sg-font-display);
-  font-size: 1.15rem;
-  text-decoration: none;
-}
-
 .sg-post__date {
   display: inline-flex;
   align-items: center;
@@ -5753,34 +5802,24 @@ body.sg-topicpage-on .sg-post .post-author-title {
   font-size: 17px;
 }
 
-/* Boutons du message (citer, modifier, supprimer, IP) : icônes rondes, sur tous les formats */
-#topic .sg-post .post-buttons {
-  display: block !important;
+/* À droite de l'en-tête : J'aime puis le menu des actions du message */
+.sg-post__actions {
+  display: flex;
   flex: none;
+  align-items: center;
+  gap: 4px;
   margin-left: auto;
 }
 
-#topic .sg-post .post-buttons ul {
-  display: flex;
-  gap: 4px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+/* Bouton trois points : rond, sans contour, discret (≠ « Actions » de la barre, plus affirmé) */
+.sg-menu--icon {
+  margin-left: 0;
 }
 
-#topic .sg-post .post-buttons li {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  background: none;
-}
-
-#topic .sg-post .post-buttons a {
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  margin: 0;
+.sg-menu--icon .sg-menu__toggle {
+  justify-content: center;
+  width: 40px;
+  height: 40px;
   padding: 0;
   border: 0;
   border-radius: 50%;
@@ -5788,18 +5827,14 @@ body.sg-topicpage-on .sg-post .post-author-title {
   color: var(--sg-text-muted);
 }
 
-#topic .sg-post .post-buttons a:hover,
-#topic .sg-post .post-buttons a:focus-visible {
+.sg-menu--icon .sg-menu__toggle:hover,
+.sg-menu--icon.is-open .sg-menu__toggle {
   background: var(--sg-surface-2);
   color: var(--sg-text);
 }
 
-#topic .sg-post .post-buttons .btn-delete a:hover {
-  color: var(--sg-accent-2);
-}
-
-#topic .sg-post .post-buttons .material-symbols-outlined {
-  font-size: 20px;
+.sg-menu--icon .sg-menu__toggle .material-symbols-outlined {
+  font-size: 22px;
 }
 
 /* La lettre */
@@ -5873,7 +5908,7 @@ body.sg-topicpage-on .sg-post .post-author-title {
   color: var(--sg-text);
 }
 
-/* Pied de la lettre : J'aime / Je n'aime pas en pastilles */
+/* Pied de la lettre (vide une fois le J'aime déplacé dans l'en-tête : masqué) */
 #topic .sg-post .post-footer {
   display: flex;
   flex-wrap: wrap;
@@ -5895,11 +5930,13 @@ body.sg-topicpage-on .sg-post .post-author-title {
 #topic .sg-post .rep-button {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  height: 34px;
+  min-width: 40px;
+  height: 40px;
   margin: 0;
-  padding: 0 14px 0 10px;
-  border: 1px solid var(--sg-border);
+  padding: 0 10px;
+  border: 0;
   border-radius: 999px;
   background: none;
   box-shadow: none;
@@ -5922,12 +5959,12 @@ body.sg-topicpage-on .sg-post .post-author-title {
 }
 
 #topic .sg-post .rep-button .material-symbols-outlined {
-  font-size: 18px;
+  font-size: 22px;
 }
 
 #topic .sg-post .rep-button:hover,
 #topic .sg-post .rep-button:focus-visible {
-  border-color: var(--sg-border-strong, var(--sg-border));
+  background: var(--sg-surface-2);
   color: var(--sg-text);
 }
 
@@ -5941,18 +5978,12 @@ body.sg-topicpage-on .sg-post .post-author-title {
 }
 
 #topic .sg-post .rep-button.fa_liked {
-  border-color: color-mix(in srgb, var(--sg-like) 55%, transparent);
   color: var(--sg-text);
 }
 
 #topic .sg-post .rep-button.fa_liked .material-symbols-outlined {
   color: var(--sg-like);
   font-variation-settings: "FILL" 1;
-}
-
-#topic .sg-post .fa_like,
-#topic .sg-post .fa_liked {
-  padding: 0 12px;
 }
 
 #topic .sg-post .rep-nb {
@@ -6149,69 +6180,61 @@ body.sg-topicpage-on .sg-post .post-author-title {
 
 /* --- Tablette et mobile ------------------------------------------------------------------ */
 @media (max-width: 768px) {
-  /* Le profil passe au-dessus de la lettre, en bandeau compact */
-  #topic .post-wrap.sg-post {
+  /* Le profil passe au-dessus de la lettre (quelle que soit la préférence de position), en bandeau compact */
+  #topic .post-wrap.sg-post,
+  html[data-profile="right"] #topic .post-wrap.sg-post {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
       "aside"
-      "head"
-      "body";
-    grid-template-rows: auto auto 1fr;
+      "letter";
+    gap: 10px;
   }
 
   #topic .sg-post .post-aside {
+    gap: 8px;
+  }
+
+  /* Carte : portrait | pseudo et fiche */
+  .sg-post__card {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-columns: auto minmax(0, 1fr);
     align-items: center;
     gap: 4px 14px;
-    padding: 16px 16px 14px 19px;
-    border-right: 0;
-    border-bottom: 1px solid var(--sg-border);
+    padding: 12px 14px;
     text-align: left;
   }
 
-  /* Bandeau : rôle sur toute la largeur, puis portrait | pseudo | contacts */
   #topic .sg-post .post-author-avatar {
     grid-column: 1;
-    grid-row: 2 / span 2;
+    grid-row: 1 / span 2;
   }
 
   #topic .sg-post .post-author {
     grid-column: 2;
-    grid-row: 2 / span 2;
-    align-self: center;
+    grid-row: 1;
+    align-self: end;
+    align-items: flex-start;
+    gap: 4px;
   }
 
   #topic .sg-post .avatar-big img {
     width: 56px;
     height: 112px; /* même format 1:2, réduit */
     border-radius: 10px;
-    outline-offset: 2px;
   }
 
-  .sg-role {
-    grid-column: 1 / -1;
-    grid-row: 1;
-    margin-bottom: 8px;
-  }
-
-  #topic .sg-post .post-author {
-    align-items: flex-start;
-    gap: 4px;
-  }
-
-  #topic .sg-post .post-author-details {
-    display: none;
-  }
-
-  .sg-post__contact {
-    grid-column: 3;
-    grid-row: 2 / span 2;
+  .sg-post__facts {
+    grid-column: 2;
+    grid-row: 2;
+    align-self: start;
     margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 0.82rem;
   }
 
   #topic .sg-post .post-header {
-    padding: 10px 10px 10px 16px;
+    padding: 6px 6px 6px 16px;
   }
 
   #topic .sg-post .post-content {
@@ -6229,21 +6252,33 @@ body.sg-topicpage-on .sg-post .post-author-title {
     padding: 18px 16px 20px;
   }
 
-  /* Précédent / suivant sur une ligne pleine largeur, « Actions » dessous */
-  .sg-tbar__nav {
-    flex: 1 1 100%;
-  }
-
-  .sg-tbar__nav .sg-tool {
-    flex: 1 1 0;
-    justify-content: center;
-    min-width: 0;
-    white-space: nowrap;
+  /* Barre : « Préférences » et « Actions » côte à côte, à parts égales */
+  .sg-tbar {
+    flex-wrap: nowrap;
   }
 
   .sg-tbar .sg-menu {
-    flex: 1 1 100%;
+    flex: 1 1 0;
+    min-width: 0;
     margin-left: 0;
+  }
+
+  /* Le menu d'un message garde sa taille de bouton rond (pas la pleine largeur des autres menus) */
+  .sg-menu--icon .sg-menu__toggle {
+    width: 44px;
+    height: 44px;
+  }
+
+  .sg-menu--icon .sg-menu__list {
+    left: auto;
+    right: 0;
+    width: max-content;
+    max-width: calc(100vw - 32px);
+  }
+
+  #topic .sg-post .rep-button {
+    min-width: 44px;
+    height: 44px;
   }
 
   .sg-modtools {
