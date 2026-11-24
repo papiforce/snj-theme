@@ -242,8 +242,8 @@ dans le panneau d'administration (PA), puis on commit.
   à droite la liste déroulante **« Modération »** (`actionsMenu` avec `lead: 'gavel'`, chevron qui pivote, bouton au
   style `.sg-tool` des listes personnalisées, `#sg-mod-menu`) qui remplace les icônes natives de `.topic-admin`
   (masquées) : Verrouiller / Déverrouiller le sujet, Déplacer le sujet, Diviser le sujet, Fusionner avec un autre
-  sujet, puis sous un filet les actions destructives en Ume (`.sg-menu__item--danger`) : Mettre à la corbeille,
-  Supprimer définitivement. Libellés et icônes choisis d'après le mode du lien natif (`MOD`), adresses natives ; un
+  sujet, puis sous un filet « Supprimer » en Ume (`.sg-menu__item--danger`, icône `delete`). « Mettre à la
+  corbeille » est retiré (demande de Vinny : `MOD.trash = null`). Libellés et icônes choisis d'après le mode du lien natif (`MOD`), adresses natives ; un
   outil inconnu garde son titre et son icône natifs. Puis les permissions et le fil d'Ariane. Retirés aussi : barre « Plus ! / Partagez », bouton fixe « Répondre au sujet »,
   liste « Outils de modération » (doublon des icônes), lien « Arrêter de surveiller ce sujet » (dans « Actions »).
 - **Permissions : laissez-passer « tegata »** (`layout.js`, fonction `perms`, + `58-perms.css`) : pattern **réservé
