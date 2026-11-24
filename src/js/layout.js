@@ -1861,6 +1861,8 @@
         });
       }
       setTimeout(function () { place(d); }, 0);
+      /* Sa taille peut changer après coup (cadre de Servimg) : elle est replacée à chaque changement */
+      if (window.ResizeObserver) new ResizeObserver(function () { place(d); }).observe(d);
     };
     var mo = new MutationObserver(function (ms) {
       ms.forEach(function (m) {
