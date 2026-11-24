@@ -81,6 +81,11 @@
   transform: scaleY(-1);
 }
 
+/* Même espace au-dessus et en dessous : la marge basse du sélecteur ne s'ajoute pas */
+.sg-zones:has(~ .sg-divider--end) {
+  margin-bottom: 0;
+}
+
 @media (max-width: 768px) {
   .sg-divider {
     --sg-divider-space: 40px;
