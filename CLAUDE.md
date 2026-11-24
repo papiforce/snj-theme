@@ -162,7 +162,8 @@ dans le panneau d'administration (PA), puis on commit.
 - **Briques partagées** (`layout.js`, avant `topics()`) : `uiEl` / `uiIco` (création d'éléments et d'icônes),
   `actionsMenu(items, id, opts)` (menu déroulant ; `items` = `[adresse ou fonction, icône, libellé]`, `null` =
   séparateur, `{ pref, icon, label(actif) }` = interrupteur `.sg-switch` qui enregistre une préférence et laisse le menu
-  ouvert ; `opts` = `{ label, icon, iconFirst, iconOnly, cls }` : « Actions » par défaut, `sg-menu--start` (menu ouvert
+  ouvert ; une 4e valeur `'danger'` marque une entrée destructive ; `opts` = `{ label, icon, iconFirst, iconOnly, lead,
+  toggleCls, cls }` (`lead` : icône avant le libellé en plus de `icon` après, allure de liste déroulante) : « Actions » par défaut, `sg-menu--start` (menu ouvert
   vers la droite), `sg-menu--icon` (bouton rond sans contour, trois points des messages)), `combo(select, opts)` (listes personnalisées), `jumpBox(valeurCourante)` (« Sauter vers »),
   `copyLink(texte)` (copie synchrone par champ temporaire + `execCommand`, l'API Clipboard en repli : elle peut rester
   en attente d'une permission) et `toast(message)` (message discret `.sg-toast` en bas d'écran, au-dessus de la barre
@@ -238,8 +239,12 @@ dans le panneau d'administration (PA), puis on commit.
   natif `.quick-reply` est masqué (`#topic:has(.sg-treply) .quick-reply`). Pas de bouton sans lien de réponse (sujet
   verrouillé, visiteur). Le style de l'éditeur SCEditor reste dans `59-topic.css` pour la page de réponse.
   **Bas de page** (`.sg-tfoot`) : séparateur de fin, « Sauter vers » (`jumpBox`, forum du sujet coché) à gauche,
-  outils de modération à droite (`.sg-modtools` : libellé « Modération » + icônes rondes de `.topic-admin`), puis
-  les permissions et le fil d'Ariane. Retirés aussi : barre « Plus ! / Partagez », bouton fixe « Répondre au sujet »,
+  à droite la liste déroulante **« Modération »** (`actionsMenu` avec `lead: 'gavel'`, chevron qui pivote, bouton au
+  style `.sg-tool` des listes personnalisées, `#sg-mod-menu`) qui remplace les icônes natives de `.topic-admin`
+  (masquées) : Verrouiller / Déverrouiller le sujet, Déplacer le sujet, Diviser le sujet, Fusionner avec un autre
+  sujet, puis sous un filet les actions destructives en Ume (`.sg-menu__item--danger`) : Mettre à la corbeille,
+  Supprimer définitivement. Libellés et icônes choisis d'après le mode du lien natif (`MOD`), adresses natives ; un
+  outil inconnu garde son titre et son icône natifs. Puis les permissions et le fil d'Ariane. Retirés aussi : barre « Plus ! / Partagez », bouton fixe « Répondre au sujet »,
   liste « Outils de modération » (doublon des icônes), lien « Arrêter de surveiller ce sujet » (dans « Actions »).
 - **Permissions : laissez-passer « tegata »** (`layout.js`, fonction `perms`, + `58-perms.css`) : pattern **réservé
   aux permissions**, sur toutes les pages où Forumactif affiche le bloc « Permission de ce forum » (pages de forum,
