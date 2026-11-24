@@ -684,7 +684,7 @@
        On reprend les adresses des liens natifs (recherches limitées au forum en priorité). */
     var find = function (re) {
       return Array.prototype.slice.call(document.querySelectorAll('a[href]')).filter(function (x) {
-        return re.test(x.getAttribute('href'));
+        return !x.closest('.sg-menu') && re.test(x.getAttribute('href'));
       })[0];
     };
     var fid = (location.pathname.match(/^\/f(\d+)/) || [])[1];

@@ -4109,6 +4109,13 @@ body.sg-topics-on #wrap > .posts {
   list-style: none;
 }
 
+/* AwesomeBB ajoute un filet entre les <li> d'une liste */
+#wrap .sg-menu__list > li {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
 .sg-menu__list[hidden] {
   display: none;
 }
@@ -4141,7 +4148,7 @@ body.sg-topics-on #wrap > .posts {
   transition: none;
 }
 
-.sg-menu__sep {
+#wrap .sg-menu__list > li.sg-menu__sep {
   height: 1px;
   margin: 6px 8px;
   background: var(--sg-border);
