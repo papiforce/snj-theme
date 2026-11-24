@@ -4,7 +4,7 @@
    Pattern réservé aux PERMISSIONS, partout où Forumactif les affiche. Il se distingue des autres
    cartes (toutes arrondies) par ses coins coupés en biseau et par son cachet de statut :
      - autorisé : étiquette pleine, icône à la couleur de la catégorie (--ph), cachet Asagi « Autorisé » ;
-     - non autorisé : étiquette estompée au contour pointillé, cachet « Non autorisé » avec cadenas.
+     - non autorisé : étiquette estompée, hachurée en biais (barrière fermée), cachet « Non autorisé » avec cadenas.
    Un droit qui mène quelque part (Modérer ce forum) : toute l'étiquette est un lien, avec une flèche.
    Grille fluide : les étiquettes se partagent toute la largeur (240px minimum). Dessous : le fil d'Ariane de l'en-tête, repris.
    ========================================================================== */
@@ -158,18 +158,19 @@
   color: var(--sg-accent-1);
 }
 
-/* Non autorisé : étiquette estompée, contour pointillé (dessiné en dégradés, clip-path oblige) */
+/* Non autorisé : étiquette estompée, hachurée en biais comme une barrière fermée (même contour biseauté) */
 .sg-pass.is-no {
-  --pass-bg: transparent;
+  --pass-line: color-mix(in srgb, var(--sg-border-strong, var(--sg-border)) 70%, transparent);
 }
 
 .sg-pass.is-no .sg-pass__card {
-  background:
-    repeating-linear-gradient(90deg, var(--pass-line) 0 6px, transparent 6px 11px) top / 100% 1px no-repeat,
-    repeating-linear-gradient(90deg, var(--pass-line) 0 6px, transparent 6px 11px) bottom / 100% 1px no-repeat,
-    repeating-linear-gradient(0deg, var(--pass-line) 0 6px, transparent 6px 11px) left / 1px 100% no-repeat,
-    repeating-linear-gradient(0deg, var(--pass-line) 0 6px, transparent 6px 11px) right / 1px 100% no-repeat;
   color: var(--sg-text-muted);
+}
+
+.sg-pass.is-no .sg-pass__card::before {
+  background:
+    repeating-linear-gradient(135deg, rgba(var(--sg-contrast-rgb), 0.05) 0 6px, transparent 6px 13px),
+    var(--sg-bg, var(--sg-surface));
 }
 
 .sg-pass.is-no .sg-pass__icon {
