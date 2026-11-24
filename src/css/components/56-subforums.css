@@ -118,9 +118,10 @@ body.sg-subforums-on #wrap > .forum.type-table-forum {
   top: 16%;
   left: 50%;
   z-index: 1;
-  width: 12px;
-  height: 12px;
-  border: 2px solid var(--sg-contrast);
+  width: 16px;
+  height: 16px;
+  border: 3px solid var(--sg-contrast);
+  box-shadow: 0 0 0 2px rgba(var(--sg-ink-overlay), 0.35);
   border-radius: 50%;
   background: var(--sg-bg);
   transform: translateX(-50%);
