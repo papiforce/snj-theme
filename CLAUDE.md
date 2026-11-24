@@ -266,16 +266,21 @@ dans le panneau d'administration (PA), puis on commit.
   (« Titre du message (facultatif) » / « Titre du sujet ») au style des listes personnalisées (`.sg-write__field` :
   contour arrondi, fond de surface, 46px ; Forumactif impose `border-radius: 0 !important` et un fond transparent à
   `.input-subtle`, d'où nos `!important`) et à sa droite la **couleur du titre** (liste personnalisée avec pastilles,
-  option `swatch` de `combo()`, 180px ; dessous sur mobile). **Cinq couleurs** (`TITLE_COLORS`), enregistrées sous les
+  option `swatch` de `combo()`, 180px ; sa liste fait la largeur du bouton et s'aligne à droite, sinon elle déborde
+  de la page ; dessous sur mobile). **Cinq couleurs** (`TITLE_COLORS`), enregistrées sous les
   codes natifs de Forumactif et affichées avec nos tokens (`--sg-title-*`, `08-groups.css`) : Défaut (`''`, couleur
   du texte), Rouge (`#FF0000` → Hi), Orange (`#FF9933` → **Kaki** 柿 `#d98a4e` / `#b5602a`, **hors palette**, demandé
   par Vinny), Vert (`#006600` → Kaze), Hagane (`#0000FF` → primaire) ; une couleur ancienne hors liste est gardée. Le
   titre se colore à l'écriture ; sur les cartes de sujets et l'en-tête du sujet, `titleToneOf()` lit le code natif et
   pose `.sg-tcolor--hi|kaki|kaze|hagane` (non vérifié sur un vrai sujet coloré). Description du sujet au même style.
-  Éditeur sans bordures (ni le conteneur, ni la barre d'outils), zone de saisie en `padding: 16px !important` (16px
-  aussi dans l'iframe du mode visuel). **Barre d'outils** (`editorToolbar()`) : retirés (`TB_REMOVE`) tableau, taille,
+  Éditeur sans bordures ; la **barre d'outils est posée sur la lettre**, hors du fond : seule la zone de saisie
+  (textarea et iframe) a le fond `--sg-surface-2` et l'arrondi de 12px, en `padding: 16px !important` (16px aussi
+  dans l'iframe du mode visuel). **Toutes les icônes sur une seule ligne** (boutons de 32px, flex sans retour à la
+  ligne, défilement horizontal sur petit écran ; filet retiré après le dernier groupe visible, `.sg-tb-last`).
+  **Mode bloqué en texte (BBCode)**, celui qu'utilise Vinny : `lockEditorMode()` rebascule un éditeur ouvert en
+  mode visuel (`toggleSourceMode()` de l'instance SCEditor). **Barre d'outils** (`editorToolbar()`) : retirés (`TB_REMOVE`) tableau, taille,
   police, supprimer le formatage, plus/moins de boutons, défilements horizontal et vertical, aléatoire, Twemoji, date,
-  heure, coller sans formatage, **basculer le mode d'édition** (l'éditeur reste dans le dernier mode utilisé) ; les
+  heure, coller sans formatage, **basculer le mode d'édition** (mode bloqué en texte, voir plus haut) ; les
   groupes vides sont masqués. Icônes d'origine remplacées par des Material Symbols (`TB_ICONS` ; YouTube en SVG de
   Simple Icons) ; SCEditor rejette le texte hors champ (`text-indent: -9999px`), annulé sur nos icônes. Le panneau
   de smileys et l'aide « Le HTML est désactivé… » sont masqués. **Mode visuel** de
