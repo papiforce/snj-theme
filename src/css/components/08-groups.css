@@ -1,0 +1,50 @@
+/* ==========================================================================
+   SNJ — Couleurs des groupes (tout le forum)
+   Forumactif écrit la couleur de chaque groupe en dur dans la page
+   (style="color:#B5533F" sur les pseudos et la légende). Ces teintes, réglées dans
+   PA › Utilisateurs & Groupes › Administration des groupes, sont rebranchées ici sur
+   nos tokens : elles suivent ainsi le thème clair ou sombre.
+
+   Teinte du PA → token
+   #B5533F Hi no Kuni        → --sg-nation-hi
+   #5A87AD Mizu no Kuni      → --sg-nation-mizu
+   #73A060 Kaze no Kuni      → --sg-nation-kaze
+   #CDB04A Kaminari no Kuni  → --sg-nation-kaminari
+   #A0714A Tsuchi no Kuni    → --sg-nation-tsuchi
+   #8A6CAE Shōkoku           → --sg-nation-autres
+   #9FB0C3 Modérateurs       → --sg-primary (Hagane)
+   #ECE5D4 Staffeux          → --sg-contrast (sumi et gofun)
+
+   Ordre des groupes dans le PA : les pays d'abord (1 à 6), puis Modérateurs (7) et
+   Staffeux (8). Un membre du staff qui a un pays prend donc la couleur de son pays.
+   ========================================================================== */
+
+:root {
+  --sg-group-hi: var(--sg-nation-hi);
+  --sg-group-mizu: var(--sg-nation-mizu);
+  --sg-group-kaze: var(--sg-nation-kaze);
+  --sg-group-kaminari: var(--sg-nation-kaminari);
+  --sg-group-tsuchi: var(--sg-nation-tsuchi);
+  --sg-group-autres: var(--sg-nation-autres);
+  --sg-group-mod: var(--sg-primary);
+  --sg-group-staff: var(--sg-contrast);
+}
+
+/* En clair, les teintes des pays sont assombries pour rester lisibles sur le papier */
+[data-theme="light"] {
+  --sg-group-hi: color-mix(in srgb, var(--sg-nation-hi) 85%, #000);
+  --sg-group-mizu: color-mix(in srgb, var(--sg-nation-mizu) 80%, #000);
+  --sg-group-kaze: color-mix(in srgb, var(--sg-nation-kaze) 72%, #000);
+  --sg-group-kaminari: color-mix(in srgb, var(--sg-nation-kaminari) 62%, #000);
+  --sg-group-tsuchi: color-mix(in srgb, var(--sg-nation-tsuchi) 82%, #000);
+  --sg-group-autres: color-mix(in srgb, var(--sg-nation-autres) 85%, #000);
+}
+
+[style*="B5533F" i] { color: var(--sg-group-hi) !important; }
+[style*="5A87AD" i] { color: var(--sg-group-mizu) !important; }
+[style*="73A060" i] { color: var(--sg-group-kaze) !important; }
+[style*="CDB04A" i] { color: var(--sg-group-kaminari) !important; }
+[style*="A0714A" i] { color: var(--sg-group-tsuchi) !important; }
+[style*="8A6CAE" i] { color: var(--sg-group-autres) !important; }
+[style*="9FB0C3" i] { color: var(--sg-group-mod) !important; }
+[style*="ECE5D4" i] { color: var(--sg-group-staff) !important; }

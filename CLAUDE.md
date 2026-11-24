@@ -83,7 +83,7 @@ dans le panneau d'administration (PA), puis on commit.
   (objet `DATA`) à brancher plus tard sur l'API de l'annexe. Pas d'animation de bordure au survol.
   Les `<header>` sont interdits dans nos composants : AwesomeBB les fixe tous en haut de page.
 - **Catégories de l'accueil** (`forums.js` + `40-zones.css`) : à gauche un sélecteur collant (Gestion, Hi, Mizu, Kaze,
-  Kaminari, Tsuchi no Kuni, Reste du Sekai) au style des raccourcis de l'Annexe, pastille = badge pour Gestion
+  Kaminari, Tsuchi no Kuni, Shōkoku — « les petits pays », ex-Reste du Sekai) au style des raccourcis de l'Annexe, pastille = badge pour Gestion
   (sumi et gofun) et kanji du pays sinon (火 水 風 雷 土, 他 comme sur l'annexe), couleur de la nation ; onglet actif
   rempli. Libellé des onglets sur le fond de la barre latérale (`--sg-surface`) ; au survol et actif, texte et kanji
   en blanc papier (`--sg-paper-50`), Gestion en `--sg-on-contrast`. Sur mobile (≤ 900px), menu déroulant personnalisé. À droite, les forums de la catégorie en cartes (inspirées de

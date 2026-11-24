@@ -1,0 +1,532 @@
+/* ==========================================================================
+   SNJ — Statistiques de l'accueil (construites par src/js/stats.js)
+   Remplace le bloc natif « Qui est en ligne ». Grille « bento » de 12 colonnes,
+   mêmes cartes que les widgets du haut (.sg-card, motifs Edo, typographie).
+
+   Nouveaux motifs du design system :
+   - Sceau (.sg-seal) : cachet carré au trait, en sumi et gofun, posé en biais ; il se
+     « tamponne » au survol de la carte.
+   - Nobori (.sg-nobori) : bannières verticales des armées de l'époque Sengoku, une par
+     groupe, à sa couleur (--flag, texte --on-flag), avec un mon (kanji ou icône) et le nom
+     écrit à la verticale. Elles ondulent au survol.
+   - Jauge (.sg-gauge) : segments proportionnels, pour une répartition (connectés…).
+   - Point « en direct » (.sg-live) : pulsation douce, en Asagi.
+   ========================================================================== */
+
+:root {
+  --sg-stats: 1; /* sert à stats.js pour vérifier que ce CSS est chargé */
+}
+
+/* Le bloc natif reste affiché tant que stats.js n'a pas monté le sien */
+body.sg-stats-on #index #block-online,
+body.sg-stats-on #index .block-subtle {
+  display: none;
+}
+
+/* --- Grille ---------------------------------------------------------------- */
+#sg-stats {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--sg-space-4);
+  margin-bottom: var(--sg-space-8);
+  font-size: 16px; /* AwesomeBB réduit la taille du texte dans #wrap */
+  line-height: 1.6;
+}
+
+#sg-stats > * {
+  min-width: 0;
+}
+
+.sg-s-chronicles { grid-column: span 5; }
+.sg-s-newest { grid-column: span 4; }
+.sg-s-now { grid-column: span 3; }
+.sg-s-recent { grid-column: span 5; }
+.sg-s-groups { grid-column: span 7; }
+
+.sg-s-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sg-space-3);
+}
+
+.sg-s-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--sg-contrast);
+  color: var(--sg-on-contrast);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+/* --- Chroniques : grand compteur ---------------------------------------------- */
+.sg-s-chronicles {
+  justify-content: space-between;
+  padding: 24px 28px;
+}
+
+.sg-chron__big {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 14px;
+  margin: 0;
+}
+
+.sg-chron__big .sg-count {
+  font-family: var(--sg-font-display);
+  font-size: clamp(3rem, 5.2vw, 4.4rem);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--sg-text);
+}
+
+.sg-chron__unit {
+  color: var(--sg-text-muted);
+  font-size: 1.05rem;
+}
+
+.sg-chron__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+}
+
+.sg-chron__fact {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--sg-text-muted);
+  font-size: 0.92rem;
+}
+
+.sg-chron__fact .sg-count {
+  color: var(--sg-text);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.sg-chron__fact .material-symbols-outlined {
+  font-size: 20px;
+  color: var(--sg-primary);
+}
+
+/* --- Dernier inscrit : portrait et sceau ------------------------------------- */
+.sg-s-newest {
+  flex-direction: row;
+  align-items: center;
+  gap: 20px;
+  padding: 22px 24px;
+}
+
+.sg-newest__avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 84px;
+  height: 108px;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--sg-surface-2);
+  color: var(--sg-text-muted);
+}
+
+.sg-newest__avatar .material-symbols-outlined {
+  font-size: 34px;
+}
+
+.sg-newest__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s var(--sg-ease);
+}
+
+.sg-s-newest:hover .sg-newest__avatar img {
+  transform: scale(1.06);
+}
+
+.sg-newest__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding-right: 48px; /* place du sceau */
+}
+
+.sg-newest__name {
+  overflow: hidden;
+  font-family: var(--sg-font-display);
+  font-size: 1.7rem;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sg-newest__text {
+  color: var(--sg-text-muted);
+  font-size: 0.9rem;
+}
+
+/* Sceau : cachet carré au trait, double filet, posé en biais */
+.sg-seal {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 2px solid currentColor;
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 2px var(--sg-surface), inset 0 0 0 3px currentColor;
+  color: rgba(var(--sg-contrast-rgb), 0.7);
+  font-family: var(--sg-font-display);
+  font-size: 1.45rem;
+  line-height: 1;
+  transform: rotate(-8deg);
+  transition: transform 0.5s var(--sg-ease), color 0.3s ease;
+}
+
+.sg-s-newest:hover .sg-seal {
+  color: var(--sg-contrast);
+  animation: sg-stamp 0.55s var(--sg-ease);
+}
+
+@keyframes sg-stamp {
+  0% { transform: rotate(-8deg) scale(1); }
+  40% { transform: rotate(-14deg) scale(1.22); }
+  70% { transform: rotate(-6deg) scale(0.94); }
+  100% { transform: rotate(-8deg) scale(1); }
+}
+
+/* --- En ce moment : jauge et point « en direct » ------------------------------ */
+.sg-now__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sg-live {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--sg-accent-1);
+}
+
+.sg-live::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--sg-accent-1);
+  animation: sg-live 2.2s ease-out infinite;
+}
+
+@keyframes sg-live {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(3.2); opacity: 0; }
+}
+
+.sg-now__total {
+  margin: 0;
+  color: var(--sg-text-muted);
+}
+
+.sg-now__total strong {
+  margin-right: 2px;
+  font-family: var(--sg-font-display);
+  font-size: 2.2rem;
+  font-weight: 400;
+  line-height: 1;
+  color: var(--sg-text);
+}
+
+.sg-gauge {
+  display: flex;
+  gap: 3px;
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--sg-surface-2);
+}
+
+.sg-gauge__seg {
+  flex-basis: 0;
+  min-width: 0;
+  border-radius: 999px;
+}
+
+.sg-gauge__seg--reg,
+.sg-now__dot--reg { background: var(--sg-accent-1); }
+.sg-gauge__seg--hid,
+.sg-now__dot--hid { background: var(--sg-accent-2); }
+.sg-gauge__seg--gue,
+.sg-now__dot--gue { background: rgba(var(--sg-contrast-rgb), 0.4); }
+
+.sg-now__list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sg-now__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+}
+
+.sg-now__dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.sg-now__label {
+  flex: 1;
+  color: var(--sg-text-muted);
+}
+
+.sg-now__num {
+  font-variant-numeric: tabular-nums;
+}
+
+.sg-now__record {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: auto 0 0;
+  color: var(--sg-text-muted);
+  font-size: 0.78rem;
+}
+
+.sg-now__record .material-symbols-outlined {
+  font-size: 16px;
+}
+
+/* --- Récemment connectés : pseudos en pastilles ------------------------------- */
+.sg-people {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sg-person,
+.sg-person:visited,
+.sg-people__more {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  border: 1px solid var(--sg-border);
+  border-radius: 999px;
+  background: var(--sg-surface);
+  color: var(--sg-text);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1.3;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.25s var(--sg-ease), background-color 0.25s ease;
+}
+
+.sg-person:hover,
+.sg-people__more:hover {
+  transform: translateY(-2px);
+  background: var(--sg-surface-2);
+}
+
+.sg-person__name {
+  transition: none; /* voir la note sur les transitions dans CLAUDE.md */
+}
+
+.sg-person__staff {
+  font-size: 15px;
+  color: var(--sg-text-muted);
+}
+
+.sg-people__more {
+  color: var(--sg-text-muted);
+}
+
+/* --- Groupes : bannières nobori --------------------------------------------- */
+.sg-nobori {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sg-nobori__flag,
+.sg-nobori__flag:visited {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--sg-text);
+  text-decoration: none;
+}
+
+/* Hampe horizontale avec ses deux embouts */
+.sg-nobori__pole {
+  position: relative;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(var(--sg-contrast-rgb), 0.55);
+}
+
+.sg-nobori__pole::before,
+.sg-nobori__pole::after {
+  content: "";
+  position: absolute;
+  top: -2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(var(--sg-contrast-rgb), 0.7);
+}
+
+.sg-nobori__pole::before { left: -3px; }
+.sg-nobori__pole::after { right: -3px; }
+
+/* Étoffe : couleur du groupe, reflet vertical, bas en queue d'aronde */
+.sg-nobori__cloth {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 86%;
+  height: 200px;
+  margin-top: -8px;
+  padding: 14px 0 30px;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.1), transparent 35%, transparent 70%, rgba(0, 0, 0, 0.16)),
+    var(--flag);
+  color: var(--on-flag);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 86%, 0 100%);
+  transform-origin: 50% 0;
+  transition: filter 0.3s ease;
+}
+
+.sg-nobori__mon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  font-family: var(--sg-font-display);
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.sg-nobori__mon .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.sg-nobori__name {
+  overflow: hidden;
+  font-family: var(--sg-font-display);
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  writing-mode: vertical-rl;
+}
+
+.sg-nobori__count {
+  color: var(--sg-text-muted);
+  font-size: 0.78rem;
+  text-align: center;
+}
+
+.sg-nobori__count strong {
+  display: block;
+  color: var(--sg-text);
+  font-family: var(--sg-font-display);
+  font-size: 1.35rem;
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.sg-nobori__flag:hover .sg-nobori__cloth,
+.sg-nobori__flag:focus-visible .sg-nobori__cloth {
+  filter: brightness(1.08);
+  animation: sg-wave 1.6s ease-in-out infinite;
+  animation-delay: calc(var(--i, 0) * -0.15s);
+}
+
+@keyframes sg-wave {
+  0%, 100% { transform: skewX(0deg) rotate(0deg); }
+  25% { transform: skewX(-3deg) rotate(0.8deg); }
+  75% { transform: skewX(3deg) rotate(-0.8deg); }
+}
+
+/* Couleurs des bannières */
+.sg-flag--hi { --flag: var(--sg-nation-hi); --on-flag: var(--sg-paper-50); }
+.sg-flag--mizu { --flag: var(--sg-nation-mizu); --on-flag: var(--sg-paper-50); }
+.sg-flag--kaze { --flag: var(--sg-nation-kaze); --on-flag: var(--sg-paper-50); }
+.sg-flag--kaminari { --flag: var(--sg-nation-kaminari); --on-flag: var(--sg-paper-50); }
+.sg-flag--tsuchi { --flag: var(--sg-nation-tsuchi); --on-flag: var(--sg-paper-50); }
+.sg-flag--autres { --flag: var(--sg-nation-autres); --on-flag: var(--sg-paper-50); }
+.sg-flag--mod { --flag: var(--sg-primary); --on-flag: var(--sg-surface); }
+.sg-flag--staff { --flag: var(--sg-contrast); --on-flag: var(--sg-on-contrast); }
+.sg-flag--other { --on-flag: var(--sg-paper-50); }
+
+/* --- Responsive ------------------------------------------------------------- */
+@media (max-width: 1200px) {
+  #sg-stats > * {
+    grid-column: span 6;
+  }
+
+  #sg-stats > .sg-s-groups {
+    grid-column: span 12;
+  }
+}
+
+@media (max-width: 768px) {
+  #sg-stats > * {
+    grid-column: span 12;
+  }
+
+  .sg-nobori {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    row-gap: 18px;
+  }
+
+  .sg-nobori__cloth {
+    height: 160px;
+  }
+
+  .sg-newest__name {
+    font-size: 1.4rem;
+  }
+}
+
+/* --- Animations réduites ------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  .sg-live::after,
+  .sg-s-newest:hover .sg-seal,
+  .sg-nobori__flag:hover .sg-nobori__cloth,
+  .sg-nobori__flag:focus-visible .sg-nobori__cloth {
+    animation: none;
+  }
+}

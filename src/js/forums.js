@@ -33,11 +33,14 @@
     { slug: 'kaze-no-kuni', label: 'Kaze no Kuni', sub: 'Pays du Vent', kanji: '風', color: 'var(--sg-nation-kaze)', category: 'Kaze no Kuni', rp: true },
     { slug: 'kaminari-no-kuni', label: 'Kaminari no Kuni', sub: 'Pays de la Foudre', kanji: '雷', color: 'var(--sg-nation-kaminari)', category: 'Kaminari no Kuni', rp: true },
     { slug: 'tsuchi-no-kuni', label: 'Tsuchi no Kuni', sub: 'Pays de la Terre', kanji: '土', color: 'var(--sg-nation-tsuchi)', category: 'Tsuchi no Kuni', rp: true },
-    { slug: 'reste-du-sekai', label: 'Reste du Sekai', kanji: '他', color: 'var(--sg-nation-autres)', category: 'Reste du Sekai', rp: true }
+    { slug: 'shokoku', label: 'Shōkoku', sub: 'Les petits pays', kanji: '他', color: 'var(--sg-nation-autres)', category: 'Shōkoku', rp: true }
   ];
   var PARAM = 'onglet';
   var STORE = 'snj-onglet';
   var DEFAULT = 'gestion';
+  /* Anciens noms (catégorie du PA et adresse) encore acceptés */
+  var OLD_NAMES = { 'Shōkoku': 'Reste du Sekai' };
+  var OLD_SLUGS = { 'reste-du-sekai': 'shokoku' };
 
   /* Forumactif charge les modules dans le <head> : on attend la page */
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
@@ -191,7 +194,7 @@
     }
 
     function panelFor(zone) {
-      var forums = zone.category ? forumsByCategory[zone.category] : null;
+      var forums = zone.category ? forumsByCategory[zone.category] || forumsByCategory[OLD_NAMES[zone.category]] : null;
       var body;
       if (forums && forums.length) {
         body = forums.map(function (f) { return card(f, zone); });
@@ -366,6 +369,8 @@
       var stored = null;
       try { fromUrl = new URL(location.href).searchParams.get(PARAM); } catch (e) {}
       try { stored = localStorage.getItem(STORE); } catch (e) {}
+      fromUrl = OLD_SLUGS[fromUrl] || fromUrl;
+      stored = OLD_SLUGS[stored] || stored;
       var valid = function (s) { return ZONES.some(function (z) { return z.slug === s; }); };
       return valid(fromUrl) ? fromUrl : valid(stored) ? stored : DEFAULT;
     }

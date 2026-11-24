@@ -77,11 +77,11 @@
 
     rumors: [
       { kanji: '雷', nation: 'Kaminari no Kuni', title: 'Du mouvement à Kaminari no Kuni', text: "Des informations rapportent qu'Hachibi serait en train de se déchaîner dans la région de la Corne d'Hachibi." },
-      { kanji: '他', nation: 'Autres', title: "Naissance d'un étrange culte dans la forêt aux bois noirs", text: "On raconte qu'un étrange et sanglant culte serait apparu au sein de la forêt aux bois noirs : le culte de Jashin. Encore mystérieux, il inquiète cependant les autorités de la région." },
+      { kanji: '他', nation: 'Shōkoku', title: "Naissance d'un étrange culte dans la forêt aux bois noirs", text: "On raconte qu'un étrange et sanglant culte serait apparu au sein de la forêt aux bois noirs : le culte de Jashin. Encore mystérieux, il inquiète cependant les autorités de la région." },
       { kanji: '水', nation: 'Mizu no Kuni', title: "L'annexion de l'île Kaguya", text: "L'empereur de Mizu no Kuni prépare l'ultime offensive sur l'île Kaguya, dont la résistance a couvert de honte sa campagne. On raconte que sa propre unité de shinobi devrait s'y rendre sous peu." },
       { kanji: '土', nation: 'Tsuchi no Kuni', title: 'Manme Jin, responsable d’un massacre', text: "Les autorités de Tsuchi no Kuni viennent de découvrir l'horreur dans un village des montagnes Karere, où un laboratoire clandestin aurait été installé. On raconte que le clan Manme devra répondre de ses actes." },
-      { kanji: '他', nation: 'Autres', title: "L'empire de Tetsu renforce ses attaques", text: "Après les représailles du clan Inuzuka, l'empire de Tetsu envoie toujours plus de samouraïs au sein des frontières. On raconte que certains seraient plus forts, plus robustes et plus dangereux qu'auparavant." },
-      { kanji: '他', nation: 'Autres', title: "Mouvements inquiétants autour de l'archipel Karyuu", text: "Plusieurs navires de guerre de Kaminari no Kuni, appartenant au culte des six voies, auraient été vus au large. Le précédent chef du clan Yuki aurait été capturé." },
+      { kanji: '他', nation: 'Shōkoku', title: "L'empire de Tetsu renforce ses attaques", text: "Après les représailles du clan Inuzuka, l'empire de Tetsu envoie toujours plus de samouraïs au sein des frontières. On raconte que certains seraient plus forts, plus robustes et plus dangereux qu'auparavant." },
+      { kanji: '他', nation: 'Shōkoku', title: "Mouvements inquiétants autour de l'archipel Karyuu", text: "Plusieurs navires de guerre de Kaminari no Kuni, appartenant au culte des six voies, auraient été vus au large. Le précédent chef du clan Yuki aurait été capturé." },
       { kanji: '土', nation: 'Tsuchi no Kuni', title: 'Le clan Goka contre Omukade', text: "L'organisation criminelle d'Akimichi Madarame vient de s'en prendre à l'un des villages contrôlés par le clan Goka. On raconte qu'un membre du clan Uzumaki serait sur place." },
       { kanji: '風', nation: 'Kaze no Kuni', title: 'Ichibi se déplace', text: "Le démon des sables Ichibi aurait été vu dans les dunes rouges du clan Imiko, précisément sur le lieu de bataille de Warashi Oma et Sasori. Qu'est-ce que cela signifie ?" },
       { kanji: '水', nation: 'Mizu no Kuni', title: 'Le retour des cinq épéistes', text: "On raconte que l'unité de shinobi d'élite de Mizu no Kuni serait de retour, prête à envahir l'île Kaguya." }
@@ -275,7 +275,7 @@
   /* ----------------------------------------------------------------------
      Briques de cartes
      ---------------------------------------------------------------------- */
-  var NATIONS = { 'Hi no Kuni': 'hi', 'Mizu no Kuni': 'mizu', 'Kaminari no Kuni': 'kaminari', 'Tsuchi no Kuni': 'tsuchi', 'Kaze no Kuni': 'kaze', 'Autres': 'autres' };
+  var NATIONS = { 'Hi no Kuni': 'hi', 'Mizu no Kuni': 'mizu', 'Kaminari no Kuni': 'kaminari', 'Tsuchi no Kuni': 'tsuchi', 'Kaze no Kuni': 'kaze', 'Shōkoku': 'autres', 'Autres': 'autres' };
 
   function img(name) { return "background-image:url('" + assetsBase() + name + "')"; }
 

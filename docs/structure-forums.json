@@ -43,8 +43,9 @@
    "color": "--sg-nation-tsuchi"
   },
   {
-   "slug": "reste-du-sekai",
-   "label": "Reste du Sekai",
+   "slug": "shokoku",
+   "label": "Shōkoku",
+   "sub": "Les petits pays",
    "kanji": "他",
    "color": "--sg-nation-autres"
   }
