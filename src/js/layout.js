@@ -2201,7 +2201,15 @@
       parent.insertBefore(c.box, next);
     });
 
-    /* Autres blocs du formulaire (règles, sondage, calendrier, SEO…) : panneaux repliables */
+    /* Retirés à la demande de Vinny : la raison de la modification, le calendrier et les outils SEO */
+    var reason = form.querySelector('input[name="edit_reason"]');
+    if (reason) (reason.closest('label') || reason).classList.add('sg-hidden');
+    ['calendar-block', 'seo-block'].forEach(function (id) {
+      var x = document.getElementById(id);
+      if (x) x.classList.add('sg-hidden');
+    });
+
+    /* Autres blocs du formulaire (règles, sondage…) : panneaux repliables */
     Array.prototype.slice.call(form.querySelectorAll(':scope > .block')).forEach(function (b, i) {
       if (b === box || b === optBlock || b.id === 'preview') return;
       var bh = b.querySelector(':scope > .block-header');
@@ -2226,6 +2234,7 @@
       };
       set(openIt);
       tg.addEventListener('click', function () { set(!b.classList.contains('is-open')); });
+      if (bc && bc.querySelector('input[name="poll_title"]')) { b.classList.add('sg-panel--poll'); pollPanel(bc); }
     });
 
     /* Aperçu : la lettre telle qu'elle sera publiée */
@@ -2628,6 +2637,182 @@
     } else toast('Copie impossible : ' + text);
   }
 
+  /* Sondage (page d'écriture) : le contenu natif reconstruit au design system, sans contrôle natif à l'écran.
+     Les champs d'origine restent dans le formulaire (noms inchangés) : la question est restylée, les choix
+     deviennent une liste de champs (ajout, retrait, Entrée pour le suivant, maximum lu dans la consigne) qui
+     remplit le textarea natif masqué, la durée un compteur − / + (0 = sans fin), et chaque groupe de boutons
+     radio un contrôle segmenté (.sg-seg, les radios natives y sont déplacées et masquées). */
+  var POLL_LABELS = [
+    [/choix multiple/i, 'Choix multiple'],
+    [/annulation/i, 'Annulation du vote'],
+    [/ayant particip/i, 'Liste des participants'],
+    [/chaque choix/i, 'Votants de chaque choix']
+  ];
+  function pollPanel(bc) {
+    var el = uiEl, ico = uiIco;
+    var q = bc.querySelector('input[name="poll_title"]');
+    var ta = bc.querySelector('textarea[name="poll_option_text"]');
+    var len = bc.querySelector('input[name="poll_length"]');
+    var groups = Array.prototype.slice.call(bc.querySelectorAll('.radio-wrap'));
+    var max = parseInt((bc.textContent.match(/(\d+)\s*choix au maximum/i) || [])[1], 10) || 10;
+    var wrap = el('div', 'sg-poll');
+    var field = function (label, hint, forId) {
+      var f = el('div', 'sg-poll__field');
+      var l = el(forId ? 'label' : 'span', 'sg-poll__label', label);
+      if (forId) l.setAttribute('for', forId);
+      f.appendChild(l);
+      if (hint) f.appendChild(el('span', 'sg-poll__hint', hint));
+      wrap.appendChild(f);
+      return f;
+    };
+
+    if (q) {
+      q.id = q.id || 'sg-poll-q';
+      q.className = 'sg-write__field sg-poll__input';
+      q.placeholder = 'Votre question';
+      field('Question', null, q.id).appendChild(q);
+    }
+
+    if (ta) {
+      var fc = field('Choix', max + ' choix au maximum');
+      var list = el('ol', 'sg-poll__choices');
+      var add = el('button', 'sg-poll__add');
+      add.type = 'button';
+      add.appendChild(ico('add'));
+      add.appendChild(el('span', null, 'Ajouter un choix'));
+      var sync = function () {
+        var inputs = Array.prototype.slice.call(list.querySelectorAll('input'));
+        ta.value = inputs.map(function (i) { return i.value.trim(); }).filter(Boolean).join('\n');
+        inputs.forEach(function (i, n) {
+          i.placeholder = 'Choix ' + (n + 1);
+          i.parentNode.querySelector('.sg-poll__num').textContent = n + 1;
+        });
+        list.classList.toggle('is-min', inputs.length <= 2);
+        add.disabled = inputs.length >= max;
+      };
+      var row = function (value, focus) {
+        if (list.children.length >= max) return null;
+        var li = el('li', 'sg-poll__choice');
+        li.appendChild(el('span', 'sg-poll__num'));
+        var inp = el('input', 'sg-write__field sg-poll__input');
+        inp.type = 'text';
+        inp.maxLength = 255;
+        inp.value = value || '';
+        inp.setAttribute('aria-label', 'Choix');
+        inp.addEventListener('input', sync);
+        inp.addEventListener('keydown', function (e) {
+          if (e.key !== 'Enter') return;
+          e.preventDefault(); /* pas d'envoi du formulaire */
+          var nextLi = li.nextElementSibling;
+          if (nextLi) nextLi.querySelector('input').focus();
+          else row('', true);
+        });
+        var rm = el('button', 'sg-poll__remove');
+        rm.type = 'button';
+        rm.setAttribute('aria-label', 'Retirer ce choix');
+        rm.setAttribute('title', 'Retirer ce choix');
+        rm.appendChild(ico('close'));
+        rm.addEventListener('click', function () {
+          if (list.children.length <= 2) return;
+          var prevInput = (li.previousElementSibling || li.nextElementSibling).querySelector('input');
+          li.remove();
+          sync();
+          prevInput.focus();
+        });
+        li.appendChild(inp);
+        li.appendChild(rm);
+        list.appendChild(li);
+        sync();
+        if (focus) inp.focus();
+        return inp;
+      };
+      var existing = ta.value.split(/\r?\n/).map(function (x) { return x.trim(); }).filter(Boolean);
+      (existing.length ? existing : ['', '']).forEach(function (v) { row(v); });
+      if (list.children.length < 2) row('');
+      add.addEventListener('click', function () { row('', true); });
+      ta.classList.add('sg-poll__native');
+      fc.appendChild(list);
+      fc.appendChild(add);
+      fc.appendChild(ta);
+    }
+
+    if (len) {
+      var fd = field('Durée', '0 : le sondage ne se termine jamais');
+      var step = el('div', 'sg-poll__step');
+      var minus = el('button', 'sg-poll__stepbtn');
+      minus.type = 'button';
+      minus.setAttribute('aria-label', 'Un jour de moins');
+      minus.appendChild(ico('remove'));
+      var plus = el('button', 'sg-poll__stepbtn');
+      plus.type = 'button';
+      plus.setAttribute('aria-label', 'Un jour de plus');
+      plus.appendChild(ico('add'));
+      var num = el('input', 'sg-poll__days');
+      num.type = 'text';
+      num.inputMode = 'numeric';
+      num.setAttribute('aria-label', 'Durée du sondage, en jours');
+      var unit = el('span', 'sg-poll__unit');
+      var maxDays = parseInt(len.getAttribute('max'), 10) || 999;
+      var setDays = function (v) {
+        v = Math.max(0, Math.min(maxDays, parseInt(v, 10) || 0));
+        num.value = v;
+        len.value = v || '';
+        unit.textContent = v === 0 ? 'sans fin' : v === 1 ? 'jour' : 'jours';
+        minus.disabled = v === 0;
+        plus.disabled = v >= maxDays;
+      };
+      setDays(len.value);
+      minus.addEventListener('click', function () { setDays((parseInt(num.value, 10) || 0) - 1); });
+      plus.addEventListener('click', function () { setDays((parseInt(num.value, 10) || 0) + 1); });
+      num.addEventListener('input', function () { num.value = num.value.replace(/\D/g, '').slice(0, 3); });
+      num.addEventListener('change', function () { setDays(num.value); });
+      num.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowUp') { e.preventDefault(); setDays((parseInt(num.value, 10) || 0) + 1); }
+        if (e.key === 'ArrowDown') { e.preventDefault(); setDays((parseInt(num.value, 10) || 0) - 1); }
+        if (e.key === 'Enter') { e.preventDefault(); setDays(num.value); }
+      });
+      len.classList.add('sg-poll__native');
+      step.appendChild(minus);
+      step.appendChild(num);
+      step.appendChild(plus);
+      step.appendChild(unit);
+      fd.appendChild(step);
+      fd.appendChild(len);
+    }
+
+    if (groups.length) {
+      var grid = el('div', 'sg-poll__settings');
+      groups.forEach(function (g) {
+        var title = (g.querySelector('.radio-label') || {}).textContent || '';
+        title = title.replace(/\s+/g, ' ').trim();
+        for (var i = 0; i < POLL_LABELS.length; i++) if (POLL_LABELS[i][0].test(title)) { title = POLL_LABELS[i][1]; break; }
+        var f = el('div', 'sg-poll__field');
+        f.setAttribute('role', 'radiogroup');
+        f.setAttribute('aria-label', title);
+        f.appendChild(el('span', 'sg-poll__label', title));
+        var seg = el('div', 'sg-seg');
+        var radios = Array.prototype.slice.call(g.querySelectorAll('input[type="radio"]'));
+        seg.style.gridTemplateColumns = 'repeat(' + radios.length + ', 1fr)';
+        radios.forEach(function (r) {
+          var text = (r.closest('label') || {}).textContent || r.value;
+          text = text.replace(/\s+/g, ' ').trim().replace(/^Quand le sondage est terminé$/i, 'À la fin');
+          var lab = el('label', 'sg-seg__opt');
+          lab.appendChild(r);
+          var face = el('span', 'sg-seg__face');
+          face.appendChild(el('span', null, text));
+          lab.appendChild(face);
+          seg.appendChild(lab);
+        });
+        f.appendChild(seg);
+        grid.appendChild(f);
+      });
+      wrap.appendChild(grid);
+    }
+
+    bc.textContent = '';
+    bc.appendChild(wrap);
+  }
+
   /* Fenêtre de confirmation (modale) au design system : icône, titre en Zen Antique, texte, « Annuler » et
      l'action (en Ume si elle est destructive). Échap, clic sur le voile ou « Annuler » la ferment ; le focus
      reste dans la fenêtre et revient ensuite sur l'élément d'origine. opts = { icon, title, text, confirm,
@@ -2887,6 +3072,13 @@
     wrap.insertBefore(card, block);
     block.classList.add('sg-notice-native');
     document.body.classList.add('sg-noticepage');
+    /* La bannière occupe le haut de l'écran : défilement doux jusqu'au message (sans animation si le système le
+       demande), une fois la page posée */
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    setTimeout(function () {
+      if (window.scrollY > 40) return; /* le lecteur a déjà défilé */
+      top.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    }, 150);
     document.title = title;
   }
 

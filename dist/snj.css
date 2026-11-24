@@ -7469,7 +7469,7 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
   margin: 0 0 16px;
   padding: 0;
   overflow: visible;
-  border: 1px solid var(--sg-border);
+  border: 0;
   border-radius: var(--sg-radius-lg);
   background: var(--sg-surface);
   box-shadow: none;
@@ -7627,6 +7627,223 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
 #wrap .sg-panel dt {
   color: var(--sg-text-muted);
   font-size: 0.9rem;
+}
+
+/* --- Sondage (pollPanel) : aucun contrôle natif à l'écran ----------------------------------------------- */
+#wrap .sg-panel--poll > .block-content {
+  padding: 4px 16px 20px;
+}
+
+.sg-poll {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.sg-poll__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+#wrap .sg-poll__label {
+  margin: 0;
+  padding: 0;
+  color: var(--sg-text);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+#wrap .sg-poll__hint {
+  margin: -4px 0 0;
+  color: var(--sg-text-muted);
+  font-size: 0.85rem;
+}
+
+/* Champs : le style des champs de l'écritoire, sur le fond de second plan (le panneau est sur la surface) */
+#wrap .sg-writeform input.sg-write__field.sg-poll__input {
+  height: 44px;
+  background: var(--sg-surface-2) !important;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+#wrap .sg-writeform .sg-poll__native {
+  display: none !important;
+}
+
+/* Choix : liste numérotée, un champ par choix, retrait au survol de la ligne */
+#wrap .sg-poll__choices {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#wrap .sg-poll__choice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.sg-poll__num {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--sg-surface-2);
+  color: var(--sg-text-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.sg-poll__choice .sg-poll__input {
+  flex: 1;
+  min-width: 0;
+}
+
+.sg-poll__remove,
+.sg-poll__stepbtn {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--sg-text-muted);
+  cursor: pointer;
+}
+
+.sg-poll__remove > *,
+.sg-poll__stepbtn > *,
+.sg-poll__add > * {
+  transition: none;
+}
+
+.sg-poll__remove:hover,
+.sg-poll__remove:focus-visible {
+  background: color-mix(in srgb, var(--sg-accent-2) 14%, transparent);
+  color: var(--sg-accent-2);
+}
+
+.sg-poll__choices.is-min .sg-poll__remove {
+  visibility: hidden;
+}
+
+.sg-poll__add {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  margin-left: 38px;
+  padding: 0 16px 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--sg-surface-2);
+  color: var(--sg-text);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sg-poll__add:hover {
+  background: var(--sg-contrast);
+  color: var(--sg-on-contrast);
+}
+
+.sg-poll__add:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  background: var(--sg-surface-2);
+  color: var(--sg-text);
+}
+
+/* Durée : compteur − valeur + et l'unité (« jours », « sans fin ») */
+.sg-poll__step {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--sg-surface-2);
+}
+
+.sg-poll__stepbtn {
+  width: 38px;
+  height: 38px;
+  color: var(--sg-text);
+}
+
+.sg-poll__stepbtn:hover:not(:disabled) {
+  background: var(--sg-contrast);
+  color: var(--sg-on-contrast);
+}
+
+.sg-poll__stepbtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+#wrap input.sg-poll__days {
+  width: 3.4ch;
+  height: 38px;
+  margin: 0;
+  padding: 0;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none;
+  color: var(--sg-text);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+}
+
+.sg-poll__unit {
+  min-width: 70px;
+  padding: 0 12px 0 4px;
+  color: var(--sg-text-muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+/* Réglages : contrôles segmentés en grille de 2 colonnes */
+.sg-poll__settings {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 20px;
+}
+
+.sg-poll__settings .sg-seg__face {
+  padding: 0 6px;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .sg-poll__settings {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sg-poll__add {
+    margin-left: 0;
+  }
 }
 
 /* --- 5. Derniers messages du sujet --------------------------------------------------------------------- */
