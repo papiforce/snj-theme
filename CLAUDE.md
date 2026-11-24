@@ -356,6 +356,10 @@ dans le panneau d'administration (PA), puis on commit.
   « Retour au forum »…, phrase native en infobulle) : le premier plein (`.sg-action`), les autres au contour. Pas de
   redirection (`noForcedRedirect`). Vérifié sur une vraie erreur (« Action impossible ») et sur une confirmation
   reconstituée (« Message publié ») ; libellés et titres des autres cas à ajuster au fil des pages rencontrées.
+  **Erreurs de saisie** (template `error_body` : `.block.block-error`, ex. « Vous devez entrer un message avant de
+  poster. ») : même famille (`errorBlocks()`, `61-notice.css`) : encart `.sg-alert` sur fond teinté d'Ume, sans
+  contour ni ombre, **petit sceau 否** (40px, même rebond), message en gras, `role="alert"` ; sur la page d'écriture
+  il rejoint la colonne de la lettre, juste au-dessus d'elle (inséré avant `#postingbox`, qui ne bouge pas).
   Récapitulatif des patterns : **forum** (accueil) = image en fond + panneau + kanji ; **sous-forum** = ema
   (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ; **confirmation** = hanko (sceau au kanji) ;
   **permission** = étiquette tegata aux coins coupés.

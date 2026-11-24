@@ -150,7 +150,7 @@ body.sg-noticepage #wrap > .sg-divider--notice {
   flex: 1;
   min-width: 0;
   margin: 0;
-  padding: 0;
+  padding: 0 !important; /* AwesomeBB : 16px 22px imposés */
   border: 0;
   background: none;
   box-shadow: none;
