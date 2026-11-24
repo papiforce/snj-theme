@@ -14,7 +14,7 @@ dans le panneau d'administration (PA), puis on commit.
 | `src/css/critical.css` | Tokens, thèmes clair/sombre, base | PA › Affichage › Couleurs › CSS principal |
 | `src/css/components/` | CSS des composants (barre latérale, catégories, sujets…), préfixés par un numéro d'ordre | Assemblés dans `dist/snj.css` par `node scripts/build.mjs`, servis par jsDelivr |
 | `src/templates/` | Templates HTML et extraits à insérer | PA › Affichage › Templates |
-| `src/js/` | Un fichier par script : `layout.js` (barre latérale, thème, pied de page, en-tête, sous-forums, sujets, page de sujet et permissions ; toutes les pages, module 10), `home.js` (widgets de l'accueil et des pages de forum, index + sous-forums, module 11), `forums.js` (catégories de l'accueil, index, module 12), `stats.js` (statistiques de l'accueil, index, module 13) | PA › Modules › Gestion des codes JavaScript |
+| `src/js/` | Un fichier par script : `layout.js` (barre latérale, thème, pied de page, en-tête, sous-forums, sujets, page de sujet, page d'écriture et permissions ; toutes les pages, module 10), `home.js` (widgets de l'accueil et des pages de forum, index + sous-forums, module 11), `forums.js` (catégories de l'accueil, index, module 12), `stats.js` (statistiques de l'accueil, index, module 13) | PA › Modules › Gestion des codes JavaScript |
 | `docs/` | Décisions, notes de migration | — |
 
 ## Décisions
@@ -248,6 +248,38 @@ dans le panneau d'administration (PA), puis on commit.
   corbeille » est retiré (demande de Vinny : `MOD.trash = null`). Libellés et icônes choisis d'après le mode du lien natif (`MOD`), adresses natives ; un
   outil inconnu garde son titre et son icône natifs. Puis les permissions et le fil d'Ariane. Retirés aussi : barre « Plus ! / Partagez », bouton fixe « Répondre au sujet »,
   liste « Outils de modération » (doublon des icônes), lien « Arrêter de surveiller ce sujet » (dans « Actions »).
+- **Page d'écriture d'un message : écritoire « suzuri »** 硯 (la pierre à encre) (`layout.js`, fonction `writePage`,
+  + `60-write.css`, adresse `/post` : répondre, citer, nouveau sujet, modifier). Pattern **réservé à l'écriture**, qui
+  prolonge les messages « fumi » : on écrit dans la même lettre que celle qui sera publiée. **Le bloc de l'éditeur
+  (`#postingbox`) n'est jamais déplacé** : l'iframe de SCEditor se rechargerait et l'éditeur casserait ; c'est le
+  formulaire qui devient la grille (`form.sg-writeform`, `248px | 1fr`, sans écart de rangée : les marges espacent,
+  l'auteur s'étend sur `grid-row: 1 / span 40`), et la préférence « Position du profil (inversé) » s'y applique.
+  **Haut** : séparateur avec le logo (sans les widgets : la page reste concentrée sur l'écriture ; logo au trait en
+  masque CSS depuis `assets/snj-logo-outline.svg`), puis l'en-tête au pattern des forums : fil d'Ariane lu sur la page
+  du sujet ou du forum (`/t3-` ou `/f4-` : **sans le tiret, `/t3` renvoie une 404**), liens d'origine repris tels quels
+  (icône maison), le verbe en dernier niveau ; **titre = le verbe** (« Répondre au sujet », « Nouveau sujet »,
+  « Modifier le message ») ; description « Dans « <sujet ou forum, en lien> » » ; couleur de la catégorie (`--ph`).
+  **Colonne de l'auteur** (collante, masquée sur mobile) : rôle (`.sg-role`, d'après `staffRoles`), portrait 200 × 400
+  (`_userdata.avatar`), pseudo. **Lettre** (fond de surface, arrondie, sans bordure) : titre du message en Zen Antique
+  sans cadre, sur un filet (« Titre du message (facultatif) » / « Titre du sujet »), description du sujet, éditeur
+  restylé (barre d'outils à plat en groupes, icônes d'origine inversées en thème sombre ; le panneau de smileys et
+  l'aide « Le HTML est désactivé… » sont masqués, les smileys restent dans la barre d'outils). **Mode visuel** de
+  l'éditeur : la zone d'écriture est une iframe que le CSS de la page n'atteint pas : `editorFrameTheme()` y injecte
+  la couleur du texte, la police et surtout le **même `color-scheme` que la page** (sinon le navigateur peint un fond
+  blanc opaque derrière l'iframe), relu 260ms après un changement de thème (transition d'AwesomeBB).
+  **Réglages** au pied de la lettre : les cases natives (bloc « Options », masqué) deviennent des **interrupteurs**
+  `.sg-opt` (la case reste dans le formulaire, masquée ; `.sg-switch` partagé avec « Préférences ») aux libellés courts
+  (« Désactiver le BBCode », « Désactiver les smileys », « M'avertir des réponses », « Ajouter ma signature ») ; le
+  **type du sujet** en contrôle segmenté `.sg-seg` (Normal, Épinglé, Annonce, Annonce globale ; deux par ligne sur
+  mobile) ; la **couleur du titre** en liste personnalisée (`combo`). **Boutons** à droite sous un filet :
+  « Prévisualiser » (contour, `visibility`) puis le bouton natif d'envoi, libellé « Envoyer », « Publier le sujet » ou
+  « Enregistrer » (plein) ; sur mobile en pleine largeur, « Envoyer » au-dessus. **Autres blocs** du formulaire
+  (règles du forum, sondage, calendrier, SEO, pièces jointes…) en **panneaux repliables** `.sg-panel` (titre en Zen
+  Antique, chevron ; fermés, sauf les règles) ; leurs listes passent en `combo`, leurs champs au contour arrondi.
+  **Aperçu** (`#preview`) : carte pointillée « Aperçu ». **Revue du sujet** : « Derniers messages du sujet » en
+  cartes compactes `.sg-rev` (portrait 48 × 64, « par X le … » en tête, message coupé à 240px avec un fondu et
+  « Lire la suite »). En bas : séparateur de fin et fil d'Ariane repris. Non testés faute d'envoyer un formulaire :
+  aperçu, modification, erreurs, pièces jointes.
 - **Permissions : laissez-passer « tegata »** (`layout.js`, fonction `perms`, + `58-perms.css`) : pattern **réservé
   aux permissions**, sur toutes les pages où Forumactif affiche le bloc « Permission de ce forum » (pages de forum,
   pages de sujet…) ; le bloc natif est masqué. Le tegata 手形 est le sauf-conduit qu'on présentait aux barrières.
@@ -262,7 +294,7 @@ dans le panneau d'administration (PA), puis on commit.
   forum ») : toute l'étiquette est le lien, flèche à droite, contour à la couleur de la catégorie au survol.
   **Fil d'Ariane repris dessous** (copie du `.sg-crumbs` de l'en-tête, `.sg-crumbs--end`), quand l'en-tête existe.
   Récapitulatif des patterns : **forum** (accueil) = image en fond + panneau + kanji ; **sous-forum** = ema
-  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ;
+  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ;
   **permission** = étiquette tegata aux coins coupés.
 - **Catégories de l'accueil** (`forums.js` + `40-zones.css`) : à gauche un sélecteur collant (Gestion, Hi, Mizu, Kaze,
   Kaminari, Tsuchi no Kuni, Shōkoku — « les petits pays », ex-Reste du Sekai) au style des raccourcis de l'Annexe, pastille = badge pour Gestion
@@ -315,9 +347,10 @@ dans le panneau d'administration (PA), puis on commit.
   remplit légèrement au survol. Les liens du pied de page doivent viser `#page-footer a…` (AwesomeBB les force en blanc).
 - **Modules JavaScript** : Forumactif les charge dans le `<head>` ; tout script attend `DOMContentLoaded`.
   Ils sont regroupés dans un fichier `/NNNNN.js` mis en cache très longtemps. Il arrive que Forumactif réutilise le même
-  nom de fichier après une modification : la page charge alors l'ancienne version. Vérifier après chaque mise à jour
-  (le code servi par `fetch('/NNNNN.js', {cache: 'no-store'})` doit contenir la nouveauté) ; sinon, revalider le module
-  sans rien changer, ce qui produit un nouveau nom de fichier.
+  nom de fichier après une modification, **même un nom déjà servi plus tôt** : le navigateur exécute alors la version
+  qu'il a en cache. Vérifier après chaque mise à jour avec **`fetch('/NNNNN.js', {cache: 'force-cache'})`** (ce que
+  le navigateur exécute) et pas seulement `no-store` (ce que le serveur renvoie) ; si la nouveauté manque, revalider le
+  module sans rien changer, ce qui produit un nouveau nom de fichier.
 - **Transitions** : AwesomeBB applique `* { transition: 0.16s }`. Un texte placé dans un enfant d'un élément dont la
   couleur s'anime saute pendant l'animation : mettre `transition: none` sur ces enfants (voir `40-zones.css`).
 - **Variables CSS** préfixées `--sg-*`. On rebranche les `--t_*` d'AwesomeBB sur nos tokens.
