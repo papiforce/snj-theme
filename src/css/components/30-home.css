@@ -65,6 +65,11 @@
 #sg-home.is-forum > .sg-c-season { grid-column: span 4; }
 #sg-home.is-forum > .sg-c-annexe { grid-column: span 3; }
 
+/* Même espace au-dessus et en dessous du séparateur : marge native du titre du forum retirée */
+#sg-home.is-forum ~ .page-header {
+  margin-top: 0 !important;
+}
+
 /* --- Carte de base --------------------------------------------------------- */
 .sg-card {
   position: relative;
