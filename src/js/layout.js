@@ -665,10 +665,9 @@
       section.appendChild(empty);
     } else section.appendChild(grid);
 
-    /* Bouton « Poster un nouveau sujet » au-dessus de la grille : le lien d'origine est déplacé
-       (depuis l'en-tête de page ou le bouton fixe natif), pas copié */
+    /* Bouton « Poster un nouveau sujet » au-dessus de la grille, à gauche. Celui d'origine reste
+       à droite du titre de la page (en-tête) : celui-ci reprend seulement son adresse */
     var post = document.querySelector('.sg-pagehead__actions a[href*="mode=newtopic"]') ||
-      document.querySelector('#wrap a.btn-fixed[href*="mode=newtopic"]') ||
       document.querySelector('#wrap a[href*="mode=newtopic"]');
     if (post) {
       var bar = el('div', 'sg-topics__bar');
@@ -678,9 +677,6 @@
       btn.appendChild(el('span', null, 'Poster un nouveau sujet'));
       bar.appendChild(btn);
       section.insertBefore(bar, section.firstChild);
-      var holder = post.parentNode;
-      post.remove();
-      if (holder && holder.classList.contains('sg-pagehead__actions') && !holder.children.length) holder.remove();
     }
 
     blocks[0].parentNode.insertBefore(section, blocks[0]);

@@ -4020,7 +4020,7 @@ body.sg-subforums-on #wrap > .forum.type-table-forum {
    Zen Antique, description, auteur, pages du sujet, puis en pied : réponses et vues, dernier
    message (avatar, auteur coloré, date).
    Annonces : motif en Ume ; sujets verrouillés : carte atténuée.
-   Au-dessus de la grille : bouton « Poster un nouveau sujet » (lien d'origine déplacé).
+   Au-dessus de la grille, à gauche : bouton « Poster un nouveau sujet » (en plus de celui de l'en-tête).
    Grille de 2 colonnes, cartes de même hauteur (1 colonne ≤ 768px).
    ========================================================================== */
 
@@ -4046,7 +4046,7 @@ body.sg-topics-on #wrap > .posts {
 /* --- Bouton « Poster un nouveau sujet » (style .sg-action de 55-pagehead.css) --- */
 .sg-topics__bar {
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
   margin: 0 0 var(--sg-space-5, 20px);
 }
 
@@ -4142,8 +4142,8 @@ body.sg-topics-on #wrap > .posts {
 }
 
 .sg-topic__flag--announce {
-  background: var(--sg-accent-2);
-  color: var(--sg-on-accent);
+  background: var(--sg-primary);
+  color: var(--sg-primary-fg);
 }
 
 .sg-topic__new {
