@@ -311,9 +311,19 @@ dans le panneau d'administration (PA), puis on commit.
   **type du sujet** en contrôle segmenté `.sg-seg` (Normal, Épinglé, Annonce, Annonce globale ; deux par ligne sur
   mobile) ; la **couleur du titre** en liste personnalisée (`combo`). **Boutons** à droite sous un filet :
   « Prévisualiser » (contour, `visibility`) puis le bouton natif d'envoi, libellé « Envoyer », « Publier le sujet » ou
-  « Enregistrer » (plein) ; sur mobile en pleine largeur, « Envoyer » au-dessus. **Autres blocs** du formulaire
-  (règles du forum, sondage, calendrier, SEO, pièces jointes…) en **panneaux repliables** `.sg-panel` (titre en Zen
-  Antique, chevron ; fermés, sauf les règles) ; leurs listes passent en `combo`, leurs champs au contour arrondi.
+  « Enregistrer » (plein) ; sur mobile en pleine largeur, « Envoyer » au-dessus. **Retirés** (demande de Vinny) : la
+  **raison de la modification** (`edit_reason`), les blocs **Calendrier** (`#calendar-block`) et **Outils SEO**
+  (`#seo-block`). **Autres blocs** du formulaire (règles du forum, sondage, pièces jointes…) en **panneaux
+  repliables** `.sg-panel` (fond de surface, sans contour ; titre en Zen Antique, chevron ; fermés, sauf les
+  règles) ; leurs listes passent en `combo`, leurs champs au contour arrondi. **Sondage** (`pollPanel()`) :
+  **aucun contrôle natif à l'écran**, les champs d'origine restent dans le formulaire sous leurs noms : Question
+  (champ de l'écritoire sur `--sg-surface-2`) ; **Choix** en liste numérotée de champs (`.sg-poll__choices` : Entrée
+  passe au suivant ou en crée un, retrait d'une ligne au ✕ en Ume, deux au minimum, « Ajouter un choix » jusqu'au
+  maximum lu dans la consigne) qui remplit le textarea `poll_option_text` masqué (une ligne par choix) ; **Durée**
+  en compteur − / valeur / + avec l'unité (« sans fin », « jour », « jours » ; flèches haut et bas) qui remplit
+  `poll_length` masqué ; les quatre réglages (Choix multiple, Annulation du vote, Liste des participants, Votants de
+  chaque choix ; « Quand le sondage est terminé » → « À la fin ») en **contrôles segmentés** `.sg-seg` (radios
+  natives déplacées et masquées), grille de 2 colonnes (1 sur mobile). Non testé : l'envoi d'un sondage.
   **Aperçu** (`#preview`) : carte « Aperçu » sur fond de surface, sans contour ni ombre (celles d'AwesomeBB sur
   `.block-header` et `.block-content` sont retirées). **Revue du sujet** : « Derniers messages du sujet » **repliés par défaut** :
   le titre est un bouton (`.sg-review__toggle`, sans contour ; au survol, fond `--sg-surface-2` et chevron qui fait
@@ -354,7 +364,8 @@ dans le panneau d'administration (PA), puis on commit.
   le message en texte discret ; les **liens natifs** (« Cliquez ici pour… », lus ligne par ligne entre les `<br>`)
   **déplacés** et devenus **boutons** aux libellés courts (`NOTICE_LINKS` : « Voir le message », « Retour au sujet »,
   « Retour au forum »…, phrase native en infobulle) : le premier plein (`.sg-action`), les autres au contour. Pas de
-  redirection (`noForcedRedirect`). Vérifié sur une vraie erreur (« Action impossible ») et sur une confirmation
+  redirection (`noForcedRedirect`) ; **défilement doux jusqu'au message** à l'arrivée (la bannière occupe le haut de
+  l'écran ; rien si le lecteur a déjà défilé, sans animation si le système le demande). Vérifié sur une vraie erreur (« Action impossible ») et sur une confirmation
   reconstituée (« Message publié ») ; libellés et titres des autres cas à ajuster au fil des pages rencontrées.
   **Erreurs de saisie** (template `error_body` : `.block.block-error`, ex. « Vous devez entrer un message avant de
   poster. ») : même famille (`errorBlocks()`, `61-notice.css`) : encart `.sg-alert` sur fond teinté d'Ume, sans
