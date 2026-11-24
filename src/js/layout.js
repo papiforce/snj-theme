@@ -1634,7 +1634,14 @@
     /* « le Lun 23 Mar 2026 - 10:00 » ; « Aujourd'hui à … » / « Hier à … » restent tels quels */
     var dateText = /^(aujourd|hier)/i.test(date) ? date.charAt(0).toLowerCase() + date.slice(1) : 'le ' + date;
     if (hit) {
+      /* La mention et ses enveloppes devenues vides */
+      var box = hit.parentNode;
       hit.remove();
+      while (box && box !== content && !box.textContent.trim() && !box.querySelector('img')) {
+        var up = box.parentNode;
+        box.remove();
+        box = up;
+      }
       /* Les <br> laissés en fin de message par la mention */
       while (content.lastChild && (content.lastChild.nodeName === 'BR' || (content.lastChild.nodeType === 3 && !content.lastChild.textContent.trim()))) content.lastChild.remove();
     }

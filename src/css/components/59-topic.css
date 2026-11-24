@@ -261,6 +261,7 @@ html[data-profile="right"] #topic .post-wrap.sg-post {
 .sg-post__facts {
   display: flex;
   flex-direction: column;
+  order: 3;
   gap: 6px;
   width: 100%;
   margin: 2px 0 0;
