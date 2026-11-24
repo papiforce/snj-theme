@@ -1863,6 +1863,13 @@
       setTimeout(function () { place(d); }, 0);
       /* Sa taille peut changer après coup (cadre de Servimg) : elle est replacée à chaque changement */
       if (window.ResizeObserver) new ResizeObserver(function () { place(d); }).observe(d);
+      /* Servimg est gardée et seulement masquée (display: none) entre deux ouvertures : l'état du bouton suit */
+      if (d.parentNode === document.body) {
+        new MutationObserver(function () {
+          if (getComputedStyle(d).display === 'none') clearOpen();
+          else { clearOpen(); if (opener) opener.classList.add('sg-tb--open'); }
+        }).observe(d, { attributes: true, attributeFilter: ['style'] });
+      }
     };
     var mo = new MutationObserver(function (ms) {
       ms.forEach(function (m) {
