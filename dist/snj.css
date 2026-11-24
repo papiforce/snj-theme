@@ -6172,13 +6172,21 @@ body.sg-topicpage-on .sg-post .post-header > h2 {
     padding: 18px 16px 20px;
   }
 
-  .sg-tbar__nav,
-  .sg-tbar__nav .sg-tool {
-    flex: 1;
+  /* Précédent / suivant sur une ligne pleine largeur, « Actions » dessous */
+  .sg-tbar__nav {
+    flex: 1 1 100%;
   }
 
   .sg-tbar__nav .sg-tool {
+    flex: 1 1 0;
     justify-content: center;
+    min-width: 0;
+    white-space: nowrap;
+  }
+
+  .sg-tbar .sg-menu {
+    flex: 1 1 100%;
+    margin-left: 0;
   }
 
   .sg-modtools {
