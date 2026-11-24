@@ -585,6 +585,7 @@ body.sg-topicpage-on .sg-post .post-header > h2 {
 
 #topic .quick-reply .sceditor-container textarea,
 #topic .quick-reply .sceditor-container iframe {
+  border: 0 !important; /* filet clair natif (2px #ebebeb) sous la barre d'outils */
   background: transparent !important;
   color: var(--sg-text);
   font-family: var(--sg-font-body, inherit);
