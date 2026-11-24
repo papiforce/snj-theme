@@ -315,7 +315,8 @@ body.sg-topics-on .sg-topics {
   top: calc(100% + 8px);
   left: 0;
   z-index: 30;
-  min-width: 100%;
+  width: max(100%, 340px);
+  max-width: calc(100vw - 32px);
   max-height: min(360px, 60vh);
   margin: 0;
   padding: 6px;

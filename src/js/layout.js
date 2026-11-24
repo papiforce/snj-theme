@@ -810,6 +810,8 @@
       list.hidden = true;
       var field;
       var current = select.value;
+      /* Jumpbox : le forum affiché est coché (sa valeur native est « -1 ») */
+      if (opts.tree && opts.currentValue && !data.some(function (d) { return d.value === current; })) current = opts.currentValue;
       var labelOf = function (v) { for (var i = 0; i < data.length; i++) if (data[i].value === v) return data[i].label; return ''; };
 
       if (opts.search) {
@@ -1058,7 +1060,7 @@
       while (jumpForm.firstChild) jumpForm.removeChild(jumpForm.firstChild);
       jumpForm.className = 'sg-jump';
       keep.forEach(function (h) { jumpForm.appendChild(h); });
-      var jumpCombo = combo(jumpSelect, { search: true, tree: true });
+      var jumpCombo = combo(jumpSelect, { search: true, tree: true, currentValue: fid ? 'f' + fid : '' });
       var jl = el('label', 'sg-jump__label');
       jl.setAttribute('for', jumpCombo.field.id);
       jl.appendChild(ico('alt_route'));
