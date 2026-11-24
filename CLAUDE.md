@@ -394,6 +394,11 @@ dans le panneau d'administration (PA), puis on commit.
   crédit que Forumactif fait varier selon la page. Dessous, « Sengoku no Jidai » au trait en Zen Antique sur toute la
   largeur du contenu (SVG ajusté au texte une fois la police chargée), sumi et gofun, estompé vers le bas, qui se
   remplit légèrement au survol. Les liens du pied de page doivent viser `#page-footer a…` (AwesomeBB les force en blanc).
+- **Redirections immédiates** (`layout.js`, `fastRedirect`, en tête du module 10, toutes les pages) : les pages de
+  confirmation de Forumactif (message posté ou modifié, profil enregistré…) ne redirigent qu'après un délai, par une
+  balise `<meta http-equiv="refresh" content="N;url=…">` que `{META}` pose dans `overall_header` (template
+  `message_body`) : l'adresse est suivie tout de suite, par `location.replace` (la confirmation ne reste pas dans
+  l'historique).
 - **Modules JavaScript** : Forumactif les charge dans le `<head>` ; tout script attend `DOMContentLoaded`.
   Ils sont regroupés dans un fichier `/NNNNN.js` mis en cache très longtemps. Il arrive que Forumactif réutilise le même
   nom de fichier après une modification, **même un nom déjà servi plus tôt** : le navigateur exécute alors la version

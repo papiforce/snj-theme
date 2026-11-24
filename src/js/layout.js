@@ -11,6 +11,29 @@
   'use strict';
 
   /* ----------------------------------------------------------------------
+     Redirections immédiates : après un envoi (message posté, modifié, profil enregistré…), Forumactif affiche
+     une page de confirmation qui ne redirige qu'au bout de quelques secondes (balise <meta http-equiv="refresh"
+     content="3;url=…"> posée par {META} dans overall_header). On suit l'adresse tout de suite, sans garder la page
+     de confirmation dans l'historique (location.replace). Lancé avant tout le reste, et revu au DOMContentLoaded si
+     la balise n'est pas encore lue.
+     ---------------------------------------------------------------------- */
+  (function fastRedirect() {
+    var done = false;
+    var go = function () {
+      if (done) return true;
+      var meta = document.querySelector('meta[http-equiv="refresh" i]');
+      var m = meta && (meta.getAttribute('content') || '').match(/^\s*\d+\s*[;,]\s*url\s*=\s*['"]?([^'"]+)/i);
+      if (!m) return false;
+      var url = m[1].trim();
+      if (!url || url === location.href) return false;
+      done = true;
+      location.replace(url);
+      return true;
+    };
+    if (!go()) document.addEventListener('DOMContentLoaded', go);
+  })();
+
+  /* ----------------------------------------------------------------------
      CONFIGURATION — liens de navigation (modifiable sans toucher au reste)
      icon : nom d'une icône Material Symbols (https://fonts.google.com/icons)
      svg  : clé de l'objet SVG ci-dessous (logos de marque uniquement)
