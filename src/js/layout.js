@@ -288,6 +288,16 @@
     bar.appendChild(bottom);
 
     document.body.insertBefore(bar, document.body.firstChild);
+
+    /* La bannière ramène à l'accueil */
+    var banner = document.getElementById('header-banner');
+    if (banner && !banner.querySelector('.sg-banner-link')) {
+      var home = document.createElement('a');
+      home.className = 'sg-banner-link';
+      home.href = '/';
+      home.setAttribute('aria-label', 'Sengoku no Jidai, accueil');
+      banner.appendChild(home);
+    }
     applyTheme(storedTheme() || currentTheme());
   }
 

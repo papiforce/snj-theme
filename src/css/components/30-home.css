@@ -917,11 +917,42 @@
 .sg-topic,
 .sg-topic:visited {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  gap: 12px;
   padding: 10px 0;
   color: var(--sg-text);
   text-decoration: none;
+}
+
+/* Deux lignes, chacune coupée par une ellipse ; avatar tout à droite */
+.sg-topic__text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sg-topic__avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--sg-surface-2);
+  color: var(--sg-text-muted);
+}
+
+.sg-topic__avatar .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.sg-topic__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .sg-topic__title {
@@ -938,8 +969,11 @@
 }
 
 .sg-topic__meta {
+  overflow: hidden;
   color: var(--sg-text-muted);
   font-size: 0.78rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* --- Minuteur des carrousels automatiques ------------------------------------

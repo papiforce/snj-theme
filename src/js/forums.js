@@ -206,7 +206,7 @@
     }
 
     function zoneStyle(zone) {
-      return '--zc:' + zone.color + ';' + (zone.on ? '--zc-on:' + zone.on + ';' : '');
+      return '--zc:' + zone.color + ';' + (zone.on ? '--zc-on:' + zone.on + ';--zc-sign:' + zone.on + ';' : '');
     }
 
     function sign(zone) {

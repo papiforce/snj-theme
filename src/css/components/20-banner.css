@@ -119,3 +119,16 @@
     margin-bottom: var(--sg-space-4) !important;
   }
 }
+
+/* Lien vers l'accueil sur toute la bannière (ajouté par layout.js) */
+.sg-banner-link {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+}
+
+.sg-banner-link:focus-visible {
+  outline: 2px solid var(--sg-primary);
+  outline-offset: -4px;
+}

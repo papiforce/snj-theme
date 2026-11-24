@@ -101,6 +101,7 @@
     ],
 
     latestCount: 15,
+    latestHidden: /corbeille/i, /* forums dont les sujets ne s'affichent pas (sujets supprimés) */
     latestPerSlide: 3
   };
 
@@ -431,6 +432,40 @@
     ]);
   }
 
+  /* Avatars des derniers participants : lus dans la liste des membres (une requête
+     par membre), gardés en mémoire pour la session */
+  function loadAvatars(topics, scope) {
+    var KEY = 'snj-avatars';
+    var cache = {};
+    try { cache = JSON.parse(sessionStorage.getItem(KEY) || '{}'); } catch (e) {}
+    var paint = function (uid, src) {
+      if (!src) return;
+      scope.querySelectorAll('.sg-topic__avatar[data-uid="' + uid + '"]').forEach(function (el) {
+        el.replaceChildren(h('img', { src: src, alt: '', loading: 'lazy', referrerpolicy: 'no-referrer' }));
+        el.classList.add('has-img');
+      });
+    };
+    var seen = {};
+    topics.forEach(function (t) {
+      if (!t.uid || seen[t.uid]) return;
+      seen[t.uid] = true;
+      if (cache[t.uid] !== undefined) { paint(t.uid, cache[t.uid]); return; }
+      fetch('/memberlist?username=' + encodeURIComponent(t.author), { credentials: 'same-origin' })
+        .then(function (r) { return r.ok ? r.text() : ''; })
+        .then(function (html) {
+          var doc = new DOMParser().parseFromString(html, 'text/html');
+          var blocks = Array.prototype.slice.call(doc.querySelectorAll('.member-block'));
+          var block = blocks.filter(function (b) { return b.querySelector('a[href="/u' + t.uid + '"]'); })[0];
+          var img = block && block.querySelector('.avatar-default img');
+          var src = img ? img.getAttribute('src') : '';
+          cache[t.uid] = src;
+          try { sessionStorage.setItem(KEY, JSON.stringify(cache)); } catch (e) {}
+          paint(t.uid, src);
+        })
+        .catch(function () {});
+    });
+  }
+
   function latest() {
     var body = h('div', { class: 'sg-latest' }, [h('p', { class: 'sg-muted', text: 'Chargement des derniers sujets…' })]);
     var card = h('article', { class: 'sg-card sg-c-latest sg-feed' }, [title('Derniers sujets', 's'), body]);
@@ -439,31 +474,42 @@
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
       .then(function (html) {
         var doc = new DOMParser().parseFromString(html, 'text/html');
-        var rows = Array.prototype.slice.call(doc.querySelectorAll('.block-topics-details')).slice(0, DATA.latestCount);
+        /* Sujets supprimés (déplacés dans la Corbeille) exclus */
+        var rows = Array.prototype.slice.call(doc.querySelectorAll('.block-topics-content')).filter(function (row) {
+          var cat = row.querySelector('.block-topics-category');
+          return !(cat && DATA.latestHidden.test(cat.textContent + ' ' + (cat.getAttribute('href') || '')));
+        }).slice(0, DATA.latestCount);
         if (!rows.length) throw new Error('vide');
         var topics = rows.map(function (row) {
           var a = row.querySelector('a.topictitle');
-          var author = row.querySelector('.block-topics-author strong');
-          var last = row.querySelector('.block-topics-lastpost a[href*="#"], .block-topics-lastpost a:last-child');
-          var m = row.textContent.replace(/\s+/g, ' ').match(/,\s*([^,]+)$/);
+          var poster = row.querySelector('.block-topics-lastpost strong a') || row.querySelector('.block-topics-author a');
+          var last = row.querySelector('.block-topics-lastpost a[href*="/t"]');
+          var lp = row.querySelector('.block-topics-lastpost');
+          var m = lp ? lp.textContent.replace(/\s+/g, ' ').match(/,\s*([^,]+?)\s*$/) : null;
           return {
             title: a ? a.textContent.trim() : '',
             href: last ? last.getAttribute('href') : (a ? a.getAttribute('href') : '/latest'),
-            author: author ? author.textContent.trim() : '',
+            author: poster ? poster.textContent.trim() : '',
+            uid: poster ? (poster.getAttribute('href') || '').replace(/^.*\/u(\d+).*$/, '$1') : '',
             date: m ? m[1].trim() : ''
           };
         });
         var slides = [];
         for (var i = 0; i < topics.length; i += DATA.latestPerSlide) {
           slides.push(h('ul', { class: 'sg-topics' }, topics.slice(i, i + DATA.latestPerSlide).map(function (t) {
+            var av = h('span', { class: 'sg-topic__avatar', 'data-uid': t.uid, 'aria-hidden': 'true' }, [icon('person')]);
             return h('li', null, [
               link(t.href, { class: 'sg-topic' }, [
-                h('span', { class: 'sg-topic__title', text: t.title }),
-                h('span', { class: 'sg-topic__meta', text: [t.author, t.date].filter(Boolean).join(' · ') })
+                h('span', { class: 'sg-topic__text' }, [
+                  h('span', { class: 'sg-topic__title', text: t.title }),
+                  h('span', { class: 'sg-topic__meta', text: [t.author, t.date].filter(Boolean).join(' · ') })
+                ]),
+                av
               ])
             ]);
           })));
         }
+        loadAvatars(topics, body);
         body.replaceChildren(carousel('Derniers sujets', slides));
       })
       .catch(function () {

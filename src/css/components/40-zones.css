@@ -58,7 +58,8 @@ body.sg-zones-on #index .forum.type-table-forum {
 .sg-zone-tab,
 .sg-zone-option,
 .sg-zone-select__button {
-  --zc-on: var(--sg-ink-950);
+  --zc-on: var(--sg-paper-50); /* texte et kanji au survol / actif : blanc papier */
+  --zc-sign: var(--sg-ink-950); /* kanji au repos, sur la pastille */
   --zc-text: var(--zc);
   display: flex;
   align-items: stretch;
@@ -89,7 +90,8 @@ body.sg-zones-on #index .forum.type-table-forum {
   place-items: center;
   width: 56px;
   padding-right: 6px;
-  color: var(--zc-on);
+  color: var(--zc-sign);
+  transition: color 0.45s ease 0.2s;
 }
 
 .sg-zone-tab__sign.is-kanji {
@@ -112,7 +114,7 @@ body.sg-zones-on #index .forum.type-table-forum {
   min-width: 0;
   padding: 6px 16px 6px 22px;
   border-radius: 12px 0 0 12px / 50% 0 0 50%;
-  background: linear-gradient(var(--zc), var(--zc)) left center / 0% 100% no-repeat, var(--sg-surface-2);
+  background: linear-gradient(var(--zc), var(--zc)) left center / 0% 100% no-repeat, var(--sg-surface); /* fond de la barre latérale */
   color: var(--zc-text);
   text-align: right;
   transition: background-size 0.9s var(--sg-ease), color 0.45s ease 0.2s;
@@ -123,7 +125,6 @@ body.sg-zones-on #index .forum.type-table-forum {
    Le texte suit donc la couleur du parent sans transition propre. */
 .sg-zone-tab__name,
 .sg-zone-tab__sub,
-.sg-zone-tab__sign,
 .sg-zone-tab__sign *,
 .sg-zcard__subs a > span {
   transition: none;
@@ -155,6 +156,16 @@ body.sg-zones-on #index .forum.type-table-forum {
 .sg-zone-option[aria-selected="true"] .sg-zone-tab__label,
 .sg-zone-select__button .sg-zone-tab__label {
   background-size: 100% 100%, auto;
+  color: var(--zc-on);
+}
+
+.sg-zone-tab:hover .sg-zone-tab__sign,
+.sg-zone-tab:focus-visible .sg-zone-tab__sign,
+.sg-zone-tab[aria-selected="true"] .sg-zone-tab__sign,
+.sg-zone-option:hover .sg-zone-tab__sign,
+.sg-zone-option:focus .sg-zone-tab__sign,
+.sg-zone-option[aria-selected="true"] .sg-zone-tab__sign,
+.sg-zone-select__button .sg-zone-tab__sign {
   color: var(--zc-on);
 }
 
