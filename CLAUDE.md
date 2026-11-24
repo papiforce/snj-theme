@@ -86,12 +86,16 @@ dans le panneau d'administration (PA), puis on commit.
   l'ancien SnJ) : image en fond avec voile selon le thème, panneau avec kanji en filigrane propre au forum, titre,
   description, bouton du clan (fiche de l'annexe), dangerosité sur 5 (zones RP uniquement), dernier message avec
   avatar, sous-forums à droite. Gestion : cartes sans image sur motif seigaiha. Catégories sans forum : « Prochainement ».
-  Onglet actif dans l'adresse (`?onglet=hi-no-kuni`) et mémorisé (`localStorage` `snj-onglet`), Gestion par défaut.
+  Image des cartes sous un voile et une trame de points (comme l'ancien SnJ). Changement de catégorie : défilement doux
+  jusqu'au séparateur. Onglet actif dans l'adresse (`?onglet=hi-no-kuni`) et mémorisé (`localStorage` `snj-onglet`),
+  Gestion par défaut.
   Données d'une carte dans la description du forum (PA), balise invisible `<span class="sg-meta" data-kanji data-image
   data-danger data-clan data-clan-href hidden>` puis le texte. Structure et contenus : `docs/structure-forums.json`
   (repris de la production ; dangerosité provisoire, tirée au hasard). Index : sous-forums affichés (PA › Affichage ›
   Page d'accueil › Structure et hiérarchie). La liste native n'est masquée que si le sélecteur est monté.
 - **Modules JavaScript** : Forumactif les charge dans le `<head>` ; tout script attend `DOMContentLoaded`.
+- **Transitions** : AwesomeBB applique `* { transition: 0.16s }`. Un texte placé dans un enfant d'un élément dont la
+  couleur s'anime saute pendant l'animation : mettre `transition: none` sur ces enfants (voir `40-zones.css`).
 - **Variables CSS** préfixées `--sg-*`. On rebranche les `--t_*` d'AwesomeBB sur nos tokens.
 - **CSS hors forum** : servi par jsDelivr depuis ce dépôt, avec une adresse versionnée (SHA de commit ou tag).
   Le CSS indispensable reste dans le CSS principal du forum pour que le forum reste lisible si le CDN tombe.
