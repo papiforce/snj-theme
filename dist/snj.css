@@ -3810,7 +3810,7 @@ body.sg-topicpage #topic > .topic-actions:not(.bottom) {
   transition: none;
 }
 
-/* Action secondaire (sujet : « Poster un nouveau sujet ») : contour sur fond de surface */
+/* Action secondaire : contour sur fond de surface (réservée, plus utilisée sur les sujets) */
 #wrap a.sg-action--ghost,
 #wrap a.sg-action--ghost:visited {
   border: 1px solid var(--sg-border-strong, var(--sg-border));
@@ -3818,32 +3818,18 @@ body.sg-topicpage #topic > .topic-actions:not(.bottom) {
   color: var(--sg-text);
 }
 
-/* Cloche des notifications du sujet (élément natif #push-bell), à la suite du titre */
-.sg-pagehead__title .sg-pagehead__bell {
-  display: inline-grid;
-  place-items: center;
-  width: 38px;
-  height: 38px;
-  margin-left: 12px;
-  border: 1px solid var(--sg-border);
-  border-radius: 50%;
-  color: var(--sg-text-muted) !important; /* la cloche native est en jaune */
-  font-size: 1rem;
-  vertical-align: middle;
-  cursor: pointer;
+/* Titre d'un sujet : une seule ligne, coupée en ellipse (titre complet en infobulle) ; le filet reste dessous */
+.sg-pagehead__title--line {
+  flex: 1 1 0;
 }
 
-.sg-pagehead__bell * {
-  color: inherit !important;
-}
-
-.sg-pagehead__bell .material-symbols-outlined {
-  font-size: 20px;
-}
-
-.sg-pagehead__bell:hover {
-  background: var(--sg-surface-2);
-  color: var(--sg-text);
+.sg-pagehead__title--line .sg-pagehead__text {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.08em; /* jambages */
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Fil d'Ariane d'un sujet : le sujet lui-même, dernier niveau, sans lien */
@@ -5413,16 +5399,17 @@ a.sg-pass__card:focus-visible {
 /* --- 59-topic.css --- */
 /* ==========================================================================
    SNJ — Page d'un sujet (construite par src/js/layout.js : pageHead + topicPage)
-   1. Barre du sujet (.sg-tbar) : sujet précédent / suivant, menu « Actions ».
+   1. Barre du sujet (.sg-tbar) : menu « Actions ».
    2. Messages « fumi » (文, la lettre) — pattern réservé aux MESSAGES, partout où ils s'affichent
       (sujets, puis aperçus, messages privés, résultats de recherche…) :
         - carte arrondie en deux colonnes : profil de l'auteur à gauche, lettre à droite ;
         - liseré gauche, cadre du portrait et numéro du message à la couleur du groupe de l'auteur
           (--author, lue sur son pseudo ; couleur de la catégorie par défaut) ;
-        - portrait 3:4 (comme le Dernier inscrit), pseudo en Zen Antique, rang en pastille, fiche
+        - rôle au-dessus du portrait (bandeau shippō + magatama pour le staff), portrait 200 × 400,
+          pseudo en Zen Antique, fiche
           compacte (libellé / valeur), contacts en icônes ;
         - en-tête de la lettre : numéro « #n » (lien permanent), date, boutons en icônes ;
-        - contenu lisible (corps 1rem, interligne 1,75), citations et code restylés, J'aime en pastilles.
+        - contenu lisible (corps 1rem, interligne 1,75), citations et code restylés, J'aime en cœur.
    3. Réponse rapide (.quick-reply) : carte au même gabarit, éditeur natif conservé et restylé.
    4. Bas de page (.sg-tfoot) : séparateur de fin, « Sauter vers », outils de modération.
    ========================================================================== */
@@ -5433,12 +5420,16 @@ body.sg-topicpage-on #topic > .topic-actions.bottom,
 body.sg-topicpage-on #topic > form.quickmod,
 body.sg-topicpage-on .sg-post .post-buttons-mobile,
 body.sg-topicpage-on .sg-post .post-author-contact,
-body.sg-topicpage-on .sg-post .post-header > h2 {
+body.sg-topicpage-on .sg-post .post-header > h2,
+body.sg-topicpage-on .sg-post .fa_dislike,
+body.sg-topicpage-on .sg-post .post-author-title {
   display: none !important;
 }
 
 #topic {
   --ph: var(--sg-primary);
+  /* Rouge du cœur « J'aime » : demandé explicitement, distinct du rouge de Hi no Kuni (#b5533f) */
+  --sg-like: #e0475b;
   font-size: 16px; /* AwesomeBB réduit la taille du texte dans #wrap */
 }
 
@@ -5484,7 +5475,7 @@ body.sg-topicpage-on .sg-post .post-header > h2 {
   position: relative;
   isolation: isolate; /* l'en-tête natif du message a un z-index de 500 : on le contient dans la carte */
   display: grid;
-  grid-template-columns: 232px minmax(0, 1fr);
+  grid-template-columns: 248px minmax(0, 1fr);
   grid-template-areas:
     "aside head"
     "aside body";
@@ -5554,27 +5545,14 @@ body.sg-topicpage-on .sg-post .post-header > h2 {
 
 #topic .sg-post .avatar-big img {
   display: block;
-  width: 140px;
-  height: auto;
+  width: 200px;
+  height: 400px; /* format 200 × 400 */
   max-width: 100%;
-  aspect-ratio: 3 / 4;
   border: 0;
   border-radius: 12px;
   outline: 2px solid var(--author);
   outline-offset: 3px;
   object-fit: cover;
-}
-
-/* Pastille « en ligne » sur le portrait */
-.sg-post__online {
-  position: absolute;
-  right: -6px;
-  bottom: -6px;
-  width: 16px;
-  height: 16px;
-  border: 3px solid var(--sg-surface);
-  border-radius: 50%;
-  background: var(--sg-accent-1);
 }
 
 #topic .sg-post .post-author-name {
@@ -5596,24 +5574,56 @@ body.sg-topicpage-on .sg-post .post-header > h2 {
   transition: none;
 }
 
-#topic .sg-post .post-author-title {
-  display: inline-block;
-  padding: 2px 10px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--author) 16%, transparent);
+/* Rôle au-dessus du portrait : bandeau (pas de pastille) sur motif shippō (communauté, staff),
+   filets haut et bas à la couleur de l'auteur, magatama plein du logo de SnJ pour le staff */
+.sg-role {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  order: 0;
+  width: 100%;
+  padding: 9px 12px;
+  overflow: hidden;
+  border-top: 1px solid color-mix(in srgb, var(--author) 60%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--author) 60%, transparent);
+  background: color-mix(in srgb, var(--author) 8%, var(--sg-surface));
   color: var(--sg-text);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
-#topic .sg-post .post-author-title:empty {
-  display: none;
+.sg-role::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: color-mix(in srgb, var(--author) 30%, transparent);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='%23000' stroke-width='1.4'%3E%3Ccircle cx='0' cy='0' r='20'/%3E%3Ccircle cx='40' cy='0' r='20'/%3E%3Ccircle cx='0' cy='40' r='20'/%3E%3Ccircle cx='40' cy='40' r='20'/%3E%3Ccircle cx='20' cy='20' r='20'/%3E%3C/g%3E%3C/svg%3E") repeat center / 24px 24px;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='%23000' stroke-width='1.4'%3E%3Ccircle cx='0' cy='0' r='20'/%3E%3Ccircle cx='40' cy='0' r='20'/%3E%3Ccircle cx='0' cy='40' r='20'/%3E%3Ccircle cx='40' cy='40' r='20'/%3E%3Ccircle cx='20' cy='20' r='20'/%3E%3C/g%3E%3C/svg%3E") repeat center / 24px 24px;
 }
 
-#topic .sg-post .post-author-title br {
-  display: none;
+.sg-role__mark {
+  display: inline-flex;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  color: var(--author);
+}
+
+.sg-role__mark svg {
+  width: 100%;
+  height: 100%;
+}
+
+.sg-role__label {
+  overflow: hidden;
+  font-family: var(--sg-font-display);
+  font-size: 1.05rem;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Fiche compacte : libellé à gauche, valeur à droite */
@@ -5911,12 +5921,28 @@ body.sg-topicpage-on .sg-post .post-header > h2 {
   color: var(--sg-text);
 }
 
-#topic .sg-post .rep-button.fa_like:hover .material-symbols-outlined {
-  color: var(--sg-accent-1);
+/* J'aime : cœur vide ; une fois aimé (.fa_liked), cœur plein rouge et compteur */
+#topic .sg-post .rep-button .material-symbols-outlined {
+  font-variation-settings: "FILL" 0;
 }
 
-#topic .sg-post .rep-button.fa_dislike:hover .material-symbols-outlined {
-  color: var(--sg-accent-2);
+#topic .sg-post .fa_like:hover .material-symbols-outlined {
+  color: var(--sg-like);
+}
+
+#topic .sg-post .rep-button.fa_liked {
+  border-color: color-mix(in srgb, var(--sg-like) 55%, transparent);
+  color: var(--sg-text);
+}
+
+#topic .sg-post .rep-button.fa_liked .material-symbols-outlined {
+  color: var(--sg-like);
+  font-variation-settings: "FILL" 1;
+}
+
+#topic .sg-post .rep-nb {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
 /* Signature : sous un filet pointillé, en plus petit */
@@ -6135,8 +6161,13 @@ body.sg-topicpage-on .sg-post .post-header > h2 {
 
   #topic .sg-post .avatar-big img {
     width: 56px;
+    height: 112px; /* même format 1:2, réduit */
     border-radius: 10px;
     outline-offset: 2px;
+  }
+
+  .sg-role {
+    grid-column: 1 / -1;
   }
 
   #topic .sg-post .post-author {

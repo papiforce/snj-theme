@@ -372,16 +372,21 @@
     var row = el('div', 'sg-pagehead__row');
     var title = el('h1', 'sg-pagehead__title');
     title.textContent = (h1.querySelector('a') || h1).textContent.trim();
-    /* Sujet : la cloche des notifications push du sujet (élément natif, déplacé) suit le titre */
-    var bell = isTopic && h1.querySelector('#push-bell');
-    if (bell) { bell.classList.add('sg-pagehead__bell'); bell.setAttribute('title', 'Notifications de ce sujet'); title.appendChild(bell); }
+    /* Sujet : titre sur une ligne, coupé en ellipse (titre complet en infobulle) ; la cloche native
+       des notifications du sujet et « Poster un nouveau sujet » restent dans l'en-tête natif, masqué */
+    if (isTopic) {
+      var full = title.textContent;
+      title.textContent = '';
+      title.appendChild(uiEl('span', 'sg-pagehead__text', full));
+      title.classList.add('sg-pagehead__title--line');
+      title.setAttribute('title', full);
+    }
     row.appendChild(title);
     var actions = el('div', 'sg-pagehead__actions');
     Array.prototype.slice.call(native.querySelectorAll(':scope > a.btn')).forEach(function (b) {
-      /* Sur un sujet, « Répondre » est l'action principale ; « Poster un nouveau sujet » passe en secondaire, à gauche */
-      var secondary = isTopic && /mode=newtopic/.test(b.getAttribute('href') || '');
-      b.className = 'sg-action' + (secondary ? ' sg-action--ghost' : '');
-      if (secondary) actions.insertBefore(b, actions.firstChild); else actions.appendChild(b);
+      if (isTopic && /mode=newtopic/.test(b.getAttribute('href') || '')) return;
+      b.className = 'sg-action';
+      actions.appendChild(b);
     });
     if (actions.children.length) row.appendChild(actions);
     head.appendChild(row);
@@ -405,7 +410,41 @@
 
     native.parentNode.insertBefore(head, native);
     document.body.classList.add('sg-pagehead-on');
-    if (isTopic) document.body.classList.add('sg-topicpage');
+    if (isTopic) {
+      document.body.classList.add('sg-topicpage');
+      topicDescription(head, row);
+    }
+  }
+
+  /* Description d'un sujet : absente de la page du sujet, elle est lue dans la liste des sujets
+     de son forum (première page), puis gardée pour la session (sessionStorage « snj-tdesc »). */
+  function topicDescription(head, row) {
+    var tid = (location.pathname.match(/^\/t(\d+)/) || [])[1];
+    var forums = Array.prototype.slice.call(head.querySelectorAll('.sg-crumbs a[href^="/f"]'));
+    var forum = forums.length ? forums[forums.length - 1].getAttribute('href') : '';
+    if (!tid || !forum) return;
+    var KEY = 'snj-tdesc';
+    var cache = {};
+    try { cache = JSON.parse(sessionStorage.getItem(KEY) || '{}'); } catch (e) {}
+    var show = function (text) {
+      if (!text || head.querySelector('.sg-pagehead__desc')) return;
+      var d = uiEl('div', 'sg-pagehead__desc', text);
+      row.parentNode.insertBefore(d, row.nextSibling);
+    };
+    if (cache[tid] !== undefined) { show(cache[tid]); return; }
+    fetch(forum, { credentials: 'same-origin' })
+      .then(function (r) { return r.ok ? r.text() : ''; })
+      .then(function (html) {
+        var doc = new DOMParser().parseFromString(html, 'text/html');
+        var link = doc.querySelector('.posts-description a[href^="/t' + tid + '-"], a.topictitle[href^="/t' + tid + '-"]');
+        var item = link && (link.closest('.posts-section') || link.closest('li') || link.closest('tr'));
+        var desc = item && item.querySelector('.topic-description');
+        var text = desc ? desc.textContent.replace(/\s+/g, ' ').trim() : '';
+        cache[tid] = text;
+        try { sessionStorage.setItem(KEY, JSON.stringify(cache)); } catch (e) {}
+        show(text);
+      })
+      .catch(function () {});
   }
 
   /* --------------------------------------------------------------------
@@ -1160,8 +1199,7 @@
 
   /* --------------------------------------------------------------------
      Page d'un sujet (/tN-…) : en-tête commun (pageHead), puis
-       1. barre : sujet précédent / suivant à gauche, menu « Actions » à droite
-          (favoris, suivi du sujet, copier le lien, imprimer, recherches) ;
+       1. barre : menu « Actions » à droite (favoris, suivi du sujet, copier le lien) ;
        2. messages « fumi » (文, la lettre) : carte en deux colonnes, profil de l'auteur à gauche
           (portrait, pseudo et liseré à la couleur de son groupe, rang, fiche, contacts en icônes),
           lettre à droite (numéro du message, date, boutons, contenu, J'aime, signature) ;
@@ -1184,34 +1222,15 @@
       })[0];
     };
 
-    /* 1. Barre du sujet */
+    /* 1. Barre du sujet : menu « Actions » à droite */
     var bar = el('div', 'sg-tbar');
-    var qn = topic.querySelector('.quick-nav-topics');
-    if (qn) {
-      var nav = el('nav', 'sg-tbar__nav');
-      nav.setAttribute('aria-label', 'Sujets voisins');
-      Array.prototype.slice.call(qn.querySelectorAll('a[href]')).forEach(function (a) {
-        var next = /suivant/i.test(a.textContent);
-        var b = el('a', 'sg-tool');
-        b.href = a.getAttribute('href');
-        if (!next) b.appendChild(ico('chevron_left'));
-        b.appendChild(el('span', null, next ? 'Sujet suivant' : 'Sujet précédent'));
-        if (next) b.appendChild(ico('chevron_right'));
-        nav.appendChild(b);
-      });
-      bar.appendChild(nav);
-    }
     var watch = find(/[?&](un)?watch=topic/, topic);
     var watched = watch && /unwatch=topic/.test(watch.getAttribute('href'));
     var items = [
       [find(/add_favourite/), 'bookmark_add', 'Ajouter à mes favoris'],
       [watch, watched ? 'notifications_off' : 'notifications_active', watched ? 'Ne plus suivre ce sujet' : 'Suivre ce sujet'],
       null,
-      [function () { copyLink(location.origin + location.pathname); }, 'link', 'Copier le lien du sujet'],
-      [function () { window.print(); }, 'print', 'Imprimer le sujet'],
-      null,
-      [find(/search_id=newposts(?![a-z])/), 'new_releases', 'Nouveaux messages depuis ma dernière visite'],
-      [find(/search_id=watchsearch(?![a-z])/), 'bookmarks', 'Mes sujets suivis']
+      [function () { copyLink(location.origin + location.pathname); }, 'link', 'Copier le lien du sujet']
     ].filter(function (it) { return it === null || it[0]; }).map(function (it) {
       return it && [typeof it[0] === 'function' ? it[0] : it[0].getAttribute('href'), it[1], it[2]];
     });
@@ -1271,15 +1290,22 @@
           });
           aside.appendChild(contact);
         }
-        var av = aside.querySelector('.post-author-avatar');
-        if (av && post.classList.contains('online')) {
-          var dot = el('span', 'sg-post__online');
-          dot.setAttribute('title', 'En ligne');
-          dot.appendChild(el('span', 'sg-visually-hidden', 'En ligne'));
-          av.appendChild(dot);
-        }
       }
     });
+
+    /* J'aime : un cœur (vide, plein quand le message est aimé : Forumactif passe le bouton de .fa_like à .fa_liked) ;
+       « Je n'aime pas » est masqué par le CSS */
+    Array.prototype.slice.call(topic.querySelectorAll('.sg-post .fa_like, .sg-post .fa_liked')).forEach(function (b) {
+      var i = b.querySelector('.material-symbols-outlined');
+      if (i) i.textContent = 'favorite';
+      var label = b.querySelector(':scope > span:last-child');
+      if (label && !label.classList.contains('rep-cat')) label.classList.add('sg-visually-hidden');
+      b.setAttribute('title', 'J’aime');
+      b.setAttribute('aria-label', 'J’aime');
+    });
+
+    /* Rôle au-dessus du portrait : Staffeux ou Modérateur (groupes du forum), sinon le rang Forumactif */
+    postRoles(posts);
 
     /* Couleur de l'auteur (celle de son groupe, après les règles de 08-groups.css) : liseré et cadre du portrait */
     var paintAuthors = function () {
@@ -1339,6 +1365,70 @@
 
     topic.classList.add('sg-topic-on');
     document.body.classList.add('sg-topicpage-on');
+  }
+
+  /* Magatama du logo de Sengoku no Jidai (formes pleines) : marque du staff, comme dans les statistiques */
+  var MAGATAMA_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="22 21 56 56" fill="currentColor" aria-hidden="true">' +
+    '<path d="M73.3 51.0Q72.5 50.3 70.6 49.4Q68.8 48.4 66.4 48.3Q64.1 48.2 61.9 49.1Q59.7 49.9 58.2 51.2Q56.7 52.6 55.6 54.4Q54.6 56.2 54.2 58.1Q53.9 60.0 54.2 61.6Q54.6 63.2 55.5 64.7Q56.4 66.3 57.4 67.5Q58.5 68.8 58.5 69.1Q58.6 69.5 57.3 71.1Q56.0 72.7 54.6 73.7Q53.2 74.7 53.3 75.1Q53.3 75.6 56.3 75.6Q59.3 75.7 62.4 74.8Q65.5 74.0 67.9 72.7Q70.3 71.3 72.0 69.6Q73.8 67.9 74.6 66.6Q75.3 65.4 75.9 64.0Q76.6 62.5 76.7 60.2Q76.9 57.8 76.7 56.8Q76.6 55.8 76.1 54.7Q75.6 53.6 74.8 52.6Q74.1 51.7 73.3 51.0Z"/>' +
+    '<path d="M31.1 43.2Q30.8 43.1 30.4 43.4Q29.9 43.8 28.9 45.1Q27.9 46.4 26.5 49.3Q25.1 52.2 24.6 54.6Q24.1 57.0 24.3 60.0Q24.4 62.9 25.3 65.2Q26.1 67.4 27.0 68.7Q27.9 70.0 28.8 70.8Q29.7 71.7 30.7 72.3Q31.8 73.0 32.9 73.4Q34.0 73.8 36.3 73.8Q38.5 73.8 40.6 72.9Q42.6 72.0 43.8 71.0Q44.9 70.0 45.5 69.0Q46.2 68.1 46.7 67.0Q47.1 66.0 47.3 64.6Q47.5 63.2 47.3 61.0Q47.1 58.9 46.1 56.9Q45.1 54.9 43.5 53.6Q42.0 52.2 40.1 51.6Q38.2 51.0 35.4 50.9Q32.6 50.9 32.3 50.4Q32.0 50.0 31.7 48.5Q31.4 47.1 31.4 45.2Q31.4 43.3 31.1 43.2Z"/>' +
+    '<path d="M37.2 30.3Q36.7 31.6 36.7 34.1Q36.7 36.6 37.5 38.4Q38.3 40.2 39.8 41.8Q41.4 43.4 43.6 44.4Q45.8 45.3 48.3 45.4Q50.9 45.4 52.5 44.8Q54.0 44.2 55.4 42.9Q56.8 41.6 58.0 39.3Q59.2 37.1 59.7 36.6Q60.3 36.0 61.9 36.4Q63.6 36.7 65.3 37.6Q67.0 38.5 67.2 38.5Q67.5 38.5 67.6 38.3Q67.7 38.1 66.7 35.8Q65.7 33.5 63.8 31.1Q61.9 28.7 59.8 27.0Q57.6 25.3 55.1 24.3Q52.7 23.3 51.3 23.2Q49.9 23.0 48.0 23.0Q46.1 23.1 44.1 23.8Q42.1 24.4 41.1 25.1Q40.2 25.8 39.4 26.6Q38.6 27.5 38.1 28.2Q37.6 29.0 37.2 30.3Z"/>' +
+    '</svg>';
+
+  /* Rôles du staff : membres des groupes Staffeux et Modérateurs (pages /groups puis /gN-…),
+     gardés 15 minutes pour la session (sessionStorage « snj-roles » : { uid: 'staff' | 'mod' }) */
+  function staffRoles(cb) {
+    var KEY = 'snj-roles';
+    try {
+      var c = JSON.parse(sessionStorage.getItem(KEY) || 'null');
+      if (c && Date.now() - c.t < 15 * 60000) { cb(c.d); return; }
+    } catch (e) {}
+    var get = function (url) {
+      return fetch(url, { credentials: 'same-origin' }).then(function (r) { return r.ok ? r.text() : ''; })
+        .then(function (html) { return new DOMParser().parseFromString(html, 'text/html'); });
+    };
+    get('/groups').then(function (doc) {
+      var seen = {};
+      var groups = Array.prototype.slice.call(doc.querySelectorAll('a[href^="/g"]')).map(function (a) { return a.getAttribute('href'); })
+        .filter(function (href) { var ok = /^\/g\d+-(staffeux|moderateurs)/.test(href) && !seen[href]; seen[href] = true; return ok; });
+      return Promise.all(groups.map(function (href) {
+        var role = /staffeux/.test(href) ? 'staff' : 'mod';
+        return get(href).then(function (g) {
+          return Array.prototype.slice.call(g.querySelectorAll('tr a[href]')).map(function (a) {
+            var m = (a.getAttribute('href') || '').match(/^\/u(\d+)$/);
+            return m ? [m[1], role] : null;
+          }).filter(Boolean);
+        }).catch(function () { return []; });
+      }));
+    }).then(function (lists) {
+      var roles = {};
+      lists.forEach(function (l) { l.forEach(function (p) { if (roles[p[0]] !== 'staff') roles[p[0]] = p[1]; }); });
+      try { sessionStorage.setItem(KEY, JSON.stringify({ t: Date.now(), d: roles })); } catch (e) {}
+      cb(roles);
+    }).catch(function () { cb({}); });
+  }
+
+  function postRoles(posts) {
+    staffRoles(function (roles) {
+      posts.forEach(function (post) {
+        var aside = post.querySelector('.post-aside');
+        if (!aside || aside.querySelector('.sg-role')) return;
+        var a = post.querySelector('.post-author-name a[href]');
+        var uid = a && ((a.getAttribute('href') || '').match(/^\/u(\d+)/) || [])[1];
+        var role = uid && roles[uid];
+        var rankEl = post.querySelector('.post-author-title');
+        var rank = rankEl ? rankEl.textContent.replace(/\s+/g, ' ').trim() : '';
+        var label = role === 'staff' ? 'Staffeux' : role === 'mod' ? 'Modérateur' : rank;
+        if (!label) return;
+        var band = uiEl('div', 'sg-role' + (role ? ' sg-role--staff' : ''));
+        if (role) {
+          var mark = uiEl('span', 'sg-role__mark');
+          mark.innerHTML = MAGATAMA_SVG;
+          band.appendChild(mark);
+        }
+        band.appendChild(uiEl('span', 'sg-role__label', label));
+        aside.insertBefore(band, aside.firstChild);
+      });
+    });
   }
 
   /* Copie d'un lien dans le presse-papiers, avec un message discret en bas d'écran */

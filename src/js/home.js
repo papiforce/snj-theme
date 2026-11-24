@@ -599,8 +599,8 @@
     var cssReady = getComputedStyle(document.documentElement).getPropertyValue('--sg-home').trim() !== '';
     if (!cssReady) return;
 
-    /* Page d'un forum (/f4-presentations, /f4p20-…) : Guide, Saison et Annexe, puis le séparateur */
-    if (!document.getElementById('index') && /^\/f\d+/.test(location.pathname)) {
+    /* Page d'un forum (/f4-presentations, /f4p20-…) ou d'un sujet (/t3-…) : Guide, Saison et Annexe, puis le séparateur */
+    if (!document.getElementById('index') && /^\/[ft]\d+/.test(location.pathname)) {
       var row = h('div', { id: 'sg-home', class: 'is-forum' }, [guide(), season(), annexe()]);
       wrap.insertBefore(row, wrap.firstChild);
       row.parentNode.insertBefore(divider(), row.nextSibling);
