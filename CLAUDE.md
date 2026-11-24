@@ -190,7 +190,7 @@ dans le panneau d'administration (PA), puis on commit.
   **Messages « fumi »** (文, la lettre) : pattern **réservé aux messages**, partout où ils s'affichent (sujets ; à
   reprendre pour l'aperçu, les messages privés, les résultats de recherche par message). Le balisage natif est
   conservé et déplacé (citation, J'aime, éditeur continuent de fonctionner) : `.post-wrap.sg-post` en grille
-  `248px | 1fr` **avec 16px d'écart**, sans fond ni bordure ; l'en-tête et le contenu sont déplacés dans une carte
+  `248px | 1fr` **avec 16px d'écart**, sans fond ni bordure, **48px entre deux messages** ; l'en-tête et le contenu sont déplacés dans une carte
   `.sg-post__letter` (fond de surface, arrondie, **sans bordure** ; **pas de séparation** entre l'en-tête et le
   contenu : ni filet ni l'ombre qu'AwesomeBB pose sur `.post`) ; `.post-body` en `display: contents`, chaque message `isolation: isolate`.
   **Empilement** : Forumactif donne `z-index: 500` à la fois à `.post-header` et à `.post` ; le corps, placé après,
@@ -207,9 +207,10 @@ dans le panneau d'administration (PA), puis on commit.
   du texte** ; sinon le rang Forumactif, sans magatama ; le rang natif (« Admin ») est masqué. Dessous, la **carte du
   profil** `.sg-post__card`, **sans fond ni bordure** (padding `0 16px`) : **portrait 200 × 400** (56 × 112
   sur mobile) **sans cadre** ni pastille « en ligne », pseudo en Zen Antique **sans l'infobulle de profil** de
-  Forumactif (tooltipster détruit, lien remplacé par un clone), un **petit séparateur avec le logo**
-  (`smallDivider()`, `.sg-divider--sm` : logo 22px, triangle 24 × 12 ; masqué sur mobile), puis la fiche réduite
-  `.sg-post__facts` (icônes de la couleur du texte) :
+  Forumactif (tooltipster détruit, lien remplacé par un clone), une **simple ligne** (`hr.sg-post__rule`, 60 % de la
+  largeur, centrée, 1px `--sg-border` ; masquée sur mobile ; le séparateur avec logo a été écarté ici), puis la fiche
+  réduite `.sg-post__facts` (icônes de la couleur du texte, chaque information **sur 2 lignes au plus, en ellipse**,
+  texte complet en infobulle) :
   « **Inscrit depuis** N jours / semaines / mois / ans » (`memberSince` : < 1 semaine en jours, < 1 mois en semaines,
   < 1 an en mois, puis en années ; pluriels gérés ; date complète en infobulle) et la **localisation** avec l'icône
   `location_on`. **Retirés** : Messages, Âge, les icônes de contact (profil, MP, e-mail, site web).
@@ -232,8 +233,10 @@ dans le panneau d'administration (PA), puis on commit.
   ≤ 768px : profil au-dessus de la lettre (rôle sur toute la largeur, puis carte portrait | pseudo et fiche),
   « Préférences » et « Actions » côte à côte, cœur et trois points en cibles de 44px. Forumactif **minifie** le code
   des modules : pour vérifier une version servie, chercher un nom de fonction, pas une chaîne avec des espaces.
-  **Réponse rapide** : carte au même gabarit, intitulé « Répondre » ; l'éditeur natif (SCEditor) est conservé et
-  restylé (ses bordures et fonds sont en `!important` dans le CSS de Forumactif : on surcharge en `!important`).
+  **Réponse rapide remplacée** par un bouton **« Répondre au sujet »** (`.sg-treply`, style `.sg-action`, icône
+  `reply`) **centré** sous le dernier message, qui reprend l'adresse du bouton de l'en-tête (`mode=reply`) ; le bloc
+  natif `.quick-reply` est masqué (`#topic:has(.sg-treply) .quick-reply`). Pas de bouton sans lien de réponse (sujet
+  verrouillé, visiteur). Le style de l'éditeur SCEditor reste dans `59-topic.css` pour la page de réponse.
   **Bas de page** (`.sg-tfoot`) : séparateur de fin, « Sauter vers » (`jumpBox`, forum du sujet coché) à gauche,
   outils de modération à droite (`.sg-modtools` : libellé « Modération » + icônes rondes de `.topic-admin`), puis
   les permissions et le fil d'Ariane. Retirés aussi : barre « Plus ! / Partagez », bouton fixe « Répondre au sujet »,
