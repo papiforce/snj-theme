@@ -4037,6 +4037,11 @@ body.sg-topics-on #wrap > #sort-box {
   line-height: 1.6;
 }
 
+/* Même espace au-dessus et en dessous du séparateur qui remplace le bloc « Modérateurs » */
+body.sg-topics-on .sg-topics {
+  margin-bottom: 0;
+}
+
 .sg-topics.sg-tone-gestion { --ph: var(--sg-contrast); }
 .sg-topics.sg-tone-hi { --ph: var(--sg-nation-hi); }
 .sg-topics.sg-tone-mizu { --ph: var(--sg-nation-mizu); }
@@ -4189,7 +4194,6 @@ body.sg-topics-on #wrap > #sort-box {
 }
 
 .sg-tool:focus-visible,
-#wrap .sg-select select:focus-visible,
 .sg-seg__opt input:focus-visible + .sg-seg__face {
   outline: 2px solid var(--sg-accent-1);
   outline-offset: 2px;
@@ -4211,52 +4215,216 @@ body.sg-topics-on #wrap > #sort-box {
   transition: none;
 }
 
-/* Liste déroulante restylée (Trier par, Sauter vers) */
-.sg-select {
+/* --- Listes déroulantes personnalisées (.sg-combo, construites par combo() dans layout.js) ---
+   Même gabarit que le bouton « Trier » : contour arrondi, fond de surface. Le <select> natif reste
+   dans le formulaire, masqué. « Sauter vers » : champ de saisie qui filtre, arborescence indentée. */
+.sg-combo {
   position: relative;
-  display: inline-flex;
-  align-items: center;
   min-width: 0;
 }
 
-/* AwesomeBB impose une largeur aux <select> sur mobile : on la neutralise */
-#wrap .sg-select select {
-  -webkit-appearance: none;
-  appearance: none;
-  flex: 1 1 auto;
+#wrap .sg-combo__native {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+}
+
+#wrap .sg-combo__control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   width: 100%;
-  min-width: 0;
-  max-width: none;
   height: 46px;
   margin: 0;
-  padding: 0 42px 0 14px;
+  padding: 0 12px 0 16px;
   border: 1px solid var(--sg-border-strong, var(--sg-border));
   border-radius: var(--sg-radius-lg);
   background: var(--sg-surface);
-  background-image: none;
-  box-shadow: none;
   color: var(--sg-text);
   font: inherit;
   font-size: 0.95rem;
-  text-overflow: ellipsis;
+  font-weight: 700;
+  text-align: left;
   cursor: pointer;
 }
 
-#wrap .sg-select select:hover {
+#wrap .sg-combo__control:hover,
+#wrap .sg-combo.is-open .sg-combo__control {
   background: var(--sg-surface-2);
 }
 
-#wrap .sg-select select option {
+#wrap button.sg-combo__control:focus-visible,
+#wrap .sg-combo__control:focus-within {
+  outline: 2px solid var(--sg-accent-1);
+  outline-offset: 2px;
+}
+
+.sg-combo__control > .material-symbols-outlined {
+  flex: none;
+  color: var(--sg-text-muted);
+  font-size: 20px;
+  transition: none;
+}
+
+.sg-combo__value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: none;
+}
+
+.sg-combo__chevron {
+  margin-left: auto;
+}
+
+#wrap .sg-combo__control .sg-combo__chevron {
+  transition: transform 0.25s var(--sg-ease);
+}
+
+#wrap .sg-combo.is-open .sg-combo__chevron {
+  transform: rotate(180deg);
+}
+
+/* Champ de saisie de « Sauter vers » (AwesomeBB stylise les <input>) */
+#wrap input.sg-combo__input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  outline: none;
+  background: transparent;
+  box-shadow: none;
+  color: var(--sg-text);
+  font: inherit;
+  font-weight: 700;
+}
+
+#wrap input.sg-combo__input::placeholder {
+  color: var(--sg-text);
+  opacity: 1;
+}
+
+#wrap .sg-combo.is-open input.sg-combo__input::placeholder {
+  color: var(--sg-text-muted);
+  font-weight: 400;
+}
+
+/* Liste */
+#wrap .sg-combo__list {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 30;
+  min-width: 100%;
+  max-height: min(360px, 60vh);
+  margin: 0;
+  padding: 6px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--sg-border);
+  border-radius: var(--sg-radius-lg);
   background: var(--sg-surface);
+  box-shadow: var(--sg-shadow);
+  list-style: none;
+}
+
+#wrap .sg-combo__list[hidden] {
+  display: none;
+}
+
+#wrap .sg-combo__list > li {
+  margin: 0;
+  border: 0;
+}
+
+#wrap .sg-combo__opt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px 9px calc(12px + max(var(--depth, 0) - 1, 0) * 18px);
+  border-radius: 8px;
+  color: var(--sg-text);
+  font-size: 0.92rem;
+  line-height: 1.35;
+  cursor: pointer;
+}
+
+#wrap .sg-combo__opt[hidden] {
+  display: none;
+}
+
+.sg-combo__label {
+  flex: 1;
+  min-width: 0;
+  transition: none;
+}
+
+/* Sous-forums : petit filet d'arborescence */
+#wrap .sg-combo__opt.is-deep .sg-combo__label::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin: 0 8px 3px 0;
+  border-bottom: 1px solid var(--sg-border-strong, var(--sg-border));
+  border-left: 1px solid var(--sg-border-strong, var(--sg-border));
+  vertical-align: middle;
+}
+
+/* Catégories : intitulés de groupe */
+#wrap .sg-combo__opt.is-cat {
+  margin-top: 4px;
+  color: var(--sg-text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+#wrap .sg-combo__opt.is-cat:first-child {
+  margin-top: 0;
+}
+
+#wrap .sg-combo__opt.is-active {
+  background: var(--sg-surface-2);
   color: var(--sg-text);
 }
 
-.sg-select > .material-symbols-outlined {
-  position: absolute;
-  right: 12px;
+/* Résultat de recherche affiché seulement pour garder l'arborescence */
+#wrap .sg-combo__opt.is-context:not(.is-cat) {
   color: var(--sg-text-muted);
-  font-size: 20px;
-  pointer-events: none;
+}
+
+#wrap .sg-combo__opt.is-selected {
+  font-weight: 700;
+}
+
+.sg-combo__check {
+  flex: none;
+  color: var(--sg-accent-1);
+  font-size: 18px;
+  visibility: hidden;
+}
+
+.sg-combo__opt.is-selected .sg-combo__check {
+  visibility: visible;
+}
+
+#wrap .sg-combo__empty {
+  padding: 12px;
+  color: var(--sg-text-muted);
+  font-size: 0.9rem;
+  text-align: center;
 }
 
 /* Fenêtre « Trier » */
@@ -4316,9 +4484,6 @@ body.sg-topics-on #wrap > #sort-box {
   text-transform: uppercase;
 }
 
-.sg-field .sg-select {
-  display: flex;
-}
 
 /* Ordre : contrôle segmenté */
 .sg-seg {
@@ -4429,7 +4594,7 @@ body.sg-topics-on #wrap > #sort-box {
   font-size: 20px;
 }
 
-.sg-jump .sg-select {
+.sg-jump .sg-combo {
   flex: 1;
 }
 
