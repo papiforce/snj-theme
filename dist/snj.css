@@ -5131,7 +5131,7 @@ body.sg-topics-on .sg-topics {
      - autorisé : étiquette pleine, icône à la couleur de la catégorie (--ph), cachet Asagi « Autorisé » ;
      - non autorisé : étiquette estompée au contour pointillé, cachet « Non autorisé » avec cadenas.
    Un droit qui mène quelque part (Modérer ce forum) : toute l'étiquette est un lien, avec une flèche.
-   Grille fluide (étiquettes de 220px minimum). Dessous : le fil d'Ariane de l'en-tête, repris.
+   Grille fluide : les étiquettes se partagent toute la largeur (240px minimum). Dessous : le fil d'Ariane de l'en-tête, repris.
    ========================================================================== */
 
 .sg-perms {
@@ -5177,7 +5177,7 @@ body.sg-topics-on .sg-topics {
 
 #wrap .sg-perms__list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); /* les étiquettes se partagent toute la largeur */
   gap: 14px;
   margin: 0;
   padding: 0;
@@ -5345,9 +5345,7 @@ a.sg-pass__card:focus-visible {
 
 /* --- Fil d'Ariane repris sous les permissions ------------------------------------ */
 .sg-crumbs--end {
-  margin-top: 14px;
-  padding-top: 18px;
-  border-top: 1px solid var(--sg-border);
+  margin-top: 10px;
 }
 
 @media (max-width: 600px) {
