@@ -320,6 +320,7 @@ body.sg-topicpage-on .sg-post .post-header > h2 {
 #topic .sg-post .post-buttons {
   display: block !important;
   flex: none;
+  margin-left: auto;
 }
 
 #topic .sg-post .post-buttons ul {
@@ -457,6 +458,7 @@ body.sg-topicpage-on .sg-post .post-header > h2 {
 #topic .sg-post .rep-button {
   display: inline-flex;
   align-items: center;
+  gap: 6px;
   height: 34px;
   margin: 0;
   padding: 0 14px 0 10px;
@@ -548,33 +550,38 @@ body.sg-topicpage-on .sg-post .post-header > h2 {
   background: none;
 }
 
+/* L'éditeur natif (SCEditor) impose bordure et fonds en !important (CSS de Forumactif) */
 #topic .quick-reply .sceditor-container {
   overflow: hidden;
-  border: 1px solid var(--sg-border-strong, var(--sg-border));
-  border-radius: 12px;
-  background: var(--sg-surface-2);
+  border: 1px solid var(--sg-border-strong, var(--sg-border)) !important;
+  border-radius: 12px !important;
+  background: var(--sg-surface-2) !important;
+  color: var(--sg-text) !important;
 }
 
 #topic .quick-reply .sceditor-toolbar {
   border: 0;
   border-bottom: 1px solid var(--sg-border);
-  background: none;
+  background: none !important;
+  color: var(--sg-text-muted);
 }
 
 #topic .quick-reply .sceditor-button {
+  border: 0 !important;
   border-radius: 8px;
-  background: none;
-  color: var(--sg-text-muted);
+  background: none !important;
+  color: var(--sg-text-muted) !important;
 }
 
 #topic .quick-reply .sceditor-button:hover,
 #topic .quick-reply .sceditor-button.active {
-  background: var(--sg-surface);
-  color: var(--sg-text);
+  background: var(--sg-surface) !important;
+  color: var(--sg-text) !important;
 }
 
-#topic .quick-reply .sceditor-container textarea {
-  background: none;
+#topic .quick-reply .sceditor-container textarea,
+#topic .quick-reply .sceditor-container iframe {
+  background: transparent !important;
   color: var(--sg-text);
   font-family: var(--sg-font-body, inherit);
   font-size: 1rem;

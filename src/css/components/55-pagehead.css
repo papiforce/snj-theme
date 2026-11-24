@@ -182,10 +182,14 @@ body.sg-topicpage #topic > .topic-actions:not(.bottom) {
   margin-left: 12px;
   border: 1px solid var(--sg-border);
   border-radius: 50%;
-  color: var(--sg-text-muted);
+  color: var(--sg-text-muted) !important; /* la cloche native est en jaune */
   font-size: 1rem;
   vertical-align: middle;
   cursor: pointer;
+}
+
+.sg-pagehead__bell * {
+  color: inherit !important;
 }
 
 .sg-pagehead__bell .material-symbols-outlined {
