@@ -83,7 +83,7 @@ dans le panneau d'administration (PA), puis on commit.
   (objet `DATA`) à brancher plus tard sur l'API de l'annexe. Pas d'animation de bordure au survol.
   Les `<header>` sont interdits dans nos composants : AwesomeBB les fixe tous en haut de page.
 - **Pages des forums** (`home.js`, mode `#sg-home.is-forum`, placement « Sur les sous-forums » du module 11) : sous la
-  bannière, Guide du joueur (5 colonnes), Saison (4) et Annexe (3) — les mêmes cartes que l'accueil —, puis le
+  bannière, Guide du joueur, Saison et Annexe, 4 colonnes chacune — les mêmes cartes que l'accueil —, puis le
   séparateur avec le logo (56px au-dessus et en dessous ; marge native de `.page-header` retirée). ≤ 1200px : Guide et
   Saison côte à côte, Annexe dessous ; ≤ 768px : une colonne. Détection : pas de `#index` et adresse en `/fN…`.
 - **Catégories de l'accueil** (`forums.js` + `40-zones.css`) : à gauche un sélecteur collant (Gestion, Hi, Mizu, Kaze,
