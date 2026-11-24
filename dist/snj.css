@@ -2042,7 +2042,8 @@ html::after {
     font-size: 0.66rem;
   }
 
-  #sg-home > * {
+  #sg-home > *,
+  #sg-home.is-forum > * {
     grid-column: span 12;
   }
 
