@@ -6507,6 +6507,13 @@ body.sg-writepage-on #wrap > .page-header,
 .sg-writeform.sg-tone-tsuchi { --ph: var(--sg-nation-tsuchi); }
 .sg-writeform.sg-tone-autres { --ph: var(--sg-nation-autres); }
 
+/* Séparateur avec le logo au-dessus de l'en-tête : logo au trait en masque, dans la couleur du séparateur */
+.sg-divider__logo--mask {
+  background-color: currentColor;
+  -webkit-mask: url("https://cdn.jsdelivr.net/gh/papiforce/snj-theme@b44435293a455829eb6ec7b2193db36fafb78071/assets/snj-logo-outline.svg") center / contain no-repeat;
+  mask: url("https://cdn.jsdelivr.net/gh/papiforce/snj-theme@b44435293a455829eb6ec7b2193db36fafb78071/assets/snj-logo-outline.svg") center / contain no-repeat;
+}
+
 /* Lien du sujet dans la description de l'en-tête */
 #wrap .sg-pagehead--write .sg-pagehead__desc a {
   color: var(--sg-text);
@@ -6673,6 +6680,7 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
   border: 1px solid var(--sg-border) !important;
   border-radius: 12px !important;
   background: var(--sg-surface-2) !important;
+  box-shadow: none !important;
   color: var(--sg-text) !important;
 }
 
@@ -7081,6 +7089,7 @@ html[data-theme="dark"] .sg-writeform .sceditor-button div {
   padding: 0;
   border: 0;
   background: none;
+  box-shadow: none; /* ombre d'AwesomeBB : dessinait une seconde carte dans la carte */
 }
 
 .sg-rev__meta {

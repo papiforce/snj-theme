@@ -1699,6 +1699,20 @@
     };
     if (nativeHead) nativeHead.parentNode.insertBefore(head, nativeHead);
     else form.parentNode.insertBefore(head, form);
+    /* Séparateur avec le logo entre la bannière et l'en-tête, comme sur les forums et les sujets (sans les widgets :
+       la page reste concentrée sur l'écriture). Logo au trait servi par jsDelivr, en masque (couleur du thème). */
+    var topDiv = el('div', 'sg-divider sg-divider--write');
+    topDiv.setAttribute('role', 'separator');
+    var logo = el('span', 'sg-divider__logo sg-divider__logo--mask');
+    logo.setAttribute('aria-hidden', 'true');
+    topDiv.appendChild(logo);
+    var topRule = el('span', 'sg-divider__rule');
+    topRule.setAttribute('aria-hidden', 'true');
+    topRule.appendChild(el('span', 'sg-divider__line'));
+    topRule.insertAdjacentHTML('beforeend', '<svg class="sg-divider__notch" viewBox="0 0 48 25" aria-hidden="true"><path d="M0 .5L24 24.5L48 .5"/></svg>');
+    topRule.appendChild(el('span', 'sg-divider__line'));
+    topDiv.appendChild(topRule);
+    head.parentNode.insertBefore(topDiv, head);
     document.body.classList.add('sg-pagehead-on');
 
     var tone = function (t) {
@@ -1708,7 +1722,8 @@
     };
     /* Contexte (fil d'Ariane, titre du sujet ou du forum) lu sur la page du sujet ou du forum */
     var t = val('t') || params.t, p = val('p') || params.p, f = val('f') || params.f;
-    var src = t ? '/t' + t : p ? '/viewtopic?p=' + p : f ? '/f' + f : '';
+    /* « /t3 » renvoie une erreur 404 : il faut le tiret (« /t3- »), que Forumactif redirige vers l'adresse complète */
+    var src = t ? '/t' + t + '-' : p ? '/viewtopic?p=' + p : f ? '/f' + f + '-' : '';
     var fillHead = function (doc, url) {
       var isTopic = /^\/t\d+/.test(url);
       var native = doc && doc.querySelector(isTopic ? '#topic .topic-header' : '#wrap .page-header');
