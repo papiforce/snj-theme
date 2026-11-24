@@ -78,10 +78,14 @@ dans le panneau d'administration (PA), puis on commit.
   illustrées, les fils ni la carte Discord) : seigaiha 青海波 (vagues) → parcours et aide (onboarding, guides,
   tutoriels) ; kikkō 亀甲 (carapace de tortue) → univers et références durables (contexte, règlement, chronologie) ;
   shippō 七宝 (cercles entrelacés) → communauté et liens (staff, votes, partenaires, membres) ; yagasuri 矢絣
-  (empennes de flèches) → sujets (cartes de sujets uniquement).
-  Derniers sujets : sujets de la Corbeille (supprimés) exclus (`DATA.latestHidden`), titre et ligne « dernier
-  participant · date » coupés en ellipse, avatar du dernier participant à droite (lu dans `/memberlist`, mis en cache
-  `sessionStorage` `snj-avatars`). La bannière est un lien vers `/` (`.sg-banner-link`, ajouté par `layout.js`).
+  (empennes de flèches) → sujets (cartes de sujets, widget Derniers sujets).
+  Derniers sujets : **liste qui défile dans la carte** (plus de carrousel ; fondu en bas tant qu'il reste des sujets),
+  motif yagasuri estompé en fond (`.sg-pat--yagasuri`), sujets de la Corbeille (supprimés) exclus (`DATA.latestHidden`),
+  titre et ligne « dernier participant · date » coupés en ellipse, avatar du dernier participant à droite. Classes
+  **`.sg-ltopic…`** propres au widget : `.sg-topic` / `.sg-topics` sont réservées aux cartes de sujets des pages de forum.
+  **Avatars** (widget et Dernier inscrit) : lus dans `/memberlist`, cache `sessionStorage` `snj-avatars` de **10 minutes**
+  (`{s, t}`) ; celui du membre connecté vient toujours de `_userdata.avatar` (jamais du cache), pour qu'un avatar
+  modifié apparaisse tout de suite. La bannière est un lien vers `/` (`.sg-banner-link`, ajouté par `layout.js`).
   Peu de kanji (seulement dans les tuiles de scénarios). Annonces, Rumeurs et Saison sont des données provisoires
   (objet `DATA`) à brancher plus tard sur l'API de l'annexe. Pas d'animation de bordure au survol.
   Les `<header>` sont interdits dans nos composants : AwesomeBB les fixe tous en haut de page.
@@ -114,7 +118,8 @@ dans le panneau d'administration (PA), puis on commit.
   vers la gauche, comme le seigaiha des cartes Gestion. Pastilles de statut (Annonce / Annonce globale en couleur primaire `--sg-primary` / `--sg-primary-fg`, Épinglé,
   Verrouillé), « Nouveau » en Asagi ; **pas d'icône dans le coin supérieur droit** (l'indicateur de participation a été
   retiré). Titre en Zen Antique (2 lignes max), description sur 1 ligne, « par » + auteur coloré, pages du sujet en
-  pastilles ; en pied (pointillé) réponses et vues, dernier message (avatar, auteur coloré, date vers le message).
+  pastilles ; en pied (pointillé) réponses et vues, dernier message (avatar, auteur coloré, date vers le message),
+  **toujours au bas de la carte** (`margin-top: auto` ; l'élément qui le précède garde 10px de marge basse).
   Verrouillés : carte atténuée (72 %). Grille de 2 colonnes, **même hauteur pour toutes les cartes** (`grid-auto-rows: 1fr`) ;
   1 colonne ≤ 768px. Soulèvement au survol. **« Poster un nouveau sujet » deux fois** : le bouton d'origine reste à droite
   du titre de la page (en-tête), et un second, qui reprend son adresse, est **au-dessus de la grille, à gauche**
@@ -131,12 +136,14 @@ dans le panneau d'administration (PA), puis on commit.
   « Ordre » (8px entre le libellé et le contrôle ; `<div role="group">`, pas de `<fieldset>`/`<legend>` qui échappe à
   l'espacement) en contrôle segmenté (Décroissant / Croissant, radios natives `sort_order`), bouton « Appliquer » ; puis,
   à sa droite, **« Sauter vers »** : le formulaire natif `jumpbox` déplacé, avec une liste personnalisée à saisie.
+  La fenêtre « Trier » ne donne le focus à rien à l'ouverture.
   **Listes déroulantes personnalisées** (`combo()` dans `layout.js`, `.sg-combo`) : jamais le `<select>` natif à
   l'écran ; il reste dans le formulaire, masqué, et reçoit la valeur choisie puis un événement `change` (la jumpbox
   s'envoie alors d'elle-même). Même style que le bouton « Trier » (contour arrondi, fond de surface, chevron qui pivote),
   liste en fenêtre (motif combobox ARIA : flèches, Page préc./suiv., Entrée, Échap — qui ne ferme que la liste —,
   clic extérieur), coche Asagi sur l'entrée choisie. Option `search` : champ qui filtre la liste, sans tenir compte des
-  accents, en gardant visibles les parents des résultats (l'arborescence reste lisible). Option `tree` (jumpbox) : les
+  accents, en gardant visibles les parents des résultats (l'arborescence reste lisible) ; toute la surface du champ
+  l'ouvre (icône, chevron, marges), un second clic la ferme, et pas d'anneau de focus au clic. Option `tree` (jumpbox) : les
   entrées de valeur `-1` (`|`, `| |`, lignes vides, « Sélectionner un forum » devenu texte d'aide) sont purgées, la
   profondeur est lue dans le nombre de `|` : catégories en intitulés de groupe, forums, sous-forums indentés avec un
   petit filet ; le forum affiché est coché. La barre native sous les sujets (`#wrap > a.mark-buttons` « Surveiller »
@@ -155,7 +162,11 @@ dans le panneau d'administration (PA), puis on commit.
   en blanc papier (`--sg-paper-50`), Gestion en `--sg-on-contrast`. Sur mobile (≤ 900px), menu déroulant personnalisé. À droite, les forums de la catégorie en cartes (inspirées de
   l'ancien SnJ) : image en fond avec voile selon le thème, panneau avec kanji en filigrane propre au forum, titre,
   description, bouton du clan (fiche de l'annexe), dangerosité sur 5 (zones RP uniquement), dernier message avec
-  avatar, sous-forums à droite. Gestion : cartes sans image sur motif seigaiha. Catégories sans forum : « Prochainement ».
+  avatar, sous-forums à droite ; au survol, le libellé d'un sous-forum passe en blanc papier (`--zc-hover`, sumi et
+  gofun pour Gestion). **Gestion** : cartes sans image sur motif seigaiha (`plainCard()`), titre, puis description et
+  dernier message alignés sur une ligne (`.sg-zcard__row`, en colonne ≤ 900px), puis les sous-forums sur toute la
+  largeur en **grille de 2 colonnes, 2 par page**, pagination par points centrée (`.sg-zcard__pager`, mêmes points que
+  les carrousels ; 1 colonne ≤ 600px). Catégories sans forum : « Prochainement ».
   Image des cartes sous un voile et une trame de points (comme l'ancien SnJ). Changement de catégorie : défilement doux
   jusqu'au séparateur **d'abord**, puis affichage des forums de la catégorie (le focus rendu au sélecteur utilise
   `preventScroll` pour ne pas couper le défilement). Sous les catégories, **séparateur de fin** `.sg-divider--end`
