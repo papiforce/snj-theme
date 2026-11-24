@@ -243,7 +243,7 @@
       if (e.key === 'End') j = tabs.length - 1;
       if (j === null) return;
       e.preventDefault();
-      tabs[j].focus();
+      tabs[j].focus({ preventScroll: true });
       select(ZONES[j].slug, true);
     });
 
@@ -257,7 +257,7 @@
       return h('li', {
         class: 'sg-zone-option', role: 'option', id: 'sg-zone-opt-' + z.slug, 'aria-selected': 'false',
         tabindex: '-1', style: zoneStyle(z),
-        onclick: function () { select(z.slug, true); toggleList(false); trigger.focus(); }
+        onclick: function () { select(z.slug, true); toggleList(false); trigger.focus({ preventScroll: true }); }
       }, [sign(z), label(z)]);
     });
     var list = h('ul', { class: 'sg-zone-select__list', role: 'listbox', 'aria-label': 'Catégories du forum', hidden: true }, options);
