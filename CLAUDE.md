@@ -154,8 +154,10 @@ dans le panneau d'administration (PA), puis on commit.
   Les blocs natifs `#wrap > .posts` sont masqués. Attention : AwesomeBB stylise les éléments dont la classe contient
   « topic » (`align-items: center`, `white-space: nowrap` sur les titres) : les règles de la carte passent par `#wrap .sg-topic…`.
 - **Briques partagées** (`layout.js`, avant `topics()`) : `uiEl` / `uiIco` (création d'éléments et d'icônes),
-  `actionsMenu(items, id)` (bouton « Actions » trois points ; `items` = `[adresse ou fonction, icône, libellé]`,
-  `null` = séparateur), `combo(select, opts)` (listes personnalisées), `jumpBox(valeurCourante)` (« Sauter vers »),
+  `actionsMenu(items, id, opts)` (menu déroulant ; `items` = `[adresse ou fonction, icône, libellé]`, `null` =
+  séparateur, `{ pref, icon, label(actif) }` = interrupteur `.sg-switch` qui enregistre une préférence et laisse le menu
+  ouvert ; `opts` = `{ label, icon, iconFirst, iconOnly, cls }` : « Actions » par défaut, `sg-menu--start` (menu ouvert
+  vers la droite), `sg-menu--icon` (bouton rond sans contour, trois points des messages)), `combo(select, opts)` (listes personnalisées), `jumpBox(valeurCourante)` (« Sauter vers »),
   `copyLink(texte)` (copie synchrone par champ temporaire + `execCommand`, l'API Clipboard en repli : elle peut rester
   en attente d'une permission) et `toast(message)` (message discret `.sg-toast` en bas d'écran, au-dessus de la barre
   mobile). À réutiliser sur toute nouvelle page plutôt que de les recopier.
@@ -170,28 +172,44 @@ dans le panneau d'administration (PA), puis on commit.
   sujet (`#push-bell`) et « Poster un nouveau sujet ». Sur mobile (forums et sujets) : fil d'Ariane, titre,
   description, puis les boutons (`.sg-pagehead__row` en `display: contents` + `order`).
   Couleur de la catégorie posée sur `#topic` (`#topic.sg-tone-…`). Classe `body.sg-topicpage` (et `sg-topicpage-on`).
-  **Barre du sujet** (`.sg-tbar`, `z-index: 5`) : menu « Actions » seul, à droite : Ajouter à mes favoris, Suivre /
+  **Barre du sujet** (`.sg-tbar`, `z-index: 5`) : **« Préférences »** à l'extrême gauche (icône `tune`, même bouton
+  que « Actions ») avec deux interrupteurs (piste sumi et gofun, Asagi une fois activé, pastille qui glisse avec un
+  léger rebond) : « Position du profil (défaut / inversé) » et « Densité (défaut / compact) » (effet visuel de la
+  densité **à faire**). Gardées comme le thème (`localStorage` + cookie, `snj-profile` = `right`|`default`,
+  `snj-density` = `compact`|`default`), réappliquées au chargement, au retour arrière et d'un onglet à l'autre ;
+  attributs `data-profile="right"` et `data-density="compact"` sur `<html>`. Profil inversé = profil à droite de la
+  lettre (sur ordinateur ; sur mobile le profil reste au-dessus). « Actions » à droite : Ajouter à mes favoris, Suivre /
   Ne plus suivre ce sujet, Copier le lien du sujet. **Retirés** : Sujet précédent / suivant, Imprimer, Nouveaux
   messages depuis ma dernière visite, Mes sujets suivis.
   **Messages « fumi »** (文, la lettre) : pattern **réservé aux messages**, partout où ils s'affichent (sujets ; à
   reprendre pour l'aperçu, les messages privés, les résultats de recherche par message). Le balisage natif est
-  conservé (citation, J'aime, éditeur continuent de fonctionner) : `.post-wrap.sg-post` en grille `248px | 1fr`,
-  `.post-body` en `display: contents`, chaque message `isolation: isolate` (l'en-tête natif a un `z-index: 500`).
-  Colonne de l'auteur : liseré gauche de 3px et léger halo à la couleur de son groupe (`--author`, lue en JS sur son
-  pseudo après `08-groups.css`, relue à chaque changement de thème ; couleur de la catégorie à défaut).
-  **Rôle au-dessus du portrait** (`postRoles`) : **bandeau** `.sg-role` (pas une pastille) sur motif **shippō**
-  (communauté, staff) à la couleur de l'auteur, filets haut et bas, libellé en Zen Antique ; **Staffeux** ou
-  **Modérateur** d'après les groupes du forum (`staffRoles` : `/groups` puis `/g2-staffeux`, `/g9-moderateurs`…,
-  cache `snj-roles` de 15 min) avec le **magatama plein** du logo (`MAGATAMA_SVG`) ; sinon le rang Forumactif, sans
-  magatama ; le rang natif (« Admin ») est masqué. **Portrait 200 × 400** (56 × 112 sur mobile), cerné à la couleur de
-  l'auteur, **sans pastille « en ligne »**. Pseudo en Zen Antique, fiche compacte (libellé / valeur ; le gris `#444444`
-  écrit en dur par Forumactif est neutralisé), contacts en icônes rondes (profil, message privé, e-mail, site web).
-  Lettre : en-tête (numéro « #n » à la couleur de l'auteur, lien permanent ; date ; boutons citer / modifier /
-  supprimer / IP en icônes rondes, sur tous les formats), contenu (1rem, interligne 1,75 ; citations, code et spoilers
-  sur fond de surface), **J'aime en cœur** : vide, plein et rouge (`--sg-like`, `#e0475b`) une fois aimé — Forumactif
-  passe le bouton de `.fa_like` à `.fa_liked` et affiche le compteur `.rep-nb` ; **« Je n'aime pas » masqué** ;
-  signature sous un filet pointillé. ≤ 768px : profil en bandeau au-dessus de la lettre (rôle sur toute la largeur,
-  puis portrait | pseudo | contacts ; fiche masquée).
+  conservé et déplacé (citation, J'aime, éditeur continuent de fonctionner) : `.post-wrap.sg-post` en grille
+  `248px | 1fr` **avec 16px d'écart**, sans fond ni bordure ; l'en-tête et le contenu sont déplacés dans une carte
+  `.sg-post__letter` ; `.post-body` en `display: contents`, chaque message `isolation: isolate`.
+  **Colonne de l'auteur**, sans liseré : le **rôle** (`postRoles`) en haut, hors de la carte : **bandeau** `.sg-role`
+  (pas une pastille) sur motif **shippō**, **encadré sur ses 4 côtés** (arrondi 10px) à la couleur de l'auteur
+  (`--author`, lue en JS sur son pseudo après `08-groups.css`, relue à chaque changement de thème), libellé en Zen
+  Antique ; **Staffeux** ou **Modérateur** d'après les groupes du forum (`staffRoles` : `/groups` puis `/g2-staffeux`,
+  `/g9-moderateurs`…, cache `snj-roles` de 15 min) avec le **magatama plein** du logo (`MAGATAMA_SVG`) **de la couleur
+  du texte** ; sinon le rang Forumactif, sans magatama ; le rang natif (« Admin ») est masqué. Dessous, la **carte du
+  profil** `.sg-post__card` (seule à porter le halo dégradé à la couleur de l'auteur) : **portrait 200 × 400** (56 × 112
+  sur mobile) **sans cadre** ni pastille « en ligne », pseudo en Zen Antique **sans l'infobulle de profil** de
+  Forumactif (tooltipster détruit, lien remplacé par un clone), puis la fiche réduite `.sg-post__facts` :
+  « **Inscrit depuis** N jours / semaines / mois / ans » (`memberSince` : < 1 semaine en jours, < 1 mois en semaines,
+  < 1 an en mois, puis en années ; pluriels gérés ; date complète en infobulle) et la **localisation** avec l'icône
+  `location_on`. **Retirés** : Messages, Âge, les icônes de contact (profil, MP, e-mail, site web).
+  **Lettre** : en-tête avec la **date de publication** (`schedule`) et, si Forumactif l'écrit, la **date de dernière
+  modification** (`edit_note`, « Modifié le … », mention complète en infobulle) : la mention native « Dernière édition
+  par X le …, édité N fois » est lue dans le contenu (`editedInfo`) puis retirée avec son enveloppe ; Forumactif ne
+  l'écrit pas toujours (pas sur le sujet de test). **Plus de numéro « #n »**. À droite, **J'aime** (cœur : vide, plein
+  et rouge `--sg-like` `#e0475b` une fois aimé, compteur `.rep-nb` ; le `.fa_like_div` natif est déplacé, le pied
+  devenu vide est masqué ; « Je n'aime pas » masqué) puis le bouton **trois points** (`more_vert`, rond, sans contour,
+  `sg-menu--icon`) : Citer ce message, Modifier le message, Supprimer le message, Voir l'adresse IP (Signaler le
+  message s'il existe), séparateur, Copier le lien du message (remplace le lien permanent « #n ») ; les boutons natifs
+  `.post-buttons` sont masqués et une entrée sans lien natif n'apparaît pas. Contenu (1rem, interligne 1,75 ;
+  citations, code et spoilers sur fond de surface), signature sous un filet pointillé.
+  ≤ 768px : profil au-dessus de la lettre (rôle sur toute la largeur, puis carte portrait | pseudo et fiche),
+  « Préférences » et « Actions » côte à côte, cœur et trois points en cibles de 44px.
   **Réponse rapide** : carte au même gabarit, intitulé « Répondre » ; l'éditeur natif (SCEditor) est conservé et
   restylé (ses bordures et fonds sont en `!important` dans le CSS de Forumactif : on surcharge en `!important`).
   **Bas de page** (`.sg-tfoot`) : séparateur de fin, « Sauter vers » (`jumpBox`, forum du sujet coché) à gauche,
