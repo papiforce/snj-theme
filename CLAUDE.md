@@ -405,6 +405,10 @@ dans le panneau d'administration (PA), puis on commit.
   Le CSS indispensable reste dans le CSS principal du forum pour que le forum reste lisible si le CDN tombe.
 - **Messages libres** (sans modèle) : doivent rester lisibles et épurés.
 - **Migration** : bascule de tout le forum en une fois.
+  **HTML dans les messages** (PA › Général › Messages et e-mails › Configuration) : « Autoriser le HTML » sur **Oui**,
+  « HTML non protégé » (scripts) réservé aux **Administrateurs** ; à reporter en production. Chaque membre a aussi
+  « Toujours autoriser le HTML » dans ses préférences de profil : sur Non (défaut), l'interrupteur « Désactiver le
+  HTML » de l'écritoire est coché d'office.
   Alendria (test) : activation des nouveaux membres sur « Aucune activation » (comptes de test sans e-mail de
   confirmation). **Ne pas reporter en production**, qui garde l'activation par l'utilisateur (e-mail).
 
