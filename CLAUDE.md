@@ -14,7 +14,7 @@ dans le panneau d'administration (PA), puis on commit.
 | `src/css/critical.css` | Tokens, thèmes clair/sombre, base | PA › Affichage › Couleurs › CSS principal |
 | `src/css/components/` | CSS des composants (barre latérale, catégories, sujets…), préfixés par un numéro d'ordre | Assemblés dans `dist/snj.css` par `node scripts/build.mjs`, servis par jsDelivr |
 | `src/templates/` | Templates HTML et extraits à insérer | PA › Affichage › Templates |
-| `src/js/` | Un fichier par script : `layout.js` (barre latérale + thème, toutes les pages, module 10), `home.js` (widgets de l'accueil et des pages de forum, index + sous-forums, module 11), `forums.js` (catégories de l'accueil, index, module 12), `stats.js` (statistiques de l'accueil, index, module 13) | PA › Modules › Gestion des codes JavaScript |
+| `src/js/` | Un fichier par script : `layout.js` (barre latérale, thème, pied de page, en-tête des pages de forum ; toutes les pages, module 10), `home.js` (widgets de l'accueil et des pages de forum, index + sous-forums, module 11), `forums.js` (catégories de l'accueil, index, module 12), `stats.js` (statistiques de l'accueil, index, module 13) | PA › Modules › Gestion des codes JavaScript |
 | `docs/` | Décisions, notes de migration | — |
 
 ## Décisions
@@ -87,6 +87,14 @@ dans le panneau d'administration (PA), puis on commit.
   séparateur avec le logo (56px au-dessus et en dessous ; marge native de `.page-header` retirée). Annexe : raccourcis de 44px
   de haut en bas de la carte, l'image prend la hauteur restante (sur l'accueil, les raccourcis remplissent la carte). ≤ 1200px : Guide et
   Saison côte à côte, Annexe dessous ; ≤ 768px : une colonne. Détection : pas de `#index` et adresse en `/fN…`.
+- **En-tête des pages de forum** (`layout.js`, fonction `pageHead`, + `55-pagehead.css`) : pattern commun à tous les
+  forums, sous le séparateur. Ordre : **fil d'Ariane** (icône maison, chevrons Material Symbols, page courante en gras ;
+  la catégorie mène à son onglet de l'accueil `/?onglet=…`), **titre** en Zen Antique avec un filet de 56px à la couleur
+  de la catégorie (`--ph` : nation, sumi et gofun pour Gestion) et les **boutons d'action** à l'extrême droite (bouton
+  sumi et gofun, pleine largeur sur mobile), puis la **description** (sans boîte, 75ch max). Kanji du forum (`data-kanji`
+  de sa `.sg-meta`) en filigrane à 7 %. Retirés : `.page-header` natif, la barre « Plus ! / Marquer tous les sujets
+  comme lus » (`.topic-actions`), la barre de liens `.action-bar-top` (au-dessus des sous-forums) et le bouton fixe
+  « Poster un nouveau sujet » (`a.btn-fixed`). Les liens et boutons d'origine sont déplacés, pas copiés.
 - **Catégories de l'accueil** (`forums.js` + `40-zones.css`) : à gauche un sélecteur collant (Gestion, Hi, Mizu, Kaze,
   Kaminari, Tsuchi no Kuni, Shōkoku — « les petits pays », ex-Reste du Sekai) au style des raccourcis de l'Annexe, pastille = badge pour Gestion
   (sumi et gofun) et kanji du pays sinon (火 水 風 雷 土, 他 comme sur l'annexe), couleur de la nation ; onglet actif
