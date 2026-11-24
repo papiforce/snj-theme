@@ -262,7 +262,7 @@ dans le panneau d'administration (PA), puis on commit.
   (icône maison), le verbe en dernier niveau ; **titre = le verbe** (« Répondre au sujet », « Nouveau sujet »,
   « Modifier le message ») ; description « Dans « <sujet ou forum> » » en texte simple (pas de lien : le fil d'Ariane y mène déjà) ; couleur de la catégorie (`--ph`).
   **Colonne de l'auteur** (collante, masquée sur mobile) : rôle (`.sg-role`, d'après `staffRoles`), portrait 200 × 400
-  (`_userdata.avatar`), pseudo. **Lettre** (fond de surface, arrondie, sans bordure) : sur une ligne (`.sg-write__titlerow`), le champ du titre
+  (`_userdata.avatar`), pseudo. **Lettre** (fond de surface, arrondie, sans bordure ni l'ombre qu'AwesomeBB pose sur `.block-content`) : sur une ligne (`.sg-write__titlerow`), le champ du titre
   (« Titre du message (facultatif) » / « Titre du sujet ») au style des listes personnalisées (`.sg-write__field` :
   contour arrondi, fond de surface, 46px ; Forumactif impose `border-radius: 0 !important` et un fond transparent à
   `.input-subtle`, d'où nos `!important`) et à sa droite la **couleur du titre** (liste personnalisée avec pastilles,
@@ -277,17 +277,22 @@ dans le panneau d'administration (PA), puis on commit.
   (textarea et iframe) a le fond `--sg-surface-2` et l'arrondi de 12px, en `padding: 16px !important` (16px aussi
   dans l'iframe du mode visuel). **Toutes les icônes sur une seule ligne** (boutons de 32px, flex sans retour à la
   ligne, défilement horizontal sur petit écran ; filet retiré après le dernier groupe visible, `.sg-tb-last`).
-  **Survol** d'une icône en sumi et gofun plein (actif : teinte légère) et
+  **Survol** d'une icône en sumi et gofun plein (actif : teinte légère), **état gardé tant que sa fenêtre est
+  ouverte** (`.sg-tb--open`, posé sur le bouton qui l'a ouverte, retiré à la fermeture) et
   **libellé en infobulle** au survol et au focus (`toolbarTips()` : une seule infobulle `.sg-tbtip` en position fixe,
   posée sur la page, car la barre défile et couperait une infobulle CSS ; libellés natifs, `TB_LABELS` pour les plus
   longs). **Fenêtres des outils** (spoiler, héberger une image, insérer une image, lien, enrichir un lien, vidéo
   YouTube, format des titres, couleur) au design system (`editorPopups()` : SCEditor les recrée à chaque ouverture,
-  un `MutationObserver` les marque `.sg-pop`) : fond de surface, contour, ombre, libellés en petit, champs arrondis
+  un `MutationObserver` les marque `.sg-pop`) ; Forumactif coupait tout ce qui sortait de `#textarea_content`
+  (passé en `overflow: visible`) ; chaque fenêtre est **replacée** après SCEditor (valeurs en `!important`, et à
+  chaque changement de taille) : sous son bouton pour Servimg (posée sur la page, elle recouvrait la barre ;
+  gardée et seulement masquée entre deux ouvertures), décalée vers la gauche si elle dépasse la lettre ; fond de surface, contour, ombre, libellés en petit, champs arrondis
   sur `--sg-surface-2`, bouton « Insérer » sumi et gofun ; la fenêtre de Servimg est une page extérieure (cadre
   seulement). Titres : « Grand titre » / « Titre » / « Sous-titre » en Zen Antique (`HEADER_LABELS`, balises h2 à h4
-  inchangées). **Couleur** : fenêtre reconstruite avec **uniquement les couleurs du design system**, pastille + nom
-  (`TEXT_COLORS` : Hagane, Sumi et gofun, Asagi, Ume, Kaki, les six pays) ; un clic insère `[color=#CODE]…[/color]`
-  (`insertText` de SCEditor) avec le code « sombre », que `08-groups.css` remplace à l'affichage par le token
+  inchangées). **Couleur** : fenêtre reconstruite en **pastilles seules** (nom en infobulle), **8 par ligne**, en deux groupes :
+  **« Sengoku no Jidai »** d'abord (`TEXT_COLORS` : Hagane, Sumi et gofun, Asagi, Ume, Kaki, les six pays), puis
+  **« Défaut »** (couleurs de base de Forumactif, lues dans la fenêtre native) ; un clic insère `[color=#CODE]…[/color]`
+  (`insertText` de SCEditor) avec le code « sombre » pour celles de la refonte, que `08-groups.css` remplace à l'affichage par le token
   (la couleur suit le thème ; Asagi, Ume et Kaki y ont été ajoutés). **Densité compacte** : le profil et la lettre
   partagent le même fond (`form.sg-writeform` sur `--sg-surface`, sans écart, profil en marge intérieure de 16px).
   **Mode bloqué en texte (BBCode)**, celui qu'utilise Vinny : `lockEditorMode()` rebascule un éditeur ouvert en
@@ -310,7 +315,8 @@ dans le panneau d'administration (PA), puis on commit.
   (règles du forum, sondage, calendrier, SEO, pièces jointes…) en **panneaux repliables** `.sg-panel` (titre en Zen
   Antique, chevron ; fermés, sauf les règles) ; leurs listes passent en `combo`, leurs champs au contour arrondi.
   **Aperçu** (`#preview`) : carte pointillée « Aperçu ». **Revue du sujet** : « Derniers messages du sujet » **repliés par défaut** :
-  le titre est un bouton (`.sg-review__toggle`, contour pointillé, plein une fois ouvert) avec le **nombre de messages**
+  le titre est un bouton (`.sg-review__toggle`, sans contour ; au survol, fond `--sg-surface-2` et chevron qui fait
+  un pas dans le sens de l'ouverture) avec le **nombre de messages**
   en pastille Asagi, « Afficher » / « Masquer » et un chevron (`aria-expanded`). Messages au **pattern « fumi »** de la
   page du sujet (`section.sg-review.sg-fumi` : le CSS des messages vise `:is(#topic, .sg-fumi)`), préférences
   « Position du profil » et « Densité » comprises, couleur de la catégorie, mais un profil réduit à **l'avatar et au
