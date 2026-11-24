@@ -118,7 +118,13 @@ dans le panneau d'administration (PA), puis on commit.
   Verrouillés : carte atténuée (72 %). Grille de 2 colonnes, **même hauteur pour toutes les cartes** (`grid-auto-rows: 1fr`) ;
   1 colonne ≤ 768px. Soulèvement au survol. **« Poster un nouveau sujet » deux fois** : le bouton d'origine reste à droite
   du titre de la page (en-tête), et un second, qui reprend son adresse, est **au-dessus de la grille, à gauche**
-  (`.sg-topics__bar`, style `.sg-action`, pleine largeur sur mobile). Aucun sujet : encadré pointillé « Aucun sujet pour l'instant ».
+  (`.sg-topics__bar`, style `.sg-action`, pleine largeur sur mobile). À l'extrême droite de cette barre, bouton
+  **« Actions »** (icône `more_horiz`, contour sur fond de surface) qui ouvre un menu (`.sg-menu`, `role="menu"`, flèches,
+  Début/Fin, Échap, clic extérieur) : « Nouveaux messages depuis ma dernière visite », « Messages sans réponse », un
+  séparateur, « Suivre les sujets de ce forum » (« Ne plus suivre les sujets de ce forum » si le lien natif est en
+  `?unwatch=forum`), « Mes sujets suivis ». Adresses reprises des liens natifs (recherches limitées au forum, sinon
+  globales) ; une entrée sans lien natif (visiteur) n'apparaît pas, et le bouton non plus s'il n'en reste aucune.
+  AwesomeBB ajoute un filet entre les `<li>` : il est retiré dans `#wrap .sg-menu__list > li`. Aucun sujet : encadré pointillé « Aucun sujet pour l'instant ».
   Les blocs natifs `#wrap > .posts` sont masqués. Attention : AwesomeBB stylise les éléments dont la classe contient
   « topic » (`align-items: center`, `white-space: nowrap` sur les titres) : les règles de la carte passent par `#wrap .sg-topic…`.
   Récapitulatif des patterns de cartes : **forum** (accueil) = image en fond + panneau + kanji ; **sous-forum** = ema
