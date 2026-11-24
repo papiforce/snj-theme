@@ -314,7 +314,8 @@ dans le panneau d'administration (PA), puis on commit.
   « Enregistrer » (plein) ; sur mobile en pleine largeur, « Envoyer » au-dessus. **Autres blocs** du formulaire
   (règles du forum, sondage, calendrier, SEO, pièces jointes…) en **panneaux repliables** `.sg-panel` (titre en Zen
   Antique, chevron ; fermés, sauf les règles) ; leurs listes passent en `combo`, leurs champs au contour arrondi.
-  **Aperçu** (`#preview`) : carte pointillée « Aperçu ». **Revue du sujet** : « Derniers messages du sujet » **repliés par défaut** :
+  **Aperçu** (`#preview`) : carte « Aperçu » sur fond de surface, sans contour ni ombre (celles d'AwesomeBB sur
+  `.block-header` et `.block-content` sont retirées). **Revue du sujet** : « Derniers messages du sujet » **repliés par défaut** :
   le titre est un bouton (`.sg-review__toggle`, sans contour ; au survol, fond `--sg-surface-2` et chevron qui fait
   un pas dans le sens de l'ouverture) avec le **nombre de messages**
   en pastille Asagi, « Afficher » / « Masquer » et un chevron (`aria-expanded`). Messages au **pattern « fumi »** de la
