@@ -2050,7 +2050,8 @@
     var wait = function () { if (!paint() && ++tries < 40) setTimeout(wait, 150); };
     wait();
     if (window.MutationObserver) {
-      new MutationObserver(function () { requestAnimationFrame(paint); })
+      /* Après la transition de couleur d'AwesomeBB (* { transition: .16s }) : sinon on lirait l'ancienne couleur */
+      new MutationObserver(function () { setTimeout(paint, 260); })
         .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     }
     /* Changement de mode (source ↔ visuel) : SCEditor peut réécrire le document de l'iframe */
