@@ -209,10 +209,14 @@ body.sg-topics-on #wrap > #sort-box {
   min-width: 0;
 }
 
+/* AwesomeBB impose une largeur aux <select> sur mobile : on la neutralise */
 #wrap .sg-select select {
   -webkit-appearance: none;
   appearance: none;
+  flex: 1 1 auto;
   width: 100%;
+  min-width: 0;
+  max-width: none;
   height: 46px;
   margin: 0;
   padding: 0 42px 0 14px;
