@@ -394,11 +394,21 @@ dans le panneau d'administration (PA), puis on commit.
   crédit que Forumactif fait varier selon la page. Dessous, « Sengoku no Jidai » au trait en Zen Antique sur toute la
   largeur du contenu (SVG ajusté au texte une fois la police chargée), sumi et gofun, estompé vers le bas, qui se
   remplit légèrement au survol. Les liens du pied de page doivent viser `#page-footer a…` (AwesomeBB les force en blanc).
-- **Redirections immédiates** (`layout.js`, `fastRedirect`, en tête du module 10, toutes les pages) : les pages de
-  confirmation de Forumactif (message posté ou modifié, profil enregistré…) ne redirigent qu'après un délai, par une
-  balise `<meta http-equiv="refresh" content="N;url=…">` que `{META}` pose dans `overall_header` (template
-  `message_body`) : l'adresse est suivie tout de suite, par `location.replace` (la confirmation ne reste pas dans
-  l'historique).
+- **Pages de confirmation sans redirection forcée** (`layout.js`, `noForcedRedirect`, en tête du module 10, toutes
+  les pages) : après un envoi (message posté ou modifié, profil enregistré…), Forumactif affiche une confirmation
+  qui renvoie d'office ailleurs après quelques secondes (`<meta http-equiv="refresh" content="N;url=…">` posée par
+  `{META}` dans `overall_header`, template `message_body`). La page **reste affichée** : une fois la page chargée,
+  `window.stop()` annule la redirection en attente (vérifié sur une redirection injectée) et la balise est retirée ;
+  on continue par les liens de la confirmation. Demande de Vinny : ni délai ni redirection (une redirection
+  immédiate a été essayée puis abandonnée).
+- **Suppression d'un message en fenêtre** (`layout.js`, `deletePost` + `confirmModal`, + `59-topic.css`) : l'entrée
+  « Supprimer le message » (en Ume) du menu trois points ouvre une **modale** `.sg-modal` au lieu de la page native
+  `/post?p=N&mode=delete` : icône dans un cercle teinté, « Supprimer ce message ? » en Zen Antique, avertissement,
+  « Annuler » (contour) et « Supprimer » (Ume plein) ; Échap, clic sur le voile, focus gardé dans la fenêtre et rendu
+  ensuite. À la confirmation, le formulaire natif est lu sur la page de suppression puis envoyé en arrière-plan
+  (POST `/post` : `p`, `mode=delete`, `confirm`) ; le message s'efface de la page (toast « Message supprimé ») ; s'il
+  n'en reste aucun, on rejoint le forum (lien de la réponse). Erreur de Forumactif : affichée dans la fenêtre ; échec
+  réseau : la page native prend le relais. `confirmModal(opts)` est réutilisable pour toute confirmation.
 - **Modules JavaScript** : Forumactif les charge dans le `<head>` ; tout script attend `DOMContentLoaded`.
   Ils sont regroupés dans un fichier `/NNNNN.js` mis en cache très longtemps. Il arrive que Forumactif réutilise le même
   nom de fichier après une modification, **même un nom déjà servi plus tôt** : le navigateur exécute alors la version

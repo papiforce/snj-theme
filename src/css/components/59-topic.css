@@ -752,6 +752,162 @@ html[data-density="compact"][data-profile="right"] :is(#topic, .sg-fumi) .sg-pos
   transform: translate(-50%, 0);
 }
 
+/* Fenêtre de confirmation (confirmModal) : voile, carte de surface centrée, icône dans un cercle teinté,
+   titre en Zen Antique, « Annuler » au contour, action pleine (Ume si elle est destructive) */
+html.sg-modal-open {
+  overflow: hidden;
+}
+
+.sg-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(10, 8, 6, 0.55);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.sg-modal.is-on {
+  opacity: 1;
+}
+
+.sg-modal__box {
+  --tone: var(--sg-primary);
+  box-sizing: border-box;
+  width: min(440px, 100%);
+  padding: 28px 24px 22px;
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-surface);
+  box-shadow: var(--sg-shadow);
+  color: var(--sg-text);
+  text-align: center;
+  transform: translateY(8px) scale(0.98);
+  transition: transform 0.25s var(--sg-ease);
+}
+
+.sg-modal.is-on .sg-modal__box {
+  transform: none;
+}
+
+.sg-modal__box.is-danger {
+  --tone: var(--sg-accent-2);
+}
+
+.sg-modal__icon {
+  display: inline-grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  margin-bottom: 14px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--tone) 16%, transparent);
+  color: var(--tone);
+}
+
+.sg-modal__icon .material-symbols-outlined {
+  font-size: 26px;
+}
+
+#wrap .sg-modal__title,
+.sg-modal__title {
+  margin: 0 0 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--sg-text);
+  font-family: var(--sg-font-display);
+  font-size: 1.4rem;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.sg-modal__text {
+  margin: 0 auto;
+  max-width: 34ch;
+  color: var(--sg-text-muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.sg-modal__error {
+  margin: 14px 0 0;
+  color: var(--sg-accent-2);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.sg-modal__actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.sg-modal__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 132px;
+  height: 44px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--sg-contrast);
+  color: var(--sg-on-contrast);
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sg-modal__btn > * {
+  transition: none;
+}
+
+.sg-modal__btn .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.sg-modal__btn--ghost {
+  border: 1px solid var(--sg-border-strong, var(--sg-border));
+  background: var(--sg-surface);
+  color: var(--sg-text);
+}
+
+.sg-modal__btn--ghost:hover {
+  background: var(--sg-surface-2);
+}
+
+.sg-modal__btn--danger {
+  background: var(--sg-accent-2);
+  color: var(--sg-on-accent);
+}
+
+.sg-modal__btn:not(.sg-modal__btn--ghost):hover {
+  opacity: 0.9;
+}
+
+.sg-modal__btn:focus-visible {
+  outline: 2px solid var(--sg-accent-1);
+  outline-offset: 2px;
+}
+
+.sg-modal.is-busy .sg-modal__btn {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+/* Message supprimé : il s'efface avant de quitter la page */
+:is(#topic, .sg-fumi) .post-wrap.sg-post.is-removing {
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
 /* --- Tablette et mobile ------------------------------------------------------------------ */
 @media (max-width: 768px) {
   /* Le profil passe au-dessus de la lettre (quelle que soit la préférence de position), en bandeau compact */
@@ -868,6 +1024,14 @@ html[data-density="compact"][data-profile="right"] :is(#topic, .sg-fumi) .sg-pos
   .sg-tfoot__row .sg-menu--mod {
     flex: 1 1 100%;
     margin-left: 0;
+  }
+
+  .sg-modal__actions {
+    flex-direction: column-reverse;
+  }
+
+  .sg-modal__btn {
+    width: 100%;
   }
 
   .sg-toast {

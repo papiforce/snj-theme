@@ -11,26 +11,22 @@
   'use strict';
 
   /* ----------------------------------------------------------------------
-     Redirections immédiates : après un envoi (message posté, modifié, profil enregistré…), Forumactif affiche
-     une page de confirmation qui ne redirige qu'au bout de quelques secondes (balise <meta http-equiv="refresh"
-     content="3;url=…"> posée par {META} dans overall_header). On suit l'adresse tout de suite, sans garder la page
-     de confirmation dans l'historique (location.replace). Lancé avant tout le reste, et revu au DOMContentLoaded si
-     la balise n'est pas encore lue.
+     Pages de confirmation sans redirection forcée : après un envoi (message posté, modifié, profil enregistré…),
+     Forumactif affiche une confirmation qui renvoie d'office ailleurs au bout de quelques secondes (balise
+     <meta http-equiv="refresh" content="3;url=…"> posée par {META} dans overall_header). La page reste affichée :
+     la redirection programmée est annulée une fois la page chargée (window.stop() annule une redirection en
+     attente ; appelé après le chargement, il n'interrompt plus rien d'autre). Les liens de la confirmation
+     (« Cliquez ici pour… ») restent là pour continuer.
      ---------------------------------------------------------------------- */
-  (function fastRedirect() {
-    var done = false;
-    var go = function () {
-      if (done) return true;
+  (function noForcedRedirect() {
+    var cancel = function () {
       var meta = document.querySelector('meta[http-equiv="refresh" i]');
-      var m = meta && (meta.getAttribute('content') || '').match(/^\s*\d+\s*[;,]\s*url\s*=\s*['"]?([^'"]+)/i);
-      if (!m) return false;
-      var url = m[1].trim();
-      if (!url || url === location.href) return false;
-      done = true;
-      location.replace(url);
-      return true;
+      if (!meta || !/url\s*=/i.test(meta.getAttribute('content') || '')) return;
+      try { window.stop(); } catch (e) {}
+      meta.parentNode.removeChild(meta);
     };
-    if (!go()) document.addEventListener('DOMContentLoaded', go);
+    if (document.readyState === 'complete') setTimeout(cancel, 0);
+    else window.addEventListener('load', function () { setTimeout(cancel, 0); });
   })();
 
   /* ----------------------------------------------------------------------
@@ -1521,7 +1517,11 @@
         Array.prototype.slice.call(hd.querySelectorAll('.post-buttons li')).forEach(function (li) {
           var a = li.querySelector('a[href]');
           var spec = BTN[(li.className.match(/btn-[a-z]+/) || [])[0]];
-          if (a && spec) mItems.push([a.getAttribute('href'), spec[0], spec[1]]);
+          if (!a || !spec) return;
+          var href = a.getAttribute('href');
+          /* Supprimer : confirmation dans une fenêtre sur la page plutôt que sur la page native */
+          if (/btn-delete/.test(li.className)) mItems.push([function () { deletePost(href, post); }, spec[0], spec[1], 'danger']);
+          else mItems.push([href, spec[0], spec[1]]);
         });
         var link = location.origin + location.pathname + '#' + (permalink ? (permalink.getAttribute('href').split('#')[1] || post.id) : post.id);
         if (mItems.length) mItems.push(null);
@@ -2624,6 +2624,137 @@
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(function () { toast('Lien copié dans le presse-papiers'); }, function () { toast('Copie impossible : ' + text); });
     } else toast('Copie impossible : ' + text);
+  }
+
+  /* Fenêtre de confirmation (modale) au design system : icône, titre en Zen Antique, texte, « Annuler » et
+     l'action (en Ume si elle est destructive). Échap, clic sur le voile ou « Annuler » la ferment ; le focus
+     reste dans la fenêtre et revient ensuite sur l'élément d'origine. opts = { icon, title, text, confirm,
+     busy, danger, onConfirm(ctl) } ; ctl.fail(message) affiche une erreur, ctl.close() ferme. */
+  function confirmModal(opts) {
+    var prev = document.activeElement;
+    var wrap = uiEl('div', 'sg-modal');
+    var box = uiEl('div', 'sg-modal__box' + (opts.danger ? ' is-danger' : ''));
+    var id = 'sg-modal-' + Math.random().toString(36).slice(2);
+    box.setAttribute('role', 'alertdialog');
+    box.setAttribute('aria-modal', 'true');
+    box.setAttribute('aria-labelledby', id + '-t');
+    box.setAttribute('aria-describedby', id + '-d');
+    var ic = uiEl('span', 'sg-modal__icon');
+    ic.appendChild(uiIco(opts.icon || 'help'));
+    box.appendChild(ic);
+    var h = uiEl('h2', 'sg-modal__title', opts.title);
+    h.id = id + '-t';
+    box.appendChild(h);
+    var p = uiEl('p', 'sg-modal__text', opts.text);
+    p.id = id + '-d';
+    box.appendChild(p);
+    var err = uiEl('p', 'sg-modal__error');
+    err.hidden = true;
+    box.appendChild(err);
+    var acts = uiEl('div', 'sg-modal__actions');
+    var no = uiEl('button', 'sg-modal__btn sg-modal__btn--ghost', 'Annuler');
+    no.type = 'button';
+    var yes = uiEl('button', 'sg-modal__btn' + (opts.danger ? ' sg-modal__btn--danger' : ''));
+    yes.type = 'button';
+    if (opts.danger) yes.appendChild(uiIco(opts.icon || 'delete'));
+    var yesLabel = uiEl('span', null, opts.confirm || 'Confirmer');
+    yes.appendChild(yesLabel);
+    acts.appendChild(no);
+    acts.appendChild(yes);
+    box.appendChild(acts);
+    wrap.appendChild(box);
+    document.body.appendChild(wrap);
+    document.documentElement.classList.add('sg-modal-open');
+    var busy = false;
+    var close = function () {
+      if (!wrap.parentNode) return;
+      wrap.classList.remove('is-on');
+      document.removeEventListener('keydown', onKey, true);
+      setTimeout(function () { if (wrap.parentNode) wrap.parentNode.removeChild(wrap); }, 200);
+      document.documentElement.classList.remove('sg-modal-open');
+      if (prev && prev.focus) try { prev.focus({ preventScroll: true }); } catch (e) {}
+    };
+    var onKey = function (e) {
+      if (e.key === 'Escape' && !busy) { e.preventDefault(); close(); }
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        (document.activeElement === no ? yes : no).focus();
+      }
+    };
+    document.addEventListener('keydown', onKey, true);
+    wrap.addEventListener('mousedown', function (e) { if (e.target === wrap && !busy) close(); });
+    no.addEventListener('click', function () { if (!busy) close(); });
+    yes.addEventListener('click', function () {
+      if (busy) return;
+      busy = true;
+      err.hidden = true;
+      wrap.classList.add('is-busy');
+      yes.disabled = no.disabled = true;
+      yesLabel.textContent = opts.busy || 'Un instant…';
+      opts.onConfirm({
+        close: close,
+        fail: function (message) {
+          busy = false;
+          wrap.classList.remove('is-busy');
+          yes.disabled = no.disabled = false;
+          yesLabel.textContent = opts.confirm || 'Confirmer';
+          err.textContent = message;
+          err.hidden = false;
+        }
+      });
+    });
+    requestAnimationFrame(function () { wrap.classList.add('is-on'); no.focus(); });
+    return { close: close };
+  }
+
+  /* Suppression d'un message depuis son menu : confirmation en fenêtre, puis envoi du formulaire natif de
+     Forumactif (lu sur la page /post?p=N&mode=delete, envoyé en arrière-plan). Le message disparaît de la page ;
+     si le sujet n'a plus de message, on rejoint le forum. En cas de souci, la page native prend le relais. */
+  function deletePost(href, post) {
+    confirmModal({
+      icon: 'delete',
+      title: 'Supprimer ce message ?',
+      text: 'Le message sera supprimé définitivement. Cette action est irréversible.',
+      confirm: 'Supprimer',
+      busy: 'Suppression…',
+      danger: true,
+      onConfirm: function (ctl) {
+        var parse = function (html) { return new DOMParser().parseFromString(html, 'text/html'); };
+        fetch(href, { credentials: 'same-origin' }).then(function (r) { return r.text(); }).then(function (html) {
+          var form = Array.prototype.slice.call(parse(html).querySelectorAll('form')).filter(function (f) {
+            return f.querySelector('input[name="mode"][value="delete"]');
+          })[0];
+          if (!form) throw new Error('form');
+          var data = new URLSearchParams();
+          Array.prototype.slice.call(form.querySelectorAll('input[type="hidden"]')).forEach(function (i) { data.append(i.name, i.value); });
+          var ok = form.querySelector('[name="confirm"]');
+          data.append(ok ? ok.name : 'confirm', ok ? ok.value : '1');
+          return fetch(form.getAttribute('action') || '/post', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: data.toString()
+          });
+        }).then(function (r) { return r.text(); }).then(function (html) {
+          var doc = parse(html);
+          var still = doc.querySelector('form input[name="mode"][value="delete"]');
+          var msg = doc.querySelector('#wrap .block .block-content, .block-content');
+          var text = msg ? msg.textContent.replace(/\s+/g, ' ').trim() : '';
+          if (still || !/supprim/i.test(text)) { ctl.fail(text || 'La suppression a échoué. Réessaie depuis la page de suppression.'); return; }
+          ctl.close();
+          var left = document.querySelectorAll('#topic .sg-post').length - 1;
+          if (left <= 0) {
+            var back = Array.prototype.slice.call(doc.querySelectorAll('a[href]')).map(function (a) { return a.getAttribute('href'); })
+              .filter(function (h) { return /^\/f\d+/.test(h) || /\/f\d+-/.test(h); })[0];
+            location.href = back || '/';
+            return;
+          }
+          post.classList.add('is-removing');
+          setTimeout(function () { if (post.parentNode) post.parentNode.removeChild(post); }, 320);
+          toast('Message supprimé');
+        }).catch(function () { location.href = href; });
+      }
+    });
   }
 
   function toast(message) {
