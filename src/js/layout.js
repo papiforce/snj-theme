@@ -1804,14 +1804,15 @@
        et décalée vers la gauche si elle déborde à droite */
     var place = function (d) {
       var btn = opener && opener.getBoundingClientRect();
+      /* SCEditor repositionne la fenêtre après l'avoir insérée : nos valeurs passent en !important */
       if (d.parentNode === document.body && btn) {
-        d.style.top = (btn.bottom + window.scrollY + 8) + 'px';
-        d.style.left = (btn.left + window.scrollX) + 'px';
+        d.style.setProperty('top', (btn.bottom + window.scrollY) + 'px', 'important');
+        d.style.setProperty('left', (btn.left + window.scrollX) + 'px', 'important');
       }
       var r = d.getBoundingClientRect();
       var maxRight = Math.min(window.innerWidth - 8, (scope.getBoundingClientRect().right || window.innerWidth));
       var over = r.right - maxRight;
-      if (over > 0) d.style.left = (parseFloat(getComputedStyle(d).left) - over) + 'px';
+      if (over > 0) d.style.setProperty('left', (parseFloat(getComputedStyle(d).left) - over) + 'px', 'important');
     };
     var handle = function (d) {
       if (!d.classList || !d.classList.contains('sceditor-dropdown') || d.classList.contains('sg-pop')) return;
@@ -1859,8 +1860,7 @@
           if (HEADER_LABELS[h.tagName]) h.textContent = HEADER_LABELS[h.tagName];
         });
       }
-      place(d);
-      requestAnimationFrame(function () { place(d); });
+      setTimeout(function () { place(d); }, 0);
     };
     var mo = new MutationObserver(function (ms) {
       ms.forEach(function (m) {
