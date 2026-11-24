@@ -48,6 +48,10 @@
 [style*="8A6CAE" i] { color: var(--sg-group-autres) !important; }
 [style*="9FB0C3" i] { color: var(--sg-group-mod) !important; }
 [style*="ECE5D4" i] { color: var(--sg-group-staff) !important; }
+/* Couleurs du texte des messages (fenêtre « Couleur » de l'éditeur, layout.js TEXT_COLORS) : accents et Kaki */
+[style*="6FB3AE" i] { color: var(--sg-accent-1) !important; }
+[style*="C27390" i] { color: var(--sg-accent-2) !important; }
+[style*="D98A4E" i] { color: var(--sg-title-kaki) !important; }
 
 /* --- Couleurs du titre d'un sujet (choisies à l'écriture, cinq choix) -------------------------------------
    Forumactif enregistre un code couleur natif (#FF0000, #FF9933, #006600, #0000FF) : layout.js le lit et pose

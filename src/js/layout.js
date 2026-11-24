@@ -1706,68 +1706,6 @@
     headers: 'title', color: 'format_color_text', subscript: 'subscript', superscript: 'superscript'
   };
   var YOUTUBE_SVG = '<svg class="sg-tb__svg" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>';
-  /* Profils des auteurs des derniers messages (page d'écriture) : lus sur la 1re et la dernière page du sujet,
-     par pseudo ; complète chaque message « fumi » avec le rôle (ou le rang) et la fiche réduite */
-  function reviewAuthors(form, rposts, done) {
-    var tIn = form.querySelector('input[name="t"]');
-    var t = (tIn && tIn.value) || (location.search.match(/[?&]t=(\d+)/) || [])[1];
-    if (!t || !rposts.length) return;
-    var get = function (url) {
-      return fetch(url, { credentials: 'same-origin' }).then(function (r) { return r.ok ? r.text() : ''; })
-        .then(function (html) { return new DOMParser().parseFromString(html, 'text/html'); });
-    };
-    var people = {};
-    var read = function (doc) {
-      Array.prototype.slice.call(doc.querySelectorAll('.post-wrap')).forEach(function (pw) {
-        var a = pw.querySelector('.post-author-name a[href]');
-        if (!a) return;
-        var name = a.textContent.replace(/\s+/g, ' ').trim();
-        var rank = pw.querySelector('.post-author-title');
-        people[name] = {
-          uid: ((a.getAttribute('href') || '').match(/^\/u(\d+)/) || [])[1],
-          rank: rank ? rank.textContent.replace(/\s+/g, ' ').trim() : '',
-          dl: pw.querySelector('.post-author-details')
-        };
-      });
-      return doc;
-    };
-    get('/t' + t + '-').then(read).then(function (doc) {
-      var last = 0, href = '';
-      Array.prototype.slice.call(doc.querySelectorAll('.pagination a[href]')).forEach(function (a) {
-        var h = a.getAttribute('href');
-        var m = h.match(/^\/t\d+p(\d+)-/);
-        if (m && +m[1] > last) { last = +m[1]; href = h; }
-      });
-      return href ? get(href).then(read) : null;
-    }).then(function () {
-      staffRoles(function (roles) {
-        rposts.forEach(function (r) {
-          var who = people[r.name];
-          if (!who) return;
-          var aside = r.post.querySelector('.post-aside');
-          var card = r.post.querySelector('.sg-post__card');
-          if (!aside.querySelector('.sg-role')) {
-            var role = who.uid && roles[who.uid];
-            if (role) aside.insertBefore(roleBand(role), aside.firstChild);
-            else if (who.rank) {
-              var band = uiEl('div', 'sg-role');
-              band.appendChild(uiEl('span', 'sg-role__label', who.rank));
-              aside.insertBefore(band, aside.firstChild);
-            }
-          }
-          var facts = !card.querySelector('.sg-post__facts') && authorFacts(who.dl);
-          if (facts) {
-            var rule = uiEl('hr', 'sg-post__rule');
-            rule.setAttribute('aria-hidden', 'true');
-            card.appendChild(rule);
-            card.appendChild(facts);
-          }
-        });
-        if (done) requestAnimationFrame(done);
-      });
-    }).catch(function () {});
-  }
-
   function editorToolbar(scope) {
     var tries = 0;
     var run = function () {
@@ -1789,9 +1727,109 @@
       });
       if (shown.length) shown[shown.length - 1].classList.add('sg-tb-last');
       bar.classList.add('sg-tb-on');
+      toolbarTips(bar);
+      editorPopups(scope);
       lockEditorMode();
     };
     run();
+  }
+
+  /* Libellé de chaque icône de la barre d'outils, en infobulle au survol et au focus. La barre défile à
+     l'horizontale (elle couperait une infobulle en CSS) : une seule infobulle, posée sur la page, en position fixe. */
+  var TB_LABELS = { embed: 'Enrichir un lien', youtube: 'Insérer une vidéo YouTube', headers: 'Format des titres' };
+  function toolbarTips(bar) {
+    var tip = null;
+    var hide = function () { if (tip) tip.classList.remove('is-on'); };
+    var show = function (a) {
+      if (!tip) { tip = uiEl('div', 'sg-tbtip'); tip.setAttribute('role', 'tooltip'); document.body.appendChild(tip); }
+      tip.textContent = a.getAttribute('data-tip');
+      tip.classList.add('is-on');
+      var r = a.getBoundingClientRect(), w = tip.offsetWidth;
+      var left = Math.max(8, Math.min(window.innerWidth - w - 8, r.left + r.width / 2 - w / 2));
+      tip.style.left = left + 'px';
+      tip.style.top = (r.top - tip.offsetHeight - 8) + 'px';
+    };
+    Array.prototype.slice.call(bar.querySelectorAll('a.sg-tb')).forEach(function (a) {
+      var name = (a.className.match(/sceditor-button-(\S+)/) || [])[1];
+      var label = TB_LABELS[name] || (a.getAttribute('title') || '').trim();
+      if (!label) return;
+      a.setAttribute('data-tip', label);
+      a.setAttribute('aria-label', label);
+      a.removeAttribute('title');
+      a.addEventListener('mouseenter', function () { show(a); });
+      a.addEventListener('focus', function () { show(a); });
+      a.addEventListener('mouseleave', hide);
+      a.addEventListener('blur', hide);
+      a.addEventListener('click', hide);
+    });
+    bar.addEventListener('scroll', hide, { passive: true });
+    window.addEventListener('scroll', hide, { passive: true });
+  }
+
+  /* Couleurs du texte : uniquement celles du design system, enregistrées sous leur code « sombre » ; à l'affichage,
+     08-groups.css remplace chaque code par son token (la couleur suit le thème) */
+  var TEXT_COLORS = [
+    ['#9FB0C3', 'Hagane', 'var(--sg-primary)'],
+    ['#ECE5D4', 'Sumi et gofun', 'var(--sg-contrast)'],
+    ['#6FB3AE', 'Asagi', 'var(--sg-accent-1)'],
+    ['#C27390', 'Ume', 'var(--sg-accent-2)'],
+    ['#D98A4E', 'Kaki', 'var(--sg-title-kaki)'],
+    ['#B5533F', 'Hi no Kuni', 'var(--sg-group-hi)'],
+    ['#5A87AD', 'Mizu no Kuni', 'var(--sg-group-mizu)'],
+    ['#73A060', 'Kaze no Kuni', 'var(--sg-group-kaze)'],
+    ['#CDB04A', 'Kaminari no Kuni', 'var(--sg-group-kaminari)'],
+    ['#A0714A', 'Tsuchi no Kuni', 'var(--sg-group-tsuchi)'],
+    ['#8A6CAE', 'Shōkoku', 'var(--sg-group-autres)']
+  ];
+  var HEADER_LABELS = { H2: 'Grand titre', H3: 'Titre', H4: 'Sous-titre' };
+
+  /* Fenêtres des outils de l'éditeur (spoiler, images, lien, vidéo, titres, couleur) : SCEditor les crée à chaque
+     ouverture ; elles reçoivent la classe .sg-pop (60-write.css). La fenêtre des couleurs est reconstruite. */
+  function editorPopups(scope) {
+    var $ = window.jQuery;
+    var ta = document.getElementById('text_editor_textarea');
+    var inst = $ && ta && $(ta).sceditor && $(ta).sceditor('instance');
+    var handle = function (d) {
+      if (!d.classList || !d.classList.contains('sceditor-dropdown') || d.classList.contains('sg-pop')) return;
+      d.classList.add('sg-pop');
+      if (d.classList.contains('sceditor-color-picker') && inst) {
+        var host = d.firstElementChild || d;
+        host.textContent = '';
+        var list = uiEl('div', 'sg-cpick');
+        list.setAttribute('role', 'listbox');
+        list.setAttribute('aria-label', 'Couleur du texte');
+        TEXT_COLORS.forEach(function (c) {
+          var b = uiEl('button', 'sg-cpick__opt');
+          b.type = 'button';
+          b.setAttribute('role', 'option');
+          var sw = uiEl('span', 'sg-cpick__swatch');
+          sw.style.background = c[2];
+          b.appendChild(sw);
+          b.appendChild(uiEl('span', null, c[1]));
+          b.addEventListener('mousedown', function (e) { e.preventDefault(); });
+          b.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            inst.insertText('[color=' + c[0] + ']', '[/color]');
+            if (inst.closeDropDown) inst.closeDropDown(true);
+          });
+          list.appendChild(b);
+        });
+        host.appendChild(list);
+      }
+      if (d.classList.contains('sceditor-header-picker')) {
+        Array.prototype.slice.call(d.querySelectorAll('.sceditor-header-option')).forEach(function (h) {
+          h.removeAttribute('style');
+          if (HEADER_LABELS[h.tagName]) h.textContent = HEADER_LABELS[h.tagName];
+        });
+      }
+    };
+    var mo = new MutationObserver(function (ms) {
+      ms.forEach(function (m) { Array.prototype.forEach.call(m.addedNodes, handle); });
+    });
+    var cont = scope.querySelector('.sceditor-container');
+    if (cont) mo.observe(cont, { childList: true });
+    mo.observe(document.body, { childList: true });
   }
 
   /* Mode de l'éditeur bloqué sur le mode texte (BBCode), celui qu'utilise Vinny : le bouton « Basculer le mode
@@ -2131,10 +2169,26 @@
     if (comments.length) {
       var review = el('section', 'sg-review sg-fumi');
       review.setAttribute('aria-label', 'Derniers messages du sujet');
+      /* Repliés par défaut : le titre est un bouton qui annonce le nombre de messages et invite à les afficher */
       var rh = el('h2', 'sg-review__title');
-      rh.appendChild(ico('history'));
-      rh.appendChild(el('span', null, 'Derniers messages du sujet'));
+      var rToggle = el('button', 'sg-review__toggle');
+      rToggle.type = 'button';
+      rToggle.setAttribute('aria-expanded', 'false');
+      rToggle.setAttribute('aria-controls', 'sg-review-list');
+      rToggle.appendChild(ico('history'));
+      rToggle.appendChild(el('span', 'sg-review__label', 'Derniers messages du sujet'));
+      rToggle.appendChild(el('span', 'sg-review__count', comments.length + (comments.length > 1 ? ' messages' : ' message')));
+      var rHint = el('span', 'sg-review__hint', 'Afficher');
+      rToggle.appendChild(rHint);
+      var rChev = ico('expand_more');
+      rChev.classList.add('sg-review__chev');
+      rToggle.appendChild(rChev);
+      rh.appendChild(rToggle);
       review.appendChild(rh);
+      var rList = el('div', 'sg-review__list');
+      rList.id = 'sg-review-list';
+      rList.hidden = true;
+      review.appendChild(rList);
       var rposts = [];
       comments.forEach(function (c) {
         var bodyC = c.querySelector('.content');
@@ -2192,7 +2246,7 @@
         letter.appendChild(body);
         post.appendChild(aside);
         post.appendChild(letter);
-        review.appendChild(post);
+        rList.appendChild(post);
         c.remove();
         rposts.push({ post: post, name: nm.textContent.replace(/\s+/g, ' ').trim() });
 
@@ -2226,8 +2280,15 @@
           more.hidden = !clamp;
         });
       };
-      requestAnimationFrame(clampReview);
-      window.addEventListener('resize', function () { requestAnimationFrame(clampReview); });
+      window.addEventListener('resize', function () { if (!rList.hidden) requestAnimationFrame(clampReview); });
+      rToggle.addEventListener('click', function () {
+        var open = rList.hidden;
+        rList.hidden = !open;
+        review.classList.toggle('is-open', open);
+        rToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        rHint.textContent = open ? 'Masquer' : 'Afficher';
+        if (open) requestAnimationFrame(clampReview);
+      });
       form.parentNode.insertBefore(review, form.nextSibling);
       if (reviewTitle) reviewTitle.classList.add('sg-hidden');
       after = review;
@@ -2244,7 +2305,6 @@
         new MutationObserver(function () { requestAnimationFrame(paintReview); })
           .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
       }
-      reviewAuthors(form, rposts, clampReview);
     }
 
     /* 4. Séparateur de fin et fil d'Ariane repris */

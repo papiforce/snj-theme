@@ -73,6 +73,21 @@ html[data-profile="right"] .sg-writeform > * {
   grid-column: 1;
 }
 
+/* Préférence « Densité (compact) » : comme en lecture, le profil et la lettre partagent le même fond */
+html[data-density="compact"] #wrap form.sg-writeform {
+  column-gap: 0;
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-surface);
+}
+
+html[data-density="compact"] .sg-write__aside {
+  padding: 16px 0 16px 16px;
+}
+
+html[data-density="compact"][data-profile="right"] .sg-write__aside {
+  padding: 16px 16px 16px 0;
+}
+
 /* L'auteur, collant : rôle (bandeau partagé avec les messages, .sg-role), portrait, pseudo */
 .sg-write__aside {
   position: sticky;
@@ -338,8 +353,221 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
 }
 
 .sg-writeform a.sceditor-button.sg-tb:hover,
+.sg-writeform a.sceditor-button.sg-tb:focus-visible,
 .sg-writeform a.sceditor-button.sg-tb.active {
+  background-color: rgba(var(--sg-contrast-rgb), 0.12) !important;
   color: var(--sg-text);
+}
+
+.sg-writeform a.sceditor-button.sg-tb:hover {
+  background-color: var(--sg-contrast) !important;
+  color: var(--sg-on-contrast);
+}
+
+/* Infobulle du libellé (toolbarTips) : sumi et gofun, au-dessus du bouton */
+.sg-tbtip {
+  position: fixed;
+  z-index: 2000;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: var(--sg-contrast);
+  box-shadow: var(--sg-shadow);
+  color: var(--sg-on-contrast);
+  font-family: var(--sg-font-body);
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.3;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition: opacity 0.15s, transform 0.15s, visibility 0.15s;
+}
+
+.sg-tbtip.is-on {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+
+/* Fenêtres des outils de l'éditeur (spoiler, images, lien, vidéo, titres, couleur) : SCEditor les crée,
+   layout.js (editorPopups) les marque .sg-pop ; styles de Forumactif neutralisés */
+.sceditor-dropdown.sg-pop {
+  z-index: 1000 !important;
+  min-width: 300px;
+  max-width: calc(100vw - 32px);
+  margin-top: 8px !important;
+  padding: 16px !important;
+  border: 1px solid var(--sg-border) !important;
+  border-radius: var(--sg-radius-lg) !important;
+  background: var(--sg-surface) !important;
+  box-shadow: var(--sg-shadow) !important;
+  color: var(--sg-text) !important;
+  font-family: var(--sg-font-body) !important;
+  font-size: 0.95rem !important;
+}
+
+.sceditor-dropdown.sg-pop > div {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sceditor-dropdown.sg-pop > div > div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+}
+
+.sceditor-dropdown.sg-pop br {
+  display: none;
+}
+
+.sceditor-dropdown.sg-pop label {
+  margin: 0 !important;
+  padding: 0;
+  color: var(--sg-text-muted) !important;
+  font-size: 0.85rem !important;
+  font-weight: 700;
+}
+
+.sceditor-dropdown.sg-pop input[type="text"] {
+  box-sizing: border-box;
+  width: 100% !important;
+  height: 42px !important;
+  margin: 0 !important;
+  padding: 0 14px !important;
+  border: 1px solid var(--sg-border-strong, var(--sg-border)) !important;
+  border-radius: var(--sg-radius-lg) !important;
+  background: var(--sg-surface-2) !important;
+  box-shadow: none !important;
+  color: var(--sg-text) !important;
+  font: inherit !important;
+  outline: none;
+}
+
+.sceditor-dropdown.sg-pop input[type="text"]:focus {
+  border-color: var(--sg-accent-1) !important;
+}
+
+.sceditor-dropdown.sg-pop input[type="text"]::placeholder {
+  color: var(--sg-text-muted);
+}
+
+/* Bouton « Insérer » : action principale (sumi et gofun), à droite */
+.sceditor-dropdown.sg-pop input.button {
+  align-self: flex-end;
+  height: 40px !important;
+  margin: 4px 0 0 !important;
+  padding: 0 18px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: var(--sg-contrast) !important;
+  box-shadow: none !important;
+  color: var(--sg-on-contrast) !important;
+  font: inherit !important;
+  font-weight: 700 !important;
+  cursor: pointer;
+}
+
+.sceditor-dropdown.sg-pop input.button:hover {
+  opacity: 0.88;
+}
+
+/* Héberger une image : la fenêtre de Servimg (page extérieure, non stylable) dans notre cadre */
+.sceditor-dropdown.sg-pop.sceditor-servimg p {
+  margin: 0;
+}
+
+.sceditor-dropdown.sg-pop.sceditor-servimg iframe {
+  display: block;
+  max-width: 100%;
+  border: 0;
+  border-radius: 10px;
+  background: #fff;
+}
+
+/* Format des titres : trois niveaux en Zen Antique, à leur taille */
+.sceditor-dropdown.sg-pop.sceditor-header-picker {
+  min-width: 220px;
+  padding: 6px !important;
+}
+
+.sceditor-dropdown.sg-pop.sceditor-header-picker > div {
+  gap: 2px;
+}
+
+.sceditor-dropdown.sg-pop .sceditor-header-option {
+  margin: 0 !important;
+  padding: 8px 12px !important;
+  border: 0 !important;
+  border-radius: 10px;
+  background: none !important;
+  color: var(--sg-text) !important;
+  font-family: var(--sg-font-display) !important;
+  font-weight: 400 !important;
+  line-height: 1.2 !important;
+  text-transform: none !important;
+  cursor: pointer;
+}
+
+.sceditor-dropdown.sg-pop h2.sceditor-header-option { font-size: 1.5rem !important; }
+.sceditor-dropdown.sg-pop h3.sceditor-header-option { font-size: 1.25rem !important; }
+.sceditor-dropdown.sg-pop h4.sceditor-header-option { font-size: 1.05rem !important; }
+
+.sceditor-dropdown.sg-pop .sceditor-header-option:hover {
+  background: var(--sg-surface-2) !important;
+}
+
+/* Couleur : les couleurs du design system, pastille et nom */
+.sceditor-dropdown.sg-pop.sceditor-color-picker {
+  width: 260px;
+  min-width: 0;
+  padding: 6px !important;
+}
+
+.sg-cpick {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: min(420px, 60vh);
+  overflow-y: auto;
+}
+
+.sg-cpick__opt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 38px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--sg-text);
+  font: inherit;
+  font-size: 0.92rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sg-cpick__opt:hover,
+.sg-cpick__opt:focus-visible {
+  background: var(--sg-surface-2);
+}
+
+.sg-cpick__opt > * {
+  transition: none;
+}
+
+.sg-cpick__swatch {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(var(--sg-contrast-rgb), 0.2);
 }
 
 .sg-writeform a.sceditor-button.sg-tb.active .material-symbols-outlined {
@@ -699,22 +927,85 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
 }
 
 #wrap .sg-review__title {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0 0 16px;
+  margin: 0;
   padding: 0;
   border: 0;
   background: none;
-  color: var(--sg-text);
-  font-family: var(--sg-font-display);
-  font-size: 1.35rem;
-  font-weight: 400;
+  font-size: inherit;
 }
 
-.sg-review__title .material-symbols-outlined {
+/* Repliés par défaut : une barre qui annonce le nombre de messages et invite à cliquer */
+.sg-review__toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 56px;
+  padding: 0 18px;
+  border: 1px dashed var(--sg-border-strong, var(--sg-border));
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-surface);
+  color: var(--sg-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sg-review__toggle:hover,
+.sg-review.is-open .sg-review__toggle {
+  border-style: solid;
+}
+
+.sg-review__toggle > * {
+  transition: none;
+}
+
+.sg-review__toggle .material-symbols-outlined {
   color: var(--sg-text-muted);
   font-size: 22px;
+}
+
+.sg-review__label {
+  font-family: var(--sg-font-display);
+  font-size: 1.25rem;
+  line-height: 1.2;
+}
+
+.sg-review__count {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--sg-accent-1);
+  color: var(--sg-on-accent);
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.sg-review__hint {
+  margin-left: auto;
+  color: var(--sg-text-muted);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.sg-review__toggle:hover .sg-review__hint {
+  color: var(--sg-text);
+}
+
+.sg-review__toggle .sg-review__chev {
+  transition: transform 0.25s var(--sg-ease);
+}
+
+.sg-review.is-open .sg-review__chev {
+  transform: rotate(180deg);
+}
+
+.sg-review__list {
+  margin-top: 24px;
+}
+
+.sg-review__list[hidden] {
+  display: none;
 }
 
 /* Les messages suivent le pattern « fumi » de la page du sujet (59-topic.css, portée .sg-fumi), préférences
@@ -795,6 +1086,15 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
 
   .sg-write__opts .sg-seg {
     grid-template-columns: 1fr 1fr;
+  }
+
+  /* Derniers messages : l'indication « Afficher » cède la place au compteur et au chevron */
+  .sg-review__hint {
+    display: none;
+  }
+
+  .sg-review__count {
+    margin-left: auto;
   }
 
   /* Titre puis couleur du titre, l'un sous l'autre */
