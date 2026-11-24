@@ -76,13 +76,17 @@ dans le panneau d'administration (PA), puis on commit.
   illustrées, les fils ni la carte Discord) : seigaiha 青海波 (vagues) → parcours et aide (onboarding, guides,
   tutoriels) ; kikkō 亀甲 (carapace de tortue) → univers et références durables (contexte, règlement, chronologie) ;
   shippō 七宝 (cercles entrelacés) → communauté et liens (staff, votes, partenaires, membres).
+  Derniers sujets : sujets de la Corbeille (supprimés) exclus (`DATA.latestHidden`), titre et ligne « dernier
+  participant · date » coupés en ellipse, avatar du dernier participant à droite (lu dans `/memberlist`, mis en cache
+  `sessionStorage` `snj-avatars`). La bannière est un lien vers `/` (`.sg-banner-link`, ajouté par `layout.js`).
   Peu de kanji (seulement dans les tuiles de scénarios). Annonces, Rumeurs et Saison sont des données provisoires
   (objet `DATA`) à brancher plus tard sur l'API de l'annexe. Pas d'animation de bordure au survol.
   Les `<header>` sont interdits dans nos composants : AwesomeBB les fixe tous en haut de page.
 - **Catégories de l'accueil** (`forums.js` + `40-zones.css`) : à gauche un sélecteur collant (Gestion, Hi, Mizu, Kaze,
   Kaminari, Tsuchi no Kuni, Reste du Sekai) au style des raccourcis de l'Annexe, pastille = badge pour Gestion
   (sumi et gofun) et kanji du pays sinon (火 水 風 雷 土, 他 comme sur l'annexe), couleur de la nation ; onglet actif
-  rempli. Sur mobile (≤ 900px), menu déroulant personnalisé. À droite, les forums de la catégorie en cartes (inspirées de
+  rempli. Libellé des onglets sur le fond de la barre latérale (`--sg-surface`) ; au survol et actif, texte et kanji
+  en blanc papier (`--sg-paper-50`), Gestion en `--sg-on-contrast`. Sur mobile (≤ 900px), menu déroulant personnalisé. À droite, les forums de la catégorie en cartes (inspirées de
   l'ancien SnJ) : image en fond avec voile selon le thème, panneau avec kanji en filigrane propre au forum, titre,
   description, bouton du clan (fiche de l'annexe), dangerosité sur 5 (zones RP uniquement), dernier message avec
   avatar, sous-forums à droite. Gestion : cartes sans image sur motif seigaiha. Catégories sans forum : « Prochainement ».
