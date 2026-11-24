@@ -5121,3 +5121,243 @@ body.sg-topics-on .sg-topics {
     transform: none;
   }
 }
+
+/* --- 58-perms.css --- */
+/* ==========================================================================
+   SNJ — Permissions : laissez-passer « tegata » (construits par src/js/layout.js, fonction perms)
+   Le tegata 手形 est le sauf-conduit qu'on présentait aux barrières sous les shoguns.
+   Pattern réservé aux PERMISSIONS, partout où Forumactif les affiche. Il se distingue des autres
+   cartes (toutes arrondies) par ses coins coupés en biseau et par son cachet de statut :
+     - autorisé : étiquette pleine, icône à la couleur de la catégorie (--ph), cachet Asagi « Autorisé » ;
+     - non autorisé : étiquette estompée au contour pointillé, cachet « Non autorisé » avec cadenas.
+   Un droit qui mène quelque part (Modérer ce forum) : toute l'étiquette est un lien, avec une flèche.
+   Grille fluide (étiquettes de 220px minimum). Dessous : le fil d'Ariane de l'en-tête, repris.
+   ========================================================================== */
+
+.sg-perms {
+  --ph: var(--sg-primary);
+  --cut: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin: 0 0 var(--sg-space-8);
+  font-size: 16px; /* AwesomeBB réduit la taille du texte dans #wrap */
+  line-height: 1.5;
+}
+
+.sg-perms.sg-tone-gestion { --ph: var(--sg-contrast); }
+.sg-perms.sg-tone-hi { --ph: var(--sg-nation-hi); }
+.sg-perms.sg-tone-mizu { --ph: var(--sg-nation-mizu); }
+.sg-perms.sg-tone-kaze { --ph: var(--sg-nation-kaze); }
+.sg-perms.sg-tone-kaminari { --ph: var(--sg-nation-kaminari); }
+.sg-perms.sg-tone-tsuchi { --ph: var(--sg-nation-tsuchi); }
+.sg-perms.sg-tone-autres { --ph: var(--sg-nation-autres); }
+
+/* Titre discret, comme un intitulé de section */
+#wrap .sg-perms__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--sg-text-muted);
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.sg-perms__title .material-symbols-outlined {
+  color: var(--ph);
+  font-size: 18px;
+}
+
+#wrap .sg-perms__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#wrap .sg-perms__list > li {
+  margin: 0;
+  border: 0;
+}
+
+/* --- Étiquette aux coins coupés ------------------------------------------------
+   Le contour suit le biseau : l'élément sert de filet (fond = couleur du contour),
+   son pseudo-élément ::before, biseauté pareil et décalé de 1px, sert de fond. */
+.sg-pass {
+  --pass-line: var(--sg-border-strong, var(--sg-border));
+  --pass-bg: var(--sg-surface);
+  position: relative;
+  isolation: isolate;
+  min-width: 0;
+  height: 100%;
+}
+
+.sg-pass__card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 100%;
+  min-height: 76px;
+  padding: 14px 18px;
+  background: var(--pass-line);
+  clip-path: polygon(var(--cut) 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, var(--cut) 100%, 0 calc(100% - var(--cut)), 0 var(--cut));
+  color: var(--sg-text);
+  text-decoration: none;
+}
+
+.sg-pass__card::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  background: var(--pass-bg);
+  clip-path: polygon(calc(var(--cut) - 0.4px) 0, calc(100% - var(--cut) + 0.4px) 0, 100% calc(var(--cut) - 0.4px), 100% calc(100% - var(--cut) + 0.4px), calc(100% - var(--cut) + 0.4px) 100%, calc(var(--cut) - 0.4px) 100%, 0 calc(100% - var(--cut) + 0.4px), 0 calc(var(--cut) - 0.4px));
+}
+
+/* Le contenu passe devant le fond */
+.sg-pass__card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.sg-pass__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--ph) 16%, transparent);
+  color: var(--ph);
+}
+
+.sg-pass__icon .material-symbols-outlined {
+  font-size: 22px;
+}
+
+.sg-pass__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.sg-pass__label {
+  overflow: hidden;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Cachet de statut */
+.sg-pass__seal {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 4px;
+  padding: 1px 9px 1px 6px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.sg-pass__seal .material-symbols-outlined {
+  font-size: 14px;
+}
+
+.sg-pass.is-yes .sg-pass__seal {
+  background: color-mix(in srgb, var(--sg-accent-1) 18%, transparent);
+  color: var(--sg-accent-1);
+}
+
+/* Non autorisé : étiquette estompée, contour pointillé (dessiné en dégradés, clip-path oblige) */
+.sg-pass.is-no {
+  --pass-bg: transparent;
+}
+
+.sg-pass.is-no .sg-pass__card {
+  background:
+    repeating-linear-gradient(90deg, var(--pass-line) 0 6px, transparent 6px 11px) top / 100% 1px no-repeat,
+    repeating-linear-gradient(90deg, var(--pass-line) 0 6px, transparent 6px 11px) bottom / 100% 1px no-repeat,
+    repeating-linear-gradient(0deg, var(--pass-line) 0 6px, transparent 6px 11px) left / 1px 100% no-repeat,
+    repeating-linear-gradient(0deg, var(--pass-line) 0 6px, transparent 6px 11px) right / 1px 100% no-repeat;
+  color: var(--sg-text-muted);
+}
+
+.sg-pass.is-no .sg-pass__icon {
+  background: var(--sg-surface-2);
+  color: var(--sg-text-muted);
+}
+
+.sg-pass.is-no .sg-pass__seal {
+  background: var(--sg-surface-2);
+  color: var(--sg-text-muted);
+}
+
+/* Droit qui mène quelque part : toute l'étiquette est un lien */
+a.sg-pass__card > .material-symbols-outlined:last-child {
+  flex: none;
+  color: var(--sg-text-muted);
+  font-size: 20px;
+  transition: transform 0.3s var(--sg-ease);
+}
+
+#wrap a.sg-pass__card,
+#wrap a.sg-pass__card:visited {
+  color: var(--sg-text);
+}
+
+a.sg-pass__card:hover {
+  --pass-line: var(--ph);
+}
+
+a.sg-pass__card:hover > .material-symbols-outlined:last-child {
+  transform: translateX(4px);
+  color: var(--sg-text);
+}
+
+a.sg-pass__card:focus-visible {
+  outline: none;
+}
+
+.sg-pass:has(a.sg-pass__card:focus-visible) {
+  outline: 2px solid var(--sg-accent-1);
+  outline-offset: 3px;
+}
+
+.sg-pass__card .material-symbols-outlined,
+.sg-pass__card span {
+  transition: none;
+}
+
+/* --- Fil d'Ariane repris sous les permissions ------------------------------------ */
+.sg-crumbs--end {
+  margin-top: 14px;
+  padding-top: 18px;
+  border-top: 1px solid var(--sg-border);
+}
+
+@media (max-width: 600px) {
+  #wrap .sg-perms__list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  a.sg-pass__card > .material-symbols-outlined:last-child {
+    transition: none;
+  }
+}

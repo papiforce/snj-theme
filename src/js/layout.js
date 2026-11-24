@@ -302,6 +302,7 @@
     pageHead();
     subforums();
     topics();
+    perms();
     applyTheme(storedTheme() || currentTheme());
   }
 
@@ -1104,6 +1105,106 @@
 
     blocks[0].parentNode.insertBefore(section, blocks[0]);
     document.body.classList.add('sg-topics-on');
+  }
+
+  /* --------------------------------------------------------------------
+     Permissions : laissez-passer « tegata » (手形, le sauf-conduit qu'on montrait
+     aux barrières sous les shoguns). Pattern réservé aux PERMISSIONS, partout où
+     Forumactif les affiche (bloc .block « Permission de ce forum ») : une étiquette
+     aux coins coupés par droit, icône de l'action, libellé court, cachet « Autorisé »
+     (Asagi) ou « Non autorisé » (cadenas, étiquette estompée au trait pointillé).
+     Le lien « modérer ce forum » est repris : toute l'étiquette est cliquable.
+     Dessous, le fil d'Ariane de l'en-tête est repris (copie du <nav> .sg-crumbs).
+     -------------------------------------------------------------------- */
+  function perms() {
+    if (document.querySelector('.sg-perms')) return;
+    var block = Array.prototype.slice.call(document.querySelectorAll('#wrap .block')).filter(function (b) {
+      var head = b.querySelector('.block-header');
+      return head && /Permission/i.test(head.textContent);
+    })[0];
+    var content = block && block.querySelector('.block-content');
+    if (!content) return;
+
+    var el = function (tag, cls, text) {
+      var e = document.createElement(tag);
+      if (cls) e.className = cls;
+      if (text !== undefined) e.textContent = text;
+      return e;
+    };
+    var ico = function (name) { var i = el('span', 'material-symbols-outlined', name); i.setAttribute('aria-hidden', 'true'); return i; };
+    /* Libellés courts et icônes des droits connus ; sinon la phrase de Forumactif, raccourcie */
+    var KNOWN = [
+      [/nouveaux sujets/i, 'edit_square', 'Créer des sujets'],
+      [/répondre/i, 'reply', 'Répondre aux sujets'],
+      [/modérer/i, 'gavel', 'Modérer ce forum'],
+      [/éditer|modifier/i, 'edit', 'Modifier ses messages'],
+      [/supprimer/i, 'delete', 'Supprimer ses messages'],
+      [/voter|sondage/i, 'how_to_vote', 'Voter aux sondages'],
+      [/fichier|joindre|pièce/i, 'attach_file', 'Joindre des fichiers'],
+      [/événement|calendrier/i, 'event', 'Ajouter des événements']
+    ];
+
+    /* Une ligne par droit : le contenu est découpé sur les <br> */
+    var lines = content.innerHTML.split(/<br\s*\/?>/i).map(function (html) {
+      var tmp = document.createElement('div');
+      tmp.innerHTML = html;
+      var text = tmp.textContent.replace(/\s+/g, ' ').trim();
+      if (!text) return null;
+      var no = /ne\s+pouvez\s+pas/i.test(text);
+      var link = tmp.querySelector('a[href]');
+      var known = KNOWN.filter(function (k) { return k[0].test(text); })[0];
+      var label = known ? known[2] : (function (t) {
+        t = t.replace(/^vous\s+(ne\s+)?pouvez(\s+pas)?\s+/i, '').replace(/\s+dans ce forum\.?$/i, '');
+        return t.charAt(0).toUpperCase() + t.slice(1);
+      })(text);
+      return { yes: !no, icon: known ? known[1] : 'task_alt', label: label, href: !no && link ? link.getAttribute('href') : '', full: text };
+    }).filter(Boolean);
+    if (!lines.length) return;
+
+    var section = el('section', 'sg-perms');
+    var head = document.querySelector('.sg-pagehead');
+    if (head) (head.className.match(/sg-tone-[a-z]+/) || []).forEach(function (c) { section.classList.add(c); });
+    var title = el('h2', 'sg-perms__title');
+    title.id = 'sg-perms-title';
+    title.appendChild(ico('verified_user'));
+    title.appendChild(el('span', null, 'Droits dans ce forum'));
+    section.setAttribute('aria-labelledby', title.id);
+    section.appendChild(title);
+
+    var list = el('ul', 'sg-perms__list');
+    lines.forEach(function (p) {
+      var li = el('li', 'sg-pass' + (p.yes ? ' is-yes' : ' is-no'));
+      var card = el(p.href ? 'a' : 'div', 'sg-pass__card');
+      if (p.href) card.href = p.href;
+      card.setAttribute('title', p.full);
+      var icon = el('span', 'sg-pass__icon');
+      icon.appendChild(ico(p.icon));
+      card.appendChild(icon);
+      var body = el('span', 'sg-pass__body');
+      body.appendChild(el('span', 'sg-pass__label', p.label));
+      var seal = el('span', 'sg-pass__seal');
+      seal.appendChild(ico(p.yes ? 'check' : 'lock'));
+      seal.appendChild(el('span', null, p.yes ? 'Autorisé' : 'Non autorisé'));
+      body.appendChild(seal);
+      card.appendChild(body);
+      if (p.href) card.appendChild(ico('arrow_forward'));
+      li.appendChild(card);
+      list.appendChild(li);
+    });
+    section.appendChild(list);
+
+    /* Fil d'Ariane repris en bas de page */
+    var crumbs = document.querySelector('.sg-pagehead .sg-crumbs');
+    if (crumbs) {
+      var copy = crumbs.cloneNode(true);
+      copy.classList.add('sg-crumbs--end');
+      copy.setAttribute('aria-label', 'Fil d’Ariane (bas de page)');
+      section.appendChild(copy);
+    }
+
+    block.parentNode.insertBefore(section, block);
+    block.style.display = 'none';
+    document.body.classList.add('sg-perms-on');
   }
 
   /* --------------------------------------------------------------------
