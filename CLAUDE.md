@@ -326,7 +326,8 @@ dans le panneau d'administration (PA), puis on commit.
   contenu (`.block-footer`), sont retirés. Pas de J'aime ni de menu (aucun lien natif).
   **« Lire la suite »** gardé, **centré** (`.sg-rev__more`, « Réduire » une fois déplié) : le message est coupé à la
   hauteur du profil (`--rev-clamp`, 240px au moins, 240px sur mobile), avec un fondu ; calculé à l'ouverture et au
-  redimensionnement. En bas : séparateur de fin et fil d'Ariane repris. Non testés faute d'envoyer un formulaire :
+  redimensionnement. Le bouton n'apparaît que si le texte dépasse : sa hauteur est mesurée sur le contenu (`Range`),
+  car la boîte du message est étirée à la hauteur du profil et AwesomeBB anime tout changement de style. En bas : séparateur de fin et fil d'Ariane repris. Non testés faute d'envoyer un formulaire :
   aperçu, modification, erreurs, pièces jointes.
 - **Permissions : laissez-passer « tegata »** (`layout.js`, fonction `perms`, + `58-perms.css`) : pattern **réservé
   aux permissions**, sur toutes les pages où Forumactif affiche le bloc « Permission de ce forum » (pages de forum,
