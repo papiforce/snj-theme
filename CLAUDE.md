@@ -159,34 +159,44 @@ dans le panneau d'administration (PA), puis on commit.
   `copyLink(texte)` (copie synchrone par champ temporaire + `execCommand`, l'API Clipboard en repli : elle peut rester
   en attente d'une permission) et `toast(message)` (message discret `.sg-toast` en bas d'écran, au-dessus de la barre
   mobile). À réutiliser sur toute nouvelle page plutôt que de les recopier.
-- **Page d'un sujet** (`layout.js`, `pageHead` + `topicPage`, + `59-topic.css`) :
+- **Page d'un sujet** (`layout.js`, `pageHead` + `topicPage`, + `59-topic.css` ; widgets par `home.js`) :
+  **Au-dessus** : Guide du joueur, Saison et Annexe, puis le séparateur avec le logo (même mode `#sg-home.is-forum`
+  que les forums ; `home.js` reconnaît `/fN…` et `/tN…`, placement « Sur les sujets » coché sur le module 11).
   **En-tête** : même pattern que les forums (`pageHead` reconnaît `/tN-…` et lit `#topic .topic-header`) ; le sujet
-  est le dernier niveau du fil d'Ariane (sans lien, en gras, coupé à 40ch) ; la cloche native des notifications du
-  sujet (`#push-bell`) suit le titre (bouton rond, sa couleur jaune neutralisée) ; « Répondre au sujet » en action
-  principale, « Poster un nouveau sujet » en secondaire à sa gauche (`.sg-action--ghost` : contour sur fond de surface).
+  est le dernier niveau du fil d'Ariane (sans lien, en gras, coupé à 40ch) ; **titre sur une ligne, coupé en ellipse**
+  (texte dans `.sg-pagehead__text`, le filet `::after` reste dessous ; titre complet en infobulle) ; **description du
+  sujet** dessous : absente de la page, elle est lue dans la liste des sujets du forum (1re page seulement ; cache de
+  session `snj-tdesc`) ; une seule action, « Répondre au sujet ». **Retirés** : la cloche des notifications push du
+  sujet (`#push-bell`) et « Poster un nouveau sujet ». Sur mobile (forums et sujets) : fil d'Ariane, titre,
+  description, puis les boutons (`.sg-pagehead__row` en `display: contents` + `order`).
   Couleur de la catégorie posée sur `#topic` (`#topic.sg-tone-…`). Classe `body.sg-topicpage` (et `sg-topicpage-on`).
-  **Barre du sujet** (`.sg-tbar`, `z-index: 5` pour que le menu passe devant les messages) : « Sujet précédent » /
-  « Sujet suivant » (`.sg-tool`, liens natifs de `.quick-nav-topics`) et menu « Actions » : Ajouter à mes favoris,
-  Suivre / Ne plus suivre ce sujet, Copier le lien du sujet, Imprimer le sujet, Nouveaux messages depuis ma dernière
-  visite, Mes sujets suivis. Sur mobile : précédent / suivant sur une ligne pleine largeur, « Actions » dessous.
+  **Barre du sujet** (`.sg-tbar`, `z-index: 5`) : menu « Actions » seul, à droite : Ajouter à mes favoris, Suivre /
+  Ne plus suivre ce sujet, Copier le lien du sujet. **Retirés** : Sujet précédent / suivant, Imprimer, Nouveaux
+  messages depuis ma dernière visite, Mes sujets suivis.
   **Messages « fumi »** (文, la lettre) : pattern **réservé aux messages**, partout où ils s'affichent (sujets ; à
   reprendre pour l'aperçu, les messages privés, les résultats de recherche par message). Le balisage natif est
-  conservé (citation, J'aime, éditeur continuent de fonctionner) : `.post-wrap.sg-post` en grille `232px | 1fr`,
+  conservé (citation, J'aime, éditeur continuent de fonctionner) : `.post-wrap.sg-post` en grille `248px | 1fr`,
   `.post-body` en `display: contents`, chaque message `isolation: isolate` (l'en-tête natif a un `z-index: 500`).
   Colonne de l'auteur : liseré gauche de 3px et léger halo à la couleur de son groupe (`--author`, lue en JS sur son
-  pseudo après `08-groups.css`, relue à chaque changement de thème ; couleur de la catégorie à défaut), portrait 3:4
-  cerné à sa couleur, pastille Asagi « en ligne », pseudo en Zen Antique, rang en pastille, fiche compacte
-  (libellé / valeur ; le gris `#444444` écrit en dur par Forumactif est neutralisé), contacts en icônes rondes
-  (profil, message privé, e-mail, site web ; la liste déroulante native est masquée). Lettre : en-tête (numéro
-  « #n » à la couleur de l'auteur, lien permanent, compté depuis le début du sujet ; date ; boutons citer / modifier /
+  pseudo après `08-groups.css`, relue à chaque changement de thème ; couleur de la catégorie à défaut).
+  **Rôle au-dessus du portrait** (`postRoles`) : **bandeau** `.sg-role` (pas une pastille) sur motif **shippō**
+  (communauté, staff) à la couleur de l'auteur, filets haut et bas, libellé en Zen Antique ; **Staffeux** ou
+  **Modérateur** d'après les groupes du forum (`staffRoles` : `/groups` puis `/g2-staffeux`, `/g9-moderateurs`…,
+  cache `snj-roles` de 15 min) avec le **magatama plein** du logo (`MAGATAMA_SVG`) ; sinon le rang Forumactif, sans
+  magatama ; le rang natif (« Admin ») est masqué. **Portrait 200 × 400** (56 × 112 sur mobile), cerné à la couleur de
+  l'auteur, **sans pastille « en ligne »**. Pseudo en Zen Antique, fiche compacte (libellé / valeur ; le gris `#444444`
+  écrit en dur par Forumactif est neutralisé), contacts en icônes rondes (profil, message privé, e-mail, site web).
+  Lettre : en-tête (numéro « #n » à la couleur de l'auteur, lien permanent ; date ; boutons citer / modifier /
   supprimer / IP en icônes rondes, sur tous les formats), contenu (1rem, interligne 1,75 ; citations, code et spoilers
-  sur fond de surface), J'aime / Je n'aime pas en pastilles, signature sous un filet pointillé. ≤ 768px : profil en
-  bandeau au-dessus de la lettre (portrait 56px, fiche masquée, contacts à droite).
+  sur fond de surface), **J'aime en cœur** : vide, plein et rouge (`--sg-like`, `#e0475b`) une fois aimé — Forumactif
+  passe le bouton de `.fa_like` à `.fa_liked` et affiche le compteur `.rep-nb` ; **« Je n'aime pas » masqué** ;
+  signature sous un filet pointillé. ≤ 768px : profil en bandeau au-dessus de la lettre (rôle sur toute la largeur,
+  puis portrait | pseudo | contacts ; fiche masquée).
   **Réponse rapide** : carte au même gabarit, intitulé « Répondre » ; l'éditeur natif (SCEditor) est conservé et
   restylé (ses bordures et fonds sont en `!important` dans le CSS de Forumactif : on surcharge en `!important`).
   **Bas de page** (`.sg-tfoot`) : séparateur de fin, « Sauter vers » (`jumpBox`, forum du sujet coché) à gauche,
   outils de modération à droite (`.sg-modtools` : libellé « Modération » + icônes rondes de `.topic-admin`), puis
-  les permissions et le fil d'Ariane. Retirés : barre « Plus ! / Partagez », bouton fixe « Répondre au sujet »,
+  les permissions et le fil d'Ariane. Retirés aussi : barre « Plus ! / Partagez », bouton fixe « Répondre au sujet »,
   liste « Outils de modération » (doublon des icônes), lien « Arrêter de surveiller ce sujet » (dans « Actions »).
 - **Permissions : laissez-passer « tegata »** (`layout.js`, fonction `perms`, + `58-perms.css`) : pattern **réservé
   aux permissions**, sur toutes les pages où Forumactif affiche le bloc « Permission de ce forum » (pages de forum,
@@ -267,6 +277,26 @@ dans le panneau d'administration (PA), puis on commit.
 - **Migration** : bascule de tout le forum en une fois.
   Alendria (test) : activation des nouveaux membres sur « Aucune activation » (comptes de test sans e-mail de
   confirmation). **Ne pas reporter en production**, qui garde l'activation par l'utilisateur (e-mail).
+
+## Préférences de design de Vinny (apprises de ses retours)
+
+À appliquer d'emblée sur toute nouvelle page, sans attendre qu'il le redemande ; signaler quand un retour contredit
+une décision de la refonte.
+
+- **Épuré, sans doublon** : retirer ce qui répète une information ou une action disponible ailleurs (boutons
+  « Poster un nouveau sujet » sur un sujet, précédent / suivant, entrées de menu peu utiles, « Je n'aime pas »,
+  pastille « en ligne », cloches, barres natives). Une seule action principale par en-tête.
+- **Une ligne, en ellipse** pour les titres et libellés (titres de sujet, sous-forums, pseudos), nom complet en infobulle.
+- **Pas de look « badge »** pour les éléments d'identité (rôles, statuts importants) : bandeaux avec **motif Edo** et
+  **éléments de l'univers** (magatama du logo, kanji, sceaux) plutôt que des pastilles génériques.
+- **Cohérence entre pages** : reprendre les mêmes blocs (widgets Guide / Saison / Annexe + séparateur, en-tête,
+  fil d'Ariane en bas, séparateur de fin) d'une page à l'autre.
+- **Vocabulaire de l'univers** : « shinobi », « Sekai », noms des groupes du forum (« Staffeux » plutôt que le rang
+  « Admin »), libellés courts.
+- **Icônes Material Symbols** sobres (cœur, chevrons, trois points verticaux), pleines pour un état actif.
+- **Mobile** : cibles de 44px, éléments empilés dans un ordre logique (titre, description, puis actions).
+- **Couleurs** : tokens de la refonte ; un retour peut demander une couleur hors palette (ex. cœur rouge) : l'appliquer,
+  la nommer dans un token dédié, et signaler l'écart à la règle.
 
 ## Publier une nouvelle version du CSS des composants
 
