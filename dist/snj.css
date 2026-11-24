@@ -3393,16 +3393,16 @@ body.sg-footer-on #page-footer > :not(.sg-footer) {
   opacity: 0.6;
 }
 
-.sg-footer__links a.sg-footer__link,
-.sg-footer__links a.sg-footer__link:visited {
+#page-footer a.sg-footer__link,
+#page-footer a.sg-footer__link:visited {
   color: var(--sg-text-muted);
   font-weight: 400;
   text-decoration: none;
   transition: color 0.25s ease;
 }
 
-.sg-footer__links a.sg-footer__link:hover,
-.sg-footer__links a.sg-footer__link:focus-visible {
+#page-footer a.sg-footer__link:hover,
+#page-footer a.sg-footer__link:focus-visible {
   color: var(--sg-text);
 }
 
