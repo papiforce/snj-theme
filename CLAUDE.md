@@ -342,8 +342,22 @@ dans le panneau d'administration (PA), puis on commit.
   événements), sinon la phrase native raccourcie ; phrase complète en infobulle. Un droit avec lien (« Modérer ce
   forum ») : toute l'étiquette est le lien, flèche à droite, contour à la couleur de la catégorie au survol.
   **Fil d'Ariane repris dessous** (copie du `.sg-crumbs` de l'en-tête, `.sg-crumbs--end`), quand l'en-tête existe.
+- **Page de confirmation ou d'information : sceau « hanko »** 判子 (`layout.js`, fonction `noticePage`, +
+  `61-notice.css`) : pattern **réservé aux pages où Forumactif n'affiche qu'un message** (template `message_body` :
+  un seul `.block` « Informations » dans `#wrap`, sans formulaire) : message publié, modifié, supprimé, sujet
+  verrouillé ou déplacé, profil enregistré, erreur de droits… Le bloc natif est masqué. Séparateur avec le logo en
+  haut (comme l'écriture), puis une **carte centrée** (560px, fond de surface, sans contour ni ombre) : **sceau carré**
+  au kanji, à double filet, incliné comme un tampon, qui **se pose avec un rebond** (sans animation si le système le
+  demande) — ton d'après le message (`NOTICE_TONES`) : **済** fait (Asagi), **否** refusé (Ume), **報** avis (Hagane) ;
+  **titre court** en Zen Antique avec un filet de 40px au ton (tiré du message par `NOTICE_TITLES` quand Forumactif
+  écrit « Informations » : « Message publié », « Sujet verrouillé », « Action impossible »…, repris dans l'onglet) ;
+  le message en texte discret ; les **liens natifs** (« Cliquez ici pour… », lus ligne par ligne entre les `<br>`)
+  **déplacés** et devenus **boutons** aux libellés courts (`NOTICE_LINKS` : « Voir le message », « Retour au sujet »,
+  « Retour au forum »…, phrase native en infobulle) : le premier plein (`.sg-action`), les autres au contour. Pas de
+  redirection (`noForcedRedirect`). Vérifié sur une vraie erreur (« Action impossible ») et sur une confirmation
+  reconstituée (« Message publié ») ; libellés et titres des autres cas à ajuster au fil des pages rencontrées.
   Récapitulatif des patterns : **forum** (accueil) = image en fond + panneau + kanji ; **sous-forum** = ema
-  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ;
+  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ; **confirmation** = hanko (sceau au kanji) ;
   **permission** = étiquette tegata aux coins coupés.
 - **Catégories de l'accueil** (`forums.js` + `40-zones.css`) : à gauche un sélecteur collant (Gestion, Hi, Mizu, Kaze,
   Kaminari, Tsuchi no Kuni, Shōkoku — « les petits pays », ex-Reste du Sekai) au style des raccourcis de l'Annexe, pastille = badge pour Gestion
