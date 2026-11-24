@@ -531,7 +531,8 @@
      yagasuri en fond à la couleur de la catégorie. Statut en pastilles (annonce,
      épinglé, verrouillé, nouveau), titre, description, auteur, compteurs et dernier
      message. Au-dessus de la grille, « Poster un nouveau sujet » à gauche et le menu
-     « Actions » à droite (nouveaux messages, sans réponse, suivi du forum, sujets suivis).
+     « Actions » à droite (nouveaux messages, sans réponse, marquer comme lus, suivi du forum,
+     sujets suivis) ; dessous, « Trier » et « Sauter vers » (formulaires natifs déplacés).
      -------------------------------------------------------------------- */
   function topics() {
     if (document.querySelector('.sg-topics')) return;
@@ -696,6 +697,7 @@
     var items = [
       [search('newposts'), 'new_releases', 'Nouveaux messages depuis ma dernière visite'],
       [search('unanswered'), 'mark_chat_unread', 'Messages sans réponse'],
+      [find(/[?&]mark=topics/), 'mark_chat_read', 'Marquer tous les sujets comme lus'],
       null,
       [watch, watched ? 'notifications_off' : 'notifications_active', watched ? 'Ne plus suivre les sujets de ce forum' : 'Suivre les sujets de ce forum'],
       [search('watchsearch'), 'bookmarks', 'Mes sujets suivis']
@@ -713,7 +715,7 @@
       toggle.setAttribute('aria-expanded', 'false');
       toggle.setAttribute('aria-controls', menuId);
       toggle.appendChild(el('span', null, 'Actions'));
-      toggle.appendChild(ico('more_horiz'));
+      toggle.appendChild(ico('more_vert'));
       var menu = el('ul', 'sg-menu__list');
       menu.id = menuId;
       menu.setAttribute('role', 'menu');
@@ -764,6 +766,122 @@
         else if (ev.key === 'Tab') close(false);
       });
       document.addEventListener('click', function (ev) { if (!wrapM.contains(ev.target)) close(false); });
+    }
+
+    /* Deuxième ligne : « Trier » (le formulaire natif est déplacé dans une fenêtre) puis « Sauter vers »
+       (le formulaire natif jumpbox est déplacé et restylé). La barre native sous les sujets
+       (Surveiller, Marquer comme lus, Trier) est masquée par le CSS : ses liens sont dans « Actions ». */
+    var tools = el('div', 'sg-topics__tools');
+    var selectBox = function (select) {
+      var box = el('span', 'sg-select');
+      box.appendChild(select);
+      box.appendChild(ico('expand_more'));
+      return box;
+    };
+    var popover = function (wrapEl, toggleEl, panelEl, onOpen) {
+      var close = function (refocus) {
+        if (panelEl.hidden) return;
+        panelEl.hidden = true;
+        toggleEl.setAttribute('aria-expanded', 'false');
+        wrapEl.classList.remove('is-open');
+        if (refocus) toggleEl.focus();
+      };
+      toggleEl.addEventListener('click', function () {
+        if (!panelEl.hidden) { close(false); return; }
+        panelEl.hidden = false;
+        toggleEl.setAttribute('aria-expanded', 'true');
+        wrapEl.classList.add('is-open');
+        if (onOpen) onOpen();
+      });
+      panelEl.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') { ev.preventDefault(); close(true); } });
+      document.addEventListener('click', function (ev) { if (!wrapEl.contains(ev.target)) close(false); });
+    };
+
+    var sortForm = document.querySelector('#sort-box form');
+    var sortSelect = sortForm && sortForm.querySelector('select[name="sort_method"]');
+    if (sortForm && sortSelect) {
+      var sortWrap = el('div', 'sg-sort');
+      var sortBtn = el('button', 'sg-tool');
+      sortBtn.type = 'button';
+      sortBtn.setAttribute('aria-haspopup', 'dialog');
+      sortBtn.setAttribute('aria-expanded', 'false');
+      sortBtn.setAttribute('aria-controls', 'sg-sort-panel');
+      sortBtn.appendChild(ico('sort'));
+      sortBtn.appendChild(el('span', null, 'Trier'));
+      sortBtn.appendChild(ico('expand_more'));
+      var panel = el('div', 'sg-sort__panel');
+      panel.id = 'sg-sort-panel';
+      panel.setAttribute('role', 'dialog');
+      panel.setAttribute('aria-label', 'Trier les sujets');
+      panel.hidden = true;
+
+      var radios = Array.prototype.slice.call(sortForm.querySelectorAll('input[name="sort_order"]'));
+      var submit = sortForm.querySelector('input[type="submit"]');
+      var hidden = Array.prototype.slice.call(sortForm.querySelectorAll('input[type="hidden"]'));
+      while (sortForm.firstChild) sortForm.removeChild(sortForm.firstChild);
+      sortForm.className = 'sg-sort__form';
+      hidden.forEach(function (h) { sortForm.appendChild(h); });
+
+      var f1 = el('div', 'sg-field');
+      var l1 = el('label', 'sg-field__label', 'Trier par');
+      sortSelect.id = 'sg-sort-method';
+      l1.setAttribute('for', 'sg-sort-method');
+      f1.appendChild(l1);
+      f1.appendChild(selectBox(sortSelect));
+      sortForm.appendChild(f1);
+
+      if (radios.length) {
+        var f2 = el('fieldset', 'sg-field');
+        f2.appendChild(el('legend', 'sg-field__label', 'Ordre'));
+        var seg = el('div', 'sg-seg');
+        radios.forEach(function (r) {
+          var lab = el('label', 'sg-seg__opt');
+          var up = r.value === '1';
+          lab.appendChild(r);
+          var face = el('span', 'sg-seg__face');
+          face.appendChild(ico(up ? 'arrow_upward' : 'arrow_downward'));
+          face.appendChild(el('span', null, up ? 'Croissant' : 'Décroissant'));
+          lab.appendChild(face);
+          seg.appendChild(lab);
+        });
+        f2.appendChild(seg);
+        sortForm.appendChild(f2);
+      }
+
+      var go = el('button', 'sg-action sg-sort__submit');
+      go.type = 'submit';
+      if (submit && submit.name) { go.name = submit.name; go.value = submit.value; }
+      go.appendChild(ico('check'));
+      go.appendChild(el('span', null, 'Appliquer'));
+      sortForm.appendChild(go);
+
+      panel.appendChild(sortForm);
+      sortWrap.appendChild(sortBtn);
+      sortWrap.appendChild(panel);
+      popover(sortWrap, sortBtn, panel, function () { sortSelect.focus(); });
+      tools.appendChild(sortWrap);
+    }
+
+    var jumpForm = document.querySelector('form[name="jumpbox"]');
+    var jumpSelect = jumpForm && jumpForm.querySelector('select');
+    if (jumpForm && jumpSelect) {
+      var keep = Array.prototype.slice.call(jumpForm.querySelectorAll('input[type="hidden"]'));
+      while (jumpForm.firstChild) jumpForm.removeChild(jumpForm.firstChild);
+      jumpForm.className = 'sg-jump';
+      keep.forEach(function (h) { jumpForm.appendChild(h); });
+      jumpSelect.id = 'sg-jump-select';
+      var jl = el('label', 'sg-jump__label');
+      jl.setAttribute('for', 'sg-jump-select');
+      jl.appendChild(ico('alt_route'));
+      jl.appendChild(el('span', null, 'Sauter vers'));
+      jumpForm.appendChild(jl);
+      jumpForm.appendChild(selectBox(jumpSelect));
+      tools.appendChild(jumpForm);
+    }
+
+    if (tools.children.length) {
+      bar = bar || el('div', 'sg-topics__bar');
+      bar.appendChild(tools);
     }
 
     if (bar) section.insertBefore(bar, section.firstChild);

@@ -4024,7 +4024,9 @@ body.sg-subforums-on #wrap > .forum.type-table-forum {
    Grille de 2 colonnes, cartes de même hauteur (1 colonne ≤ 768px).
    ========================================================================== */
 
-body.sg-topics-on #wrap > .posts {
+body.sg-topics-on #wrap > .posts,
+body.sg-topics-on #wrap > a.mark-buttons,
+body.sg-topics-on #wrap > #sort-box {
   display: none !important;
 }
 
@@ -4046,6 +4048,7 @@ body.sg-topics-on #wrap > .posts {
 /* --- Barre : « Poster un nouveau sujet » à gauche (style .sg-action de 55-pagehead.css), « Actions » à droite --- */
 .sg-topics__bar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
@@ -4152,6 +4155,256 @@ body.sg-topics-on #wrap > .posts {
   height: 1px;
   margin: 6px 8px;
   background: var(--sg-border);
+}
+
+/* --- Deuxième ligne : « Trier » puis « Sauter vers » -------------------------------- */
+.sg-topics__tools {
+  display: flex;
+  flex: 1 0 100%;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Bouton à contour (Trier), même gabarit que « Actions » */
+.sg-tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 46px;
+  padding: 0 12px 0 16px;
+  border: 1px solid var(--sg-border-strong, var(--sg-border));
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-surface);
+  color: var(--sg-text);
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sg-tool:hover,
+.is-open > .sg-tool {
+  background: var(--sg-surface-2);
+}
+
+.sg-tool:focus-visible,
+#wrap .sg-select select:focus-visible,
+.sg-seg__opt input:focus-visible + .sg-seg__face {
+  outline: 2px solid var(--sg-accent-1);
+  outline-offset: 2px;
+}
+
+.sg-tool .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.sg-tool .material-symbols-outlined:last-child {
+  transition: transform 0.25s var(--sg-ease);
+}
+
+.is-open > .sg-tool .material-symbols-outlined:last-child {
+  transform: rotate(180deg);
+}
+
+.sg-tool > span:not(:last-child) {
+  transition: none;
+}
+
+/* Liste déroulante restylée (Trier par, Sauter vers) */
+.sg-select {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+}
+
+#wrap .sg-select select {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 46px;
+  margin: 0;
+  padding: 0 42px 0 14px;
+  border: 1px solid var(--sg-border-strong, var(--sg-border));
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-surface);
+  background-image: none;
+  box-shadow: none;
+  color: var(--sg-text);
+  font: inherit;
+  font-size: 0.95rem;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+#wrap .sg-select select:hover {
+  background: var(--sg-surface-2);
+}
+
+#wrap .sg-select select option {
+  background: var(--sg-surface);
+  color: var(--sg-text);
+}
+
+.sg-select > .material-symbols-outlined {
+  position: absolute;
+  right: 12px;
+  color: var(--sg-text-muted);
+  font-size: 20px;
+  pointer-events: none;
+}
+
+/* Fenêtre « Trier » */
+.sg-sort {
+  position: relative;
+}
+
+.sg-sort__panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 20;
+  width: 320px;
+  max-width: calc(100vw - 32px);
+  padding: 18px;
+  border: 1px solid var(--sg-border);
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-surface);
+  box-shadow: var(--sg-shadow);
+}
+
+.sg-sort__panel[hidden] {
+  display: none;
+}
+
+/* AwesomeBB masque le formulaire de tri natif (.sort-form) : le nôtre est toujours affiché dans la fenêtre */
+#wrap form.sg-sort__form {
+  position: static;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+#wrap .sg-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.sg-field__label {
+  padding: 0;
+  color: var(--sg-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sg-field .sg-select {
+  display: flex;
+}
+
+/* Ordre : contrôle segmenté */
+.sg-seg {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--sg-border);
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-surface-2);
+}
+
+.sg-seg__opt {
+  position: relative;
+  margin: 0;
+  cursor: pointer;
+}
+
+.sg-seg__opt input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sg-seg__face {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 38px;
+  border-radius: calc(var(--sg-radius-lg) - 4px);
+  color: var(--sg-text-muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.sg-seg__face .material-symbols-outlined {
+  font-size: 18px;
+}
+
+.sg-seg__face > * {
+  transition: none;
+}
+
+.sg-seg__opt:hover .sg-seg__face {
+  color: var(--sg-text);
+}
+
+.sg-seg__opt input:checked + .sg-seg__face {
+  background: var(--sg-contrast);
+  color: var(--sg-on-contrast);
+}
+
+#wrap button.sg-sort__submit {
+  justify-content: center;
+  width: 100%;
+  border: 0;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* « Sauter vers » */
+#wrap form.sg-jump {
+  display: flex;
+  flex: 0 1 380px;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  margin: 0;
+}
+
+.sg-jump__label {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--sg-text-muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.sg-jump__label .material-symbols-outlined {
+  color: var(--ph);
+  font-size: 20px;
+}
+
+.sg-jump .sg-select {
+  flex: 1;
 }
 
 .sg-topics__grid {
@@ -4462,6 +4715,29 @@ body.sg-topics-on #wrap > .posts {
     left: 0;
     width: auto;
     max-width: none;
+  }
+
+  .sg-topics__tools {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sg-tool {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .sg-sort__panel {
+    right: 0;
+    width: auto;
+    max-width: none;
+  }
+
+  #wrap form.sg-jump {
+    flex: 1 1 auto;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
   }
 
   #wrap .sg-topics__bar a.sg-action {
