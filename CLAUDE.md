@@ -91,7 +91,10 @@ dans le panneau d'administration (PA), puis on commit.
   description, bouton du clan (fiche de l'annexe), dangerosité sur 5 (zones RP uniquement), dernier message avec
   avatar, sous-forums à droite. Gestion : cartes sans image sur motif seigaiha. Catégories sans forum : « Prochainement ».
   Image des cartes sous un voile et une trame de points (comme l'ancien SnJ). Changement de catégorie : défilement doux
-  jusqu'au séparateur. Onglet actif dans l'adresse (`?onglet=hi-no-kuni`) et mémorisé (`localStorage` `snj-onglet`),
+  jusqu'au séparateur **d'abord**, puis affichage des forums de la catégorie (le focus rendu au sélecteur utilise
+  `preventScroll` pour ne pas couper le défilement). Sous les catégories, **séparateur de fin** `.sg-divider--end`
+  (triangle pointé vers le haut, sans logo, même espace de 56px au-dessus et en dessous) à la place de la barre de liens
+  native `.action-bar-bottom` (Sujets actifs du jour, Top 20…, masquée). Onglet actif dans l'adresse (`?onglet=hi-no-kuni`) et mémorisé (`localStorage` `snj-onglet`),
   Gestion par défaut.
   Données d'une carte dans la description du forum (PA), balise invisible `<span class="sg-meta" data-kanji data-image
   data-danger data-clan data-clan-href hidden>` puis le texte. Structure et contenus : `docs/structure-forums.json`
