@@ -299,7 +299,93 @@
       banner.appendChild(home);
     }
     footer();
+    pageHead();
     applyTheme(storedTheme() || currentTheme());
+  }
+
+  /* --------------------------------------------------------------------
+     En-tête de page (pages des forums) : fil d'Ariane, titre avec ses boutons
+     d'action à droite, puis description. Remplace .page-header et la barre
+     « Plus ! / Marquer tous les sujets comme lus » ; le bouton fixe
+     « Poster un nouveau sujet » en bas d'écran est masqué par le CSS.
+     Les liens et boutons d'origine sont déplacés, pas copiés.
+     -------------------------------------------------------------------- */
+  var CATEGORIES = {
+    'Gestion': { slug: 'gestion', tone: 'gestion' },
+    'Hi no Kuni': { slug: 'hi-no-kuni', tone: 'hi' },
+    'Mizu no Kuni': { slug: 'mizu-no-kuni', tone: 'mizu' },
+    'Kaze no Kuni': { slug: 'kaze-no-kuni', tone: 'kaze' },
+    'Kaminari no Kuni': { slug: 'kaminari-no-kuni', tone: 'kaminari' },
+    'Tsuchi no Kuni': { slug: 'tsuchi-no-kuni', tone: 'tsuchi' },
+    'Shōkoku': { slug: 'shokoku', tone: 'autres' },
+    'Reste du Sekai': { slug: 'shokoku', tone: 'autres' }
+  };
+
+  function pageHead() {
+    if (document.querySelector('.sg-pagehead')) return;
+    if (!/^\/f\d+/.test(location.pathname)) return;
+    var native = document.querySelector('#wrap .page-header');
+    var h1 = native && native.querySelector('h1');
+    if (!h1) return;
+
+    var el = function (tag, cls) { var e = document.createElement(tag); if (cls) e.className = cls; return e; };
+    var head = el('section', 'sg-pagehead');
+    head.setAttribute('aria-label', 'En-tête du forum');
+
+    /* Fil d'Ariane : liens d'origine, la catégorie ouvre son onglet sur l'accueil */
+    var crumbs = native.querySelector('#breadcrumbs');
+    var links = crumbs ? Array.prototype.slice.call(crumbs.querySelectorAll('a')) : [];
+    var category = links[1] ? links[1].textContent.trim() : '';
+    var meta = CATEGORIES[category];
+    if (meta) head.classList.add('sg-tone-' + meta.tone);
+    if (links.length) {
+      var nav = el('nav', 'sg-crumbs');
+      nav.setAttribute('aria-label', "Fil d'Ariane");
+      var ol = el('ol', 'sg-crumbs__list');
+      links.forEach(function (a, i) {
+        var li = el('li', 'sg-crumbs__item');
+        a.className = 'sg-crumbs__link';
+        if (i === 1 && meta) a.setAttribute('href', '/?onglet=' + meta.slug);
+        if (i === links.length - 1) a.setAttribute('aria-current', 'page');
+        li.appendChild(a);
+        ol.appendChild(li);
+      });
+      nav.appendChild(ol);
+      head.appendChild(nav);
+    }
+
+    /* Titre et boutons d'action */
+    var row = el('div', 'sg-pagehead__row');
+    var title = el('h1', 'sg-pagehead__title');
+    title.textContent = h1.textContent.trim();
+    row.appendChild(title);
+    var actions = el('div', 'sg-pagehead__actions');
+    Array.prototype.slice.call(native.querySelectorAll(':scope > a.btn')).forEach(function (b) {
+      b.className = 'sg-action';
+      actions.appendChild(b);
+    });
+    if (actions.children.length) row.appendChild(actions);
+    head.appendChild(row);
+
+    /* Description (sans la balise .sg-meta ni le bouton déplier/replier) */
+    var desc = native.querySelector('.page-desc-content');
+    /* Kanji propre au forum (balise .sg-meta de sa description), en filigrane comme sur ses cartes de l'accueil */
+    var kanjiMeta = native.querySelector('.sg-meta[data-kanji]');
+    if (kanjiMeta && kanjiMeta.getAttribute('data-kanji')) {
+      var kanji = el('span', 'sg-pagehead__kanji');
+      kanji.setAttribute('aria-hidden', 'true');
+      kanji.textContent = kanjiMeta.getAttribute('data-kanji');
+      head.insertBefore(kanji, head.firstChild);
+    }
+    if (desc) {
+      var text = el('div', 'sg-pagehead__desc');
+      Array.prototype.slice.call(desc.childNodes).forEach(function (n) { text.appendChild(n); });
+      Array.prototype.slice.call(text.querySelectorAll('.sg-meta')).forEach(function (m) { m.remove(); });
+      if (text.textContent.trim()) head.appendChild(text);
+    }
+
+    native.parentNode.insertBefore(head, native);
+    document.body.classList.add('sg-pagehead-on');
   }
 
   /* --------------------------------------------------------------------

@@ -3461,3 +3461,209 @@ body.sg-footer-on #page-footer > :not(.sg-footer) {
     content: none;
   }
 }
+
+/* --- 55-pagehead.css --- */
+/* ==========================================================================
+   SNJ — En-tête de page (construit par src/js/layout.js, fonction pageHead)
+   Pattern commun à toutes les pages de forum :
+     1. fil d'Ariane (la catégorie ouvre son onglet sur l'accueil) ;
+     2. titre en Zen Antique, filet à la couleur de la catégorie, boutons d'action à droite ;
+     3. description.
+   Kanji propre au forum en filigrane (attribut data-kanji de sa balise .sg-meta).
+   Couleur de la catégorie : --ph (nation, sumi et gofun pour Gestion, Hagane sinon).
+   Remplace .page-header, la barre « Plus ! / Marquer tous les sujets comme lus »
+   et le bouton fixe « Poster un nouveau sujet ».
+   ========================================================================== */
+
+body.sg-pagehead-on #wrap > .page-header,
+body.sg-pagehead-on #wrap > .topic-actions,
+body.sg-pagehead-on a.btn-fixed {
+  display: none !important;
+}
+
+.sg-pagehead {
+  --ph: var(--sg-primary);
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sg-space-4);
+  margin: 0 0 var(--sg-space-8);
+  font-size: 16px; /* AwesomeBB réduit la taille du texte dans #wrap */
+  line-height: 1.6;
+}
+
+.sg-pagehead.sg-tone-gestion { --ph: var(--sg-contrast); }
+.sg-pagehead.sg-tone-hi { --ph: var(--sg-nation-hi); }
+.sg-pagehead.sg-tone-mizu { --ph: var(--sg-nation-mizu); }
+.sg-pagehead.sg-tone-kaze { --ph: var(--sg-nation-kaze); }
+.sg-pagehead.sg-tone-kaminari { --ph: var(--sg-nation-kaminari); }
+.sg-pagehead.sg-tone-tsuchi { --ph: var(--sg-nation-tsuchi); }
+.sg-pagehead.sg-tone-autres { --ph: var(--sg-nation-autres); }
+
+/* --- Fil d'Ariane ------------------------------------------------------------ */
+.sg-crumbs__list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.85rem;
+}
+
+.sg-crumbs__item {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.sg-crumbs__item + .sg-crumbs__item::before {
+  content: "chevron_right";
+  margin: 0 4px;
+  color: var(--sg-text-muted);
+  font-family: "Material Symbols Outlined";
+  font-size: 16px;
+  line-height: 1;
+  opacity: 0.7;
+}
+
+#wrap a.sg-crumbs__link,
+#wrap a.sg-crumbs__link:visited {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--sg-text-muted);
+  text-decoration: none;
+  transition: color 0.25s ease;
+}
+
+#wrap a.sg-crumbs__link:hover,
+#wrap a.sg-crumbs__link:focus-visible {
+  color: var(--sg-text);
+}
+
+#wrap a.sg-crumbs__link[aria-current="page"] {
+  color: var(--sg-text);
+  font-weight: 700;
+}
+
+.sg-crumbs__link .material-symbols-outlined {
+  font-size: 18px;
+}
+
+.sg-crumbs__link > span,
+.sg-crumbs__link .material-symbols-outlined {
+  transition: none; /* voir la note sur les transitions dans CLAUDE.md */
+}
+
+/* --- Titre et actions --------------------------------------------------------- */
+.sg-pagehead__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--sg-space-4) var(--sg-space-6);
+}
+
+.sg-pagehead__title {
+  min-width: 0;
+  margin: 0;
+  color: var(--sg-text);
+  font-family: var(--sg-font-display);
+  font-size: clamp(2.2rem, 4vw, 3.2rem);
+  font-weight: 400;
+  line-height: 1.05;
+}
+
+/* Filet à la couleur de la catégorie */
+.sg-pagehead__title::after {
+  content: "";
+  display: block;
+  width: 56px;
+  height: 3px;
+  margin-top: 14px;
+  border-radius: 2px;
+  background: var(--ph);
+}
+
+.sg-pagehead__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sg-space-2);
+}
+
+#wrap a.sg-action,
+#wrap a.sg-action:visited {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 46px;
+  padding: 0 20px;
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-contrast);
+  color: var(--sg-on-contrast);
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: transform 0.3s var(--sg-ease), box-shadow 0.3s var(--sg-ease);
+}
+
+#wrap a.sg-action:hover,
+#wrap a.sg-action:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: var(--sg-shadow);
+}
+
+.sg-action .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.sg-action > *,
+.sg-action .material-symbols-outlined {
+  transition: none;
+}
+
+/* --- Description --------------------------------------------------------------- */
+.sg-pagehead__desc {
+  max-width: 75ch;
+  color: var(--sg-text-muted);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+/* --- Kanji en filigrane ------------------------------------------------------ */
+.sg-pagehead__kanji {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  z-index: -1;
+  color: var(--ph);
+  font-family: var(--sg-font-display);
+  font-size: clamp(6rem, 12vw, 10rem);
+  line-height: 1;
+  white-space: nowrap;
+  opacity: 0.07;
+  transform: translateY(-50%);
+  pointer-events: none;
+  user-select: none;
+}
+
+@media (max-width: 768px) {
+  .sg-pagehead__row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #wrap a.sg-action {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .sg-pagehead__kanji {
+    top: 0;
+    transform: none;
+  }
+}
