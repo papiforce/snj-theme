@@ -116,6 +116,13 @@ dans le panneau d'administration (PA), puis on commit.
   `--sg-nation-*`, assombris en clair). Le PA impose un modérateur par groupe, compté dans la légende : l'effectif
   affiché retire 1 (`CONFIG.legendIncludesModerator`). Il faut donc un compte du staff dédié comme modérateur des
   groupes, qui n'en est pas membre.
+- **Pied de page** (`layout.js`, fonction `footer`, + `50-footer.css`, toutes les pages) : les statistiques natives du
+  pied de page (doublon du bloc de l'accueil) et la barre native sont masquées. Liens de Forumactif centrés, en
+  `--sg-text-muted` séparés par des points médians (sans séparateur sur mobile), **sans Accueil ni Panneau
+  d'administration** ; les liens d'origine sont déplacés (le lien Cookies garde son action), y compris les liens de
+  crédit que Forumactif fait varier selon la page. Dessous, « Sengoku no Jidai » au trait en Zen Antique sur toute la
+  largeur du contenu (SVG ajusté au texte une fois la police chargée), sumi et gofun, estompé vers le bas, qui se
+  remplit légèrement au survol. Les liens du pied de page doivent viser `#page-footer a…` (AwesomeBB les force en blanc).
 - **Modules JavaScript** : Forumactif les charge dans le `<head>` ; tout script attend `DOMContentLoaded`.
 - **Transitions** : AwesomeBB applique `* { transition: 0.16s }`. Un texte placé dans un enfant d'un élément dont la
   couleur s'anime saute pendant l'animation : mettre `transition: none` sur ces enfants (voir `40-zones.css`).
