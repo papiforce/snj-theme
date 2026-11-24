@@ -231,7 +231,21 @@
     });
   }
 
-  /* Avatar d'un membre, lu dans la liste des membres (même cache que les Derniers sujets) */
+
+  /* Avatar du membre connecté : toujours celui que Forumactif fournit sur la page (_userdata), jamais un cache */
+  function ownAvatar(uid) {
+    try {
+      var u = window._userdata;
+      if (u && u.session_logged_in && String(u.user_id) === String(uid)) {
+        var m = String(u.avatar || '').match(/src="([^"]+)"/);
+        if (m) return m[1];
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  /* Avatar d'un membre, lu dans la liste des membres (même cache que les Derniers sujets).
+     Cache de session de 10 minutes : un avatar modifié finit par apparaître sans fermer l'onglet. */
   function avatar(p, el) {
     var KEY = 'snj-avatars';
     var cache = {};
@@ -241,14 +255,17 @@
       el.replaceChildren(h('img', { src: src, alt: '', loading: 'lazy', referrerpolicy: 'no-referrer' }));
       el.classList.add('has-img');
     };
-    if (cache[p.uid] !== undefined) { paint(cache[p.uid]); return; }
+    var mine = ownAvatar(p.uid);
+    if (mine) { paint(mine); return; }
+    var hit = cache[p.uid];
+    if (hit && typeof hit === 'object' && Date.now() - hit.t < 10 * 60000) { paint(hit.s); return; }
     fetchDoc('/memberlist?username=' + encodeURIComponent(p.name)).then(function (doc) {
       var block = Array.prototype.slice.call(doc.querySelectorAll('.member-block')).filter(function (b) {
         return b.querySelector('a[href="/u' + p.uid + '"]');
       })[0];
       var img = block && block.querySelector('.avatar-default img');
       var src = img ? img.getAttribute('src') : '';
-      cache[p.uid] = src;
+      cache[p.uid] = { s: src, t: Date.now() };
       try { sessionStorage.setItem(KEY, JSON.stringify(cache)); } catch (e) {}
       paint(src);
     }).catch(function () {});

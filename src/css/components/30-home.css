@@ -249,7 +249,8 @@
    Un motif = une famille d'information (jamais sur les cartes illustrées ni les fils) :
    - seigaiha 青海波 (vagues)          → parcours et aide : onboarding, guides, tutoriels
    - kikkō 亀甲 (carapace de tortue)   → univers et références durables : contexte, règlement, chronologie
-   - shippō 七宝 (cercles entrelacés)  → communauté et liens : staff, votes, partenaires, membres */
+   - shippō 七宝 (cercles entrelacés)  → communauté et liens : staff, votes, partenaires, membres
+   - yagasuri 矢絣 (empennes de flèches) → sujets (cartes de sujets, widget Derniers sujets) */
 .sg-pat::before {
   content: "";
   position: absolute;
@@ -289,6 +290,18 @@
   background-color: color-mix(in srgb, var(--sg-primary) 14%, transparent);
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='%23000' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='20'/%3E%3Ccircle cx='40' cy='0' r='20'/%3E%3Ccircle cx='0' cy='40' r='20'/%3E%3Ccircle cx='40' cy='40' r='20'/%3E%3Ccircle cx='20' cy='20' r='20'/%3E%3C/g%3E%3C/svg%3E") repeat;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='%23000' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='20'/%3E%3Ccircle cx='40' cy='0' r='20'/%3E%3Ccircle cx='0' cy='40' r='20'/%3E%3Ccircle cx='40' cy='40' r='20'/%3E%3Ccircle cx='20' cy='20' r='20'/%3E%3C/g%3E%3C/svg%3E") repeat;
+}
+
+/* Yagasuri (empennes de flèches) : sujets. Même motif que les cartes de sujets (57-topics.css),
+   net à droite et estompé vers la gauche */
+.sg-pat--yagasuri::before {
+  background-color: color-mix(in srgb, var(--sg-primary) 26%, transparent);
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='32' viewBox='0 0 24 32'%3E%3Cpath d='M0 0V32M12 0V32M0 2L6 8L12 2M0 10L6 16L12 10M0 18L6 24L12 18M0 26L6 32L12 26M12 6L18 0L24 6M12 14L18 8L24 14M12 22L18 16L24 22M12 30L18 24L24 30' fill='none' stroke='%23000' stroke-width='1'/%3E%3C/svg%3E"), linear-gradient(to left, #000 0%, rgba(0, 0, 0, 0.55) 45%, transparent 90%);
+  -webkit-mask-repeat: repeat, no-repeat;
+  -webkit-mask-composite: source-in;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='32' viewBox='0 0 24 32'%3E%3Cpath d='M0 0V32M12 0V32M0 2L6 8L12 2M0 10L6 16L12 10M0 18L6 24L12 18M0 26L6 32L12 26M12 6L18 0L24 6M12 14L18 8L24 14M12 22L18 16L24 22M12 30L18 24L24 30' fill='none' stroke='%23000' stroke-width='1'/%3E%3C/svg%3E"), linear-gradient(to left, #000 0%, rgba(0, 0, 0, 0.55) 45%, transparent 90%);
+  mask-repeat: repeat, no-repeat;
+  mask-composite: intersect;
 }
 
 /* --- Onboarding (bandeau à vagues) ------------------------------------------ */
@@ -929,21 +942,52 @@
   line-height: 1.6;
 }
 
-/* Derniers sujets */
-.sg-topics {
-  display: flex;
-  flex-direction: column;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+/* Derniers sujets : liste qui défile dans la carte. Classes .sg-ltopic propres au widget
+   (.sg-topic est réservé aux cartes de sujets des pages de forum, 57-topics.css). */
+.sg-c-latest .sg-latest {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 0;
 }
 
-.sg-topics li + li {
+.sg-ltopics {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  margin: 0 -8px 0 0;
+  padding: 0 8px 0 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--sg-border-strong, var(--sg-border)) transparent;
+  /* Fondu en bas tant qu'il reste des sujets plus bas */
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 36px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 36px), transparent);
+}
+
+.sg-ltopics.is-end {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+.sg-ltopics:focus-visible {
+  outline: 2px solid var(--sg-accent-1);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.sg-ltopics > li {
+  margin: 0;
+}
+
+.sg-ltopics > li + li {
   border-top: 1px solid var(--sg-border);
 }
 
-.sg-topic,
-.sg-topic:visited {
+.sg-ltopic,
+.sg-ltopic:visited {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -953,7 +997,7 @@
 }
 
 /* Deux lignes, chacune coupée par une ellipse ; avatar tout à droite */
-.sg-topic__text {
+.sg-ltopic__text {
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -961,7 +1005,7 @@
   min-width: 0;
 }
 
-.sg-topic__avatar {
+.sg-ltopic__avatar {
   display: grid;
   flex: none;
   place-items: center;
@@ -973,17 +1017,17 @@
   color: var(--sg-text-muted);
 }
 
-.sg-topic__avatar .material-symbols-outlined {
+.sg-ltopic__avatar .material-symbols-outlined {
   font-size: 20px;
 }
 
-.sg-topic__avatar img {
+.sg-ltopic__avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.sg-topic__title {
+.sg-ltopic__title {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -992,11 +1036,12 @@
   transition: color 0.2s ease;
 }
 
-.sg-topic:hover .sg-topic__title {
+.sg-ltopic:hover .sg-ltopic__title,
+.sg-ltopic:focus-visible .sg-ltopic__title {
   color: var(--sg-primary);
 }
 
-.sg-topic__meta {
+.sg-ltopic__meta {
   overflow: hidden;
   color: var(--sg-text-muted);
   font-size: 0.78rem;

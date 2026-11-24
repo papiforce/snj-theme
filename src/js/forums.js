@@ -186,11 +186,47 @@
         return h('li', null, [h('a', { href: s.href }, [h('span', { text: s.name }), icon('arrow_forward')])]);
       })) : null;
 
-      return h('article', { class: 'sg-zcard' + (plain ? ' sg-zcard--plain sg-pat sg-pat--seigaiha' : '') + (aside ? '' : ' sg-zcard--nosubs') }, [
-        plain ? null : h('span', { class: 'sg-zcard__img', style: 'background-image:' + cssUrl(f.image), 'aria-hidden': 'true' }),
+      if (plain) return plainCard(f, panel, aside);
+
+      return h('article', { class: 'sg-zcard' + (aside ? '' : ' sg-zcard--nosubs') }, [
+        h('span', { class: 'sg-zcard__img', style: 'background-image:' + cssUrl(f.image), 'aria-hidden': 'true' }),
         h('div', { class: 'sg-zcard__main' }, [panel, lastPost(f)]),
         aside
       ]);
+    }
+
+    /* Carte sans image (Gestion) : titre, puis description et dernier message alignés sur une même ligne,
+       puis les sous-forums sur toute la largeur, en grille de 2 colonnes, 2 par page, pagination par points */
+    var PER_PAGE = 2;
+    function plainCard(f, panel, aside) {
+      var desc = panel.querySelector('.sg-zcard__desc');
+      var row = h('div', { class: 'sg-zcard__row' }, [desc || h('span', { class: 'sg-zcard__desc-spacer' }), lastPost(f)]);
+      panel.appendChild(row);
+      var parts = [h('div', { class: 'sg-zcard__main' }, [panel])];
+      if (aside) {
+        var items = Array.prototype.slice.call(aside.children);
+        var pages = Math.ceil(items.length / PER_PAGE);
+        var dots = [];
+        var show = function (n) {
+          items.forEach(function (li, i) { li.hidden = Math.floor(i / PER_PAGE) !== n; });
+          dots.forEach(function (d, i) { d.setAttribute('aria-current', i === n ? 'true' : 'false'); });
+        };
+        parts.push(aside);
+        if (pages > 1) {
+          var nav = h('div', { class: 'sg-zcard__pager', role: 'group', 'aria-label': 'Pages des sous-forums de ' + f.name });
+          for (var p = 0; p < pages; p++) {
+            (function (n) {
+              var d = h('button', { type: 'button', class: 'sg-carousel__dot', 'aria-label': 'Page ' + (n + 1) + ' sur ' + pages });
+              d.addEventListener('click', function () { show(n); });
+              dots.push(d);
+              nav.appendChild(d);
+            })(p);
+          }
+          parts.push(nav);
+        }
+        show(0);
+      }
+      return h('article', { class: 'sg-zcard sg-zcard--plain sg-pat sg-pat--seigaiha' + (aside ? '' : ' sg-zcard--nosubs') }, parts);
     }
 
     function panelFor(zone) {
@@ -209,7 +245,7 @@
     }
 
     function zoneStyle(zone) {
-      return '--zc:' + zone.color + ';' + (zone.on ? '--zc-on:' + zone.on + ';--zc-sign:' + zone.on + ';' : '');
+      return '--zc:' + zone.color + ';' + (zone.on ? '--zc-on:' + zone.on + ';--zc-sign:' + zone.on + ';--zc-hover:' + zone.on + ';' : '');
     }
 
     function sign(zone) {

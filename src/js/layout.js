@@ -828,7 +828,15 @@
         chev.setAttribute('aria-hidden', 'true');
         wrapF.appendChild(chev);
         box.appendChild(wrapF);
-        wrapF.addEventListener('mousedown', function (ev) { if (ev.target !== field) { ev.preventDefault(); field.focus(); toggle(); } });
+        /* Toute la surface du champ ouvre la liste (icône, chevron, marges comprises).
+           Le focus ouvre déjà la liste : on ne bascule donc que si elle était ouverte avant le clic. */
+        wrapF.addEventListener('mousedown', function (ev) {
+          if (ev.target === field) return;
+          ev.preventDefault();
+          var wasOpen = !list.hidden;
+          if (document.activeElement !== field) field.focus();
+          if (wasOpen) close(); else open();
+        });
       } else {
         field = el('button', 'sg-combo__control');
         field.type = 'button';
@@ -1049,7 +1057,7 @@
       panel.appendChild(sortForm);
       sortWrap.appendChild(sortBtn);
       sortWrap.appendChild(panel);
-      popover(sortWrap, sortBtn, panel, function () { sortCombo.field.focus(); });
+      popover(sortWrap, sortBtn, panel);
       tools.appendChild(sortWrap);
     }
 

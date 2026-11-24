@@ -243,15 +243,26 @@ body.sg-topics-on .sg-topics {
   cursor: pointer;
 }
 
+#wrap .sg-combo--search .sg-combo__control {
+  cursor: text;
+}
+
 #wrap .sg-combo__control:hover,
 #wrap .sg-combo.is-open .sg-combo__control {
   background: var(--sg-surface-2);
 }
 
-#wrap button.sg-combo__control:focus-visible,
-#wrap .sg-combo__control:focus-within {
+/* Pas d'anneau au clic ; au clavier, l'anneau reste sur le bouton (« Trier par ») */
+#wrap button.sg-combo__control:focus-visible {
   outline: 2px solid var(--sg-accent-1);
   outline-offset: 2px;
+}
+
+#wrap .sg-combo__control:focus-within,
+#wrap input.sg-combo__input:focus,
+#wrap input.sg-combo__input:focus-visible {
+  outline: none;
+  box-shadow: none;
 }
 
 .sg-combo__control > .material-symbols-outlined {
@@ -785,11 +796,9 @@ body.sg-topics-on .sg-topics {
   border-top: 1px dashed var(--sg-border);
 }
 
-.sg-topic__title + .sg-topic__foot,
-.sg-topic__desc + .sg-topic__foot,
-.sg-topic__by + .sg-topic__foot,
-.sg-topic__pages + .sg-topic__foot {
-  margin-top: 10px;
+/* Le pied reste toujours au bas de la carte (margin-top: auto) ; l'élément qui le précède garde un espace minimal */
+.sg-topic > :nth-last-child(2) {
+  margin-bottom: 10px;
 }
 
 .sg-topic__stats {

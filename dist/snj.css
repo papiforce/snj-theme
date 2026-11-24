@@ -943,7 +943,8 @@ html::after {
    Un motif = une famille d'information (jamais sur les cartes illustrées ni les fils) :
    - seigaiha 青海波 (vagues)          → parcours et aide : onboarding, guides, tutoriels
    - kikkō 亀甲 (carapace de tortue)   → univers et références durables : contexte, règlement, chronologie
-   - shippō 七宝 (cercles entrelacés)  → communauté et liens : staff, votes, partenaires, membres */
+   - shippō 七宝 (cercles entrelacés)  → communauté et liens : staff, votes, partenaires, membres
+   - yagasuri 矢絣 (empennes de flèches) → sujets (cartes de sujets, widget Derniers sujets) */
 .sg-pat::before {
   content: "";
   position: absolute;
@@ -983,6 +984,18 @@ html::after {
   background-color: color-mix(in srgb, var(--sg-primary) 14%, transparent);
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='%23000' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='20'/%3E%3Ccircle cx='40' cy='0' r='20'/%3E%3Ccircle cx='0' cy='40' r='20'/%3E%3Ccircle cx='40' cy='40' r='20'/%3E%3Ccircle cx='20' cy='20' r='20'/%3E%3C/g%3E%3C/svg%3E") repeat;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='%23000' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='20'/%3E%3Ccircle cx='40' cy='0' r='20'/%3E%3Ccircle cx='0' cy='40' r='20'/%3E%3Ccircle cx='40' cy='40' r='20'/%3E%3Ccircle cx='20' cy='20' r='20'/%3E%3C/g%3E%3C/svg%3E") repeat;
+}
+
+/* Yagasuri (empennes de flèches) : sujets. Même motif que les cartes de sujets (57-topics.css),
+   net à droite et estompé vers la gauche */
+.sg-pat--yagasuri::before {
+  background-color: color-mix(in srgb, var(--sg-primary) 26%, transparent);
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='32' viewBox='0 0 24 32'%3E%3Cpath d='M0 0V32M12 0V32M0 2L6 8L12 2M0 10L6 16L12 10M0 18L6 24L12 18M0 26L6 32L12 26M12 6L18 0L24 6M12 14L18 8L24 14M12 22L18 16L24 22M12 30L18 24L24 30' fill='none' stroke='%23000' stroke-width='1'/%3E%3C/svg%3E"), linear-gradient(to left, #000 0%, rgba(0, 0, 0, 0.55) 45%, transparent 90%);
+  -webkit-mask-repeat: repeat, no-repeat;
+  -webkit-mask-composite: source-in;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='32' viewBox='0 0 24 32'%3E%3Cpath d='M0 0V32M12 0V32M0 2L6 8L12 2M0 10L6 16L12 10M0 18L6 24L12 18M0 26L6 32L12 26M12 6L18 0L24 6M12 14L18 8L24 14M12 22L18 16L24 22M12 30L18 24L24 30' fill='none' stroke='%23000' stroke-width='1'/%3E%3C/svg%3E"), linear-gradient(to left, #000 0%, rgba(0, 0, 0, 0.55) 45%, transparent 90%);
+  mask-repeat: repeat, no-repeat;
+  mask-composite: intersect;
 }
 
 /* --- Onboarding (bandeau à vagues) ------------------------------------------ */
@@ -1623,21 +1636,52 @@ html::after {
   line-height: 1.6;
 }
 
-/* Derniers sujets */
-.sg-topics {
-  display: flex;
-  flex-direction: column;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+/* Derniers sujets : liste qui défile dans la carte. Classes .sg-ltopic propres au widget
+   (.sg-topic est réservé aux cartes de sujets des pages de forum, 57-topics.css). */
+.sg-c-latest .sg-latest {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 0;
 }
 
-.sg-topics li + li {
+.sg-ltopics {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  margin: 0 -8px 0 0;
+  padding: 0 8px 0 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--sg-border-strong, var(--sg-border)) transparent;
+  /* Fondu en bas tant qu'il reste des sujets plus bas */
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 36px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 36px), transparent);
+}
+
+.sg-ltopics.is-end {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+.sg-ltopics:focus-visible {
+  outline: 2px solid var(--sg-accent-1);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.sg-ltopics > li {
+  margin: 0;
+}
+
+.sg-ltopics > li + li {
   border-top: 1px solid var(--sg-border);
 }
 
-.sg-topic,
-.sg-topic:visited {
+.sg-ltopic,
+.sg-ltopic:visited {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -1647,7 +1691,7 @@ html::after {
 }
 
 /* Deux lignes, chacune coupée par une ellipse ; avatar tout à droite */
-.sg-topic__text {
+.sg-ltopic__text {
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -1655,7 +1699,7 @@ html::after {
   min-width: 0;
 }
 
-.sg-topic__avatar {
+.sg-ltopic__avatar {
   display: grid;
   flex: none;
   place-items: center;
@@ -1667,17 +1711,17 @@ html::after {
   color: var(--sg-text-muted);
 }
 
-.sg-topic__avatar .material-symbols-outlined {
+.sg-ltopic__avatar .material-symbols-outlined {
   font-size: 20px;
 }
 
-.sg-topic__avatar img {
+.sg-ltopic__avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.sg-topic__title {
+.sg-ltopic__title {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -1686,11 +1730,12 @@ html::after {
   transition: color 0.2s ease;
 }
 
-.sg-topic:hover .sg-topic__title {
+.sg-ltopic:hover .sg-ltopic__title,
+.sg-ltopic:focus-visible .sg-ltopic__title {
   color: var(--sg-primary);
 }
 
-.sg-topic__meta {
+.sg-ltopic__meta {
   overflow: hidden;
   color: var(--sg-text-muted);
   font-size: 0.78rem;
@@ -2715,10 +2760,15 @@ a.sg-zcard__last:hover .sg-zcard__last-title {
   transition: transform 0.3s var(--sg-ease);
 }
 
+/* Au survol, le texte passe en blanc papier (sumi et gofun pour Gestion : --zc-hover posé par forums.js) */
 .sg-zcard__subs a:hover,
 .sg-zcard__subs a:focus-visible {
   background-size: 100% 100%, auto;
-  color: var(--zc-on);
+  color: var(--zc-hover, var(--sg-paper-50));
+}
+
+.sg-zcard__subs li[hidden] {
+  display: none;
 }
 
 .sg-zcard__subs a:hover .material-symbols-outlined {
@@ -2748,10 +2798,39 @@ a.sg-zcard__last:hover .sg-zcard__last-title {
   left: 0;
 }
 
+/* Description et dernier message sur une même ligne, centrés l'un sur l'autre */
+.sg-zcard__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.sg-zcard__row .sg-zcard__desc,
+.sg-zcard__desc-spacer {
+  flex: 1;
+  min-width: 0;
+}
+
 .sg-zcard--plain .sg-zcard__last {
-  align-self: flex-end;
+  flex: none;
   width: min(100%, 320px);
   background: var(--sg-surface-2);
+}
+
+/* Sous-forums sur toute la largeur : grille de 2 colonnes, 2 par page */
+.sg-zcard--plain .sg-zcard__subs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-self: stretch;
+}
+
+/* Pagination par points, centrée (mêmes points que les carrousels, 30-home.css) */
+.sg-zcard__pager {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: -4px;
 }
 
 /* Catégorie pas encore ouverte */
@@ -2793,6 +2872,12 @@ a.sg-zcard__last:hover .sg-zcard__last-title {
   color: var(--sg-text-muted);
 }
 
+@media (max-width: 600px) {
+  .sg-zcard--plain .sg-zcard__subs {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .sg-zone-tab__label,
   .sg-zcard__subs a,
@@ -2832,6 +2917,16 @@ a.sg-zcard__last:hover .sg-zcard__last-title {
 
   .sg-zcard--plain.sg-zcard--nosubs .sg-zcard__main {
     flex-direction: column;
+  }
+
+  .sg-zcard__row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .sg-zcard--plain .sg-zcard__last {
+    width: 100%;
   }
 
   .sg-zcard__panel {
@@ -4253,15 +4348,26 @@ body.sg-topics-on .sg-topics {
   cursor: pointer;
 }
 
+#wrap .sg-combo--search .sg-combo__control {
+  cursor: text;
+}
+
 #wrap .sg-combo__control:hover,
 #wrap .sg-combo.is-open .sg-combo__control {
   background: var(--sg-surface-2);
 }
 
-#wrap button.sg-combo__control:focus-visible,
-#wrap .sg-combo__control:focus-within {
+/* Pas d'anneau au clic ; au clavier, l'anneau reste sur le bouton (« Trier par ») */
+#wrap button.sg-combo__control:focus-visible {
   outline: 2px solid var(--sg-accent-1);
   outline-offset: 2px;
+}
+
+#wrap .sg-combo__control:focus-within,
+#wrap input.sg-combo__input:focus,
+#wrap input.sg-combo__input:focus-visible {
+  outline: none;
+  box-shadow: none;
 }
 
 .sg-combo__control > .material-symbols-outlined {
@@ -4795,11 +4901,9 @@ body.sg-topics-on .sg-topics {
   border-top: 1px dashed var(--sg-border);
 }
 
-.sg-topic__title + .sg-topic__foot,
-.sg-topic__desc + .sg-topic__foot,
-.sg-topic__by + .sg-topic__foot,
-.sg-topic__pages + .sg-topic__foot {
-  margin-top: 10px;
+/* Le pied reste toujours au bas de la carte (margin-top: auto) ; l'élément qui le précède garde un espace minimal */
+.sg-topic > :nth-last-child(2) {
+  margin-bottom: 10px;
 }
 
 .sg-topic__stats {

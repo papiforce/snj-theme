@@ -102,7 +102,6 @@
 
     latestCount: 15,
     latestHidden: /corbeille/i, /* forums dont les sujets ne s'affichent pas (sujets supprimés) */
-    latestPerSlide: 3
   };
 
   var DISCORD_PATH = 'M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z';
@@ -434,13 +433,27 @@
 
   /* Avatars des derniers participants : lus dans la liste des membres (une requête
      par membre), gardés en mémoire pour la session */
+
+  /* Avatar du membre connecté : toujours celui que Forumactif fournit sur la page (_userdata), jamais un cache */
+  function ownAvatar(uid) {
+    try {
+      var u = window._userdata;
+      if (u && u.session_logged_in && String(u.user_id) === String(uid)) {
+        var m = String(u.avatar || '').match(/src="([^"]+)"/);
+        if (m) return m[1];
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  /* Avatars des derniers participants (cache de session de 10 minutes, partagé avec stats.js) */
   function loadAvatars(topics, scope) {
     var KEY = 'snj-avatars';
     var cache = {};
     try { cache = JSON.parse(sessionStorage.getItem(KEY) || '{}'); } catch (e) {}
     var paint = function (uid, src) {
       if (!src) return;
-      scope.querySelectorAll('.sg-topic__avatar[data-uid="' + uid + '"]').forEach(function (el) {
+      scope.querySelectorAll('.sg-ltopic__avatar[data-uid="' + uid + '"]').forEach(function (el) {
         el.replaceChildren(h('img', { src: src, alt: '', loading: 'lazy', referrerpolicy: 'no-referrer' }));
         el.classList.add('has-img');
       });
@@ -449,7 +462,10 @@
     topics.forEach(function (t) {
       if (!t.uid || seen[t.uid]) return;
       seen[t.uid] = true;
-      if (cache[t.uid] !== undefined) { paint(t.uid, cache[t.uid]); return; }
+      var mine = ownAvatar(t.uid);
+      if (mine) { paint(t.uid, mine); return; }
+      var hit = cache[t.uid];
+      if (hit && typeof hit === 'object' && Date.now() - hit.t < 10 * 60000) { paint(t.uid, hit.s); return; }
       fetch('/memberlist?username=' + encodeURIComponent(t.author), { credentials: 'same-origin' })
         .then(function (r) { return r.ok ? r.text() : ''; })
         .then(function (html) {
@@ -458,7 +474,7 @@
           var block = blocks.filter(function (b) { return b.querySelector('a[href="/u' + t.uid + '"]'); })[0];
           var img = block && block.querySelector('.avatar-default img');
           var src = img ? img.getAttribute('src') : '';
-          cache[t.uid] = src;
+          cache[t.uid] = { s: src, t: Date.now() };
           try { sessionStorage.setItem(KEY, JSON.stringify(cache)); } catch (e) {}
           paint(t.uid, src);
         })
@@ -468,7 +484,7 @@
 
   function latest() {
     var body = h('div', { class: 'sg-latest' }, [h('p', { class: 'sg-muted', text: 'Chargement des derniers sujets…' })]);
-    var card = h('article', { class: 'sg-card sg-c-latest sg-feed' }, [title('Derniers sujets', 's'), body]);
+    var card = h('article', { class: 'sg-card sg-c-latest sg-feed sg-pat sg-pat--yagasuri' }, [title('Derniers sujets', 's'), body]);
 
     fetch('/latest', { credentials: 'same-origin' })
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
@@ -497,23 +513,27 @@
             date: m ? m[1].trim() : ''
           };
         });
-        var slides = [];
-        for (var i = 0; i < topics.length; i += DATA.latestPerSlide) {
-          slides.push(h('ul', { class: 'sg-topics' }, topics.slice(i, i + DATA.latestPerSlide).map(function (t) {
-            var av = h('span', { class: 'sg-topic__avatar', 'data-uid': t.uid, 'aria-hidden': 'true' }, [icon('person')]);
-            return h('li', null, [
-              link(t.href, { class: 'sg-topic' }, [
-                h('span', { class: 'sg-topic__text' }, [
-                  h('span', { class: 'sg-topic__title', text: t.title }),
-                  h('span', { class: 'sg-topic__meta', text: [t.author, t.date].filter(Boolean).join(' · ') })
-                ]),
-                av
-              ])
-            ]);
-          })));
-        }
+        /* Liste qui défile dans la carte (plus de carrousel). Classes propres au widget (.sg-ltopic) :
+           .sg-topic est réservé aux cartes de sujets des pages de forum. */
+        var list = h('ul', { class: 'sg-ltopics', tabindex: '0', 'aria-label': 'Derniers sujets' }, topics.map(function (t) {
+          var av = h('span', { class: 'sg-ltopic__avatar', 'data-uid': t.uid, 'aria-hidden': 'true' }, [icon('person')]);
+          return h('li', null, [
+            link(t.href, { class: 'sg-ltopic' }, [
+              h('span', { class: 'sg-ltopic__text' }, [
+                h('span', { class: 'sg-ltopic__title', text: t.title }),
+                h('span', { class: 'sg-ltopic__meta', text: [t.author, t.date].filter(Boolean).join(' · ') })
+              ]),
+              av
+            ])
+          ]);
+        }));
+        body.replaceChildren(list);
+        /* Après l'insertion : les avatars en cache sont peints tout de suite et doivent trouver leurs éléments */
         loadAvatars(topics, body);
-        body.replaceChildren(carousel('Derniers sujets', slides));
+        /* Fondu en bas tant qu'il reste des sujets à faire défiler */
+        var edge = function () { list.classList.toggle('is-end', list.scrollTop + list.clientHeight >= list.scrollHeight - 4); };
+        list.addEventListener('scroll', edge, { passive: true });
+        edge();
       })
       .catch(function () {
         body.replaceChildren(h('p', { class: 'sg-muted' }, ['Les derniers sujets n’ont pas pu être chargés. ', link('/latest', null, ['Voir les derniers sujets'])]));

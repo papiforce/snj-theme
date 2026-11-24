@@ -531,10 +531,15 @@ a.sg-zcard__last:hover .sg-zcard__last-title {
   transition: transform 0.3s var(--sg-ease);
 }
 
+/* Au survol, le texte passe en blanc papier (sumi et gofun pour Gestion : --zc-hover posé par forums.js) */
 .sg-zcard__subs a:hover,
 .sg-zcard__subs a:focus-visible {
   background-size: 100% 100%, auto;
-  color: var(--zc-on);
+  color: var(--zc-hover, var(--sg-paper-50));
+}
+
+.sg-zcard__subs li[hidden] {
+  display: none;
 }
 
 .sg-zcard__subs a:hover .material-symbols-outlined {
@@ -564,10 +569,39 @@ a.sg-zcard__last:hover .sg-zcard__last-title {
   left: 0;
 }
 
+/* Description et dernier message sur une même ligne, centrés l'un sur l'autre */
+.sg-zcard__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.sg-zcard__row .sg-zcard__desc,
+.sg-zcard__desc-spacer {
+  flex: 1;
+  min-width: 0;
+}
+
 .sg-zcard--plain .sg-zcard__last {
-  align-self: flex-end;
+  flex: none;
   width: min(100%, 320px);
   background: var(--sg-surface-2);
+}
+
+/* Sous-forums sur toute la largeur : grille de 2 colonnes, 2 par page */
+.sg-zcard--plain .sg-zcard__subs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-self: stretch;
+}
+
+/* Pagination par points, centrée (mêmes points que les carrousels, 30-home.css) */
+.sg-zcard__pager {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: -4px;
 }
 
 /* Catégorie pas encore ouverte */
@@ -609,6 +643,12 @@ a.sg-zcard__last:hover .sg-zcard__last-title {
   color: var(--sg-text-muted);
 }
 
+@media (max-width: 600px) {
+  .sg-zcard--plain .sg-zcard__subs {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .sg-zone-tab__label,
   .sg-zcard__subs a,
@@ -648,6 +688,16 @@ a.sg-zcard__last:hover .sg-zcard__last-title {
 
   .sg-zcard--plain.sg-zcard--nosubs .sg-zcard__main {
     flex-direction: column;
+  }
+
+  .sg-zcard__row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .sg-zcard--plain .sg-zcard__last {
+    width: 100%;
   }
 
   .sg-zcard__panel {
