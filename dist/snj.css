@@ -6687,6 +6687,7 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
 }
 
 #wrap .sg-writeform #postingbox > .block-content {
+  box-shadow: none; /* ombre d'AwesomeBB : dessinait un léger contour autour de la lettre */
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -6897,9 +6898,15 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
   color: var(--sg-text);
 }
 
-.sg-writeform a.sceditor-button.sg-tb:hover {
+.sg-writeform a.sceditor-button.sg-tb:hover,
+.sg-writeform a.sceditor-button.sg-tb.sg-tb--open {
   background-color: var(--sg-contrast) !important;
   color: var(--sg-on-contrast);
+}
+
+/* Les fenêtres des outils débordent de l'éditeur : Forumactif coupait tout ce qui sortait de #textarea_content */
+.sg-writeform #textarea_content {
+  overflow: visible !important;
 }
 
 /* Infobulle du libellé (toolbarTips) : sumi et gofun, au-dessus du bouton */
@@ -7061,61 +7068,56 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
   background: var(--sg-surface-2) !important;
 }
 
-/* Couleur : les couleurs du design system, pastille et nom */
+/* Couleur : deux groupes de pastilles sans nom (nom en infobulle), 8 par ligne : Sengoku no Jidai (design
+   system) puis Défaut (couleurs de base de Forumactif) */
 .sceditor-dropdown.sg-pop.sceditor-color-picker {
-  width: 260px;
+  width: auto;
   min-width: 0;
-  padding: 6px !important;
+  padding: 14px 16px 16px !important;
 }
 
-.sg-cpick {
+.sceditor-dropdown.sg-pop .sg-cpick {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  max-height: min(420px, 60vh);
-  overflow-y: auto;
+  gap: 8px;
 }
 
-.sg-cpick__opt {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  min-height: 38px;
-  padding: 0 12px;
+#wrap .sg-cpick__title,
+.sg-cpick__title {
+  margin: 0;
+  color: var(--sg-text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.sg-cpick__grid + .sg-cpick__title {
+  margin-top: 8px;
+}
+
+.sg-cpick__grid {
+  display: grid;
+  grid-template-columns: repeat(8, 28px);
+  gap: 8px;
+}
+
+.sg-cpick__sw {
+  width: 28px;
+  height: 28px;
+  padding: 0;
   border: 0;
-  border-radius: 10px;
-  background: none;
-  color: var(--sg-text);
-  font: inherit;
-  font-size: 0.92rem;
-  text-align: left;
-  cursor: pointer;
-}
-
-.sg-cpick__opt:hover,
-.sg-cpick__opt:focus-visible {
-  background: var(--sg-surface-2);
-}
-
-.sg-cpick__opt > * {
-  transition: none;
-}
-
-.sg-cpick__swatch {
-  flex: none;
-  width: 16px;
-  height: 16px;
   border-radius: 50%;
-  box-shadow: inset 0 0 0 1px rgba(var(--sg-contrast-rgb), 0.2);
+  box-shadow: inset 0 0 0 1px rgba(var(--sg-contrast-rgb), 0.18);
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
 }
 
-.sg-writeform a.sceditor-button.sg-tb.active .material-symbols-outlined {
-  font-variation-settings: "FILL" 1;
-}
-
-.sg-writeform a.sceditor-button.disabled {
-  opacity: 0.4;
+.sg-cpick__sw:hover,
+.sg-cpick__sw:focus-visible {
+  box-shadow: 0 0 0 2px var(--sg-surface), 0 0 0 4px var(--sg-contrast);
+  outline: none;
+  transform: scale(1.08);
 }
 
 /* --- 3. Réglages et boutons, au pied de la lettre -------------------------------------------------- */
@@ -7483,7 +7485,7 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
   width: 100%;
   min-height: 56px;
   padding: 0 18px;
-  border: 1px dashed var(--sg-border-strong, var(--sg-border));
+  border: 0;
   border-radius: var(--sg-radius-lg);
   background: var(--sg-surface);
   color: var(--sg-text);
@@ -7492,9 +7494,23 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
   cursor: pointer;
 }
 
+/* Survol : la barre passe sur la teinte de second plan, « Afficher » s'affirme et le chevron fait un pas
+   dans le sens de l'ouverture */
+.sg-review__toggle {
+  transition: background-color 0.2s;
+}
+
 .sg-review__toggle:hover,
-.sg-review.is-open .sg-review__toggle {
-  border-style: solid;
+.sg-review__toggle:focus-visible {
+  background: var(--sg-surface-2);
+}
+
+.sg-review__toggle:hover .sg-review__chev {
+  transform: translateY(2px);
+}
+
+.sg-review.is-open .sg-review__toggle:hover .sg-review__chev {
+  transform: rotate(180deg) translateY(2px);
 }
 
 .sg-review__toggle > * {

@@ -1790,32 +1790,67 @@
     var $ = window.jQuery;
     var ta = document.getElementById('text_editor_textarea');
     var inst = $ && ta && $(ta).sceditor && $(ta).sceditor('instance');
+    /* Bouton qui a ouvert la fenêtre : il garde l'état de survol tant qu'elle est ouverte */
+    var opener = null;
+    var bar = scope.querySelector('.sceditor-toolbar');
+    if (bar) bar.addEventListener('mousedown', function (e) {
+      var a = e.target.closest && e.target.closest('a.sceditor-button');
+      if (a) opener = a;
+    }, true);
+    var clearOpen = function () {
+      Array.prototype.slice.call(scope.querySelectorAll('.sg-tb--open')).forEach(function (a) { a.classList.remove('sg-tb--open'); });
+    };
+    /* La fenêtre reste dans la page : sous son bouton (Servimg, posée sur la page, recouvrait la barre d'outils)
+       et décalée vers la gauche si elle déborde à droite */
+    var place = function (d) {
+      var btn = opener && opener.getBoundingClientRect();
+      if (d.parentNode === document.body && btn) {
+        d.style.top = (btn.bottom + window.scrollY + 8) + 'px';
+        d.style.left = (btn.left + window.scrollX) + 'px';
+      }
+      var r = d.getBoundingClientRect();
+      var maxRight = Math.min(window.innerWidth - 8, (scope.getBoundingClientRect().right || window.innerWidth));
+      var over = r.right - maxRight;
+      if (over > 0) d.style.left = (parseFloat(getComputedStyle(d).left) - over) + 'px';
+    };
     var handle = function (d) {
       if (!d.classList || !d.classList.contains('sceditor-dropdown') || d.classList.contains('sg-pop')) return;
       d.classList.add('sg-pop');
+      clearOpen();
+      if (opener) opener.classList.add('sg-tb--open');
       if (d.classList.contains('sceditor-color-picker') && inst) {
+        /* Couleurs de base de Forumactif, lues dans la fenêtre native avant de la vider */
+        var natives = Array.prototype.slice.call(d.querySelectorAll('font[color]')).map(function (f) {
+          return [f.getAttribute('color'), f.textContent.trim(), f.getAttribute('color')];
+        });
         var host = d.firstElementChild || d;
         host.textContent = '';
         var list = uiEl('div', 'sg-cpick');
-        list.setAttribute('role', 'listbox');
-        list.setAttribute('aria-label', 'Couleur du texte');
-        TEXT_COLORS.forEach(function (c) {
-          var b = uiEl('button', 'sg-cpick__opt');
-          b.type = 'button';
-          b.setAttribute('role', 'option');
-          var sw = uiEl('span', 'sg-cpick__swatch');
-          sw.style.background = c[2];
-          b.appendChild(sw);
-          b.appendChild(uiEl('span', null, c[1]));
-          b.addEventListener('mousedown', function (e) { e.preventDefault(); });
-          b.addEventListener('click', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            inst.insertText('[color=' + c[0] + ']', '[/color]');
-            if (inst.closeDropDown) inst.closeDropDown(true);
+        var group = function (title, colors) {
+          if (!colors.length) return;
+          list.appendChild(uiEl('p', 'sg-cpick__title', title));
+          var grid = uiEl('div', 'sg-cpick__grid');
+          grid.setAttribute('role', 'group');
+          grid.setAttribute('aria-label', title);
+          colors.forEach(function (c) {
+            var b = uiEl('button', 'sg-cpick__sw');
+            b.type = 'button';
+            b.style.background = c[2];
+            b.setAttribute('title', c[1]);
+            b.setAttribute('aria-label', c[1]);
+            b.addEventListener('mousedown', function (e) { e.preventDefault(); });
+            b.addEventListener('click', function (e) {
+              e.preventDefault();
+              e.stopPropagation();
+              inst.insertText('[color=' + c[0] + ']', '[/color]');
+              if (inst.closeDropDown) inst.closeDropDown(true);
+            });
+            grid.appendChild(b);
           });
-          list.appendChild(b);
-        });
+          list.appendChild(grid);
+        };
+        group('Sengoku no Jidai', TEXT_COLORS);
+        group('Défaut', natives);
         host.appendChild(list);
       }
       if (d.classList.contains('sceditor-header-picker')) {
@@ -1824,9 +1859,16 @@
           if (HEADER_LABELS[h.tagName]) h.textContent = HEADER_LABELS[h.tagName];
         });
       }
+      place(d);
+      requestAnimationFrame(function () { place(d); });
     };
     var mo = new MutationObserver(function (ms) {
-      ms.forEach(function (m) { Array.prototype.forEach.call(m.addedNodes, handle); });
+      ms.forEach(function (m) {
+        Array.prototype.forEach.call(m.addedNodes, handle);
+        Array.prototype.forEach.call(m.removedNodes, function (n) {
+          if (n.classList && n.classList.contains('sceditor-dropdown') && !document.querySelector('.sceditor-dropdown')) clearOpen();
+        });
+      });
     });
     var cont = scope.querySelector('.sceditor-container');
     if (cont) mo.observe(cont, { childList: true });
