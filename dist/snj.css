@@ -6693,6 +6693,14 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
   width: 180px;
 }
 
+/* Liste des couleurs à la largeur du bouton, alignée à droite (sinon elle déborde de la page) */
+#wrap .sg-write__color .sg-combo__list {
+  left: auto;
+  right: 0;
+  width: 100%;
+  min-width: 0;
+}
+
 #wrap .sg-writeform input.sg-write__field {
   box-sizing: border-box;
   width: 100%;
@@ -6751,22 +6759,35 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
 .sg-writeform .sceditor-container {
   width: 100% !important;
   min-height: 320px;
-  overflow: hidden;
+  overflow: visible;
   border: 0 !important;
-  border-radius: 12px !important;
-  background: var(--sg-surface-2) !important;
+  border-radius: 0 !important;
+  /* La barre d'outils est posée sur la lettre ; seule la zone de saisie a un fond (textarea / iframe) */
+  background: none !important;
   box-shadow: none !important;
   color: var(--sg-text) !important;
 }
 
 .sg-writeform .sceditor-toolbar {
-  padding: 6px 8px !important;
+  display: flex !important;
+  flex-wrap: nowrap;
+  align-items: center;
+  padding: 0 0 10px !important;
+  overflow-x: auto; /* toutes les icônes sur une ligne ; défilement horizontal sur les petits écrans */
+  overflow-y: hidden;
   border: 0 !important;
   background: none !important;
+  scrollbar-width: none;
+}
+
+.sg-writeform .sceditor-toolbar::-webkit-scrollbar {
+  display: none;
 }
 
 .sg-writeform .sceditor-group {
-  margin: 2px 6px 2px 0 !important;
+  display: flex !important;
+  flex: none;
+  margin: 0 6px 0 0 !important;
   padding: 0 6px 0 0 !important;
   border: 0 !important;
   border-right: 1px solid var(--sg-border) !important;
@@ -6774,7 +6795,10 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
   background: none !important;
 }
 
-.sg-writeform .sceditor-group:last-child {
+.sg-writeform .sceditor-group:last-child,
+.sg-writeform .sceditor-group.sg-tb-last {
+  margin-right: 0 !important;
+  padding-right: 0 !important;
   border-right: 0 !important;
 }
 
@@ -6793,7 +6817,8 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
 .sg-writeform .sceditor-container textarea,
 .sg-writeform .sceditor-container iframe {
   border: 0 !important;
-  background: transparent !important;
+  border-radius: 12px !important;
+  background: var(--sg-surface-2) !important;
   color: var(--sg-text) !important;
   font-family: var(--sg-font-body, inherit);
   font-size: 1rem;
@@ -6821,8 +6846,8 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
 .sg-writeform a.sceditor-button.sg-tb {
   display: inline-grid !important;
   place-items: center;
-  width: 34px !important;
-  height: 34px !important;
+  width: 32px !important;
+  height: 32px !important;
   padding: 0 !important;
   color: var(--sg-text-muted);
 }

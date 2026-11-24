@@ -1721,12 +1721,25 @@
         if (icon.indexOf('svg:') === 0) a.insertAdjacentHTML('beforeend', YOUTUBE_SVG);
         else a.appendChild(uiIco(icon));
       });
-      Array.prototype.slice.call(bar.querySelectorAll('.sceditor-group')).forEach(function (g) {
-        if (!g.querySelector('a.sceditor-button:not(.sg-tb--off)')) g.classList.add('sg-tb--off');
+      var shown = Array.prototype.slice.call(bar.querySelectorAll('.sceditor-group')).filter(function (g) {
+        if (!g.querySelector('a.sceditor-button:not(.sg-tb--off)')) { g.classList.add('sg-tb--off'); return false; }
+        return true;
       });
+      if (shown.length) shown[shown.length - 1].classList.add('sg-tb-last');
       bar.classList.add('sg-tb-on');
+      lockEditorMode();
     };
     run();
+  }
+
+  /* Mode de l'éditeur bloqué sur le mode texte (BBCode), celui qu'utilise Vinny : le bouton « Basculer le mode
+     d'édition » est retiré, et un éditeur ouvert en mode visuel (préférence gardée par Forumactif) est rebasculé */
+  function lockEditorMode() {
+    var $ = window.jQuery;
+    var ta = document.getElementById('text_editor_textarea');
+    var inst = $ && ta && $(ta).sceditor && $(ta).sceditor('instance');
+    if (!inst || !inst.inSourceMode) return;
+    if (!inst.inSourceMode()) inst.toggleSourceMode();
   }
 
   /* --------------------------------------------------------------------
