@@ -127,12 +127,23 @@ dans le panneau d'administration (PA), puis on commit.
   AwesomeBB ajoute un filet entre les `<li>` : il est retiré dans `#wrap .sg-menu__list > li`.
   **Deuxième ligne** (`.sg-topics__tools`), sous « Poster un nouveau sujet » : bouton **« Trier »** (`.sg-tool`, contour,
   chevron qui pivote) qui ouvre une fenêtre (`.sg-sort__panel`, `role="dialog"`, Échap, clic extérieur) contenant le
-  **formulaire de tri natif déplacé** (`#sort-box form`, POST) : « Trier par » (liste restylée `.sg-select`), « Ordre »
-  en contrôle segmenté (Décroissant / Croissant, radios natives `sort_order`), bouton « Appliquer » ; puis, à sa droite,
-  **« Sauter vers »** : le formulaire natif `jumpbox` déplacé, sa liste restylée (envoi au changement, comme l'original).
-  La barre native sous les sujets (`#wrap > a.mark-buttons` « Surveiller » et « Marquer comme lus », `#sort-box`) est
-  masquée : ses liens sont dans « Actions ». AwesomeBB donne 20px de marge basse aux `<label>` et une largeur aux
-  `<select>` sur mobile : neutralisées sous `#wrap`. Sur mobile, tout passe en pleine largeur, l'un sous l'autre. Aucun sujet : encadré pointillé « Aucun sujet pour l'instant ».
+  **formulaire de tri natif déplacé** (`#sort-box form`, POST) : « Trier par » (liste personnalisée, sans saisie),
+  « Ordre » (8px entre le libellé et le contrôle ; `<div role="group">`, pas de `<fieldset>`/`<legend>` qui échappe à
+  l'espacement) en contrôle segmenté (Décroissant / Croissant, radios natives `sort_order`), bouton « Appliquer » ; puis,
+  à sa droite, **« Sauter vers »** : le formulaire natif `jumpbox` déplacé, avec une liste personnalisée à saisie.
+  **Listes déroulantes personnalisées** (`combo()` dans `layout.js`, `.sg-combo`) : jamais le `<select>` natif à
+  l'écran ; il reste dans le formulaire, masqué, et reçoit la valeur choisie puis un événement `change` (la jumpbox
+  s'envoie alors d'elle-même). Même style que le bouton « Trier » (contour arrondi, fond de surface, chevron qui pivote),
+  liste en fenêtre (motif combobox ARIA : flèches, Page préc./suiv., Entrée, Échap — qui ne ferme que la liste —,
+  clic extérieur), coche Asagi sur l'entrée choisie. Option `search` : champ qui filtre la liste, sans tenir compte des
+  accents, en gardant visibles les parents des résultats (l'arborescence reste lisible). Option `tree` (jumpbox) : les
+  entrées de valeur `-1` (`|`, `| |`, lignes vides, « Sélectionner un forum » devenu texte d'aide) sont purgées, la
+  profondeur est lue dans le nombre de `|` : catégories en intitulés de groupe, forums, sous-forums indentés avec un
+  petit filet ; le forum affiché est coché. La barre native sous les sujets (`#wrap > a.mark-buttons` « Surveiller »
+  et « Marquer comme lus », `#sort-box`) est masquée : ses liens sont dans « Actions ». AwesomeBB donne 20px de marge
+  basse aux `<label>` et stylise les `<input>` : neutralisés sous `#wrap`. Sur mobile, tout passe en pleine largeur,
+  l'un sous l'autre. Le bloc natif **« Modérateurs »** est masqué et remplacé par le **séparateur de fin**
+  (`.sg-divider--end.sg-divider--topics`, inversé, sans logo) ; `.sg-topics` n'a pas de marge basse. Aucun sujet : encadré pointillé « Aucun sujet pour l'instant ».
   Les blocs natifs `#wrap > .posts` sont masqués. Attention : AwesomeBB stylise les éléments dont la classe contient
   « topic » (`align-items: center`, `white-space: nowrap` sur les titres) : les règles de la carte passent par `#wrap .sg-topic…`.
   Récapitulatif des patterns de cartes : **forum** (accueil) = image en fond + panneau + kanji ; **sous-forum** = ema
