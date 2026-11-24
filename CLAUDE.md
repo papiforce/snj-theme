@@ -40,13 +40,12 @@ dans le panneau d'administration (PA), puis on commit.
   (Discord…), en SVG inline repris de Simple Icons (licence CC0), à la même taille que les icônes.
 - **Navigation** : barre latérale fixe à gauche avec icônes et infobulle à droite (inspirée de Themis Trials),
   barre fixe en bas d'écran sur mobile. Elle remplace l'en-tête natif d'AwesomeBB.
-  Haut : avatar du membre, ou logo SnJ (`assets/snj-logo.webp`) pour les visiteurs. **Menu du compte** au survol (et au
-  focus clavier) de l'avatar (`accountMenu`, `.sg-sb-account` / `.sg-sb-menu`, à la place de l'infobulle) : pseudo en
-  Zen Antique, Mon profil (`/uN`), Paramètres du profil (`/profile?mode=editprofile&page_profil=informations`),
-  Panneau d'administration (admins, lien natif), puis sous un filet Déconnexion (lien natif, avec son `tid`).
-  Passerelle invisible entre l'avatar et le menu ; Échap le ferme. Sur écran tactile (`hover: none`), le premier
-  toucher sur l'avatar ouvre le menu au lieu du profil ; sur mobile il s'ouvre au-dessus de la barre du bas
-  (`position: fixed`, la barre défilant horizontalement le couperait).
+  Haut : avatar du membre, ou logo SnJ (`assets/snj-logo.webp`) pour les visiteurs. **Menu du compte** au **clic** sur l'avatar (pas au
+  survol ; `accountMenu`, l'avatar devient un `<button>` dans `.sg-sb-account`, infobulle « Mon compte » au survol,
+  masquée menu ouvert) : pseudo en Zen Antique, Mon profil (`/uN`), Paramètres du profil
+  (`/profile?mode=editprofile&page_profil=informations`), Panneau d'administration (admins, lien natif), puis sous un
+  filet Déconnexion (lien natif, avec son `tid`). Second clic, clic à côté, Échap ou focus qui sort le ferment. Sur
+  mobile il s'ouvre au-dessus de la barre du bas (`position: fixed`, la barre défilant horizontalement le couperait).
   Navigation : Accueil, Membres (masqué sur mobile), Discord, Annexe, Carte (masquée sur mobile pour les visiteurs).
   Visiteurs : Connexion et Inscription (Inscription masquée sur mobile) en bas.
   Bas : Notifications (avec pastille), thème clair/sombre (administration et déconnexion sont dans le menu du compte).
