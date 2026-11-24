@@ -191,28 +191,38 @@ dans le panneau d'administration (PA), puis on commit.
   reprendre pour l'aperçu, les messages privés, les résultats de recherche par message). Le balisage natif est
   conservé et déplacé (citation, J'aime, éditeur continuent de fonctionner) : `.post-wrap.sg-post` en grille
   `248px | 1fr` **avec 16px d'écart**, sans fond ni bordure ; l'en-tête et le contenu sont déplacés dans une carte
-  `.sg-post__letter` ; `.post-body` en `display: contents`, chaque message `isolation: isolate`.
+  `.sg-post__letter` (fond de surface, arrondie, **sans bordure** ; **pas de séparation** entre l'en-tête et le
+  contenu : ni filet ni l'ombre qu'AwesomeBB pose sur `.post`) ; `.post-body` en `display: contents`, chaque message `isolation: isolate`.
   **Empilement** : Forumactif donne `z-index: 500` à la fois à `.post-header` et à `.post` ; le corps, placé après,
   recouvrait le menu trois points et captait ses clics (menu visible mais inactif). L'en-tête est donc à `z-index: 2`,
   le corps à `1` ; la carte de la lettre n'a pas d'`overflow: hidden` (le menu peut en déborder) et un message dont un
   menu est ouvert passe au premier plan (`.sg-post:has(.sg-menu.is-open)`, `z-index: 10`). Tout menu se referme au
   retour arrière (`pageshow` avec `persisted`). Toujours vérifier un menu par `elementFromPoint`, pas seulement à l'œil.
-  **Colonne de l'auteur**, sans liseré : le **rôle** (`postRoles`) en haut, hors de la carte : **bandeau** `.sg-role`
-  (pas une pastille) sur motif **shippō**, **encadré sur ses 4 côtés** (arrondi 10px) à la couleur de l'auteur
-  (`--author`, lue en JS sur son pseudo après `08-groups.css`, relue à chaque changement de thème), libellé en Zen
-  Antique ; **Staffeux** ou **Modérateur** d'après les groupes du forum (`staffRoles` : `/groups` puis `/g2-staffeux`,
+  **Colonne de l'auteur**, sans liseré, **collante** (`position: sticky`, 24px du haut ; statique sur mobile) : le
+  **rôle** (`postRoles`) en haut, hors de la carte : **bandeau** `.sg-role` (pas une pastille) **plein à la couleur de
+  l'auteur** (`--author`, lue en JS sur son pseudo après `08-groups.css`, relue à chaque changement de thème), arrondi
+  10px, motif **shippō**, texte et magatama dans la couleur du fond (`--sg-surface` : sombre en thème sombre, clair en
+  thème clair), libellé en Zen Antique ; **Staffeux** ou **Modérateur** d'après les groupes du forum (`staffRoles` : `/groups` puis `/g2-staffeux`,
   `/g9-moderateurs`…, cache `snj-roles` de 15 min) avec le **magatama plein** du logo (`MAGATAMA_SVG`) **de la couleur
   du texte** ; sinon le rang Forumactif, sans magatama ; le rang natif (« Admin ») est masqué. Dessous, la **carte du
-  profil** `.sg-post__card` (seule à porter le halo dégradé à la couleur de l'auteur) : **portrait 200 × 400** (56 × 112
+  profil** `.sg-post__card`, **sans fond ni bordure** (padding `0 16px`) : **portrait 200 × 400** (56 × 112
   sur mobile) **sans cadre** ni pastille « en ligne », pseudo en Zen Antique **sans l'infobulle de profil** de
-  Forumactif (tooltipster détruit, lien remplacé par un clone), puis la fiche réduite `.sg-post__facts` :
+  Forumactif (tooltipster détruit, lien remplacé par un clone), un **petit séparateur avec le logo**
+  (`smallDivider()`, `.sg-divider--sm` : logo 22px, triangle 24 × 12 ; masqué sur mobile), puis la fiche réduite
+  `.sg-post__facts` (icônes de la couleur du texte) :
   « **Inscrit depuis** N jours / semaines / mois / ans » (`memberSince` : < 1 semaine en jours, < 1 mois en semaines,
   < 1 an en mois, puis en années ; pluriels gérés ; date complète en infobulle) et la **localisation** avec l'icône
   `location_on`. **Retirés** : Messages, Âge, les icônes de contact (profil, MP, e-mail, site web).
-  **Lettre** : en-tête avec la **date de publication** (`schedule`) et, si Forumactif l'écrit, la **date de dernière
-  modification** (`edit_note`, « Modifié le … », mention complète en infobulle) : la mention native « Dernière édition
-  par X le …, édité N fois » est lue dans le contenu (`editedInfo`) puis retirée avec son enveloppe ; Forumactif ne
-  l'écrit pas toujours (pas sur le sujet de test). **Plus de numéro « #n »**. À droite, **J'aime** (cœur : vide, plein
+  **Lettre** : en-tête (padding `10px 8px 0 16px`) avec la **date de publication** (`schedule`) et, si Forumactif
+  l'écrit, la **date de dernière modification** (`edit_note`, « Modifié le … », mention complète en infobulle) ; la
+  mention native « Dernière édition par X le …, édité N fois » (souvent en **texte brut** après des `<br>`, parfois
+  dans une balise) est extraite du contenu par `editedInfo`, enveloppée si besoin, et replacée **au bas de la lettre**
+  (`.sg-post__edited`, 14px, `--sg-text-muted`, juste après `.post-content`, qui en `flex: 1` la pousse en bas).
+  Forumactif ne compte pas toutes les modifications : une modification faite pendant que le message est le dernier du
+  sujet n'est pas enregistrée (moteur phpBB) ; on ne peut afficher que ce qu'il écrit. Contenu en padding
+  `16px 16px 20px`. **Arrivée par un lien de message** (`#3`) : `scroll-margin-top: 24px` sur l'en-tête et
+  `alignPostHash()` cale le haut du message (rôle, et profil sur mobile, visibles) à 24px, refait au chargement
+  complet tant que le lecteur n'a pas défilé (molette, toucher, clavier, clic). **Plus de numéro « #n »**. À droite, **J'aime** (cœur : vide, plein
   et rouge `--sg-like` `#e0475b` une fois aimé, compteur `.rep-nb` ; le `.fa_like_div` natif est déplacé, le pied
   devenu vide est masqué ; « Je n'aime pas » masqué) puis le bouton **trois points** (`more_vert`, rond, sans contour,
   `sg-menu--icon`) : Citer ce message, Modifier le message, Supprimer le message, Voir l'adresse IP (Signaler le
@@ -220,7 +230,8 @@ dans le panneau d'administration (PA), puis on commit.
   `.post-buttons` sont masqués et une entrée sans lien natif n'apparaît pas. Contenu (1rem, interligne 1,75 ;
   citations, code et spoilers sur fond de surface), signature sous un filet pointillé.
   ≤ 768px : profil au-dessus de la lettre (rôle sur toute la largeur, puis carte portrait | pseudo et fiche),
-  « Préférences » et « Actions » côte à côte, cœur et trois points en cibles de 44px.
+  « Préférences » et « Actions » côte à côte, cœur et trois points en cibles de 44px. Forumactif **minifie** le code
+  des modules : pour vérifier une version servie, chercher un nom de fonction, pas une chaîne avec des espaces.
   **Réponse rapide** : carte au même gabarit, intitulé « Répondre » ; l'éditeur natif (SCEditor) est conservé et
   restylé (ses bordures et fonds sont en `!important` dans le CSS de Forumactif : on surcharge en `!important`).
   **Bas de page** (`.sg-tfoot`) : séparateur de fin, « Sauter vers » (`jumpBox`, forum du sujet coché) à gauche,
@@ -241,7 +252,7 @@ dans le panneau d'administration (PA), puis on commit.
   forum ») : toute l'étiquette est le lien, flèche à droite, contour à la couleur de la catégorie au survol.
   **Fil d'Ariane repris dessous** (copie du `.sg-crumbs` de l'en-tête, `.sg-crumbs--end`), quand l'en-tête existe.
   Récapitulatif des patterns : **forum** (accueil) = image en fond + panneau + kanji ; **sous-forum** = ema
-  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil à liseré + lettre) ;
+  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ;
   **permission** = étiquette tegata aux coins coupés.
 - **Catégories de l'accueil** (`forums.js` + `40-zones.css`) : à gauche un sélecteur collant (Gestion, Hi, Mizu, Kaze,
   Kaminari, Tsuchi no Kuni, Shōkoku — « les petits pays », ex-Reste du Sekai) au style des raccourcis de l'Annexe, pastille = badge pour Gestion
