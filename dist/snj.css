@@ -76,26 +76,6 @@
   stroke-linejoin: miter;
 }
 
-/* Petite version (carte du profil d'un message) : sans espace propre, logo et triangle réduits */
-.sg-divider--sm {
-  --sg-divider-space: 0px;
-  gap: 6px;
-}
-
-.sg-divider--sm .sg-divider__logo {
-  width: 22px;
-  height: 22px;
-}
-
-.sg-divider--sm .sg-divider__rule {
-  height: 12px;
-}
-
-.sg-divider--sm .sg-divider__notch {
-  width: 24px;
-  height: 12px;
-}
-
 /* Séparateur de fin : sans logo, triangle pointé vers le haut (sous les catégories de l'accueil) */
 .sg-divider--end .sg-divider__rule {
   transform: scaleY(-1);
@@ -5642,7 +5622,7 @@ a.sg-pass__card:focus-visible {
         - en-tête de la lettre : date de publication et de modification, J'aime (cœur), menu trois points
           (citer, modifier, supprimer, adresse IP, copier le lien) ;
         - contenu lisible (corps 1rem, interligne 1,75), citations et code restylés.
-   3. Réponse rapide (.quick-reply) : carte au même gabarit, éditeur natif conservé et restylé.
+   3. « Répondre au sujet » (.sg-treply) centré à la place de la réponse rapide (.quick-reply, masquée).
    4. Bas de page (.sg-tfoot) : séparateur de fin, « Sauter vers », outils de modération.
    ========================================================================== */
 
@@ -5650,6 +5630,7 @@ a.sg-pass__card:focus-visible {
 body.sg-topicpage-on #topic > .quick-nav-topics,
 body.sg-topicpage-on #topic > .topic-actions.bottom,
 body.sg-topicpage-on #topic > form.quickmod,
+body.sg-topicpage-on #topic:has(.sg-treply) .quick-reply,
 body.sg-topicpage-on .sg-post .post-buttons-mobile,
 body.sg-topicpage-on .sg-post .post-author-contact,
 body.sg-topicpage-on .sg-post .post-buttons,
@@ -5713,7 +5694,7 @@ body.sg-topicpage-on .sg-post .post-author-title {
   grid-template-areas: "aside letter";
   align-items: start;
   gap: 16px;
-  margin: 0 0 var(--sg-space-6);
+  margin: 0 0 48px;
   padding: 0;
   border: 0;
   border-radius: 0;
@@ -5784,10 +5765,15 @@ html[data-profile="right"] #topic .post-wrap.sg-post {
   background: none;
 }
 
-/* Petit séparateur avec le logo, entre le pseudo et la fiche */
-.sg-post__card .sg-divider--sm {
+/* Simple ligne entre le pseudo et la fiche : 60 % de la largeur, centrée */
+#wrap .sg-post__rule {
   order: 3;
-  align-self: stretch;
+  width: 60%;
+  height: 1px;
+  margin: 0 auto;
+  padding: 0;
+  border: 0;
+  background: var(--sg-border);
 }
 
 #topic .sg-post .post-author-status:empty,
@@ -5937,8 +5923,13 @@ html[data-profile="right"] #topic .post-wrap.sg-post {
 }
 
 .sg-post__fact span:last-child {
+  display: -webkit-box;
   min-width: 0;
+  overflow: hidden;
   overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2; /* deux lignes au plus, puis ellipse (texte complet en infobulle) */
+  line-clamp: 2;
 }
 
 /* En-tête de la lettre. Forumactif donne le même z-index (500) à l'en-tête et au corps (.post) :
@@ -6196,7 +6187,14 @@ html[data-profile="right"] #topic .post-wrap.sg-post {
   font-size: 0.88rem;
 }
 
-/* --- 3. Réponse rapide ------------------------------------------------------------ */
+/* « Répondre au sujet » à la place de la réponse rapide, centré sous le dernier message */
+.sg-treply {
+  display: flex;
+  justify-content: center;
+  margin: 0 0 var(--sg-space-6);
+}
+
+/* --- 3. Réponse rapide (masquée quand le bouton la remplace) ------------------------------------------------------------ */
 #topic .quick-reply {
   margin: 0;
   padding: 22px 24px 24px;
@@ -6399,7 +6397,7 @@ html[data-profile="right"] #topic .post-wrap.sg-post {
     text-align: left;
   }
 
-  .sg-post__card .sg-divider--sm {
+  #wrap .sg-post__rule {
     display: none;
   }
 

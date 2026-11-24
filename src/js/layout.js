@@ -1506,7 +1506,9 @@
         if (author) card.appendChild(author);
         var facts = authorFacts(aside.querySelector('.post-author-details'));
         if (facts) {
-          card.appendChild(smallDivider());
+          var rule = el('hr', 'sg-post__rule');
+          rule.setAttribute('aria-hidden', 'true');
+          card.appendChild(rule);
           card.appendChild(facts);
         }
         aside.appendChild(card);
@@ -1540,13 +1542,19 @@
         .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     }
 
-    /* 3. Réponse rapide : un intitulé */
-    var qr = topic.querySelector('.quick-reply');
-    if (qr && !qr.querySelector('.sg-qr__title')) {
-      var qt = el('h2', 'sg-qr__title');
-      qt.appendChild(ico('history_edu'));
-      qt.appendChild(el('span', null, 'Répondre'));
-      qr.insertBefore(qt, qr.firstChild);
+    /* 3. Réponse rapide remplacée par un bouton « Répondre au sujet », centré, qui reprend l'adresse du bouton
+       de l'en-tête (formulaire natif masqué ; absent si le sujet est verrouillé ou pour un visiteur) */
+    var replyLink = document.querySelector('.sg-pagehead a.sg-action[href*="mode=reply"]') || find(/mode=reply/);
+    if (replyLink && !topic.querySelector('.sg-treply')) {
+      var replyBar = el('div', 'sg-treply');
+      var rb = el('a', 'sg-action');
+      rb.href = replyLink.getAttribute('href');
+      rb.appendChild(ico('reply'));
+      rb.appendChild(el('span', null, 'Répondre au sujet'));
+      replyBar.appendChild(rb);
+      var qr = topic.querySelector('.quick-reply');
+      var after = qr || posts[posts.length - 1];
+      if (after) after.parentNode.insertBefore(replyBar, qr || after.nextSibling);
     }
 
     /* 4. Bas de page : séparateur de fin, « Sauter vers » et modération */
@@ -1607,31 +1615,6 @@
     align();
     if (document.readyState !== 'complete') window.addEventListener('load', function () { setTimeout(align, 0); setTimeout(align, 400); });
     window.addEventListener('hashchange', function () { touched = false; align(); });
-  }
-
-  /* Logo de Sengoku no Jidai au trait (même tracé que dans home.js : assets/snj-logo-outline.svg) */
-  var LOGO_OUTLINE = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">' +
-    '<circle cx="50.4" cy="50.4" r="38.4" vector-effect="non-scaling-stroke"/>' +
-    '<path vector-effect="non-scaling-stroke" d="M73.3 51.0Q72.5 50.3 70.6 49.4Q68.8 48.4 66.4 48.3Q64.1 48.2 61.9 49.1Q59.7 49.9 58.2 51.2Q56.7 52.6 55.6 54.4Q54.6 56.2 54.2 58.1Q53.9 60.0 54.2 61.6Q54.6 63.2 55.5 64.7Q56.4 66.3 57.4 67.5Q58.5 68.8 58.5 69.1Q58.6 69.5 57.3 71.1Q56.0 72.7 54.6 73.7Q53.2 74.7 53.3 75.1Q53.3 75.6 56.3 75.6Q59.3 75.7 62.4 74.8Q65.5 74.0 67.9 72.7Q70.3 71.3 72.0 69.6Q73.8 67.9 74.6 66.6Q75.3 65.4 75.9 64.0Q76.6 62.5 76.7 60.2Q76.9 57.8 76.7 56.8Q76.6 55.8 76.1 54.7Q75.6 53.6 74.8 52.6Q74.1 51.7 73.3 51.0Z"/>' +
-    '<path vector-effect="non-scaling-stroke" d="M31.1 43.2Q30.8 43.1 30.4 43.4Q29.9 43.8 28.9 45.1Q27.9 46.4 26.5 49.3Q25.1 52.2 24.6 54.6Q24.1 57.0 24.3 60.0Q24.4 62.9 25.3 65.2Q26.1 67.4 27.0 68.7Q27.9 70.0 28.8 70.8Q29.7 71.7 30.7 72.3Q31.8 73.0 32.9 73.4Q34.0 73.8 36.3 73.8Q38.5 73.8 40.6 72.9Q42.6 72.0 43.8 71.0Q44.9 70.0 45.5 69.0Q46.2 68.1 46.7 67.0Q47.1 66.0 47.3 64.6Q47.5 63.2 47.3 61.0Q47.1 58.9 46.1 56.9Q45.1 54.9 43.5 53.6Q42.0 52.2 40.1 51.6Q38.2 51.0 35.4 50.9Q32.6 50.9 32.3 50.4Q32.0 50.0 31.7 48.5Q31.4 47.1 31.4 45.2Q31.4 43.3 31.1 43.2Z"/>' +
-    '<path vector-effect="non-scaling-stroke" d="M37.2 30.3Q36.7 31.6 36.7 34.1Q36.7 36.6 37.5 38.4Q38.3 40.2 39.8 41.8Q41.4 43.4 43.6 44.4Q45.8 45.3 48.3 45.4Q50.9 45.4 52.5 44.8Q54.0 44.2 55.4 42.9Q56.8 41.6 58.0 39.3Q59.2 37.1 59.7 36.6Q60.3 36.0 61.9 36.4Q63.6 36.7 65.3 37.6Q67.0 38.5 67.2 38.5Q67.5 38.5 67.6 38.3Q67.7 38.1 66.7 35.8Q65.7 33.5 63.8 31.1Q61.9 28.7 59.8 27.0Q57.6 25.3 55.1 24.3Q52.7 23.3 51.3 23.2Q49.9 23.0 48.0 23.0Q46.1 23.1 44.1 23.8Q42.1 24.4 41.1 25.1Q40.2 25.8 39.4 26.6Q38.6 27.5 38.1 28.2Q37.6 29.0 37.2 30.3Z"/>' +
-    '</svg>';
-
-  /* Petit séparateur avec le logo (version réduite de .sg-divider : carte du profil d'un message) */
-  function smallDivider() {
-    var d = uiEl('div', 'sg-divider sg-divider--sm');
-    d.setAttribute('role', 'separator');
-    var logo = uiEl('span', 'sg-divider__logo');
-    logo.setAttribute('aria-hidden', 'true');
-    logo.innerHTML = LOGO_OUTLINE;
-    var rule = uiEl('span', 'sg-divider__rule');
-    rule.setAttribute('aria-hidden', 'true');
-    rule.appendChild(uiEl('span', 'sg-divider__line'));
-    rule.insertAdjacentHTML('beforeend', '<svg class="sg-divider__notch" viewBox="0 0 48 25" aria-hidden="true"><path d="M0 .5L24 24.5L48 .5"/></svg>');
-    rule.appendChild(uiEl('span', 'sg-divider__line'));
-    d.appendChild(logo);
-    d.appendChild(rule);
-    return d;
   }
 
   /* Magatama du logo de Sengoku no Jidai (formes pleines) : marque du staff, comme dans les statistiques */
@@ -1739,7 +1722,7 @@
     };
     var reg = values['date d\'inscription'] || values['date d’inscription'];
     add('event_available', memberSince(reg), reg ? 'Inscrit le ' + reg : '');
-    add('location_on', values.localisation, 'Localisation');
+    add('location_on', values.localisation, values.localisation);
     return list.children.length ? list : null;
   }
 

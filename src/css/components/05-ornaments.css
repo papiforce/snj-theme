@@ -74,26 +74,6 @@
   stroke-linejoin: miter;
 }
 
-/* Petite version (carte du profil d'un message) : sans espace propre, logo et triangle réduits */
-.sg-divider--sm {
-  --sg-divider-space: 0px;
-  gap: 6px;
-}
-
-.sg-divider--sm .sg-divider__logo {
-  width: 22px;
-  height: 22px;
-}
-
-.sg-divider--sm .sg-divider__rule {
-  height: 12px;
-}
-
-.sg-divider--sm .sg-divider__notch {
-  width: 24px;
-  height: 12px;
-}
-
 /* Séparateur de fin : sans logo, triangle pointé vers le haut (sous les catégories de l'accueil) */
 .sg-divider--end .sg-divider__rule {
   transform: scaleY(-1);
