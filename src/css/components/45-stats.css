@@ -414,7 +414,7 @@ body.sg-stats-on #index .block-subtle {
   align-items: center;
   gap: 12px;
   width: 86%;
-  height: 200px;
+  height: 248px; /* « Kaminari no Kuni » tient en entier */
   margin-top: -8px;
   padding: 14px 0 30px;
   background:
@@ -513,7 +513,11 @@ body.sg-stats-on #index .block-subtle {
   }
 
   .sg-nobori__cloth {
-    height: 160px;
+    height: 220px;
+  }
+
+  .sg-nobori__name {
+    font-size: 0.85rem;
   }
 
   .sg-newest__name {
