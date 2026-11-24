@@ -296,6 +296,7 @@
     };
     btn.addEventListener('click', function () { setOpen(panel.hidden); });
     document.addEventListener('click', function (e) { if (!wrap.contains(e.target)) setOpen(false); });
+    window.addEventListener('pageshow', function (e) { if (e.persisted) setOpen(false); });
     wrap.addEventListener('focusout', function (e) {
       if (e.relatedTarget && !wrap.contains(e.relatedTarget)) setOpen(false);
     });
@@ -830,6 +831,8 @@
       else if (ev.key === 'Tab') close(false);
     });
     document.addEventListener('click', function (ev) { if (!wrapM.contains(ev.target)) close(false); });
+    /* Retour arrière : la page restaurée par le navigateur ne doit pas montrer un menu resté ouvert */
+    window.addEventListener('pageshow', function (ev) { if (ev.persisted) close(false); });
     return wrapM;
   }
 
