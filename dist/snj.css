@@ -3471,12 +3471,13 @@ body.sg-footer-on #page-footer > :not(.sg-footer) {
      3. description.
    Kanji propre au forum en filigrane (attribut data-kanji de sa balise .sg-meta).
    Couleur de la catégorie : --ph (nation, sumi et gofun pour Gestion, Hagane sinon).
-   Remplace .page-header, la barre « Plus ! / Marquer tous les sujets comme lus »
-   et le bouton fixe « Poster un nouveau sujet ».
+   Remplace .page-header, la barre « Plus ! / Marquer tous les sujets comme lus », la barre de liens
+   .action-bar-top (affichée au-dessus des sous-forums) et le bouton fixe « Poster un nouveau sujet ».
    ========================================================================== */
 
 body.sg-pagehead-on #wrap > .page-header,
 body.sg-pagehead-on #wrap > .topic-actions,
+body.sg-pagehead-on #wrap > .action-bar-top,
 body.sg-pagehead-on a.btn-fixed {
   display: none !important;
 }
