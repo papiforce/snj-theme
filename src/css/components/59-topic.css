@@ -91,6 +91,12 @@ body.sg-topicpage-on .sg-post .post-author-title {
   color: var(--sg-text);
 }
 
+/* Un message dont le menu est ouvert passe devant les suivants (et la réponse rapide) :
+   sinon le menu, qui peut déborder de la carte, glisserait dessous */
+#topic .post-wrap.sg-post:has(.sg-menu.is-open) {
+  z-index: 10;
+}
+
 /* Préférence « Position du profil (inversé) » : lettre à gauche, profil à droite */
 html[data-profile="right"] #topic .post-wrap.sg-post {
   grid-template-columns: minmax(0, 1fr) 248px;
@@ -104,7 +110,6 @@ html[data-profile="right"] #topic .post-wrap.sg-post {
   flex-direction: column;
   align-self: stretch;
   min-width: 0;
-  overflow: hidden;
   border: 1px solid var(--sg-border);
   border-radius: var(--sg-radius-lg);
   background: var(--sg-surface);
@@ -295,8 +300,12 @@ html[data-profile="right"] #topic .post-wrap.sg-post {
   overflow-wrap: anywhere;
 }
 
-/* En-tête de la lettre */
+/* En-tête de la lettre. Forumactif donne le même z-index (500) à l'en-tête et au corps (.post) :
+   le corps, placé après, recouvrait le menu « trois points » qui déborde de l'en-tête et captait ses clics.
+   L'en-tête passe au-dessus du corps (le message est isolé : ces niveaux restent internes à la carte). */
 #topic .sg-post .post-header {
+  position: relative;
+  z-index: 2;
   grid-area: head;
   display: flex;
   align-items: center;
@@ -369,6 +378,8 @@ html[data-profile="right"] #topic .post-wrap.sg-post {
 
 /* La lettre */
 #topic .sg-post .post {
+  position: relative;
+  z-index: 1;
   grid-area: body;
   display: flex;
   flex-direction: column;
