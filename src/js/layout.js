@@ -526,11 +526,11 @@
   }
 
   /* --------------------------------------------------------------------
-     Sujets : cartes « makimono » (巻物, rouleau), grille de 2 colonnes.
-     Pattern réservé aux SUJETS, partout où ils sont listés : pas d'image, deux
-     rouleaux verticaux qui dépassent en haut et en bas, à la couleur de la
-     catégorie. Statut en pastilles (annonce, épinglé, verrouillé, nouveau,
-     participation), titre, description, auteur, compteurs et dernier message.
+     Sujets : cartes à motif yagasuri (矢絣, empennes de flèches), grille de 2 colonnes.
+     Pattern réservé aux SUJETS, partout où ils sont listés : pas d'image, le motif
+     yagasuri en fond à la couleur de la catégorie. Statut en pastilles (annonce,
+     épinglé, verrouillé, nouveau), titre, description, auteur, compteurs et dernier
+     message. Au-dessus de la grille, le bouton « Poster un nouveau sujet ».
      -------------------------------------------------------------------- */
   function topics() {
     if (document.querySelector('.sg-topics')) return;
@@ -576,40 +576,32 @@
         if (/folder_sticky/.test(cls)) flags.push(['push_pin', 'Épinglé', 'sticky']);
         if (/locked/.test(cls)) flags.push(['lock', 'Verrouillé', 'locked']);
         var unread = /post_new|folder_new/.test(cls);
-        var part = row.querySelector('.participate-check');
-        var participated = part && getComputedStyle(part).display !== 'none';
 
-        var card = el('li', 'sg-scroll' + (unread ? ' is-new' : '') + (flags.length ? ' is-' + flags[0][2] : ''));
-        var top = el('div', 'sg-scroll__flags');
+        var card = el('li', 'sg-topic' + (unread ? ' is-new' : '') + (flags.length ? ' is-' + flags[0][2] : ''));
+        var top = el('div', 'sg-topic__flags');
         flags.forEach(function (f) {
-          var chip = el('span', 'sg-scroll__flag sg-scroll__flag--' + f[2]);
+          var chip = el('span', 'sg-topic__flag sg-topic__flag--' + f[2]);
           chip.appendChild(ico(f[0]));
           chip.appendChild(el('span', null, f[1]));
           top.appendChild(chip);
         });
-        if (unread) top.appendChild(el('span', 'sg-scroll__new', 'Nouveau'));
-        if (participated) {
-          var mine = el('span', 'sg-scroll__mine');
-          mine.setAttribute('title', 'Vous avez posté dans ce sujet');
-          mine.appendChild(ico('history_edu'));
-          top.appendChild(mine);
-        }
+        if (unread) top.appendChild(el('span', 'sg-topic__new', 'Nouveau'));
         if (top.children.length) card.appendChild(top);
 
-        var title = el('h3', 'sg-scroll__title');
-        var a = el('a', 'sg-scroll__link', link.textContent.trim());
+        var title = el('h3', 'sg-topic__title');
+        var a = el('a', 'sg-topic__link', link.textContent.trim());
         a.href = link.getAttribute('href');
         title.appendChild(a);
         card.appendChild(title);
 
         var desc = row.querySelector('.topic-description');
-        if (desc && desc.textContent.trim()) card.appendChild(el('p', 'sg-scroll__desc', desc.textContent.trim()));
+        if (desc && desc.textContent.trim()) card.appendChild(el('p', 'sg-topic__desc', desc.textContent.trim()));
 
         var author = row.querySelector('.posts-description p a[href^="/u"]');
         if (author) {
-          var by = el('p', 'sg-scroll__by');
+          var by = el('p', 'sg-topic__by');
           by.appendChild(document.createTextNode('par '));
-          by.appendChild(person(author, 'sg-scroll__author'));
+          by.appendChild(person(author, 'sg-topic__author'));
           card.appendChild(by);
         }
 
@@ -617,18 +609,18 @@
         var pages = Array.prototype.slice.call(row.querySelectorAll('.posts-description .pagination a, .posts-description a[href*="-p"]'))
           .filter(function (p) { return /^\d+$/.test(p.textContent.trim()); });
         if (pages.length) {
-          var pl = el('p', 'sg-scroll__pages');
+          var pl = el('p', 'sg-topic__pages');
           pl.appendChild(ico('auto_stories'));
           pages.forEach(function (p) {
-            var pa = el('a', 'sg-scroll__page', p.textContent.trim());
+            var pa = el('a', 'sg-topic__page', p.textContent.trim());
             pa.href = p.getAttribute('href');
             pl.appendChild(pa);
           });
           card.appendChild(pl);
         }
 
-        var foot = el('div', 'sg-scroll__foot');
-        var stats = el('p', 'sg-scroll__stats');
+        var foot = el('div', 'sg-topic__foot');
+        var stats = el('p', 'sg-topic__stats');
         var replies = num(row.querySelector('.posts-statistics-replies'));
         var views = num(row.querySelector('.posts-statistics-views'));
         stats.appendChild(ico('forum'));
@@ -640,9 +632,9 @@
         var last = row.querySelector('.posts-lastpost');
         var lastTime = last && last.querySelector('a.posts-lastpost-time');
         if (last && lastTime) {
-          var lp = el('div', 'sg-scroll__last');
+          var lp = el('div', 'sg-topic__last');
           var avatarImg = last.querySelector('.avatar-default img');
-          var av = el('span', 'sg-scroll__avatar');
+          var av = el('span', 'sg-topic__avatar');
           if (avatarImg) {
             var im = el('img');
             im.src = avatarImg.getAttribute('src');
@@ -651,10 +643,10 @@
             av.appendChild(im);
           } else av.appendChild(ico('person'));
           lp.appendChild(av);
-          var info = el('div', 'sg-scroll__lastinfo');
+          var info = el('div', 'sg-topic__lastinfo');
           var lastAuthor = last.querySelector('.posts-lastpost-author a[href^="/u"]');
-          if (lastAuthor) info.appendChild(person(lastAuthor, 'sg-scroll__lastauthor'));
-          var t = el('a', 'sg-scroll__time', lastTime.textContent.replace(/access_time/, '').trim());
+          if (lastAuthor) info.appendChild(person(lastAuthor, 'sg-topic__lastauthor'));
+          var t = el('a', 'sg-topic__time', lastTime.textContent.replace(/access_time/, '').trim());
           t.href = lastTime.getAttribute('href');
           t.setAttribute('title', 'Voir le dernier message');
           info.appendChild(t);
@@ -668,10 +660,28 @@
 
     if (!grid.children.length) {
       var empty = el('p', 'sg-topics__empty');
-      empty.appendChild(ico('history_edu'));
+      empty.appendChild(ico('forum'));
       empty.appendChild(el('span', null, 'Aucun sujet pour l’instant.'));
       section.appendChild(empty);
     } else section.appendChild(grid);
+
+    /* Bouton « Poster un nouveau sujet » au-dessus de la grille : le lien d'origine est déplacé
+       (depuis l'en-tête de page ou le bouton fixe natif), pas copié */
+    var post = document.querySelector('.sg-pagehead__actions a[href*="mode=newtopic"]') ||
+      document.querySelector('#wrap a.btn-fixed[href*="mode=newtopic"]') ||
+      document.querySelector('#wrap a[href*="mode=newtopic"]');
+    if (post) {
+      var bar = el('div', 'sg-topics__bar');
+      var btn = el('a', 'sg-action');
+      btn.href = post.getAttribute('href');
+      btn.appendChild(ico('edit_square'));
+      btn.appendChild(el('span', null, 'Poster un nouveau sujet'));
+      bar.appendChild(btn);
+      section.insertBefore(bar, section.firstChild);
+      var holder = post.parentNode;
+      post.remove();
+      if (holder && holder.classList.contains('sg-pagehead__actions') && !holder.children.length) holder.remove();
+    }
 
     blocks[0].parentNode.insertBefore(section, blocks[0]);
     document.body.classList.add('sg-topics-on');
