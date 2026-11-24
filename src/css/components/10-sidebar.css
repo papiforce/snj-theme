@@ -2,7 +2,7 @@
    SNJ — Barre latérale (navigation principale)
    Construite par src/js/layout.js. Inspirée de Themis Trials :
    colonne fixe à gauche, icônes, infobulle à droite au survol ;
-   menu du compte au survol de l'avatar (pseudo, profil, paramètres, administration, déconnexion).
+   menu du compte au clic sur l'avatar (pseudo, profil, paramètres, administration, déconnexion).
    Sur mobile (≤ 768px) elle devient une barre fixe en bas d'écran.
    ========================================================================== */
 
@@ -83,10 +83,17 @@ body > header {
   object-fit: contain;
 }
 
-/* --- Menu du compte (survol de l'avatar) ------------------------------ */
+/* --- Menu du compte (clic sur l'avatar) ----------------------------- */
 .sg-sb-account {
   position: relative;
   flex: none;
+}
+
+/* L'avatar d'un membre est un bouton (il ouvre le menu) */
+button.sg-sb-brand {
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
 }
 
 .sg-sb-menu {
@@ -101,40 +108,25 @@ body > header {
   border-radius: var(--sg-radius-lg);
   background: var(--sg-surface);
   box-shadow: var(--sg-shadow);
-  opacity: 0;
-  visibility: hidden;
-  transform: translateX(-6px);
-  transition: opacity 0.18s ease, transform 0.18s var(--sg-ease, ease), visibility 0s linear 0.18s;
+  animation: sg-sb-menu-in 0.18s ease;
 }
 
-/* Passerelle invisible entre l'avatar et le menu : le survol ne se perd pas dans l'écart */
-.sg-sb-menu::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: -16px;
-  width: 16px;
+.sg-sb-menu[hidden] {
+  display: none;
 }
 
-.sg-sb-account:hover .sg-sb-menu,
-.sg-sb-account:focus-within .sg-sb-menu,
-.sg-sb-account.is-open .sg-sb-menu {
-  opacity: 1;
-  visibility: visible;
-  transform: none;
-  transition: opacity 0.18s ease, transform 0.18s var(--sg-ease, ease), visibility 0s;
+@keyframes sg-sb-menu-in {
+  from { opacity: 0; transform: translateX(-6px); }
+  to { opacity: 1; transform: none; }
 }
 
-.sg-sb-account.is-dismissed .sg-sb-menu {
-  opacity: 0;
-  visibility: hidden;
-  transform: translateX(-6px);
-}
-
-.sg-sb-account:hover .sg-sb-brand,
 .sg-sb-account.is-open .sg-sb-brand {
   outline-color: var(--sg-primary);
+}
+
+/* Pas d'infobulle « Mon compte » quand le menu est ouvert */
+.sg-sb-account.is-open .sg-sb-brand::after {
+  display: none;
 }
 
 #sg-sidebar .sg-sb-menu__name {
@@ -207,7 +199,7 @@ body > header {
 
 @media (prefers-reduced-motion: reduce) {
   .sg-sb-menu {
-    transform: none !important;
+    animation: none;
   }
 }
 
@@ -406,17 +398,12 @@ body > header {
     left: var(--sg-space-2);
     bottom: calc(var(--sg-bottombar-h) + env(safe-area-inset-bottom, 0px) + var(--sg-space-2));
     width: min(280px, calc(100vw - 2 * var(--sg-space-2)));
-    transform: translateY(6px);
+    animation-name: sg-sb-menu-up;
   }
 
-  .sg-sb-menu::before {
-    display: none;
-  }
-
-  /* Au toucher, seul l'état ouvert compte (pas de survol collant) */
-  .sg-sb-account:hover:not(.is-open):not(:focus-within) .sg-sb-menu {
-    opacity: 0;
-    visibility: hidden;
+  @keyframes sg-sb-menu-up {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
   }
 
   #sg-sidebar a.sg-sb-menu__item {

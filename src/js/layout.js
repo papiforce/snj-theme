@@ -238,20 +238,26 @@
   }
 
   /* Menu du compte, sur l'avatar : pseudo, profil, paramètres du profil, panneau d'administration
-     (admins), déconnexion. Ouvert au survol et au focus clavier ; sur écran tactile (pas de survol),
-     le premier toucher sur l'avatar ouvre le menu au lieu de suivre le lien du profil. */
+     (admins), déconnexion. L'avatar devient un bouton qui ouvre et ferme le menu au clic (Entrée et
+     Espace au clavier) ; Échap, un clic à côté ou le focus qui sort le ferment. */
   function accountMenu(brand, ud) {
     var wrap = document.createElement('div');
     wrap.className = 'sg-sb-account';
-    brand.removeAttribute('data-label'); /* le menu remplace l'infobulle */
-    brand.setAttribute('aria-haspopup', 'true');
-    brand.setAttribute('aria-expanded', 'false');
-    brand.setAttribute('aria-controls', 'sg-account-menu');
-    wrap.appendChild(brand);
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = brand.className;
+    btn.setAttribute('aria-label', 'Mon compte');
+    btn.setAttribute('data-label', 'Mon compte');
+    btn.setAttribute('aria-haspopup', 'true');
+    btn.setAttribute('aria-expanded', 'false');
+    btn.setAttribute('aria-controls', 'sg-account-menu');
+    while (brand.firstChild) btn.appendChild(brand.firstChild);
+    wrap.appendChild(btn);
 
     var panel = document.createElement('div');
     panel.className = 'sg-sb-menu';
     panel.id = 'sg-account-menu';
+    panel.hidden = true;
     var name = document.createElement('p');
     name.className = 'sg-sb-menu__name';
     name.textContent = ud.username || 'Mon compte';
@@ -282,30 +288,18 @@
     panel.appendChild(list);
     wrap.appendChild(panel);
 
-    /* is-open : ouvert au toucher ; is-dismissed : fermé par Échap malgré le survol ou le focus */
     var setOpen = function (on) {
+      panel.hidden = !on;
       wrap.classList.toggle('is-open', on);
-      brand.setAttribute('aria-expanded', on ? 'true' : 'false');
+      btn.setAttribute('aria-expanded', on ? 'true' : 'false');
     };
-    wrap.addEventListener('mouseenter', function () { if (!wrap.classList.contains('is-dismissed')) brand.setAttribute('aria-expanded', 'true'); });
-    wrap.addEventListener('mouseleave', function () {
-      wrap.classList.remove('is-dismissed');
-      if (!wrap.classList.contains('is-open') && !wrap.contains(document.activeElement)) brand.setAttribute('aria-expanded', 'false');
-    });
-    wrap.addEventListener('focusin', function () { if (!wrap.classList.contains('is-dismissed')) brand.setAttribute('aria-expanded', 'true'); });
-    wrap.addEventListener('focusout', function (e) {
-      if (!wrap.contains(e.relatedTarget)) { wrap.classList.remove('is-dismissed'); setOpen(false); }
-    });
-    var touch = window.matchMedia ? window.matchMedia('(hover: none)') : null;
-    brand.addEventListener('click', function (e) {
-      if (touch && touch.matches && !wrap.classList.contains('is-open')) {
-        e.preventDefault();
-        setOpen(true);
-      }
-    });
+    btn.addEventListener('click', function () { setOpen(panel.hidden); });
     document.addEventListener('click', function (e) { if (!wrap.contains(e.target)) setOpen(false); });
+    wrap.addEventListener('focusout', function (e) {
+      if (e.relatedTarget && !wrap.contains(e.relatedTarget)) setOpen(false);
+    });
     wrap.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') { setOpen(false); wrap.classList.add('is-dismissed'); brand.focus(); }
+      if (e.key === 'Escape' && !panel.hidden) { e.preventDefault(); setOpen(false); btn.focus(); }
     });
     return wrap;
   }
