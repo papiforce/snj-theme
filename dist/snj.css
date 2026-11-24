@@ -3369,7 +3369,7 @@ body.sg-footer-on #page-footer > :not(.sg-footer) {
   flex-direction: column;
   align-items: center;
   gap: var(--sg-space-6);
-  padding-top: var(--sg-space-6);
+  padding: var(--sg-space-6) 0 var(--sg-space-6);
   border-top: 1px solid var(--sg-border);
 }
 
@@ -3436,7 +3436,12 @@ body.sg-footer-on #page-footer > :not(.sg-footer) {
     font-size: 0.8rem;
   }
 
+  /* Sur mobile, les liens passent à la ligne : pas de point médian, un simple espacement */
+  .sg-footer__links {
+    gap: 6px 18px;
+  }
+
   .sg-footer__links li + li::before {
-    margin: 0 8px;
+    content: none;
   }
 }
