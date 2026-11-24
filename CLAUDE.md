@@ -14,7 +14,7 @@ dans le panneau d'administration (PA), puis on commit.
 | `src/css/critical.css` | Tokens, thèmes clair/sombre, base | PA › Affichage › Couleurs › CSS principal |
 | `src/css/components/` | CSS des composants (barre latérale, catégories, sujets…), préfixés par un numéro d'ordre | Assemblés dans `dist/snj.css` par `node scripts/build.mjs`, servis par jsDelivr |
 | `src/templates/` | Templates HTML et extraits à insérer | PA › Affichage › Templates |
-| `src/js/` | Un fichier par script : `layout.js` (barre latérale, thème, pied de page, en-tête des pages de forum ; toutes les pages, module 10), `home.js` (widgets de l'accueil et des pages de forum, index + sous-forums, module 11), `forums.js` (catégories de l'accueil, index, module 12), `stats.js` (statistiques de l'accueil, index, module 13) | PA › Modules › Gestion des codes JavaScript |
+| `src/js/` | Un fichier par script : `layout.js` (barre latérale, thème, pied de page, en-tête et sous-forums des pages de forum ; toutes les pages, module 10), `home.js` (widgets de l'accueil et des pages de forum, index + sous-forums, module 11), `forums.js` (catégories de l'accueil, index, module 12), `stats.js` (statistiques de l'accueil, index, module 13) | PA › Modules › Gestion des codes JavaScript |
 | `docs/` | Décisions, notes de migration | — |
 
 ## Décisions
@@ -95,6 +95,15 @@ dans le panneau d'administration (PA), puis on commit.
   de sa `.sg-meta`) en filigrane à 7 %. Retirés : `.page-header` natif, la barre « Plus ! / Marquer tous les sujets
   comme lus » (`.topic-actions`), la barre de liens `.action-bar-top` (au-dessus des sous-forums) et le bouton fixe
   « Poster un nouveau sujet » (`a.btn-fixed`). Les liens et boutons d'origine sont déplacés, pas copiés.
+- **Sous-forums : cartes « ema »** (`layout.js`, fonction `subforums`, + `56-subforums.css`) : pattern **réservé aux
+  sous-forums**, partout où ils sont listés ; à ne pas confondre avec les cartes de forum de l'accueil (image en fond,
+  panneau, kanji, dangerosité). L'ema 絵馬 (tablette votive) : image en haut découpée en toit (`clip-path`) avec le trou
+  du cordon sous le faîte, filet de 3px à la couleur de la catégorie (`--ph`), mention « Sous-forum », titre en Zen Antique,
+  description sur 2 lignes, compteurs en ligne (icônes à la couleur de la catégorie), sous-sous-forums en pastilles,
+  dernier message en pied (avatar, sujet complet, auteur coloré, date) ou « Aucun message pour l'instant ».
+  Image : `data-image` de la `.sg-meta` du sous-forum, sinon l'`<img>` de sa description ; à défaut, halo à la couleur
+  de la catégorie. Non lu : pastille « Nouveau » en Asagi. Grille de 2 colonnes, cartes de même proportion (1 colonne
+  ≤ 768px), titre de section « Sous-forums » + effectif. Toute la carte est cliquable (lien du titre étendu).
 - **Catégories de l'accueil** (`forums.js` + `40-zones.css`) : à gauche un sélecteur collant (Gestion, Hi, Mizu, Kaze,
   Kaminari, Tsuchi no Kuni, Shōkoku — « les petits pays », ex-Reste du Sekai) au style des raccourcis de l'Annexe, pastille = badge pour Gestion
   (sumi et gofun) et kanji du pays sinon (火 水 風 雷 土, 他 comme sur l'annexe), couleur de la nation ; onglet actif
