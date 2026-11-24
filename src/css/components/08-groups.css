@@ -48,3 +48,29 @@
 [style*="8A6CAE" i] { color: var(--sg-group-autres) !important; }
 [style*="9FB0C3" i] { color: var(--sg-group-mod) !important; }
 [style*="ECE5D4" i] { color: var(--sg-group-staff) !important; }
+
+/* --- Couleurs du titre d'un sujet (choisies à l'écriture, cinq choix) -------------------------------------
+   Forumactif enregistre un code couleur natif (#FF0000, #FF9933, #006600, #0000FF) : layout.js le lit et pose
+   une classe .sg-tcolor--… sur le titre (cartes de sujets, en-tête du sujet). Rouge = Hi no Kuni, Vert = Kaze no
+   Kuni, Hagane = couleur primaire. Orange = Kaki 柿 (kaki, le fruit), demandé par Vinny : couleur HORS palette
+   (orange vif, normalement exclu), distincte du rouge de Hi et de l'or de Kaminari, nommée dans son token. */
+:root {
+  --sg-title-hi: var(--sg-group-hi);
+  --sg-title-kaki: #d98a4e;
+  --sg-title-kaze: var(--sg-group-kaze);
+  --sg-title-hagane: var(--sg-primary);
+}
+
+[data-theme="light"] {
+  --sg-title-kaki: #b5602a;
+}
+
+#wrap .sg-tcolor--hi,
+#wrap .sg-tcolor--hi a { color: var(--sg-title-hi) !important; }
+#wrap .sg-tcolor--kaki,
+#wrap .sg-tcolor--kaki a { color: var(--sg-title-kaki) !important; }
+#wrap .sg-tcolor--kaze,
+#wrap .sg-tcolor--kaze a { color: var(--sg-title-kaze) !important; }
+#wrap .sg-tcolor--hagane,
+#wrap .sg-tcolor--hagane a { color: var(--sg-title-hagane) !important; }
+

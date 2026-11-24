@@ -498,6 +498,9 @@
       title.appendChild(uiEl('span', 'sg-pagehead__text', full));
       title.classList.add('sg-pagehead__title--line');
       title.setAttribute('title', full);
+      /* Couleur du titre choisie à l'écriture (code natif de Forumactif → token de la refonte) */
+      var tone = titleToneOf(h1);
+      if (tone) title.classList.add('sg-tcolor--' + tone);
     }
     row.appendChild(title);
     var actions = el('div', 'sg-pagehead__actions');
@@ -847,7 +850,8 @@
   /* Liste déroulante personnalisée (remplace l'affichage natif d'un <select>, qui reste dans le
      formulaire, masqué, et reçoit la valeur choisie suivie d'un événement « change »).
      options : { search: true } → champ de saisie qui filtre la liste (motif combobox ARIA) ;
-     { tree: true } → options de la jumpbox : séparateurs « | » purgés, profondeur lue dans les « | ». */
+     { tree: true } → options de la jumpbox : séparateurs « | » purgés, profondeur lue dans les « | » ;
+     { swatch: function (valeur) { return couleur CSS | '' } } → pastille de couleur devant chaque entrée et dans le bouton. */
   var comboCount = 0;
   function combo(select, opts) {
     var el = uiEl, ico = uiIco;
@@ -885,6 +889,13 @@
     /* Jumpbox : le forum affiché est coché (sa valeur native est « -1 ») */
     if (opts.tree && opts.currentValue && !data.some(function (d) { return d.value === current; })) current = opts.currentValue;
     var labelOf = function (v) { for (var i = 0; i < data.length; i++) if (data[i].value === v) return data[i].label; return ''; };
+    var swatchOf = function (v) {
+      var sw = el('span', 'sg-combo__swatch');
+      sw.setAttribute('aria-hidden', 'true');
+      var c = opts.swatch(v);
+      if (c) sw.style.background = c; else sw.classList.add('is-none');
+      return sw;
+    };
 
     if (opts.search) {
       var wrapF = el('div', 'sg-combo__control');
@@ -912,6 +923,7 @@
     } else {
       field = el('button', 'sg-combo__control');
       field.type = 'button';
+      if (opts.swatch) field.appendChild(swatchOf(current));
       var val = el('span', 'sg-combo__value', labelOf(current) || placeholder);
       field.appendChild(val);
       var chev2 = el('span', 'sg-combo__chevron material-symbols-outlined', 'expand_more');
@@ -931,6 +943,7 @@
       li.id = uid + '-o' + i;
       li.setAttribute('role', 'option');
       li.style.setProperty('--depth', d.depth);
+      if (opts.swatch) li.appendChild(swatchOf(d.value));
       li.appendChild(el('span', 'sg-combo__label', d.label));
       var ok = ico('check');
       ok.className += ' sg-combo__check';
@@ -1006,6 +1019,7 @@
       current = data[i].value;
       mark();
       if (!opts.search) field.querySelector('.sg-combo__value').textContent = data[i].label;
+      if (opts.swatch) { var old = field.querySelector('.sg-combo__swatch'); if (old) field.replaceChild(swatchOf(current), old); }
       close();
       if (opts.search) field.value = '';
       select.value = current;
@@ -1132,6 +1146,8 @@
         if (top.children.length) card.appendChild(top);
 
         var title = el('h3', 'sg-topic__title');
+        var tone = titleToneOf(link);
+        if (tone) title.classList.add('sg-tcolor--' + tone);
         var a = el('a', 'sg-topic__link', link.textContent.trim());
         a.href = link.getAttribute('href');
         title.appendChild(a);
@@ -1645,6 +1661,74 @@
     window.addEventListener('hashchange', function () { touched = false; align(); });
   }
 
+  /* Couleurs du titre d'un sujet : cinq choix, enregistrés sous les valeurs natives de Forumactif (code couleur),
+     affichés avec les tokens de la refonte (classes .sg-tcolor--…, 08-groups.css) */
+  var TITLE_COLORS = [
+    ['', 'Défaut', ''],
+    ['#FF0000', 'Rouge', 'hi'],
+    ['#FF9933', 'Orange', 'kaki'],
+    ['#006600', 'Vert', 'kaze'],
+    ['#0000FF', 'Hagane', 'hagane']
+  ];
+  var titleTone = function (hex) {
+    hex = (hex || '').toUpperCase();
+    for (var i = 0; i < TITLE_COLORS.length; i++) if (TITLE_COLORS[i][0] === hex) return TITLE_COLORS[i][2];
+    return '';
+  };
+  /* Couleur de titre écrite par Forumactif sur un lien de sujet (sur le lien ou une balise dedans) */
+  function titleToneOf(node) {
+    if (!node) return '';
+    var styled = node.matches && node.matches('[style*="color"]') ? node : node.querySelector('[style*="color"]');
+    var m = styled && (styled.getAttribute('style') || '').match(/color\s*:\s*(#[0-9a-f]{6})/i);
+    return m ? titleTone(m[1]) : '';
+  }
+
+  /* Rôle du staff : couleur de son groupe, comme les bannières de la section « Les groupes » de l'accueil
+     (Staffeux en sumi et gofun, Modérateurs en Hagane), quel que soit le pays de l'auteur */
+  function roleBand(role) {
+    var band = uiEl('div', 'sg-role sg-role--staff sg-role--' + (role === 'staff' ? 'g-staff' : 'g-mod'));
+    var mark = uiEl('span', 'sg-role__mark');
+    mark.innerHTML = MAGATAMA_SVG;
+    band.appendChild(mark);
+    band.appendChild(uiEl('span', 'sg-role__label', role === 'staff' ? 'Staffeux' : 'Modérateur'));
+    return band;
+  }
+
+  /* Barre d'outils de l'éditeur (SCEditor) : boutons retirés à la demande de Vinny, icônes d'origine (images)
+     remplacées par des Material Symbols (YouTube : logo de Simple Icons, licence CC0, absent de Material Symbols) */
+  var TB_REMOVE = ['table', 'size', 'font', 'removeformat', 'more', 'fascroll', 'faupdown', 'farand', 'twemojifa', 'date', 'time', 'pastetext', 'source'];
+  var TB_ICONS = {
+    bold: 'format_bold', italic: 'format_italic', underline: 'format_underlined', strike: 'format_strikethrough',
+    left: 'format_align_left', center: 'format_align_center', right: 'format_align_right', justify: 'format_align_justify',
+    bulletlist: 'format_list_bulleted', orderedlist: 'format_list_numbered', horizontalrule: 'horizontal_rule',
+    quote: 'format_quote', code: 'code', faspoiler: 'expand_circle_down', fahide: 'visibility_off',
+    servimg: 'add_photo_alternate', image: 'image', link: 'link', embed: 'web_asset', youtube: 'svg:youtube',
+    headers: 'title', color: 'format_color_text', subscript: 'subscript', superscript: 'superscript'
+  };
+  var YOUTUBE_SVG = '<svg class="sg-tb__svg" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>';
+  function editorToolbar(scope) {
+    var tries = 0;
+    var run = function () {
+      var bar = scope.querySelector('.sceditor-toolbar');
+      if (!bar || !bar.querySelector('.sceditor-button')) { if (++tries < 40) setTimeout(run, 150); return; }
+      if (bar.classList.contains('sg-tb-on')) return;
+      Array.prototype.slice.call(bar.querySelectorAll('a.sceditor-button')).forEach(function (a) {
+        var name = (a.className.match(/sceditor-button-(\S+)/) || [])[1];
+        if (TB_REMOVE.indexOf(name) >= 0) { a.classList.add('sg-tb--off'); return; }
+        var icon = TB_ICONS[name];
+        if (!icon) return;
+        a.classList.add('sg-tb');
+        if (icon.indexOf('svg:') === 0) a.insertAdjacentHTML('beforeend', YOUTUBE_SVG);
+        else a.appendChild(uiIco(icon));
+      });
+      Array.prototype.slice.call(bar.querySelectorAll('.sceditor-group')).forEach(function (g) {
+        if (!g.querySelector('a.sceditor-button:not(.sg-tb--off)')) g.classList.add('sg-tb--off');
+      });
+      bar.classList.add('sg-tb-on');
+    };
+    run();
+  }
+
   /* --------------------------------------------------------------------
      Page d'écriture d'un message (/post : répondre, citer, nouveau sujet, modifier) : écritoire « suzuri »
      (硯, la pierre à encre). Pattern réservé à l'ÉCRITURE ; il prolonge les messages « fumi » : on écrit
@@ -1748,15 +1832,8 @@
       /* Le sujet en dernier lien ; pour un forum, son fil se termine déjà par lui */
       if (name && (isTopic || !links.length)) crumb(url, name);
       crumb('', verb, true);
-      if (name && !head.querySelector('.sg-pagehead__desc')) {
-        var desc = el('div', 'sg-pagehead__desc');
-        desc.appendChild(document.createTextNode('Dans « '));
-        var a = el('a', null, name);
-        a.href = url;
-        desc.appendChild(a);
-        desc.appendChild(document.createTextNode(' »'));
-        head.appendChild(desc);
-      }
+      /* Description en texte simple (le fil d'Ariane mène déjà au sujet ou au forum) */
+      if (name && !head.querySelector('.sg-pagehead__desc')) head.appendChild(el('div', 'sg-pagehead__desc', 'Dans « ' + name + ' »'));
       var end = document.querySelector('.sg-crumbs--end');
       if (end) { end.textContent = ''; end.appendChild(ol.cloneNode(true)); }
     };
@@ -1789,12 +1866,7 @@
       staffRoles(function (roles) {
         var role = roles[String(ud.user_id)];
         if (!role || aside.querySelector('.sg-role')) return;
-        var band = el('div', 'sg-role sg-role--staff');
-        var mark = el('span', 'sg-role__mark');
-        mark.innerHTML = MAGATAMA_SVG;
-        band.appendChild(mark);
-        band.appendChild(el('span', 'sg-role__label', role === 'staff' ? 'Staffeux' : 'Modérateur'));
-        aside.insertBefore(band, aside.firstChild);
+        aside.insertBefore(roleBand(role), aside.firstChild);
       });
     }
 
@@ -1803,12 +1875,14 @@
     if (subject) {
       subject.classList.add('sg-write__subject');
       subject.placeholder = mode === 'newtopic' ? 'Titre du sujet' : 'Titre du message (facultatif)';
+      subject.classList.add('sg-write__field');
       subject.setAttribute('aria-label', mode === 'newtopic' ? 'Titre du sujet' : 'Titre du message');
     }
     var description = form.querySelector('input[name="description"]');
     if (description) {
       description.classList.add('sg-write__desc');
       description.placeholder = 'Description du sujet (facultatif)';
+      description.classList.add('sg-write__field');
       description.setAttribute('aria-label', 'Description du sujet');
     }
 
@@ -1866,17 +1940,34 @@
       tf.appendChild(seg);
       opts.appendChild(tf);
     }
+    /* Couleur du titre : cinq choix (TITLE_COLORS) avec pastille, sur la même ligne que le titre, à sa droite.
+       Une couleur native déjà choisie hors de ces cinq (sujet ancien) est gardée en dernière entrée. */
     var colorSel = form.querySelector('select[name="topic_color"]');
-    if (colorSel) {
-      var cf = el('div', 'sg-field');
-      var cl = el('label', 'sg-field__label', 'Couleur du titre');
-      var cc = combo(colorSel);
-      cl.setAttribute('for', cc.field.id);
-      cf.appendChild(cl);
-      cf.appendChild(cc.box);
-      var oldWrap = content.querySelector('div.select');
+    if (colorSel && subject) {
+      var cur = (colorSel.value || '').toUpperCase();
+      var legacy = cur && !TITLE_COLORS.some(function (c) { return c[0] === cur; }) ? colorSel.options[colorSel.selectedIndex] : null;
+      colorSel.textContent = '';
+      TITLE_COLORS.forEach(function (c) {
+        var o = new Option(c[1], c[0]);
+        if (c[0] === cur) o.selected = true;
+        colorSel.appendChild(o);
+      });
+      if (legacy) { colorSel.appendChild(legacy); legacy.selected = true; }
+      var toneVar = function (v) { var k = titleTone(v); return k ? 'var(--sg-title-' + k + ')' : (v || ''); };
+      var oldWrap = colorSel.closest('div.select');
+      var cc = combo(colorSel, { swatch: function (v) { return v ? toneVar(v) : ''; } });
+      cc.field.setAttribute('aria-label', 'Couleur du titre');
+      cc.field.setAttribute('title', 'Couleur du titre');
+      cc.box.classList.add('sg-write__color');
       if (oldWrap && !oldWrap.querySelector('select')) oldWrap.remove();
-      opts.appendChild(cf);
+      var titleRow = el('div', 'sg-write__titlerow');
+      subject.parentNode.insertBefore(titleRow, subject);
+      titleRow.appendChild(subject);
+      titleRow.appendChild(cc.box);
+      /* Le titre prend la couleur choisie (Forumactif y écrirait son code couleur natif) */
+      var paintSubject = function () { subject.style.color = toneVar(colorSel.value); };
+      colorSel.addEventListener('change', function () { setTimeout(paintSubject, 0); });
+      paintSubject();
     }
     if (switches.children.length) opts.insertBefore(switches, opts.firstChild);
     if (opts.children.length) {
@@ -2011,6 +2102,7 @@
     div.parentNode.insertBefore(endNav, div.nextSibling);
 
     editorFrameTheme(form);
+    editorToolbar(form);
     document.body.classList.add('sg-writepage-on');
   }
 
@@ -2029,7 +2121,7 @@
       var scheme = getComputedStyle(document.documentElement).colorScheme || 'normal';
       var css = ':root{color-scheme:' + scheme + ';}' +
         'html,body{background:transparent!important;color:' + ref.color + '!important;}' +
-        'body{font-family:' + ref.fontFamily + '!important;font-size:16px!important;line-height:1.7;margin:12px 14px;}' +
+        'body{font-family:' + ref.fontFamily + '!important;font-size:16px!important;line-height:1.7;margin:0;padding:16px!important;}' +
         'a{color:' + link + ';}' +
         'blockquote,.quote,.code,pre{border-left:3px solid ' + muted + ';padding:6px 12px;margin:8px 0;opacity:.9;}' +
         'img{max-width:100%;height:auto;}';
@@ -2110,15 +2202,10 @@
         var role = uid && roles[uid];
         var rankEl = post.querySelector('.post-author-title');
         var rank = rankEl ? rankEl.textContent.replace(/\s+/g, ' ').trim() : '';
-        var label = role === 'staff' ? 'Staffeux' : role === 'mod' ? 'Modérateur' : rank;
-        if (!label) return;
-        var band = uiEl('div', 'sg-role' + (role ? ' sg-role--staff' : ''));
-        if (role) {
-          var mark = uiEl('span', 'sg-role__mark');
-          mark.innerHTML = MAGATAMA_SVG;
-          band.appendChild(mark);
-        }
-        band.appendChild(uiEl('span', 'sg-role__label', label));
+        if (role) { aside.insertBefore(roleBand(role), aside.firstChild); return; }
+        if (!rank) return;
+        var band = uiEl('div', 'sg-role');
+        band.appendChild(uiEl('span', 'sg-role__label', rank));
         aside.insertBefore(band, aside.firstChild);
       });
     });

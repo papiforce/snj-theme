@@ -355,6 +355,25 @@ body.sg-topics-on .sg-topics {
   transform: rotate(180deg);
 }
 
+/* Pastille de couleur (combo({ swatch })) : dans le bouton et devant chaque entrée */
+.sg-combo__swatch {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(var(--sg-contrast-rgb), 0.25);
+}
+
+/* « Défaut » : la couleur du texte selon le thème, en anneau */
+.sg-combo__swatch.is-none {
+  background: none;
+  box-shadow: inset 0 0 0 2px var(--sg-text);
+}
+
+.sg-combo__opt .sg-combo__swatch {
+  margin-right: 10px;
+}
+
 /* Champ de saisie de « Sauter vers » (AwesomeBB stylise les <input>) */
 #wrap input.sg-combo__input {
   flex: 1;

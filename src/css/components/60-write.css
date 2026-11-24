@@ -143,45 +143,57 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
   background: none;
 }
 
-/* Titre du message (Zen Antique, sans cadre : on écrit sur la lettre) et description du sujet */
-#wrap .sg-writeform input.sg-write__subject,
-#wrap .sg-writeform input.sg-write__desc {
+/* Titre du message et description du sujet : même champ que les listes personnalisées (contour arrondi,
+   fond de surface, 46px) ; la couleur du titre est sur la même ligne, à droite du titre */
+.sg-write__titlerow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sg-write__titlerow > .sg-write__subject {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.sg-write__color {
+  flex: none;
+  width: 180px;
+}
+
+#wrap .sg-writeform input.sg-write__field {
+  box-sizing: border-box;
   width: 100%;
+  height: 46px;
   margin: 0;
-  padding: 4px 0 10px;
-  border: 0;
-  border-bottom: 1px solid var(--sg-border);
-  border-radius: 0;
-  background: none;
+  padding: 0 16px;
+  border: 1px solid var(--sg-border-strong, var(--sg-border));
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-surface);
   box-shadow: none;
   color: var(--sg-text);
+  font: inherit;
+  font-size: 0.95rem;
   outline: none;
 }
 
-#wrap .sg-writeform input.sg-write__subject {
-  font-family: var(--sg-font-display);
-  font-size: 1.5rem;
-  line-height: 1.25;
+#wrap .sg-writeform input.sg-write__field:hover {
+  background: var(--sg-surface-2);
 }
 
-#wrap .sg-writeform input.sg-write__desc {
-  font-size: 0.95rem;
+#wrap .sg-writeform input.sg-write__field:focus {
+  border-color: var(--sg-accent-1);
+  background: var(--sg-surface);
 }
 
-#wrap .sg-writeform input.sg-write__subject::placeholder,
-#wrap .sg-writeform input.sg-write__desc::placeholder {
+#wrap .sg-writeform input.sg-write__field::placeholder {
   color: var(--sg-text-muted);
-  opacity: 0.8;
+  opacity: 1;
 }
 
-#wrap .sg-writeform input.sg-write__subject:focus,
-#wrap .sg-writeform input.sg-write__desc:focus {
-  border-bottom-color: var(--ph);
-}
-
-/* Couleur native écrite en ligne sur le titre par Forumactif (selon la couleur choisie) : on garde le texte lisible */
-#wrap .sg-writeform input.sg-write__subject[style*="color"] {
-  text-shadow: none;
+/* Titre coloré : on garde la couleur choisie au survol et au focus */
+#wrap .sg-writeform input.sg-write__subject {
+  font-weight: 700;
 }
 
 #wrap .sg-writeform #message-box {
@@ -207,7 +219,7 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
   width: 100% !important;
   min-height: 320px;
   overflow: hidden;
-  border: 1px solid var(--sg-border) !important;
+  border: 0 !important;
   border-radius: 12px !important;
   background: var(--sg-surface-2) !important;
   box-shadow: none !important;
@@ -217,7 +229,6 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
 .sg-writeform .sceditor-toolbar {
   padding: 6px 8px !important;
   border: 0 !important;
-  border-bottom: 1px solid var(--sg-border) !important;
   background: none !important;
 }
 
@@ -246,11 +257,6 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
   box-shadow: none !important;
 }
 
-/* Icônes d'origine (images) trop sombres sur le fond du thème sombre */
-html[data-theme="dark"] .sg-writeform .sceditor-button div {
-  filter: invert(0.88) hue-rotate(180deg);
-}
-
 .sg-writeform .sceditor-container textarea,
 .sg-writeform .sceditor-container iframe {
   border: 0 !important;
@@ -261,12 +267,58 @@ html[data-theme="dark"] .sg-writeform .sceditor-button div {
   line-height: 1.7;
 }
 
+.sg-writeform .sceditor-container textarea {
+  box-sizing: border-box;
+  padding: 16px !important;
+}
+
 .sg-writeform .sceditor-container textarea::placeholder {
   color: var(--sg-text-muted);
 }
 
 .sg-writeform .sceditor-grip {
   opacity: 0.5;
+}
+
+/* Barre d'outils : boutons retirés (editorToolbar), icônes Material Symbols à la place des images d'origine */
+.sg-writeform .sg-tb--off {
+  display: none !important;
+}
+
+.sg-writeform a.sceditor-button.sg-tb {
+  display: inline-grid !important;
+  place-items: center;
+  width: 34px !important;
+  height: 34px !important;
+  padding: 0 !important;
+  color: var(--sg-text-muted);
+}
+
+.sg-writeform a.sceditor-button.sg-tb > div {
+  display: none !important;
+}
+
+.sg-writeform a.sceditor-button.sg-tb .material-symbols-outlined {
+  font-size: 20px;
+  transition: none;
+}
+
+.sg-writeform .sg-tb__svg {
+  width: 19px;
+  height: 19px;
+}
+
+.sg-writeform a.sceditor-button.sg-tb:hover,
+.sg-writeform a.sceditor-button.sg-tb.active {
+  color: var(--sg-text);
+}
+
+.sg-writeform a.sceditor-button.sg-tb.active .material-symbols-outlined {
+  font-variation-settings: "FILL" 1;
+}
+
+.sg-writeform a.sceditor-button.disabled {
+  opacity: 0.4;
 }
 
 /* --- 3. Réglages et boutons, au pied de la lettre -------------------------------------------------- */
@@ -758,6 +810,15 @@ html[data-theme="dark"] .sg-writeform .sceditor-button div {
 
   .sg-write__opts .sg-seg {
     grid-template-columns: 1fr 1fr;
+  }
+
+  /* Titre puis couleur du titre, l'un sous l'autre */
+  .sg-write__titlerow {
+    flex-wrap: wrap;
+  }
+
+  .sg-write__color {
+    width: 100%;
   }
 
   #wrap .sg-opt {
