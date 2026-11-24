@@ -299,7 +299,10 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
 }
 
 .sg-writeform a.sceditor-button.sg-tb .material-symbols-outlined {
+  width: 20px;
   font-size: 20px;
+  line-height: 20px;
+  text-indent: 0; /* SCEditor rejette le texte des boutons hors champ (text-indent: -9999px) */
   transition: none;
 }
 
