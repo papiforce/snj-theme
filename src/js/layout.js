@@ -443,6 +443,7 @@
     writePage();
     noticePage();
     errorBlocks();
+    pollCards();
     applyTheme(storedTheme() || currentTheme());
   }
 
@@ -2673,6 +2674,65 @@
       field('Question', null, q.id).appendChild(q);
     }
 
+    /* Modification d'un sondage existant : Forumactif donne un champ par choix (poll_option_text[N]) avec son
+       bouton « Supprimer » (envoi du formulaire) et un champ « Ajouter ce choix » (idem) ; ils sont repris tels
+       quels dans la liste : ✕ et + déclenchent leurs boutons natifs (la page se recharge avec le sondage à jour) */
+    var olds = Array.prototype.slice.call(bc.querySelectorAll('input[name^="poll_option_text["]'));
+    var addIn = bc.querySelector('input[name="add_poll_option_text"]');
+    var addBtn = bc.querySelector('[name="add_poll_option"]');
+    if (!ta && (olds.length || addIn)) {
+      var fe = field('Choix', 'Ajouter ou retirer un choix recharge la page');
+      var elist = el('ol', 'sg-poll__choices');
+      var mkRow = function (input, n) {
+        var li = el('li', 'sg-poll__choice');
+        li.appendChild(el('span', 'sg-poll__num', String(n)));
+        input.className = 'sg-write__field sg-poll__input';
+        input.setAttribute('aria-label', 'Choix ' + n);
+        li.appendChild(input);
+        elist.appendChild(li);
+        return li;
+      };
+      olds.forEach(function (inp, i) {
+        var li = mkRow(inp, i + 1);
+        var del = bc.querySelector('[name="' + inp.name.replace('poll_option_text', 'del_poll_option') + '"]');
+        var rm = el('button', 'sg-poll__remove');
+        rm.type = 'button';
+        rm.setAttribute('aria-label', 'Retirer ce choix');
+        rm.setAttribute('title', 'Retirer ce choix');
+        rm.appendChild(ico('close'));
+        if (del) {
+          del.classList.add('sg-poll__native');
+          li.appendChild(del);
+          rm.addEventListener('click', function () { del.click(); });
+        } else rm.disabled = true;
+        li.appendChild(rm);
+        inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') e.preventDefault(); });
+      });
+      if (olds.length <= 2) elist.classList.add('is-min');
+      if (addIn) {
+        var li2 = mkRow(addIn, olds.length + 1);
+        li2.classList.add('sg-poll__choice--new');
+        addIn.placeholder = 'Nouveau choix';
+        var plus = el('button', 'sg-poll__remove sg-poll__plus');
+        plus.type = 'button';
+        plus.setAttribute('aria-label', 'Ajouter ce choix');
+        plus.setAttribute('title', 'Ajouter ce choix');
+        plus.appendChild(ico('add'));
+        if (addBtn) {
+          addBtn.classList.add('sg-poll__native');
+          li2.appendChild(addBtn);
+          plus.addEventListener('click', function () { if (addIn.value.trim()) addBtn.click(); else addIn.focus(); });
+          addIn.addEventListener('keydown', function (e) {
+            if (e.key !== 'Enter') return;
+            e.preventDefault();
+            if (addIn.value.trim()) addBtn.click();
+          });
+        }
+        li2.appendChild(plus);
+      }
+      fe.appendChild(elist);
+    }
+
     if (ta) {
       var fc = field('Choix', max + ' choix au maximum');
       var list = el('ol', 'sg-poll__choices');
@@ -2809,8 +2869,175 @@
       wrap.appendChild(grid);
     }
 
-    bc.textContent = '';
+    /* Ce qui reste du bloc natif (libellés, champs non repris) est gardé masqué : tout champ continue d'être envoyé */
+    var rest = el('div', 'sg-poll__native');
+    while (bc.firstChild) rest.appendChild(bc.firstChild);
     bc.appendChild(wrap);
+    bc.appendChild(rest);
+  }
+
+  /* --------------------------------------------------------------------
+     Sondage affiché (page d'un sujet, et partout où Forumactif le montre) : carte « tōhyō » 投票 (le vote).
+     Pattern réservé aux SONDAGES : carte de surface sur motif shippō (communauté : votes), estompé vers la gauche ;
+     en tête « Sondage » en petites capitales, la question en Zen Antique, et pour le staff « Clore le sondage »
+     (confirmation en fenêtre) ; les choix en lignes sélectionnables (pastille ronde, carrée si choix multiple,
+     coche Asagi), « Voter » (désactivé tant que rien n'est choisi) et « Voir les résultats » ; les résultats en
+     barres arrondies (Asagi, le choix en tête plus marqué), votes et pourcentage ; les mentions (votes publics,
+     fin du sondage) en ligne discrète avec icône. Les champs, boutons et liens natifs sont déplacés.
+     -------------------------------------------------------------------- */
+  function pollCards() {
+    var el = uiEl, ico = uiIco;
+    Array.prototype.slice.call(document.querySelectorAll('.block')).forEach(function (b) {
+      if (b.classList.contains('sg-pollc') || !b.querySelector(':scope > .block-content > form.poll, :scope > .block-content > dl.poll')) return;
+      var bh = b.querySelector(':scope > .block-header');
+      var bc = b.querySelector(':scope > .block-content');
+      if (!bh || !bc) return;
+      b.classList.add('sg-pollc', 'sg-pat', 'sg-pat--shippo');
+
+      /* En-tête : « Sondage », la question, et l'action du staff */
+      var spans = Array.prototype.slice.call(bh.querySelectorAll('h2 > span')).filter(function (x) { return !/float/.test(x.getAttribute('style') || ''); });
+      var question = (spans[0] || bh).textContent.replace(/\s+/g, ' ').trim();
+      var close = bh.querySelector('a[href*="close_vote"]');
+      var head = el('div', 'sg-pollc__head');
+      var titles = el('div', 'sg-pollc__titles');
+      var kick = el('span', 'sg-pollc__kicker');
+      kick.appendChild(ico('ballot'));
+      kick.appendChild(el('span', null, 'Sondage'));
+      titles.appendChild(kick);
+      titles.appendChild(el('h2', 'sg-pollc__q', question));
+      head.appendChild(titles);
+      if (close) {
+        var href = close.getAttribute('href');
+        var cb = el('button', 'sg-pollc__close');
+        cb.type = 'button';
+        cb.setAttribute('aria-label', 'Clore le sondage');
+        cb.setAttribute('title', 'Clore le sondage');
+        cb.appendChild(ico('lock'));
+        cb.addEventListener('click', function () {
+          confirmModal({
+            icon: 'lock', title: 'Clore ce sondage ?',
+            text: 'Plus personne ne pourra voter.', confirm: 'Clore le sondage', busy: 'Un instant…', danger: true,
+            onConfirm: function () { location.href = href; }
+          });
+        });
+        head.appendChild(cb);
+      }
+      bh.textContent = '';
+      bh.appendChild(head);
+
+      var body = el('div', 'sg-pollc__body');
+      var form = bc.querySelector(':scope > form.poll');
+      var dl = bc.querySelector(':scope > dl.poll');
+
+      /* Vote : une ligne par choix */
+      if (form) {
+        var opts = el('div', 'sg-pollc__opts');
+        var inputs = [];
+        Array.prototype.slice.call(form.querySelectorAll('.radio-wrap, label')).forEach(function (w) {
+          var inp = w.querySelector('input[type="radio"], input[type="checkbox"]');
+          if (!inp || inputs.indexOf(inp) >= 0) return;
+          inputs.push(inp);
+          var text = (w.querySelector('label > span:last-child') || w).textContent.replace(/\s+/g, ' ').trim();
+          var opt = el('label', 'sg-pollc__opt' + (inp.type === 'checkbox' ? ' is-multi' : ''));
+          opt.appendChild(inp);
+          var mark = el('span', 'sg-pollc__mark');
+          mark.appendChild(ico('check'));
+          opt.appendChild(mark);
+          opt.appendChild(el('span', 'sg-pollc__label', text));
+          opts.appendChild(opt);
+        });
+        Array.prototype.slice.call(form.querySelectorAll('.radio-wrap')).forEach(function (w) { w.remove(); });
+        var acts = el('div', 'sg-pollc__actions');
+        var sub = form.querySelector('input[type="submit"]');
+        if (sub) {
+          var btn = el('button', 'sg-pollc__btn');
+          btn.type = 'submit';
+          btn.name = sub.name;
+          btn.value = sub.value;
+          btn.appendChild(ico('how_to_vote'));
+          btn.appendChild(el('span', null, 'Voter'));
+          sub.remove();
+          acts.appendChild(btn);
+          var sync = function () { btn.disabled = !inputs.some(function (i) { return i.checked; }); };
+          inputs.forEach(function (i) { i.addEventListener('change', sync); });
+          sync();
+        }
+        var resLink = form.querySelector('a[href*="viewresult"]');
+        if (resLink) {
+          resLink.className = 'sg-pollc__btn sg-pollc__btn--ghost';
+          resLink.textContent = '';
+          resLink.appendChild(ico('bar_chart'));
+          resLink.appendChild(el('span', null, 'Voir les résultats'));
+          acts.appendChild(resLink);
+        }
+        /* espaces insécables entre les boutons natifs */
+        Array.prototype.slice.call(form.childNodes).forEach(function (n) { if (n.nodeType === 3) n.remove(); });
+        form.insertBefore(opts, form.firstChild);
+        form.appendChild(acts);
+        body.appendChild(form);
+      }
+
+      /* Résultats : barres */
+      if (dl) {
+        var rows = [], total = '';
+        Array.prototype.slice.call(dl.children).forEach(function (n) {
+          if (n.tagName === 'DT' && !n.classList.contains('poll-total')) rows.push({ label: n.textContent.trim(), dd: n.nextElementSibling });
+          if (n.tagName === 'DD' && n.classList.contains('poll-total')) total = n.textContent.trim();
+        });
+        var res = el('div', 'sg-pollc__results');
+        var best = 0;
+        rows.forEach(function (r) {
+          r.num = parseInt(((r.dd && r.dd.querySelector('.poll-num')) || {}).textContent, 10) || 0;
+          r.pct = parseFloat((((r.dd && r.dd.querySelector('.poll-percent')) || {}).textContent || '0').replace(',', '.')) || 0;
+          best = Math.max(best, r.num);
+        });
+        rows.forEach(function (r) {
+          var row = el('div', 'sg-pollc__res' + (best && r.num === best ? ' is-lead' : ''));
+          var top = el('div', 'sg-pollc__resline');
+          top.appendChild(el('span', 'sg-pollc__label', r.label));
+          top.appendChild(el('span', 'sg-pollc__count', r.num + (r.num > 1 ? ' votes' : ' vote') + ' · ' + Math.round(r.pct) + ' %'));
+          row.appendChild(top);
+          var bar = el('div', 'sg-pollc__bar');
+          bar.setAttribute('role', 'img');
+          bar.setAttribute('aria-label', r.label + ' : ' + Math.round(r.pct) + ' %');
+          var fill = el('span', 'sg-pollc__fill');
+          fill.style.width = r.pct + '%';
+          bar.appendChild(fill);
+          row.appendChild(bar);
+          res.appendChild(row);
+        });
+        body.appendChild(res);
+        dl.classList.add('sg-hidden');
+        dl.style.display = 'none';
+        var back = bc.querySelector(':scope > a.btn');
+        var acts2 = el('div', 'sg-pollc__actions');
+        if (back) {
+          back.className = 'sg-pollc__btn sg-pollc__btn--ghost';
+          back.textContent = '';
+          back.appendChild(ico('arrow_back'));
+          back.appendChild(el('span', null, 'Revenir au vote'));
+          acts2.appendChild(back);
+        }
+        if (total) acts2.appendChild(el('span', 'sg-pollc__total', total + (parseInt(total, 10) > 1 ? ' votes au total' : ' vote au total')));
+        body.appendChild(acts2);
+      }
+
+      /* Mentions natives (votes publics, fin du sondage…) */
+      var meta = el('ul', 'sg-pollc__meta');
+      Array.prototype.slice.call(bc.children).forEach(function (n) {
+        if (n === form || n === dl || n.tagName !== 'DIV' || !n.textContent.trim()) return;
+        var li = el('li');
+        var t = n.textContent;
+        li.appendChild(ico(/public/i.test(t) ? 'visibility' : /anonym|priv/i.test(t) ? 'visibility_off' : /termin|fin/i.test(t) ? 'schedule' : 'info'));
+        var span = el('span');
+        while (n.firstChild) span.appendChild(n.firstChild);
+        li.appendChild(span);
+        meta.appendChild(li);
+        n.remove();
+      });
+      if (meta.children.length) body.appendChild(meta);
+      bc.insertBefore(body, bc.firstChild);
+    });
   }
 
   /* Fenêtre de confirmation (modale) au design system : icône, titre en Zen Antique, texte, « Annuler » et
@@ -2986,9 +3213,13 @@
   function noticePage() {
     var wrap = document.getElementById('wrap');
     if (!wrap || wrap.querySelector('.sg-notice')) return;
+    /* Un seul .block ; les autres enfants ne peuvent être que des scripts, des styles ou des emplacements
+       publicitaires de Forumactif (div sans classe), comme sur /modcp */
     var kids = Array.prototype.slice.call(wrap.children).filter(function (c) { return !/^(SCRIPT|STYLE)$/.test(c.tagName); });
-    if (kids.length !== 1 || !kids[0].classList.contains('block')) return;
-    var block = kids[0];
+    var blocks = kids.filter(function (c) { return c.classList.contains('block'); });
+    var others = kids.filter(function (c) { return blocks.indexOf(c) < 0; });
+    if (blocks.length !== 1 || others.some(function (c) { return c.className || c.tagName !== 'DIV'; })) return;
+    var block = blocks[0];
     var hd = block.querySelector(':scope > .block-header');
     var body = block.querySelector(':scope > .block-content');
     if (!hd || !body || body.querySelector('form, input, textarea, select')) return;
