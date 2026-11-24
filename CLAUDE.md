@@ -14,7 +14,7 @@ dans le panneau d'administration (PA), puis on commit.
 | `src/css/critical.css` | Tokens, thèmes clair/sombre, base | PA › Affichage › Couleurs › CSS principal |
 | `src/css/components/` | CSS des composants (barre latérale, catégories, sujets…), préfixés par un numéro d'ordre | Assemblés dans `dist/snj.css` par `node scripts/build.mjs`, servis par jsDelivr |
 | `src/templates/` | Templates HTML et extraits à insérer | PA › Affichage › Templates |
-| `src/js/` | Un fichier par script : `layout.js` (barre latérale + thème, toutes les pages, module 10), `home.js` (widgets de l'accueil, index, module 11), `forums.js` (catégories de l'accueil, index, module 12) | PA › Modules › Gestion des codes JavaScript |
+| `src/js/` | Un fichier par script : `layout.js` (barre latérale + thème, toutes les pages, module 10), `home.js` (widgets de l'accueil, index, module 11), `forums.js` (catégories de l'accueil, index, module 12), `stats.js` (statistiques de l'accueil, index, module 13) | PA › Modules › Gestion des codes JavaScript |
 | `docs/` | Décisions, notes de migration | — |
 
 ## Décisions
@@ -100,6 +100,22 @@ dans le panneau d'administration (PA), puis on commit.
   data-danger data-clan data-clan-href hidden>` puis le texte. Structure et contenus : `docs/structure-forums.json`
   (repris de la production ; dangerosité provisoire, tirée au hasard). Index : sous-forums affichés (PA › Affichage ›
   Page d'accueil › Structure et hiérarchie). La liste native n'est masquée que si le sélecteur est monté.
+- **Statistiques de l'accueil** (`stats.js` + `45-stats.css`) : remplacent le bloc « Qui est en ligne », sous le
+  séparateur de fin. Grille bento : Chroniques (messages en compteur animé, membres, messages par membre, kikkō),
+  Dernier inscrit (portrait, sceau 新 qui se tamponne au survol), En ce moment (point « en direct » Asagi, jauge
+  enregistrés / invisibles / invités, record en discret), Récemment connectés (24 h, pseudos en pastilles colorées,
+  icône `shield` pour le staff, « + N autres » au-delà de 24, shippō), Groupes (bannières **nobori** : une par groupe,
+  mon kanji ou icône, nom vertical, effectif, ondulation au survol). Nombre de messages, de membres et dernier inscrit :
+  extrait `src/templates/index_body-snippet.html` ajouté au template `index_body` (absents d'AwesomeBB par défaut).
+  Connectés des 24 h activés (PA › Affichage › Page d'accueil › Généralités).
+  **Groupes** (PA › Utilisateurs & Groupes) : Hi, Mizu, Kaze, Kaminari, Tsuchi no Kuni, **Shōkoku** (小国, petits pays,
+  nom choisi pour les personnages hors des cinq grandes nations ; la catégorie de l'accueil porte le même nom, slug
+  `shokoku`, l'ancien `reste-du-sekai` reste accepté), Modérateurs, Staffeux. Ordre 1 à 6 pour les pays, 7 et 8 pour
+  Modérateurs et Staffeux : un membre du staff qui a un pays prend la couleur de son pays. Teintes du PA rebranchées
+  sur les tokens dans `08-groups.css` (Staffeux `#ECE5D4` → sumi et gofun, Modérateurs `#9FB0C3` → Hagane, pays →
+  `--sg-nation-*`, assombris en clair). Le PA impose un modérateur par groupe, compté dans la légende : l'effectif
+  affiché retire 1 (`CONFIG.legendIncludesModerator`). Il faut donc un compte du staff dédié comme modérateur des
+  groupes, qui n'en est pas membre.
 - **Modules JavaScript** : Forumactif les charge dans le `<head>` ; tout script attend `DOMContentLoaded`.
 - **Transitions** : AwesomeBB applique `* { transition: 0.16s }`. Un texte placé dans un enfant d'un élément dont la
   couleur s'anime saute pendant l'animation : mettre `transition: none` sur ces enfants (voir `40-zones.css`).
