@@ -192,6 +192,11 @@ dans le panneau d'administration (PA), puis on commit.
   conservé et déplacé (citation, J'aime, éditeur continuent de fonctionner) : `.post-wrap.sg-post` en grille
   `248px | 1fr` **avec 16px d'écart**, sans fond ni bordure ; l'en-tête et le contenu sont déplacés dans une carte
   `.sg-post__letter` ; `.post-body` en `display: contents`, chaque message `isolation: isolate`.
+  **Empilement** : Forumactif donne `z-index: 500` à la fois à `.post-header` et à `.post` ; le corps, placé après,
+  recouvrait le menu trois points et captait ses clics (menu visible mais inactif). L'en-tête est donc à `z-index: 2`,
+  le corps à `1` ; la carte de la lettre n'a pas d'`overflow: hidden` (le menu peut en déborder) et un message dont un
+  menu est ouvert passe au premier plan (`.sg-post:has(.sg-menu.is-open)`, `z-index: 10`). Tout menu se referme au
+  retour arrière (`pageshow` avec `persisted`). Toujours vérifier un menu par `elementFromPoint`, pas seulement à l'œil.
   **Colonne de l'auteur**, sans liseré : le **rôle** (`postRoles`) en haut, hors de la carte : **bandeau** `.sg-role`
   (pas une pastille) sur motif **shippō**, **encadré sur ses 4 côtés** (arrondi 10px) à la couleur de l'auteur
   (`--author`, lue en JS sur son pseudo après `08-groups.css`, relue à chaque changement de thème), libellé en Zen
