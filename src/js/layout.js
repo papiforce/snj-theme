@@ -421,6 +421,7 @@
     topics();
     topicPage();
     perms();
+    writePage();
     applyTheme(storedTheme() || currentTheme());
   }
 
@@ -1642,6 +1643,353 @@
     align();
     if (document.readyState !== 'complete') window.addEventListener('load', function () { setTimeout(align, 0); setTimeout(align, 400); });
     window.addEventListener('hashchange', function () { touched = false; align(); });
+  }
+
+  /* --------------------------------------------------------------------
+     Page d'écriture d'un message (/post : répondre, citer, nouveau sujet, modifier) : écritoire « suzuri »
+     (硯, la pierre à encre). Pattern réservé à l'ÉCRITURE ; il prolonge les messages « fumi » : on écrit
+     dans la même lettre que celle qui sera publiée, le portrait et le rôle de l'auteur à gauche.
+       1. en-tête (même pattern que les forums et les sujets) : fil d'Ariane lu sur la page du sujet ou du
+          forum, verbe en titre (« Répondre au sujet »…), « Dans « … » » en description ;
+       2. le formulaire en deux colonnes : auteur collant | lettre (titre, éditeur, réglages, boutons) ;
+          réglages en interrupteurs, type du sujet en contrôle segmenté, couleur du titre en liste personnalisée ;
+          les autres blocs (sondage, calendrier, SEO, pièces jointes…) en panneaux repliables ;
+       3. « Derniers messages du sujet » (revue native) en cartes compactes, coupées au-delà de 240px ;
+       4. séparateur de fin et fil d'Ariane repris.
+     Le bloc de l'éditeur (#postingbox) n'est JAMAIS déplacé : l'iframe de SCEditor se rechargerait et
+     l'éditeur casserait. On construit autour (le formulaire devient la grille).
+     -------------------------------------------------------------------- */
+  function writePage() {
+    if (location.pathname !== '/post') return;
+    var form = document.querySelector('form[name="post"]');
+    var box = document.getElementById('postingbox');
+    if (!form || !box || form.classList.contains('sg-writeform')) return;
+    var el = uiEl, ico = uiIco;
+    var val = function (name) { var i = form.querySelector('input[name="' + name + '"]'); return i ? i.value : ''; };
+    var params = {};
+    location.search.replace(/^\?/, '').split('&').forEach(function (kv) {
+      var p = kv.split('=');
+      if (p[0]) params[decodeURIComponent(p[0])] = decodeURIComponent(p[1] || '');
+    });
+    var mode = val('mode') || params.mode || '';
+    var VERB = { reply: 'Répondre au sujet', quote: 'Répondre au sujet', newtopic: 'Nouveau sujet', editpost: 'Modifier le message' };
+    var nativeHead = document.querySelector('#wrap > .page-header');
+    var verb = VERB[mode] || (nativeHead ? nativeHead.textContent.trim() : 'Écrire un message');
+    document.body.classList.add('sg-writepage');
+
+    /* 1. En-tête */
+    var head = el('section', 'sg-pagehead sg-pagehead--write');
+    head.setAttribute('aria-label', 'En-tête de la page');
+    var nav = el('nav', 'sg-crumbs');
+    nav.setAttribute('aria-label', "Fil d'Ariane");
+    var ol = el('ol', 'sg-crumbs__list');
+    nav.appendChild(ol);
+    head.appendChild(nav);
+    var row = el('div', 'sg-pagehead__row');
+    var h1 = el('h1', 'sg-pagehead__title');
+    h1.appendChild(el('span', 'sg-pagehead__text', verb));
+    row.appendChild(h1);
+    head.appendChild(row);
+    var crumb = function (href, text, here) {
+      var li = el('li', 'sg-crumbs__item');
+      var a = el(here ? 'span' : 'a', 'sg-crumbs__link' + (here ? ' sg-crumbs__here' : ''), text);
+      if (here) a.setAttribute('aria-current', 'page'); else a.href = href;
+      li.appendChild(a);
+      ol.appendChild(li);
+    };
+    if (nativeHead) nativeHead.parentNode.insertBefore(head, nativeHead);
+    else form.parentNode.insertBefore(head, form);
+    document.body.classList.add('sg-pagehead-on');
+
+    var tone = function (t) {
+      ['sg-tone-gestion', 'sg-tone-hi', 'sg-tone-mizu', 'sg-tone-kaze', 'sg-tone-kaminari', 'sg-tone-tsuchi', 'sg-tone-autres']
+        .forEach(function (c) { head.classList.remove(c); form.classList.remove(c); });
+      if (t) { head.classList.add('sg-tone-' + t); form.classList.add('sg-tone-' + t); }
+    };
+    /* Contexte (fil d'Ariane, titre du sujet ou du forum) lu sur la page du sujet ou du forum */
+    var t = val('t') || params.t, p = val('p') || params.p, f = val('f') || params.f;
+    var src = t ? '/t' + t : p ? '/viewtopic?p=' + p : f ? '/f' + f : '';
+    var fillHead = function (doc, url) {
+      var isTopic = /^\/t\d+/.test(url);
+      var native = doc && doc.querySelector(isTopic ? '#topic .topic-header' : '#wrap .page-header');
+      var links = native ? Array.prototype.slice.call(native.querySelectorAll('#breadcrumbs a')) : [];
+      var title = native && native.querySelector('h1');
+      var name = title ? (title.querySelector('a') || title).textContent.trim() : '';
+      var category = links[1] ? links[1].textContent.trim() : '';
+      var meta = CATEGORIES[category];
+      tone(meta && meta.tone);
+      ol.textContent = '';
+      if (links.length) {
+        links.forEach(function (a, i) {
+          crumb(i === 1 && meta ? '/?onglet=' + meta.slug : a.getAttribute('href'), a.textContent.trim());
+        });
+      } else crumb('/', 'Accueil');
+      /* Le sujet en dernier lien ; pour un forum, son fil se termine déjà par lui */
+      if (name && (isTopic || !links.length)) crumb(url, name);
+      crumb('', verb, true);
+      if (name && !head.querySelector('.sg-pagehead__desc')) {
+        var desc = el('div', 'sg-pagehead__desc');
+        desc.appendChild(document.createTextNode('Dans « '));
+        var a = el('a', null, name);
+        a.href = url;
+        desc.appendChild(a);
+        desc.appendChild(document.createTextNode(' »'));
+        head.appendChild(desc);
+      }
+      var end = document.querySelector('.sg-crumbs--end');
+      if (end) { end.textContent = ''; end.appendChild(ol.cloneNode(true)); }
+    };
+    crumb('/', 'Accueil');
+    crumb('', verb, true);
+    if (src) {
+      fetch(src, { credentials: 'same-origin' })
+        .then(function (r) { return r.ok ? r.text().then(function (h) { return [h, new URL(r.url).pathname]; }) : null; })
+        .then(function (res) { if (res) fillHead(new DOMParser().parseFromString(res[0], 'text/html'), res[1]); })
+        .catch(function () {});
+    }
+
+    /* 2. Le formulaire en grille : auteur | lettre */
+    form.classList.add('sg-writeform');
+    var ud = window._userdata || {};
+    var aside = el('aside', 'sg-write__aside');
+    aside.setAttribute('aria-label', 'Auteur');
+    var card = el('div', 'sg-write__card');
+    var srcAv = avatarSrc();
+    if (srcAv) {
+      var img = el('img', 'sg-write__portrait');
+      img.src = srcAv;
+      img.alt = '';
+      card.appendChild(img);
+    }
+    if (ud.username) card.appendChild(el('p', 'sg-write__name', ud.username));
+    aside.appendChild(card);
+    form.insertBefore(aside, form.firstChild);
+    if (ud.user_id) {
+      staffRoles(function (roles) {
+        var role = roles[String(ud.user_id)];
+        if (!role || aside.querySelector('.sg-role')) return;
+        var band = el('div', 'sg-role sg-role--staff');
+        var mark = el('span', 'sg-role__mark');
+        mark.innerHTML = MAGATAMA_SVG;
+        band.appendChild(mark);
+        band.appendChild(el('span', 'sg-role__label', role === 'staff' ? 'Staffeux' : 'Modérateur'));
+        aside.insertBefore(band, aside.firstChild);
+      });
+    }
+
+    var content = box.querySelector('.block-content') || box;
+    var subject = form.querySelector('input[name="subject"]');
+    if (subject) {
+      subject.classList.add('sg-write__subject');
+      subject.placeholder = mode === 'newtopic' ? 'Titre du sujet' : 'Titre du message (facultatif)';
+      subject.setAttribute('aria-label', mode === 'newtopic' ? 'Titre du sujet' : 'Titre du message');
+    }
+    var description = form.querySelector('input[name="description"]');
+    if (description) {
+      description.classList.add('sg-write__desc');
+      description.placeholder = 'Description du sujet (facultatif)';
+      description.setAttribute('aria-label', 'Description du sujet');
+    }
+
+    /* Réglages : cases natives en interrupteurs, type du sujet en contrôle segmenté, couleur du titre en liste */
+    var buttons = content.querySelector('fieldset.form-buttons');
+    var opts = el('div', 'sg-write__opts');
+    opts.setAttribute('role', 'group');
+    opts.setAttribute('aria-label', 'Réglages du message');
+    var optBlock = Array.prototype.slice.call(form.querySelectorAll(':scope > .block')).filter(function (b) {
+      return b !== box && b.querySelector('input[name="notify"], input[name="disable_bbcode"], input[name="attach_sig"], input[name="topictype"]');
+    })[0];
+    var SHORT = {
+      disable_html: 'Désactiver le HTML',
+      disable_bbcode: 'Désactiver le BBCode',
+      disable_smilies: 'Désactiver les smileys',
+      attach_sig: 'Ajouter ma signature',
+      notify: 'M’avertir des réponses'
+    };
+    var switches = el('div', 'sg-write__switches');
+    var types = [];
+    if (optBlock) {
+      Array.prototype.slice.call(optBlock.querySelectorAll('label')).forEach(function (lab) {
+        var input = lab.querySelector('input');
+        if (!input) return;
+        if (input.type === 'radio' && input.name === 'topictype') { types.push({ input: input, text: lab.textContent.trim() }); return; }
+        if (input.type !== 'checkbox') return;
+        var row2 = el('label', 'sg-opt');
+        row2.appendChild(input);
+        row2.appendChild(el('span', 'sg-opt__text', SHORT[input.name] || lab.textContent.trim()));
+        var sw = el('span', 'sg-switch');
+        sw.setAttribute('aria-hidden', 'true');
+        sw.appendChild(el('span', 'sg-switch__thumb'));
+        row2.appendChild(sw);
+        switches.appendChild(row2);
+      });
+      optBlock.classList.add('sg-hidden');
+    }
+    if (types.length) {
+      var TYPE = { 0: ['chat_bubble', 'Normal'], 1: ['push_pin', 'Épinglé'], 2: ['campaign', 'Annonce'], 3: ['public', 'Annonce globale'] };
+      var tf = el('div', 'sg-field');
+      tf.setAttribute('role', 'group');
+      tf.setAttribute('aria-label', 'Type du sujet');
+      tf.appendChild(el('span', 'sg-field__label', 'Type du sujet'));
+      var seg = el('div', 'sg-seg');
+      types.forEach(function (o) {
+        var lab = el('label', 'sg-seg__opt');
+        lab.appendChild(o.input);
+        var face = el('span', 'sg-seg__face');
+        var spec = TYPE[o.input.value] || ['label', o.text];
+        face.appendChild(ico(spec[0]));
+        face.appendChild(el('span', null, spec[1]));
+        lab.appendChild(face);
+        seg.appendChild(lab);
+      });
+      tf.appendChild(seg);
+      opts.appendChild(tf);
+    }
+    var colorSel = form.querySelector('select[name="topic_color"]');
+    if (colorSel) {
+      var cf = el('div', 'sg-field');
+      var cl = el('label', 'sg-field__label', 'Couleur du titre');
+      var cc = combo(colorSel);
+      cl.setAttribute('for', cc.field.id);
+      cf.appendChild(cl);
+      cf.appendChild(cc.box);
+      var oldWrap = content.querySelector('div.select');
+      if (oldWrap && !oldWrap.querySelector('select')) oldWrap.remove();
+      opts.appendChild(cf);
+    }
+    if (switches.children.length) opts.insertBefore(switches, opts.firstChild);
+    if (opts.children.length) {
+      if (buttons) content.insertBefore(opts, buttons); else content.appendChild(opts);
+    }
+
+    /* Boutons : « Prévisualiser » (contour) puis « Envoyer » (plein), à droite */
+    if (buttons) {
+      var actions = el('div', 'sg-write__actions');
+      var prev = buttons.querySelector('[name="preview"]');
+      var send = buttons.querySelector('[name="post"]');
+      if (prev) {
+        var pb = el('button', 'sg-action sg-action--ghost');
+        pb.type = 'submit';
+        pb.name = prev.name;
+        pb.value = prev.value || 'Prévisualiser';
+        pb.appendChild(ico('visibility'));
+        pb.appendChild(el('span', null, 'Prévisualiser'));
+        prev.remove();
+        actions.appendChild(pb);
+      }
+      if (send) {
+        send.className = 'sg-action';
+        send.textContent = '';
+        send.appendChild(ico('send'));
+        send.appendChild(el('span', null, mode === 'editpost' ? 'Enregistrer' : mode === 'newtopic' ? 'Publier le sujet' : 'Envoyer'));
+        actions.appendChild(send);
+      }
+      buttons.appendChild(actions);
+    }
+
+    /* Selects restants (calendrier, pièces jointes…) : listes personnalisées */
+    Array.prototype.slice.call(form.querySelectorAll('select')).forEach(function (s) {
+      if (s.classList.contains('sg-combo__native') || s.multiple || s.closest('.sceditor-container')) return;
+      var parent = s.parentNode, next = s.nextSibling;
+      var c = combo(s); /* combo() range la liste native dans sa boîte */
+      parent.insertBefore(c.box, next);
+    });
+
+    /* Autres blocs du formulaire (règles, sondage, calendrier, SEO…) : panneaux repliables */
+    Array.prototype.slice.call(form.querySelectorAll(':scope > .block')).forEach(function (b, i) {
+      if (b === box || b === optBlock || b.id === 'preview') return;
+      var bh = b.querySelector(':scope > .block-header');
+      if (!bh) return;
+      b.classList.add('sg-panel');
+      var tg = el('button', 'sg-panel__toggle');
+      tg.type = 'button';
+      var pid = 'sg-panel-' + i;
+      var bc = b.querySelector(':scope > .block-content');
+      if (bc) bc.id = bc.id || pid;
+      tg.setAttribute('aria-controls', bc ? bc.id : pid);
+      var name = bh.cloneNode(true);
+      Array.prototype.slice.call(name.querySelectorAll('.forum-hide, div')).forEach(function (x) { x.remove(); });
+      tg.appendChild(el('span', 'sg-panel__title', name.textContent.trim()));
+      tg.appendChild(ico('expand_more'));
+      bh.textContent = '';
+      bh.appendChild(tg);
+      var openIt = b.id === 'forum_rules';
+      var set = function (on) {
+        b.classList.toggle('is-open', on);
+        tg.setAttribute('aria-expanded', on ? 'true' : 'false');
+      };
+      set(openIt);
+      tg.addEventListener('click', function () { set(!b.classList.contains('is-open')); });
+    });
+
+    /* Aperçu : la lettre telle qu'elle sera publiée */
+    var preview = document.getElementById('preview');
+    if (preview) {
+      preview.classList.add('sg-write__preview');
+      var ph = preview.querySelector('.block-header');
+      if (ph) { ph.textContent = ''; ph.appendChild(ico('visibility')); ph.appendChild(el('span', null, 'Aperçu')); }
+    }
+
+    /* 3. Revue du sujet : derniers messages en cartes compactes */
+    var reviewTitle = document.querySelector('#wrap > .page-title');
+    var comments = Array.prototype.slice.call(document.querySelectorAll('#wrap > .block-comment'));
+    var after = form;
+    if (comments.length) {
+      var review = el('section', 'sg-review');
+      review.setAttribute('aria-label', 'Derniers messages du sujet');
+      var rh = el('h2', 'sg-review__title');
+      rh.appendChild(ico('history'));
+      rh.appendChild(el('span', null, 'Derniers messages du sujet'));
+      review.appendChild(rh);
+      comments.forEach(function (c) {
+        c.classList.add('sg-rev');
+        var details = c.querySelector('.block-comment-details');
+        var bodyC = c.querySelector('.content');
+        if (details && bodyC) {
+          var meta = el('div', 'sg-rev__meta');
+          Array.prototype.slice.call(details.childNodes).forEach(function (n) { meta.appendChild(n); });
+          var footer = details.closest('.block-footer');
+          if (footer) footer.remove();
+          bodyC.parentNode.insertBefore(meta, bodyC);
+        }
+        review.appendChild(c);
+        if (bodyC) {
+          requestAnimationFrame(function () {
+            if (bodyC.scrollHeight <= 260) return;
+            c.classList.add('is-clamped');
+            var more = el('button', 'sg-rev__more');
+            more.type = 'button';
+            more.appendChild(el('span', null, 'Lire la suite'));
+            more.appendChild(ico('expand_more'));
+            more.addEventListener('click', function () {
+              var open = c.classList.toggle('is-expanded');
+              more.firstChild.textContent = open ? 'Réduire' : 'Lire la suite';
+            });
+            bodyC.parentNode.appendChild(more);
+          });
+        }
+      });
+      form.parentNode.insertBefore(review, form.nextSibling);
+      if (reviewTitle) reviewTitle.classList.add('sg-hidden');
+      after = review;
+    }
+
+    /* 4. Séparateur de fin et fil d'Ariane repris */
+    var div = el('div', 'sg-divider sg-divider--end');
+    div.setAttribute('role', 'separator');
+    var rule = el('span', 'sg-divider__rule');
+    rule.setAttribute('aria-hidden', 'true');
+    rule.appendChild(el('span', 'sg-divider__line'));
+    rule.insertAdjacentHTML('beforeend', '<svg class="sg-divider__notch" viewBox="0 0 48 25" aria-hidden="true"><path d="M0 .5L24 24.5L48 .5"/></svg>');
+    rule.appendChild(el('span', 'sg-divider__line'));
+    div.appendChild(rule);
+    after.parentNode.insertBefore(div, after.nextSibling);
+    var endNav = el('nav', 'sg-crumbs sg-crumbs--end');
+    endNav.setAttribute('aria-label', "Fil d'Ariane");
+    endNav.appendChild(ol.cloneNode(true));
+    div.parentNode.insertBefore(endNav, div.nextSibling);
+
+    document.body.classList.add('sg-writepage-on');
   }
 
   /* Magatama du logo de Sengoku no Jidai (formes pleines) : marque du staff, comme dans les statistiques */

@@ -6471,3 +6471,718 @@ html[data-density="compact"][data-profile="right"] #topic .sg-post .post-aside {
     bottom: 96px; /* au-dessus de la barre de navigation mobile */
   }
 }
+
+/* --- 60-write.css --- */
+/* ==========================================================================
+   SNJ — Page d'écriture d'un message (/post) : écritoire « suzuri » 硯
+   Construite par src/js/layout.js (writePage). Pattern réservé à l'ÉCRITURE ; il prolonge les
+   messages « fumi » (59-topic.css) : on écrit dans la même lettre que celle qui sera publiée.
+     1. En-tête : pattern des forums (55-pagehead.css), verbe en titre, « Dans « … » » en description.
+     2. Formulaire en grille : auteur collant (rôle, portrait 200 × 400, pseudo) | lettre.
+        Le bloc de l'éditeur (#postingbox) n'est jamais déplacé (l'iframe de SCEditor se rechargerait) :
+        c'est le formulaire qui devient la grille, sans écart de rangée (les marges font l'espacement).
+     3. Réglages (interrupteurs, type du sujet, couleur du titre) et boutons au pied de la lettre.
+     4. Autres blocs (règles, sondage, calendrier, SEO…) en panneaux repliables.
+     5. « Derniers messages du sujet » en cartes compactes, coupées au-delà de 240px.
+   ========================================================================== */
+
+body.sg-writepage-on #wrap > .page-header,
+.sg-writepage .sg-hidden,
+.sg-writeform #smiley-box,
+.sg-writeform #message-box .left-box,
+.sg-writeform #helpbox {
+  display: none !important;
+}
+
+.sg-writeform {
+  --ph: var(--sg-primary);
+  --author: var(--ph);
+}
+
+.sg-writeform.sg-tone-gestion { --ph: var(--sg-contrast); }
+.sg-writeform.sg-tone-hi { --ph: var(--sg-nation-hi); }
+.sg-writeform.sg-tone-mizu { --ph: var(--sg-nation-mizu); }
+.sg-writeform.sg-tone-kaze { --ph: var(--sg-nation-kaze); }
+.sg-writeform.sg-tone-kaminari { --ph: var(--sg-nation-kaminari); }
+.sg-writeform.sg-tone-tsuchi { --ph: var(--sg-nation-tsuchi); }
+.sg-writeform.sg-tone-autres { --ph: var(--sg-nation-autres); }
+
+/* Lien du sujet dans la description de l'en-tête */
+#wrap .sg-pagehead--write .sg-pagehead__desc a {
+  color: var(--sg-text);
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--ph) 60%, transparent);
+  text-underline-offset: 3px;
+}
+
+/* --- 2. Grille : auteur | lettre ------------------------------------------------------------------ */
+#wrap form.sg-writeform {
+  display: grid;
+  grid-template-columns: 248px minmax(0, 1fr);
+  column-gap: 16px;
+  row-gap: 0;
+  align-items: start;
+  margin: 0;
+  font-size: 16px; /* AwesomeBB réduit la taille du texte dans #wrap */
+}
+
+/* Préférence « Position du profil (inversé) » : la même qu'en lecture */
+html[data-profile="right"] #wrap form.sg-writeform {
+  grid-template-columns: minmax(0, 1fr) 248px;
+}
+
+.sg-writeform > * {
+  grid-column: 2;
+  min-width: 0;
+}
+
+html[data-profile="right"] .sg-writeform > * {
+  grid-column: 1;
+}
+
+/* L'auteur, collant : rôle (bandeau partagé avec les messages, .sg-role), portrait, pseudo */
+.sg-write__aside {
+  position: sticky;
+  top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  /* toutes les rangées implicites (la grille n'a pas d'écart de rangée : elles ne coûtent rien) */
+  grid-row: 1 / span 40;
+}
+
+.sg-writeform > .sg-write__aside {
+  grid-column: 1;
+}
+
+html[data-profile="right"] .sg-writeform > .sg-write__aside {
+  grid-column: 2;
+}
+
+.sg-write__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  text-align: center;
+}
+
+.sg-write__portrait {
+  display: block;
+  width: 200px;
+  max-width: 100%;
+  height: 400px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+#wrap .sg-write__name {
+  margin: 0;
+  overflow: hidden;
+  max-width: 100%;
+  color: var(--sg-text);
+  font-family: var(--sg-font-display);
+  font-size: 1.3rem;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* La lettre : le bloc natif de l'éditeur, restylé sur place */
+#wrap .sg-writeform #postingbox {
+  margin: 0 0 16px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-surface);
+  box-shadow: none;
+  color: var(--sg-text);
+}
+
+#wrap .sg-writeform #postingbox > .block-content {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0;
+  padding: 20px 16px 16px;
+  border: 0;
+  background: none;
+}
+
+/* Titre du message (Zen Antique, sans cadre : on écrit sur la lettre) et description du sujet */
+#wrap .sg-writeform input.sg-write__subject,
+#wrap .sg-writeform input.sg-write__desc {
+  width: 100%;
+  margin: 0;
+  padding: 4px 0 10px;
+  border: 0;
+  border-bottom: 1px solid var(--sg-border);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: var(--sg-text);
+  outline: none;
+}
+
+#wrap .sg-writeform input.sg-write__subject {
+  font-family: var(--sg-font-display);
+  font-size: 1.5rem;
+  line-height: 1.25;
+}
+
+#wrap .sg-writeform input.sg-write__desc {
+  font-size: 0.95rem;
+}
+
+#wrap .sg-writeform input.sg-write__subject::placeholder,
+#wrap .sg-writeform input.sg-write__desc::placeholder {
+  color: var(--sg-text-muted);
+  opacity: 0.8;
+}
+
+#wrap .sg-writeform input.sg-write__subject:focus,
+#wrap .sg-writeform input.sg-write__desc:focus {
+  border-bottom-color: var(--ph);
+}
+
+/* Couleur native écrite en ligne sur le titre par Forumactif (selon la couleur choisie) : on garde le texte lisible */
+#wrap .sg-writeform input.sg-write__subject[style*="color"] {
+  text-shadow: none;
+}
+
+#wrap .sg-writeform #message-box {
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+#wrap .sg-writeform #textarea_content {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Éditeur natif (SCEditor) : ses bordures et fonds sont en !important dans le CSS de Forumactif */
+.sg-writeform .sceditor-container {
+  width: 100% !important;
+  min-height: 320px;
+  overflow: hidden;
+  border: 1px solid var(--sg-border) !important;
+  border-radius: 12px !important;
+  background: var(--sg-surface-2) !important;
+  color: var(--sg-text) !important;
+}
+
+.sg-writeform .sceditor-toolbar {
+  padding: 6px 8px !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--sg-border) !important;
+  background: none !important;
+}
+
+.sg-writeform .sceditor-group {
+  margin: 2px 6px 2px 0 !important;
+  padding: 0 6px 0 0 !important;
+  border: 0 !important;
+  border-right: 1px solid var(--sg-border) !important;
+  border-radius: 0 !important;
+  background: none !important;
+}
+
+.sg-writeform .sceditor-group:last-child {
+  border-right: 0 !important;
+}
+
+.sg-writeform .sceditor-button {
+  border: 0 !important;
+  border-radius: 6px !important;
+  background-color: transparent !important;
+}
+
+.sg-writeform .sceditor-button:hover,
+.sg-writeform .sceditor-button.active {
+  background-color: var(--sg-surface) !important;
+  box-shadow: none !important;
+}
+
+/* Icônes d'origine (images) trop sombres sur le fond du thème sombre */
+html[data-theme="dark"] .sg-writeform .sceditor-button div {
+  filter: invert(0.88) hue-rotate(180deg);
+}
+
+.sg-writeform .sceditor-container textarea,
+.sg-writeform .sceditor-container iframe {
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--sg-text) !important;
+  font-family: var(--sg-font-body, inherit);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.sg-writeform .sceditor-container textarea::placeholder {
+  color: var(--sg-text-muted);
+}
+
+.sg-writeform .sceditor-grip {
+  opacity: 0.5;
+}
+
+/* --- 3. Réglages et boutons, au pied de la lettre -------------------------------------------------- */
+.sg-write__opts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px 24px;
+  padding-top: 2px;
+}
+
+.sg-write__switches {
+  display: flex;
+  flex: 1 1 100%;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+}
+
+/* Une case native en interrupteur : la case reste dans le formulaire (lue à l'envoi), seulement masquée */
+#wrap .sg-opt {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  margin: 0;
+  padding: 0 12px;
+  border: 1px solid var(--sg-border);
+  border-radius: 999px;
+  color: var(--sg-text);
+  font-size: 0.88rem;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+#wrap .sg-opt:hover {
+  background: var(--sg-surface-2);
+}
+
+#wrap .sg-opt input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sg-opt .sg-switch {
+  margin-left: 0;
+}
+
+.sg-opt input:checked ~ .sg-switch {
+  background: var(--sg-accent-1);
+  box-shadow: inset 0 0 0 1px var(--sg-accent-1);
+}
+
+.sg-opt input:checked ~ .sg-switch .sg-switch__thumb {
+  background: var(--sg-on-accent);
+  transform: translateX(18px);
+}
+
+.sg-opt input:focus-visible ~ .sg-switch {
+  outline: 2px solid var(--sg-accent-1);
+  outline-offset: 2px;
+}
+
+.sg-opt > * {
+  transition: none;
+}
+
+.sg-opt .sg-switch,
+.sg-opt .sg-switch__thumb {
+  transition: background-color 0.25s ease, box-shadow 0.25s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.sg-write__opts .sg-field {
+  min-width: 220px;
+}
+
+/* Boutons : « Prévisualiser » (contour) puis « Envoyer » (plein), à droite, au pied de la lettre */
+#wrap .sg-writeform fieldset.form-buttons {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.sg-write__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--sg-border);
+}
+
+#wrap .sg-writeform button.sg-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 46px;
+  margin: 0;
+  padding: 0 20px;
+  border: 0;
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-contrast);
+  box-shadow: none;
+  color: var(--sg-on-contrast);
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform 0.3s var(--sg-ease), box-shadow 0.3s var(--sg-ease);
+}
+
+#wrap .sg-writeform button.sg-action--ghost {
+  border: 1px solid var(--sg-border-strong, var(--sg-border));
+  background: var(--sg-surface);
+  color: var(--sg-text);
+}
+
+#wrap .sg-writeform button.sg-action:hover,
+#wrap .sg-writeform button.sg-action:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: var(--sg-shadow);
+}
+
+/* --- Aperçu : la lettre telle qu'elle sera publiée --------------------------------------------------- */
+#wrap .sg-writeform .sg-write__preview {
+  margin: 0 0 16px;
+  padding: 0;
+  overflow: hidden;
+  border: 1px dashed color-mix(in srgb, var(--ph) 55%, transparent);
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-surface);
+  box-shadow: none;
+}
+
+#wrap .sg-write__preview > .block-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 12px 16px 0;
+  border: 0;
+  background: none;
+  color: var(--sg-text-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+#wrap .sg-write__preview > .block-header .material-symbols-outlined {
+  color: var(--ph);
+  font-size: 18px;
+}
+
+#wrap .sg-write__preview > .block-content {
+  margin: 0;
+  padding: 12px 16px 20px;
+  border: 0;
+  background: none;
+  color: var(--sg-text);
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+/* --- 4. Panneaux repliables (règles du forum, sondage, calendrier, SEO, pièces jointes…) ------------- */
+#wrap .sg-writeform .sg-panel {
+  margin: 0 0 16px;
+  padding: 0;
+  overflow: visible;
+  border: 1px solid var(--sg-border);
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-surface);
+  box-shadow: none;
+  color: var(--sg-text);
+}
+
+#wrap .sg-panel > .block-header {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.sg-panel__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  margin: 0;
+  padding: 0 16px;
+  border: 0;
+  border-radius: var(--sg-radius-lg);
+  background: none;
+  color: var(--sg-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.sg-panel__toggle:hover {
+  background: var(--sg-surface-2);
+}
+
+.sg-panel__toggle:focus-visible {
+  outline: 2px solid var(--sg-accent-1);
+  outline-offset: -2px;
+}
+
+.sg-panel__title {
+  font-family: var(--sg-font-display);
+  font-size: 1.1rem;
+}
+
+.sg-panel__toggle > * {
+  transition: none;
+}
+
+.sg-panel__toggle .material-symbols-outlined {
+  color: var(--sg-text-muted);
+  transition: transform 0.25s var(--sg-ease);
+}
+
+.sg-panel.is-open .sg-panel__toggle .material-symbols-outlined {
+  transform: rotate(180deg);
+}
+
+#wrap .sg-panel > .block-content {
+  display: none;
+  margin: 0;
+  padding: 4px 16px 18px;
+  border: 0;
+  background: none;
+}
+
+#wrap .sg-panel.is-open > .block-content {
+  display: block;
+}
+
+/* Champs des panneaux : même contour arrondi que les listes personnalisées */
+#wrap .sg-panel input[type="text"],
+#wrap .sg-panel input[type="number"],
+#wrap .sg-panel input[type="url"],
+#wrap .sg-panel input:not([type]),
+#wrap .sg-panel textarea {
+  max-width: 100%;
+  margin: 4px 0;
+  padding: 10px 12px;
+  border: 1px solid var(--sg-border-strong, var(--sg-border));
+  border-radius: 10px;
+  background: var(--sg-surface-2);
+  box-shadow: none;
+  color: var(--sg-text);
+  font: inherit;
+}
+
+#wrap .sg-panel input:focus,
+#wrap .sg-panel textarea:focus {
+  border-color: var(--sg-accent-1);
+  outline: none;
+}
+
+#wrap .sg-panel input[type="radio"],
+#wrap .sg-panel input[type="checkbox"] {
+  accent-color: var(--sg-accent-1);
+}
+
+#wrap .sg-panel label {
+  margin-bottom: 0;
+}
+
+#wrap .sg-panel dl {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: 8px 16px;
+  margin: 0 0 12px;
+}
+
+#wrap .sg-panel dt,
+#wrap .sg-panel dd {
+  margin: 0;
+  border: 0;
+  background: none;
+}
+
+#wrap .sg-panel dt {
+  color: var(--sg-text-muted);
+  font-size: 0.9rem;
+}
+
+/* --- 5. Derniers messages du sujet --------------------------------------------------------------------- */
+.sg-review {
+  margin: var(--sg-space-8) 0 0;
+}
+
+#wrap .sg-review__title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 16px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--sg-text);
+  font-family: var(--sg-font-display);
+  font-size: 1.35rem;
+  font-weight: 400;
+}
+
+.sg-review__title .material-symbols-outlined {
+  color: var(--sg-text-muted);
+  font-size: 22px;
+}
+
+#wrap .sg-rev.block-comment {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 14px;
+  margin: 0 0 12px;
+  padding: 14px 16px;
+  border: 0;
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-surface);
+  box-shadow: none;
+  color: var(--sg-text);
+}
+
+#wrap .sg-rev .avatar-default {
+  width: 48px;
+  margin: 0;
+}
+
+#wrap .sg-rev .avatar-default img {
+  display: block;
+  width: 48px;
+  height: 64px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+#wrap .sg-rev > .block-content {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.sg-rev__meta {
+  margin: 0 0 8px;
+  overflow: hidden;
+  color: var(--sg-text-muted);
+  font-size: 0.85rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sg-rev__meta a {
+  font-weight: 700;
+  text-decoration: none;
+}
+
+#wrap .sg-rev .content {
+  position: relative;
+  color: var(--sg-text);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+#wrap .sg-rev .content img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Long message : coupé à 240px avec un fondu, « Lire la suite » le déplie */
+#wrap .sg-rev.is-clamped:not(.is-expanded) .content {
+  max-height: 240px;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, #000 70%, transparent);
+  mask-image: linear-gradient(to bottom, #000 70%, transparent);
+}
+
+.sg-rev__more {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 36px;
+  margin: 6px 0 0;
+  padding: 0 10px 0 0;
+  border: 0;
+  background: none;
+  color: var(--sg-text);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sg-rev__more > * {
+  transition: none;
+}
+
+.sg-rev__more .material-symbols-outlined {
+  transition: transform 0.25s var(--sg-ease);
+}
+
+.sg-rev.is-expanded .sg-rev__more .material-symbols-outlined {
+  transform: rotate(180deg);
+}
+
+/* --- Mobile -------------------------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  /* Une colonne : la lettre seule (le portrait prendrait tout l'écran au-dessus de l'éditeur) */
+  #wrap form.sg-writeform,
+  html[data-profile="right"] #wrap form.sg-writeform {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sg-writeform > *,
+  html[data-profile="right"] .sg-writeform > * {
+    grid-column: 1;
+  }
+
+  .sg-writeform > .sg-write__aside {
+    display: none;
+  }
+
+  .sg-write__opts .sg-field {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  #wrap .sg-opt {
+    min-height: 44px;
+  }
+
+  .sg-write__actions {
+    flex-direction: column-reverse;
+  }
+
+  #wrap .sg-writeform button.sg-action {
+    justify-content: center;
+    width: 100%;
+    height: 48px;
+  }
+
+  #wrap .sg-panel dl {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
