@@ -302,6 +302,7 @@
     pageHead();
     subforums();
     topics();
+    topicPage();
     perms();
     applyTheme(storedTheme() || currentTheme());
   }
@@ -326,8 +327,10 @@
 
   function pageHead() {
     if (document.querySelector('.sg-pagehead')) return;
-    if (!/^\/f\d+/.test(location.pathname)) return;
-    var native = document.querySelector('#wrap .page-header');
+    var isTopic = /^\/t\d+/.test(location.pathname);
+    if (!isTopic && !/^\/f\d+/.test(location.pathname)) return;
+    /* Page de forum : .page-header ; page de sujet : .topic-header (même pattern, le sujet en dernier niveau du fil) */
+    var native = document.querySelector(isTopic ? '#topic .topic-header' : '#wrap .page-header');
     var h1 = native && native.querySelector('h1');
     if (!h1) return;
 
@@ -349,10 +352,18 @@
         var li = el('li', 'sg-crumbs__item');
         a.className = 'sg-crumbs__link';
         if (i === 1 && meta) a.setAttribute('href', '/?onglet=' + meta.slug);
-        if (i === links.length - 1) a.setAttribute('aria-current', 'page');
+        if (i === links.length - 1 && !isTopic) a.setAttribute('aria-current', 'page');
         li.appendChild(a);
         ol.appendChild(li);
       });
+      if (isTopic) {
+        var cur = el('li', 'sg-crumbs__item');
+        var here = el('span', 'sg-crumbs__link sg-crumbs__here');
+        here.setAttribute('aria-current', 'page');
+        here.textContent = (h1.querySelector('a') || h1).textContent.trim();
+        cur.appendChild(here);
+        ol.appendChild(cur);
+      }
       nav.appendChild(ol);
       head.appendChild(nav);
     }
@@ -360,12 +371,17 @@
     /* Titre et boutons d'action */
     var row = el('div', 'sg-pagehead__row');
     var title = el('h1', 'sg-pagehead__title');
-    title.textContent = h1.textContent.trim();
+    title.textContent = (h1.querySelector('a') || h1).textContent.trim();
+    /* Sujet : la cloche des notifications push du sujet (élément natif, déplacé) suit le titre */
+    var bell = isTopic && h1.querySelector('#push-bell');
+    if (bell) { bell.classList.add('sg-pagehead__bell'); bell.setAttribute('title', 'Notifications de ce sujet'); title.appendChild(bell); }
     row.appendChild(title);
     var actions = el('div', 'sg-pagehead__actions');
     Array.prototype.slice.call(native.querySelectorAll(':scope > a.btn')).forEach(function (b) {
-      b.className = 'sg-action';
-      actions.appendChild(b);
+      /* Sur un sujet, « Répondre » est l'action principale ; « Poster un nouveau sujet » passe en secondaire, à gauche */
+      var secondary = isTopic && /mode=newtopic/.test(b.getAttribute('href') || '');
+      b.className = 'sg-action' + (secondary ? ' sg-action--ghost' : '');
+      if (secondary) actions.insertBefore(b, actions.firstChild); else actions.appendChild(b);
     });
     if (actions.children.length) row.appendChild(actions);
     head.appendChild(row);
@@ -389,6 +405,7 @@
 
     native.parentNode.insertBefore(head, native);
     document.body.classList.add('sg-pagehead-on');
+    if (isTopic) document.body.classList.add('sg-topicpage');
   }
 
   /* --------------------------------------------------------------------
@@ -524,6 +541,311 @@
     section.appendChild(grid);
     native.parentNode.insertBefore(section, native);
     document.body.classList.add('sg-subforums-on');
+  }
+
+  /* --------------------------------------------------------------------
+     Briques partagées par les pages de forum et de sujet
+     -------------------------------------------------------------------- */
+  function uiEl(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined) e.textContent = text;
+    return e;
+  }
+
+  function uiIco(name) {
+    var i = uiEl('span', 'material-symbols-outlined', name);
+    i.setAttribute('aria-hidden', 'true');
+    return i;
+  }
+
+  /* Menu « Actions » (trois points verticaux) : items = [adresse ou fonction, icône, libellé], null = séparateur.
+     Utilisé sur les pages de forum (topics) et de sujet (topicPage). */
+  function actionsMenu(items, menuId) {
+    var el = uiEl, ico = uiIco;
+    var wrapM = el('div', 'sg-menu');
+    var toggle = el('button', 'sg-menu__toggle');
+    toggle.type = 'button';
+    toggle.setAttribute('aria-haspopup', 'menu');
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-controls', menuId);
+    toggle.appendChild(el('span', null, 'Actions'));
+    toggle.appendChild(ico('more_vert'));
+    var menu = el('ul', 'sg-menu__list');
+    menu.id = menuId;
+    menu.setAttribute('role', 'menu');
+    menu.hidden = true;
+    items.forEach(function (it) {
+      if (it === null) { var sep = el('li', 'sg-menu__sep'); sep.setAttribute('role', 'separator'); menu.appendChild(sep); return; }
+      var li = el('li');
+      li.setAttribute('role', 'none');
+      var item = el('a', 'sg-menu__item');
+      if (typeof it[0] === 'function') {
+        var run = it[0];
+        item.href = '#';
+        item.addEventListener('click', function (ev) { ev.preventDefault(); close(false); run(); });
+      } else item.href = it[0];
+      item.setAttribute('role', 'menuitem');
+      item.tabIndex = -1;
+      item.appendChild(ico(it[1]));
+      item.appendChild(el('span', null, it[2]));
+      li.appendChild(item);
+      menu.appendChild(li);
+    });
+    wrapM.appendChild(toggle);
+    wrapM.appendChild(menu);
+
+    var entries = function () { return Array.prototype.slice.call(menu.querySelectorAll('.sg-menu__item')); };
+    var open = function (focusIndex) {
+      menu.hidden = false;
+      toggle.setAttribute('aria-expanded', 'true');
+      wrapM.classList.add('is-open');
+      if (focusIndex !== undefined) { var e = entries(); (e[focusIndex < 0 ? e.length - 1 : focusIndex] || e[0]).focus(); }
+    };
+    var close = function (refocus) {
+      if (menu.hidden) return;
+      menu.hidden = true;
+      toggle.setAttribute('aria-expanded', 'false');
+      wrapM.classList.remove('is-open');
+      if (refocus) toggle.focus();
+    };
+    toggle.addEventListener('click', function () { if (menu.hidden) open(); else close(); });
+    toggle.addEventListener('keydown', function (ev) {
+      if (ev.key === 'ArrowDown' || ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); open(0); }
+      else if (ev.key === 'ArrowUp') { ev.preventDefault(); open(-1); }
+    });
+    menu.addEventListener('keydown', function (ev) {
+      var e = entries(), i = e.indexOf(document.activeElement);
+      if (ev.key === 'ArrowDown') { ev.preventDefault(); e[(i + 1) % e.length].focus(); }
+      else if (ev.key === 'ArrowUp') { ev.preventDefault(); e[(i - 1 + e.length) % e.length].focus(); }
+      else if (ev.key === 'Home') { ev.preventDefault(); e[0].focus(); }
+      else if (ev.key === 'End') { ev.preventDefault(); e[e.length - 1].focus(); }
+      else if (ev.key === 'Escape') { ev.preventDefault(); close(true); }
+      else if (ev.key === 'Tab') close(false);
+    });
+    document.addEventListener('click', function (ev) { if (!wrapM.contains(ev.target)) close(false); });
+    return wrapM;
+  }
+
+  /* Liste déroulante personnalisée (remplace l'affichage natif d'un <select>, qui reste dans le
+     formulaire, masqué, et reçoit la valeur choisie suivie d'un événement « change »).
+     options : { search: true } → champ de saisie qui filtre la liste (motif combobox ARIA) ;
+     { tree: true } → options de la jumpbox : séparateurs « | » purgés, profondeur lue dans les « | ». */
+  var comboCount = 0;
+  function combo(select, opts) {
+    var el = uiEl, ico = uiIco;
+    opts = opts || {};
+    var uid = 'sg-combo-' + (++comboCount);
+    var norm = function (t) { return t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); };
+    var placeholder = '';
+    var data = [];
+    Array.prototype.slice.call(select.options).forEach(function (o) {
+      var raw = o.textContent.replace(/ /g, ' ');
+      if (opts.tree) {
+        if (o.value === '-1') { if (!placeholder && raw.trim() && !/^[|\s]*$/.test(raw)) placeholder = raw.trim(); return; }
+        var m = raw.match(/^([|\s]*)--\s*(.*)$/);
+        var depth = m ? (m[1].match(/\|/g) || []).length - 1 : 0;
+        data.push({ value: o.value, label: (m ? m[2] : raw).trim(), depth: Math.max(0, depth), cat: /^c\d/.test(o.value) });
+      } else {
+        data.push({ value: o.value, label: raw.trim(), depth: 0, cat: false });
+      }
+    });
+    /* Parents de chaque entrée, pour garder l'arborescence visible pendant le filtrage */
+    var stack = [];
+    data.forEach(function (d, i) {
+      stack.length = d.depth;
+      d.parents = stack.slice();
+      stack[d.depth] = i;
+    });
+
+    var box = el('div', 'sg-combo' + (opts.search ? ' sg-combo--search' : ''));
+    var list = el('ul', 'sg-combo__list');
+    list.id = uid + '-list';
+    list.setAttribute('role', 'listbox');
+    list.hidden = true;
+    var field;
+    var current = select.value;
+    /* Jumpbox : le forum affiché est coché (sa valeur native est « -1 ») */
+    if (opts.tree && opts.currentValue && !data.some(function (d) { return d.value === current; })) current = opts.currentValue;
+    var labelOf = function (v) { for (var i = 0; i < data.length; i++) if (data[i].value === v) return data[i].label; return ''; };
+
+    if (opts.search) {
+      var wrapF = el('div', 'sg-combo__control');
+      wrapF.appendChild(ico('search'));
+      field = el('input', 'sg-combo__input');
+      field.type = 'text';
+      field.autocomplete = 'off';
+      field.spellcheck = false;
+      field.placeholder = placeholder || 'Rechercher…';
+      field.setAttribute('aria-autocomplete', 'list');
+      wrapF.appendChild(field);
+      var chev = el('span', 'sg-combo__chevron material-symbols-outlined', 'expand_more');
+      chev.setAttribute('aria-hidden', 'true');
+      wrapF.appendChild(chev);
+      box.appendChild(wrapF);
+      /* Toute la surface du champ ouvre la liste (icône, chevron, marges comprises).
+         Le focus ouvre déjà la liste : on ne bascule donc que si elle était ouverte avant le clic. */
+      wrapF.addEventListener('mousedown', function (ev) {
+        if (ev.target === field) return;
+        ev.preventDefault();
+        var wasOpen = !list.hidden;
+        if (document.activeElement !== field) field.focus();
+        if (wasOpen) close(); else open();
+      });
+    } else {
+      field = el('button', 'sg-combo__control');
+      field.type = 'button';
+      var val = el('span', 'sg-combo__value', labelOf(current) || placeholder);
+      field.appendChild(val);
+      var chev2 = el('span', 'sg-combo__chevron material-symbols-outlined', 'expand_more');
+      chev2.setAttribute('aria-hidden', 'true');
+      field.appendChild(chev2);
+      box.appendChild(field);
+      field.addEventListener('click', function () { toggle(); });
+    }
+    field.id = uid;
+    field.setAttribute('role', 'combobox');
+    field.setAttribute('aria-expanded', 'false');
+    field.setAttribute('aria-controls', list.id);
+    field.setAttribute('aria-haspopup', 'listbox');
+
+    var items = data.map(function (d, i) {
+      var li = el('li', 'sg-combo__opt' + (d.cat ? ' is-cat' : '') + (d.depth > 1 ? ' is-deep' : ''));
+      li.id = uid + '-o' + i;
+      li.setAttribute('role', 'option');
+      li.style.setProperty('--depth', d.depth);
+      li.appendChild(el('span', 'sg-combo__label', d.label));
+      var ok = ico('check');
+      ok.className += ' sg-combo__check';
+      li.appendChild(ok);
+      li.addEventListener('mousedown', function (ev) { ev.preventDefault(); });
+      li.addEventListener('click', function () { choose(i); });
+      li.addEventListener('mousemove', function () { setActive(i); });
+      list.appendChild(li);
+      return li;
+    });
+    var empty = el('li', 'sg-combo__empty', 'Aucun résultat');
+    empty.setAttribute('role', 'presentation');
+    empty.hidden = true;
+    list.appendChild(empty);
+    box.appendChild(list);
+    select.classList.add('sg-combo__native');
+    select.setAttribute('tabindex', '-1');
+    select.setAttribute('aria-hidden', 'true');
+    box.appendChild(select);
+
+    var active = -1;
+    var visible = function () { return items.map(function (li, i) { return li.hidden ? -1 : i; }).filter(function (i) { return i >= 0; }); };
+    var setActive = function (i) {
+      if (active >= 0) items[active].classList.remove('is-active');
+      active = i;
+      if (i >= 0) {
+        items[i].classList.add('is-active');
+        field.setAttribute('aria-activedescendant', items[i].id);
+        var li = items[i], top = li.offsetTop, bottom = top + li.offsetHeight;
+        if (top < list.scrollTop) list.scrollTop = top - 6;
+        else if (bottom > list.scrollTop + list.clientHeight) list.scrollTop = bottom - list.clientHeight + 6;
+      } else field.removeAttribute('aria-activedescendant');
+    };
+    var mark = function () {
+      items.forEach(function (li, i) {
+        var on = data[i].value === current;
+        li.setAttribute('aria-selected', on ? 'true' : 'false');
+        li.classList.toggle('is-selected', on);
+      });
+    };
+    var filter = function (q) {
+      q = norm(q.trim());
+      var show = data.map(function () { return !q; });
+      if (q) data.forEach(function (d, i) {
+        if (norm(d.label).indexOf(q) >= 0) { show[i] = true; d.parents.forEach(function (p) { if (p !== undefined) show[p] = true; }); }
+      });
+      items.forEach(function (li, i) { li.hidden = !show[i]; li.classList.toggle('is-context', !!q && show[i] && norm(data[i].label).indexOf(q) < 0); });
+      empty.hidden = show.some(Boolean);
+      var v = visible().filter(function (i) { return !items[i].classList.contains('is-context'); });
+      setActive(v.length ? v[0] : -1);
+    };
+    var open = function () {
+      if (!list.hidden) return;
+      list.hidden = false;
+      box.classList.add('is-open');
+      field.setAttribute('aria-expanded', 'true');
+      mark();
+      if (opts.search) filter(field.value);
+      var sel = -1;
+      data.forEach(function (d, i) { if (d.value === current && !items[i].hidden) sel = i; });
+      setActive(sel >= 0 ? sel : (visible()[0] !== undefined ? visible()[0] : -1));
+    };
+    var close = function () {
+      if (list.hidden) return;
+      list.hidden = true;
+      box.classList.remove('is-open');
+      field.setAttribute('aria-expanded', 'false');
+      setActive(-1);
+      if (opts.search) { field.value = ''; items.forEach(function (li) { li.hidden = false; li.classList.remove('is-context'); }); empty.hidden = true; }
+    };
+    var toggle = function () { if (list.hidden) open(); else close(); };
+    var choose = function (i) {
+      current = data[i].value;
+      mark();
+      if (!opts.search) field.querySelector('.sg-combo__value').textContent = data[i].label;
+      close();
+      if (opts.search) field.value = '';
+      select.value = current;
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+    };
+    var move = function (step) {
+      var v = visible();
+      if (!v.length) return;
+      var k = v.indexOf(active);
+      if (step === 'home') k = 0;
+      else if (step === 'end') k = v.length - 1;
+      else k = k < 0 ? (step > 0 ? 0 : v.length - 1) : Math.min(v.length - 1, Math.max(0, k + step));
+      setActive(v[k]);
+    };
+    field.addEventListener('keydown', function (ev) {
+      var k = ev.key;
+      if (k === 'ArrowDown' || k === 'ArrowUp') {
+        ev.preventDefault();
+        if (list.hidden) open(); else move(k === 'ArrowDown' ? 1 : -1);
+      } else if ((k === 'Home' || k === 'End') && !list.hidden && !opts.search) {
+        ev.preventDefault(); move(k === 'Home' ? 'home' : 'end');
+      } else if (k === 'PageDown' || k === 'PageUp') {
+        if (!list.hidden) { ev.preventDefault(); move(k === 'PageDown' ? 8 : -8); }
+      } else if (k === 'Enter' || (k === ' ' && !opts.search)) {
+        ev.preventDefault();
+        if (list.hidden) open(); else if (active >= 0) choose(active);
+      } else if (k === 'Escape') {
+        if (!list.hidden) { ev.preventDefault(); ev.stopPropagation(); close(); }
+      } else if (k === 'Tab') close();
+    });
+    if (opts.search) {
+      field.addEventListener('input', function () { open(); filter(field.value); });
+      field.addEventListener('focus', function () { open(); });
+      field.addEventListener('click', function () { open(); });
+    }
+    document.addEventListener('mousedown', function (ev) { if (!box.contains(ev.target)) close(); });
+    return { box: box, field: field };
+  }
+
+  /* « Sauter vers » : formulaire natif jumpbox déplacé, liste personnalisée à saisie (combo). Renvoie le formulaire. */
+  function jumpBox(currentValue) {
+    var el = uiEl, ico = uiIco;
+    var jumpForm = document.querySelector('form[name="jumpbox"]');
+    var jumpSelect = jumpForm && jumpForm.querySelector('select');
+    if (!jumpForm || !jumpSelect || jumpForm.classList.contains('sg-jump')) return null;
+    var keep = Array.prototype.slice.call(jumpForm.querySelectorAll('input[type="hidden"]'));
+    while (jumpForm.firstChild) jumpForm.removeChild(jumpForm.firstChild);
+    jumpForm.className = 'sg-jump';
+    keep.forEach(function (h) { jumpForm.appendChild(h); });
+    var jumpCombo = combo(jumpSelect, { search: true, tree: true, currentValue: currentValue });
+    var jl = el('label', 'sg-jump__label');
+    jl.setAttribute('for', jumpCombo.field.id);
+    jl.appendChild(ico('alt_route'));
+    jl.appendChild(el('span', null, 'Sauter vers'));
+    jumpForm.appendChild(jl);
+    jumpForm.appendChild(jumpCombo.box);
+    return jumpForm;
   }
 
   /* --------------------------------------------------------------------
@@ -709,270 +1031,13 @@
 
     if (items.length) {
       bar = bar || el('div', 'sg-topics__bar');
-      var menuId = 'sg-topics-menu';
-      var wrapM = el('div', 'sg-menu');
-      var toggle = el('button', 'sg-menu__toggle');
-      toggle.type = 'button';
-      toggle.setAttribute('aria-haspopup', 'menu');
-      toggle.setAttribute('aria-expanded', 'false');
-      toggle.setAttribute('aria-controls', menuId);
-      toggle.appendChild(el('span', null, 'Actions'));
-      toggle.appendChild(ico('more_vert'));
-      var menu = el('ul', 'sg-menu__list');
-      menu.id = menuId;
-      menu.setAttribute('role', 'menu');
-      menu.hidden = true;
-      items.forEach(function (it) {
-        if (it === null) { var sep = el('li', 'sg-menu__sep'); sep.setAttribute('role', 'separator'); menu.appendChild(sep); return; }
-        var li = el('li');
-        li.setAttribute('role', 'none');
-        var item = el('a', 'sg-menu__item');
-        item.href = it[0].getAttribute('href');
-        item.setAttribute('role', 'menuitem');
-        item.tabIndex = -1;
-        item.appendChild(ico(it[1]));
-        item.appendChild(el('span', null, it[2]));
-        li.appendChild(item);
-        menu.appendChild(li);
-      });
-      wrapM.appendChild(toggle);
-      wrapM.appendChild(menu);
-      bar.appendChild(wrapM);
-
-      var entries = function () { return Array.prototype.slice.call(menu.querySelectorAll('.sg-menu__item')); };
-      var open = function (focusIndex) {
-        menu.hidden = false;
-        toggle.setAttribute('aria-expanded', 'true');
-        wrapM.classList.add('is-open');
-        if (focusIndex !== undefined) { var e = entries(); (e[focusIndex < 0 ? e.length - 1 : focusIndex] || e[0]).focus(); }
-      };
-      var close = function (refocus) {
-        if (menu.hidden) return;
-        menu.hidden = true;
-        toggle.setAttribute('aria-expanded', 'false');
-        wrapM.classList.remove('is-open');
-        if (refocus) toggle.focus();
-      };
-      toggle.addEventListener('click', function () { if (menu.hidden) open(); else close(); });
-      toggle.addEventListener('keydown', function (ev) {
-        if (ev.key === 'ArrowDown' || ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); open(0); }
-        else if (ev.key === 'ArrowUp') { ev.preventDefault(); open(-1); }
-      });
-      menu.addEventListener('keydown', function (ev) {
-        var e = entries(), i = e.indexOf(document.activeElement);
-        if (ev.key === 'ArrowDown') { ev.preventDefault(); e[(i + 1) % e.length].focus(); }
-        else if (ev.key === 'ArrowUp') { ev.preventDefault(); e[(i - 1 + e.length) % e.length].focus(); }
-        else if (ev.key === 'Home') { ev.preventDefault(); e[0].focus(); }
-        else if (ev.key === 'End') { ev.preventDefault(); e[e.length - 1].focus(); }
-        else if (ev.key === 'Escape') { ev.preventDefault(); close(true); }
-        else if (ev.key === 'Tab') close(false);
-      });
-      document.addEventListener('click', function (ev) { if (!wrapM.contains(ev.target)) close(false); });
+      bar.appendChild(actionsMenu(items.map(function (it) { return it && [it[0].getAttribute('href'), it[1], it[2]]; }), 'sg-topics-menu'));
     }
 
     /* Deuxième ligne : « Trier » (le formulaire natif est déplacé dans une fenêtre) puis « Sauter vers »
        (le formulaire natif jumpbox est déplacé et restylé). La barre native sous les sujets
        (Surveiller, Marquer comme lus, Trier) est masquée par le CSS : ses liens sont dans « Actions ». */
     var tools = el('div', 'sg-topics__tools');
-    /* Liste déroulante personnalisée (remplace l'affichage natif d'un <select>, qui reste dans le
-       formulaire, masqué, et reçoit la valeur choisie suivie d'un événement « change »).
-       options : { search: true } → champ de saisie qui filtre la liste (motif combobox ARIA) ;
-       { tree: true } → options de la jumpbox : séparateurs « | » purgés, profondeur lue dans les « | ». */
-    var comboCount = 0;
-    var combo = function (select, opts) {
-      opts = opts || {};
-      var uid = 'sg-combo-' + (++comboCount);
-      var norm = function (t) { return t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); };
-      var placeholder = '';
-      var data = [];
-      Array.prototype.slice.call(select.options).forEach(function (o) {
-        var raw = o.textContent.replace(/ /g, ' ');
-        if (opts.tree) {
-          if (o.value === '-1') { if (!placeholder && raw.trim() && !/^[|\s]*$/.test(raw)) placeholder = raw.trim(); return; }
-          var m = raw.match(/^([|\s]*)--\s*(.*)$/);
-          var depth = m ? (m[1].match(/\|/g) || []).length - 1 : 0;
-          data.push({ value: o.value, label: (m ? m[2] : raw).trim(), depth: Math.max(0, depth), cat: /^c\d/.test(o.value) });
-        } else {
-          data.push({ value: o.value, label: raw.trim(), depth: 0, cat: false });
-        }
-      });
-      /* Parents de chaque entrée, pour garder l'arborescence visible pendant le filtrage */
-      var stack = [];
-      data.forEach(function (d, i) {
-        stack.length = d.depth;
-        d.parents = stack.slice();
-        stack[d.depth] = i;
-      });
-
-      var box = el('div', 'sg-combo' + (opts.search ? ' sg-combo--search' : ''));
-      var list = el('ul', 'sg-combo__list');
-      list.id = uid + '-list';
-      list.setAttribute('role', 'listbox');
-      list.hidden = true;
-      var field;
-      var current = select.value;
-      /* Jumpbox : le forum affiché est coché (sa valeur native est « -1 ») */
-      if (opts.tree && opts.currentValue && !data.some(function (d) { return d.value === current; })) current = opts.currentValue;
-      var labelOf = function (v) { for (var i = 0; i < data.length; i++) if (data[i].value === v) return data[i].label; return ''; };
-
-      if (opts.search) {
-        var wrapF = el('div', 'sg-combo__control');
-        wrapF.appendChild(ico('search'));
-        field = el('input', 'sg-combo__input');
-        field.type = 'text';
-        field.autocomplete = 'off';
-        field.spellcheck = false;
-        field.placeholder = placeholder || 'Rechercher…';
-        field.setAttribute('aria-autocomplete', 'list');
-        wrapF.appendChild(field);
-        var chev = el('span', 'sg-combo__chevron material-symbols-outlined', 'expand_more');
-        chev.setAttribute('aria-hidden', 'true');
-        wrapF.appendChild(chev);
-        box.appendChild(wrapF);
-        /* Toute la surface du champ ouvre la liste (icône, chevron, marges comprises).
-           Le focus ouvre déjà la liste : on ne bascule donc que si elle était ouverte avant le clic. */
-        wrapF.addEventListener('mousedown', function (ev) {
-          if (ev.target === field) return;
-          ev.preventDefault();
-          var wasOpen = !list.hidden;
-          if (document.activeElement !== field) field.focus();
-          if (wasOpen) close(); else open();
-        });
-      } else {
-        field = el('button', 'sg-combo__control');
-        field.type = 'button';
-        var val = el('span', 'sg-combo__value', labelOf(current) || placeholder);
-        field.appendChild(val);
-        var chev2 = el('span', 'sg-combo__chevron material-symbols-outlined', 'expand_more');
-        chev2.setAttribute('aria-hidden', 'true');
-        field.appendChild(chev2);
-        box.appendChild(field);
-        field.addEventListener('click', function () { toggle(); });
-      }
-      field.id = uid;
-      field.setAttribute('role', 'combobox');
-      field.setAttribute('aria-expanded', 'false');
-      field.setAttribute('aria-controls', list.id);
-      field.setAttribute('aria-haspopup', 'listbox');
-
-      var items = data.map(function (d, i) {
-        var li = el('li', 'sg-combo__opt' + (d.cat ? ' is-cat' : '') + (d.depth > 1 ? ' is-deep' : ''));
-        li.id = uid + '-o' + i;
-        li.setAttribute('role', 'option');
-        li.style.setProperty('--depth', d.depth);
-        li.appendChild(el('span', 'sg-combo__label', d.label));
-        var ok = ico('check');
-        ok.className += ' sg-combo__check';
-        li.appendChild(ok);
-        li.addEventListener('mousedown', function (ev) { ev.preventDefault(); });
-        li.addEventListener('click', function () { choose(i); });
-        li.addEventListener('mousemove', function () { setActive(i); });
-        list.appendChild(li);
-        return li;
-      });
-      var empty = el('li', 'sg-combo__empty', 'Aucun résultat');
-      empty.setAttribute('role', 'presentation');
-      empty.hidden = true;
-      list.appendChild(empty);
-      box.appendChild(list);
-      select.classList.add('sg-combo__native');
-      select.setAttribute('tabindex', '-1');
-      select.setAttribute('aria-hidden', 'true');
-      box.appendChild(select);
-
-      var active = -1;
-      var visible = function () { return items.map(function (li, i) { return li.hidden ? -1 : i; }).filter(function (i) { return i >= 0; }); };
-      var setActive = function (i) {
-        if (active >= 0) items[active].classList.remove('is-active');
-        active = i;
-        if (i >= 0) {
-          items[i].classList.add('is-active');
-          field.setAttribute('aria-activedescendant', items[i].id);
-          var li = items[i], top = li.offsetTop, bottom = top + li.offsetHeight;
-          if (top < list.scrollTop) list.scrollTop = top - 6;
-          else if (bottom > list.scrollTop + list.clientHeight) list.scrollTop = bottom - list.clientHeight + 6;
-        } else field.removeAttribute('aria-activedescendant');
-      };
-      var mark = function () {
-        items.forEach(function (li, i) {
-          var on = data[i].value === current;
-          li.setAttribute('aria-selected', on ? 'true' : 'false');
-          li.classList.toggle('is-selected', on);
-        });
-      };
-      var filter = function (q) {
-        q = norm(q.trim());
-        var show = data.map(function () { return !q; });
-        if (q) data.forEach(function (d, i) {
-          if (norm(d.label).indexOf(q) >= 0) { show[i] = true; d.parents.forEach(function (p) { if (p !== undefined) show[p] = true; }); }
-        });
-        items.forEach(function (li, i) { li.hidden = !show[i]; li.classList.toggle('is-context', !!q && show[i] && norm(data[i].label).indexOf(q) < 0); });
-        empty.hidden = show.some(Boolean);
-        var v = visible().filter(function (i) { return !items[i].classList.contains('is-context'); });
-        setActive(v.length ? v[0] : -1);
-      };
-      var open = function () {
-        if (!list.hidden) return;
-        list.hidden = false;
-        box.classList.add('is-open');
-        field.setAttribute('aria-expanded', 'true');
-        mark();
-        if (opts.search) filter(field.value);
-        var sel = -1;
-        data.forEach(function (d, i) { if (d.value === current && !items[i].hidden) sel = i; });
-        setActive(sel >= 0 ? sel : (visible()[0] !== undefined ? visible()[0] : -1));
-      };
-      var close = function () {
-        if (list.hidden) return;
-        list.hidden = true;
-        box.classList.remove('is-open');
-        field.setAttribute('aria-expanded', 'false');
-        setActive(-1);
-        if (opts.search) { field.value = ''; items.forEach(function (li) { li.hidden = false; li.classList.remove('is-context'); }); empty.hidden = true; }
-      };
-      var toggle = function () { if (list.hidden) open(); else close(); };
-      var choose = function (i) {
-        current = data[i].value;
-        mark();
-        if (!opts.search) field.querySelector('.sg-combo__value').textContent = data[i].label;
-        close();
-        if (opts.search) field.value = '';
-        select.value = current;
-        select.dispatchEvent(new Event('change', { bubbles: true }));
-      };
-      var move = function (step) {
-        var v = visible();
-        if (!v.length) return;
-        var k = v.indexOf(active);
-        if (step === 'home') k = 0;
-        else if (step === 'end') k = v.length - 1;
-        else k = k < 0 ? (step > 0 ? 0 : v.length - 1) : Math.min(v.length - 1, Math.max(0, k + step));
-        setActive(v[k]);
-      };
-      field.addEventListener('keydown', function (ev) {
-        var k = ev.key;
-        if (k === 'ArrowDown' || k === 'ArrowUp') {
-          ev.preventDefault();
-          if (list.hidden) open(); else move(k === 'ArrowDown' ? 1 : -1);
-        } else if ((k === 'Home' || k === 'End') && !list.hidden && !opts.search) {
-          ev.preventDefault(); move(k === 'Home' ? 'home' : 'end');
-        } else if (k === 'PageDown' || k === 'PageUp') {
-          if (!list.hidden) { ev.preventDefault(); move(k === 'PageDown' ? 8 : -8); }
-        } else if (k === 'Enter' || (k === ' ' && !opts.search)) {
-          ev.preventDefault();
-          if (list.hidden) open(); else if (active >= 0) choose(active);
-        } else if (k === 'Escape') {
-          if (!list.hidden) { ev.preventDefault(); ev.stopPropagation(); close(); }
-        } else if (k === 'Tab') close();
-      });
-      if (opts.search) {
-        field.addEventListener('input', function () { open(); filter(field.value); });
-        field.addEventListener('focus', function () { open(); });
-        field.addEventListener('click', function () { open(); });
-      }
-      document.addEventListener('mousedown', function (ev) { if (!box.contains(ev.target)) close(); });
-      return { box: box, field: field };
-    };
     var popover = function (wrapEl, toggleEl, panelEl, onOpen) {
       var close = function (refocus) {
         if (panelEl.hidden) return;
@@ -1062,22 +1127,8 @@
       tools.appendChild(sortWrap);
     }
 
-    var jumpForm = document.querySelector('form[name="jumpbox"]');
-    var jumpSelect = jumpForm && jumpForm.querySelector('select');
-    if (jumpForm && jumpSelect) {
-      var keep = Array.prototype.slice.call(jumpForm.querySelectorAll('input[type="hidden"]'));
-      while (jumpForm.firstChild) jumpForm.removeChild(jumpForm.firstChild);
-      jumpForm.className = 'sg-jump';
-      keep.forEach(function (h) { jumpForm.appendChild(h); });
-      var jumpCombo = combo(jumpSelect, { search: true, tree: true, currentValue: fid ? 'f' + fid : '' });
-      var jl = el('label', 'sg-jump__label');
-      jl.setAttribute('for', jumpCombo.field.id);
-      jl.appendChild(ico('alt_route'));
-      jl.appendChild(el('span', null, 'Sauter vers'));
-      jumpForm.appendChild(jl);
-      jumpForm.appendChild(jumpCombo.box);
-      tools.appendChild(jumpForm);
-    }
+    var jumpForm = jumpBox(fid ? 'f' + fid : '');
+    if (jumpForm) tools.appendChild(jumpForm);
 
     if (tools.children.length) {
       bar = bar || el('div', 'sg-topics__bar');
@@ -1105,6 +1156,223 @@
 
     blocks[0].parentNode.insertBefore(section, blocks[0]);
     document.body.classList.add('sg-topics-on');
+  }
+
+  /* --------------------------------------------------------------------
+     Page d'un sujet (/tN-…) : en-tête commun (pageHead), puis
+       1. barre : sujet précédent / suivant à gauche, menu « Actions » à droite
+          (favoris, suivi du sujet, copier le lien, imprimer, recherches) ;
+       2. messages « fumi » (文, la lettre) : carte en deux colonnes, profil de l'auteur à gauche
+          (portrait, pseudo et liseré à la couleur de son groupe, rang, fiche, contacts en icônes),
+          lettre à droite (numéro du message, date, boutons, contenu, J'aime, signature) ;
+       3. réponse rapide restylée (l'éditeur natif est conservé) ;
+       4. séparateur de fin, « Sauter vers » et outils de modération, puis les permissions (perms).
+     Les éléments natifs sont déplacés ou restylés, jamais recopiés (les scripts de Forumactif
+     — citation, J'aime, éditeur — continuent de fonctionner).
+     -------------------------------------------------------------------- */
+  function topicPage() {
+    if (!/^\/t\d+/.test(location.pathname)) return;
+    var topic = document.getElementById('topic');
+    if (!topic || topic.classList.contains('sg-topic-on')) return;
+    var el = uiEl, ico = uiIco;
+    var head = document.querySelector('.sg-pagehead');
+    var tone = head && (head.className.match(/sg-tone-[a-z]+/) || [])[0];
+    if (tone) topic.classList.add(tone);
+    var find = function (re, scope) {
+      return Array.prototype.slice.call((scope || document).querySelectorAll('a[href]')).filter(function (x) {
+        return !x.closest('.sg-menu') && re.test(x.getAttribute('href'));
+      })[0];
+    };
+
+    /* 1. Barre du sujet */
+    var bar = el('div', 'sg-tbar');
+    var qn = topic.querySelector('.quick-nav-topics');
+    if (qn) {
+      var nav = el('nav', 'sg-tbar__nav');
+      nav.setAttribute('aria-label', 'Sujets voisins');
+      Array.prototype.slice.call(qn.querySelectorAll('a[href]')).forEach(function (a) {
+        var next = /suivant/i.test(a.textContent);
+        var b = el('a', 'sg-tool');
+        b.href = a.getAttribute('href');
+        if (!next) b.appendChild(ico('chevron_left'));
+        b.appendChild(el('span', null, next ? 'Sujet suivant' : 'Sujet précédent'));
+        if (next) b.appendChild(ico('chevron_right'));
+        nav.appendChild(b);
+      });
+      bar.appendChild(nav);
+    }
+    var watch = find(/[?&](un)?watch=topic/, topic);
+    var watched = watch && /unwatch=topic/.test(watch.getAttribute('href'));
+    var items = [
+      [find(/add_favourite/), 'bookmark_add', 'Ajouter à mes favoris'],
+      [watch, watched ? 'notifications_off' : 'notifications_active', watched ? 'Ne plus suivre ce sujet' : 'Suivre ce sujet'],
+      null,
+      [function () { copyLink(location.origin + location.pathname); }, 'link', 'Copier le lien du sujet'],
+      [function () { window.print(); }, 'print', 'Imprimer le sujet'],
+      null,
+      [find(/search_id=newposts(?![a-z])/), 'new_releases', 'Nouveaux messages depuis ma dernière visite'],
+      [find(/search_id=watchsearch(?![a-z])/), 'bookmarks', 'Mes sujets suivis']
+    ].filter(function (it) { return it === null || it[0]; }).map(function (it) {
+      return it && [typeof it[0] === 'function' ? it[0] : it[0].getAttribute('href'), it[1], it[2]];
+    });
+    while (items.length && items[0] === null) items.shift();
+    while (items.length && items[items.length - 1] === null) items.pop();
+    for (var k = items.length - 1; k > 0; k--) if (items[k] === null && items[k - 1] === null) items.splice(k, 1);
+    if (items.length) bar.appendChild(actionsMenu(items, 'sg-topic-menu'));
+    var firstPost = topic.querySelector('.post-wrap');
+    if (bar.children.length && firstPost) firstPost.parentNode.insertBefore(bar, firstPost);
+
+    /* 2. Messages « fumi » */
+    var offset = parseInt((location.pathname.match(/^\/t\d+p(\d+)-/) || [])[1] || '0', 10);
+    var LABELS = { 'btn-quote': 'Citer', 'btn-edit': 'Modifier', 'btn-delete': 'Supprimer', 'btn-ip': 'Adresse IP', 'btn-report': 'Signaler' };
+    var posts = Array.prototype.slice.call(topic.querySelectorAll('.post-wrap'));
+    posts.forEach(function (post, i) {
+      post.classList.add('sg-post');
+      var hd = post.querySelector('.post-header');
+      var permalink = hd && hd.querySelector('.post-heading-wrap a[href]');
+      var date = hd && hd.querySelector('.post-date');
+      if (hd) {
+        var meta = el('div', 'sg-post__meta');
+        var num = el('a', 'sg-post__num', '#' + (offset + i + 1));
+        num.href = permalink ? permalink.getAttribute('href') : '#' + post.id;
+        num.setAttribute('title', 'Lien vers ce message');
+        meta.appendChild(num);
+        if (date) {
+          var d = el('span', 'sg-post__date');
+          d.appendChild(ico('schedule'));
+          d.appendChild(el('span', null, date.textContent.trim()));
+          meta.appendChild(d);
+        }
+        hd.insertBefore(meta, hd.firstChild);
+        Array.prototype.slice.call(hd.querySelectorAll('.post-buttons li')).forEach(function (li) {
+          var a = li.querySelector('a');
+          var label = LABELS[(li.className.match(/btn-[a-z]+/) || [])[0]];
+          if (a && label) { a.setAttribute('title', label); a.setAttribute('aria-label', label); }
+        });
+      }
+
+      var aside = post.querySelector('.post-aside');
+      if (aside) {
+        /* Contacts : icônes Material Symbols à la place des images de Forumactif */
+        var links = Array.prototype.slice.call(aside.querySelectorAll('.post-author-contact a[href]'));
+        if (links.length) {
+          var contact = el('div', 'sg-post__contact');
+          links.forEach(function (a) {
+            var href = a.getAttribute('href') || '';
+            var spec = /privmsg/.test(href) ? ['mail', 'Message privé'] : /mode=email/.test(href) ? ['alternate_email', 'E-mail']
+              : /^\/u\d+/.test(href) ? ['person', 'Profil'] : /^https?:/.test(href) ? ['language', 'Site web'] : ['link', a.title || 'Lien'];
+            var b = el('a', 'sg-post__contact-link');
+            b.href = href;
+            if (a.target) b.target = a.target;
+            b.setAttribute('title', spec[1]);
+            b.setAttribute('aria-label', spec[1]);
+            b.appendChild(ico(spec[0]));
+            contact.appendChild(b);
+          });
+          aside.appendChild(contact);
+        }
+        var av = aside.querySelector('.post-author-avatar');
+        if (av && post.classList.contains('online')) {
+          var dot = el('span', 'sg-post__online');
+          dot.setAttribute('title', 'En ligne');
+          dot.appendChild(el('span', 'sg-visually-hidden', 'En ligne'));
+          av.appendChild(dot);
+        }
+      }
+    });
+
+    /* Couleur de l'auteur (celle de son groupe, après les règles de 08-groups.css) : liseré et cadre du portrait */
+    var paintAuthors = function () {
+      posts.forEach(function (post) {
+        var n = post.querySelector('.post-author-name [style*="color"]') || post.querySelector('.post-author-name a');
+        if (n) post.style.setProperty('--author', getComputedStyle(n).color);
+      });
+    };
+    paintAuthors();
+    if (window.MutationObserver) {
+      new MutationObserver(function () { requestAnimationFrame(paintAuthors); })
+        .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    }
+
+    /* 3. Réponse rapide : un intitulé */
+    var qr = topic.querySelector('.quick-reply');
+    if (qr && !qr.querySelector('.sg-qr__title')) {
+      var qt = el('h2', 'sg-qr__title');
+      qt.appendChild(ico('history_edu'));
+      qt.appendChild(el('span', null, 'Répondre'));
+      qr.insertBefore(qt, qr.firstChild);
+    }
+
+    /* 4. Bas de page : séparateur de fin, « Sauter vers » et modération */
+    var anchor = topic.querySelector('.topic-actions.bottom') || topic.querySelector('form[name="jumpbox"]');
+    if (anchor) {
+      var foot = el('div', 'sg-tfoot');
+      var div = el('div', 'sg-divider sg-divider--end');
+      div.setAttribute('role', 'separator');
+      var rule = el('span', 'sg-divider__rule');
+      rule.setAttribute('aria-hidden', 'true');
+      rule.appendChild(el('span', 'sg-divider__line'));
+      rule.insertAdjacentHTML('beforeend', '<svg class="sg-divider__notch" viewBox="0 0 48 25" aria-hidden="true"><path d="M0 .5L24 24.5L48 .5"/></svg>');
+      rule.appendChild(el('span', 'sg-divider__line'));
+      div.appendChild(rule);
+      foot.appendChild(div);
+      var row = el('div', 'sg-tfoot__row');
+      var crumbsLinks = Array.prototype.slice.call(document.querySelectorAll('.sg-pagehead .sg-crumbs a[href^="/f"]'));
+      var fidM = crumbsLinks.length ? (crumbsLinks[crumbsLinks.length - 1].getAttribute('href').match(/^\/f(\d+)/) || [])[1] : '';
+      var jf = jumpBox(fidM ? 'f' + fidM : '');
+      if (jf) row.appendChild(jf);
+      var admin = topic.querySelector('.topic-admin');
+      if (admin && admin.querySelector('a, button, input')) {
+        var mod = el('div', 'sg-modtools');
+        mod.setAttribute('role', 'group');
+        mod.setAttribute('aria-label', 'Modération');
+        var ml = el('span', 'sg-modtools__label');
+        ml.appendChild(ico('gavel'));
+        ml.appendChild(el('span', null, 'Modération'));
+        mod.appendChild(ml);
+        mod.appendChild(admin);
+        row.appendChild(mod);
+      }
+      if (row.children.length) foot.appendChild(row);
+      anchor.parentNode.insertBefore(foot, anchor);
+    }
+
+    topic.classList.add('sg-topic-on');
+    document.body.classList.add('sg-topicpage-on');
+  }
+
+  /* Copie d'un lien dans le presse-papiers, avec un message discret en bas d'écran */
+  function copyLink(text) {
+    var done = function () { toast('Lien copié dans le presse-papiers'); };
+    /* Repli sans API Clipboard : champ temporaire et execCommand */
+    var fallback = function () {
+      var ta = uiEl('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) {}
+      ta.remove();
+      toast(ok ? 'Lien copié dans le presse-papiers' : 'Copie impossible : ' + text);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, fallback);
+    else fallback();
+  }
+
+  function toast(message) {
+    var t = document.querySelector('.sg-toast');
+    if (!t) {
+      t = uiEl('div', 'sg-toast');
+      t.setAttribute('role', 'status');
+      t.setAttribute('aria-live', 'polite');
+      document.body.appendChild(t);
+    }
+    t.textContent = message;
+    t.classList.add('is-on');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(function () { t.classList.remove('is-on'); }, 2400);
   }
 
   /* --------------------------------------------------------------------
