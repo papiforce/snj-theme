@@ -4046,7 +4046,7 @@ body.sg-topics-on #wrap > .posts {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   grid-auto-rows: 1fr; /* toutes les cartes ont la même hauteur */
-  gap: var(--sg-space-6) var(--sg-space-6);
+  gap: 40px var(--sg-space-6); /* les rouleaux dépassent de 8px en haut et en bas */
   margin: 0;
   padding: 10px 14px; /* place des rouleaux qui dépassent */
   list-style: none;
