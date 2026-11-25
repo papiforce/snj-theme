@@ -473,7 +473,10 @@ dans le panneau d'administration (PA), puis on commit.
   de confirmation (choix de Vinny). Réponses de Forumactif relevées : suivre / ne plus suivre, marquer comme lus,
   verrouiller / déverrouiller (GET `/modcp?mode=lock|unlock&t=N&tid=…`) et favoris (GET
   `/search?add_favourite=N&search_id=favouritesearch`, titre « Favoris ») répondent toutes par une page
-  `message_body`. Ton lu **sans les passages entre guillemets** (« Test | Présentation refusée » passait en erreur).
+  `message_body`. Ton lu **sans les passages entre guillemets** (« Test | Présentation refusée » passait en erreur). Textes normalisés en NFC (les accents de « mis à jour » arrivaient
+  décomposés : « Profil mis à jour » passait en « Information »). Libellé d'un lien d'abord d'après son adresse : un lien
+  vers `mode=editprofile` (ou « retourner … profil ») devient **« Modifier mon profil »** (icône `edit`) et passe en
+  premier, en bouton plein (demande de Vinny).
   **Autres actions en fenêtre** : **Supprimer le sujet** (`deleteTopic` : `confirmModal`, puis la page « Êtes-vous
   sûr ? » de `/modcp?mode=delete&t=N` validée en arrière-plan, option `autoConfirm` de `bgAction` qui renvoie les champs
   cachés + `confirm` ; en fermant la confirmation on rejoint le forum du fil d'Ariane ; non essayé jusqu'au bout pour

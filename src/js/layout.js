@@ -3645,7 +3645,7 @@
     lines.forEach(function (nodes) {
       var holder = doc.createElement('span');
       nodes.forEach(function (n) { holder.appendChild(n.cloneNode(true)); });
-      var t = holder.textContent.replace(/\s+/g, ' ').trim();
+      var t = holder.textContent.normalize('NFC').replace(/\s+/g, ' ').trim();
       if (!t) return;
       var a = null;
       nodes.forEach(function (n) {
@@ -3655,14 +3655,19 @@
       if (a) {
         var phrase = t.replace(/^cliquez\s+(ici\s+)?(pour\s+)?/i, '').replace(/[.!]\s*$/, '');
         var label = phrase.charAt(0).toUpperCase() + phrase.slice(1), icon = 'arrow_forward';
-        for (var j = 0; j < NOTICE_LINKS.length; j++) {
+        var hrefA = a.getAttribute('href') || '';
+        /* D'abord l'adresse (plus sûre que la phrase) : la page d'édition du profil n'est pas le profil */
+        if (/mode=editprofile/.test(hrefA) || /retourner[^.]*profil/i.test(phrase)) { label = 'Modifier mon profil'; icon = 'edit'; }
+        else for (var j = 0; j < NOTICE_LINKS.length; j++) {
           if (NOTICE_LINKS[j][0].test(phrase)) { label = NOTICE_LINKS[j][1]; icon = NOTICE_LINKS[j][2]; break; }
         }
         links.push({ a: a, href: a.getAttribute('href'), text: t, label: label, icon: icon });
       } else text.push(t);
     });
+    /* Profil enregistré : « Modifier mon profil » en premier (bouton plein) */
+    links.sort(function (x, y) { return (y.label === 'Modifier mon profil') - (x.label === 'Modifier mon profil'); });
     var message = text.join(' ');
-    var title = hd.textContent.replace(/\s+/g, ' ').trim();
+    var title = hd.textContent.normalize('NFC').replace(/\s+/g, ' ').trim();
     /* Ton lu sans les passages entre guillemets (un titre de sujet comme « … refusée » ne doit pas compter) */
     var all = (title + ' ' + message).replace(/"[^"]*"|«[^»]*»|“[^”]*”/g, ' ');
     var tone = /(désolé|erreur|impossible|ne pouvez|ne pouvez pas|n'existe|n’existe|interdit|refus|pas autoris|pas la permission|incorrect|invalide|échou)/i.test(all) ? 'error'
