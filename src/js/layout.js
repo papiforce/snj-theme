@@ -22,6 +22,8 @@
     var cancel = function () {
       var meta = document.querySelector('meta[http-equiv="refresh" i]');
       if (!meta || !/url\s*=/i.test(meta.getAttribute('content') || '')) return;
+      /* Retour vers la page précédente en cours (noticeRelay) : ne pas l'interrompre */
+      if (document.documentElement.classList.contains('sg-notice-leaving')) return;
       try { window.stop(); } catch (e) {}
       meta.parentNode.removeChild(meta);
     };
@@ -329,6 +331,8 @@
      Construction de la barre
      ---------------------------------------------------------------------- */
   function mount() {
+    /* Page de confirmation : retour à la page précédente, où elle s'affiche en fenêtre */
+    if (noticeRelay()) return;
     if (document.getElementById('sg-sidebar')) return;
 
     /* Si le CSS du thème n'a pas chargé, on garde l'en-tête natif. */
@@ -444,6 +448,8 @@
     noticePage();
     errorBlocks();
     pollCards();
+    rememberPage();
+    noticeModal();
     applyTheme(storedTheme() || currentTheme());
   }
 
@@ -3358,19 +3364,21 @@
     [/(message|boîte) priv|messagerie/i, 'Ma messagerie', 'mail']
   ];
 
-  function noticePage() {
+  /* Lit la page de confirmation : null si ce n'en est pas une, sinon le bloc natif, le ton, le titre court, le
+     message et les liens (« Cliquez ici pour… ») avec leur libellé court et leur icône */
+  function noticeRead() {
     var wrap = document.getElementById('wrap');
-    if (!wrap || wrap.querySelector('.sg-notice')) return;
+    if (!wrap || wrap.querySelector('.sg-notice')) return null;
     /* Un seul .block ; les autres enfants ne peuvent être que des scripts, des styles ou des emplacements
        publicitaires de Forumactif (div sans classe), comme sur /modcp */
     var kids = Array.prototype.slice.call(wrap.children).filter(function (c) { return !/^(SCRIPT|STYLE)$/.test(c.tagName); });
     var blocks = kids.filter(function (c) { return c.classList.contains('block'); });
     var others = kids.filter(function (c) { return blocks.indexOf(c) < 0; });
-    if (blocks.length !== 1 || others.some(function (c) { return c.className || c.tagName !== 'DIV'; })) return;
+    if (blocks.length !== 1 || others.some(function (c) { return c.className || c.tagName !== 'DIV'; })) return null;
     var block = blocks[0];
     var hd = block.querySelector(':scope > .block-header');
     var body = block.querySelector(':scope > .block-content');
-    if (!hd || !body || body.querySelector('form, input, textarea, select')) return;
+    if (!hd || !body || body.querySelector('form, input, textarea, select')) return null;
 
     /* Le message, ligne par ligne (Forumactif sépare par des <br>) : les lignes avec un lien deviennent des boutons */
     var lines = [[]];
@@ -3389,8 +3397,14 @@
         if (a || n.nodeType !== 1) return;
         a = n.tagName === 'A' ? n : n.querySelector('a[href]');
       });
-      if (a) links.push({ a: a, text: t });
-      else text.push(t);
+      if (a) {
+        var phrase = t.replace(/^cliquez\s+(ici\s+)?(pour\s+)?/i, '').replace(/[.!]\s*$/, '');
+        var label = phrase.charAt(0).toUpperCase() + phrase.slice(1), icon = 'arrow_forward';
+        for (var j = 0; j < NOTICE_LINKS.length; j++) {
+          if (NOTICE_LINKS[j][0].test(phrase)) { label = NOTICE_LINKS[j][1]; icon = NOTICE_LINKS[j][2]; break; }
+        }
+        links.push({ a: a, href: a.getAttribute('href'), text: t, label: label, icon: icon });
+      } else text.push(t);
     });
     var message = text.join(' ');
     var title = hd.textContent.replace(/\s+/g, ' ').trim();
@@ -3403,36 +3417,52 @@
         if (NOTICE_TITLES[i][0].test(message)) { title = NOTICE_TITLES[i][1]; break; }
       }
     }
+    return { block: block, tone: tone, title: title, message: message, links: links };
+  }
 
-    var card = uiEl('section', 'sg-notice sg-notice--' + tone);
-    card.setAttribute('role', tone === 'error' ? 'alert' : 'status');
-    card.setAttribute('aria-labelledby', 'sg-notice-title');
+  /* Contenu du sceau « hanko » (carte de la page de confirmation ou de la modale) : sceau, titre, message,
+     boutons. `links` : liens à poser (éléments <a> existants ou { href, label, icon, text }) */
+  function noticeCard(data, tag, links, extra) {
+    var inModal = tag === 'div'; /* hors de #wrap : boutons de la modale plutôt que .sg-action */
+    var card = uiEl(tag || 'section', 'sg-notice sg-notice--' + data.tone);
     var seal = uiEl('div', 'sg-notice__seal');
     seal.setAttribute('aria-hidden', 'true');
-    seal.appendChild(uiEl('span', 'sg-notice__kanji', NOTICE_TONES[tone].kanji));
+    seal.appendChild(uiEl('span', 'sg-notice__kanji', NOTICE_TONES[data.tone].kanji));
     card.appendChild(seal);
-    var h = uiEl('h1', 'sg-notice__title', title);
+    var h = uiEl(inModal ? 'h2' : 'h1', 'sg-notice__title', data.title);
     h.id = 'sg-notice-title';
     card.appendChild(h);
-    if (message) card.appendChild(uiEl('p', 'sg-notice__text', message));
-    if (links.length) {
-      var acts = uiEl('div', 'sg-notice__actions');
+    if (data.message) {
+      var p = uiEl('p', 'sg-notice__text', data.message);
+      p.id = 'sg-notice-text';
+      card.appendChild(p);
+    }
+    if (links.length || extra) {
+      var acts = uiEl('div', 'sg-notice__actions' + (inModal ? ' sg-modal__actions' : ''));
       links.forEach(function (l, i) {
-        var phrase = l.text.replace(/^cliquez\s+(ici\s+)?(pour\s+)?/i, '').replace(/[.!]\s*$/, '');
-        var label = phrase.charAt(0).toUpperCase() + phrase.slice(1), icon = 'arrow_forward';
-        for (var j = 0; j < NOTICE_LINKS.length; j++) {
-          if (NOTICE_LINKS[j][0].test(phrase)) { label = NOTICE_LINKS[j][1]; icon = NOTICE_LINKS[j][2]; break; }
-        }
-        var a = l.a;
-        a.className = 'sg-action' + (i ? ' sg-action--ghost' : '');
+        var a = l.a || uiEl('a');
+        if (!l.a) a.href = l.href;
+        a.className = inModal ? 'sg-modal__btn' + (i ? ' sg-modal__btn--ghost' : '') : 'sg-action' + (i ? ' sg-action--ghost' : '');
         a.textContent = '';
-        a.appendChild(uiIco(icon));
-        a.appendChild(uiEl('span', null, label));
+        a.appendChild(uiIco(l.icon));
+        a.appendChild(uiEl('span', null, l.label));
         a.setAttribute('title', l.text);
         acts.appendChild(a);
       });
+      if (extra) acts.appendChild(extra);
       card.appendChild(acts);
     }
+    return card;
+  }
+
+  function noticePage() {
+    var data = noticeRead();
+    if (!data) return;
+    var wrap = document.getElementById('wrap');
+    var block = data.block;
+    var card = noticeCard(data, 'section', data.links);
+    card.setAttribute('role', data.tone === 'error' ? 'alert' : 'status');
+    card.setAttribute('aria-labelledby', 'sg-notice-title');
 
     /* Séparateur avec le logo au-dessus, comme sur la page d'écriture */
     var top = uiEl('div', 'sg-divider sg-divider--notice');
@@ -3458,7 +3488,126 @@
       if (window.scrollY > 40) return; /* le lecteur a déjà défilé */
       top.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
     }, 150);
-    document.title = title;
+    document.title = data.title;
+  }
+
+  /* --------------------------------------------------------------------
+     Confirmations en fenêtre (un seul endroit pour toutes les actions du forum). Toute action qui aboutit à la
+     page de confirmation de Forumactif (formulaire envoyé ou simple lien) y passe sans s'y arrêter : le message
+     est mis de côté (sessionStorage « snj-notice ») et on retourne aussitôt à la page précédente, rechargée, où
+     il s'affiche dans une modale au sceau « hanko ». Page précédente = la dernière page « réelle » visitée
+     (« snj-lastpage » : ni la page d'écriture, ni la modération, ni une confirmation), seulement si l'on vient
+     bien d'elle (référent) ; sinon, ou si elle n'existe plus (sujet supprimé), la page de confirmation reste.
+     -------------------------------------------------------------------- */
+  var NOTICE_KEY = 'snj-notice';
+  var LASTPAGE_KEY = 'snj-lastpage';
+
+  /* Pages de passage : elles mènent à une action, on n'y revient jamais après une confirmation */
+  function transitPage(url) {
+    try { url = new URL(url, location.href); } catch (e) { return true; }
+    if (url.origin !== location.origin) return true;
+    if (/^\/(post|modcp|login|admin)/.test(url.pathname)) return true;
+    if (/^\/privmsg/.test(url.pathname) && /mode=(post|reply|quote|edit)/.test(url.search)) return true;
+    return false;
+  }
+
+  function sameUrl(a, b) {
+    try {
+      a = new URL(a, location.href); b = new URL(b, location.href);
+      return a.origin === b.origin && a.pathname === b.pathname && a.search === b.search;
+    } catch (e) { return false; }
+  }
+
+  /* Page de confirmation : renvoie à la page précédente si possible (true : la suite du montage est inutile) */
+  function noticeRelay() {
+    var data = noticeRead();
+    if (!data) return false;
+    var last = null;
+    try { last = JSON.parse(sessionStorage.getItem(LASTPAGE_KEY) || 'null'); } catch (e) {}
+    if (!last || !last.u || Date.now() - last.t > 60 * 60 * 1000) return false;
+    var ref = document.referrer || '';
+    /* On vient bien de cette page, directement (lien) ou par une page de passage (formulaire, modération) */
+    if (!ref || !(sameUrl(ref, last.u) || transitPage(ref))) return false;
+    if (sameUrl(last.u, location.href)) return false;
+    /* Sujet supprimé : la page précédente (le sujet) n'existe plus */
+    if (/^\/t\d+/.test(new URL(last.u, location.href).pathname) && /sujet[^.]*supprim/i.test(data.message)) return false;
+
+    var store = {
+      t: Date.now(),
+      to: last.u,
+      from: location.href,
+      tone: data.tone,
+      title: data.title,
+      message: data.message,
+      links: data.links.map(function (l) { return { href: l.href, label: l.label, icon: l.icon, text: l.text }; })
+    };
+    try { sessionStorage.setItem(NOTICE_KEY, JSON.stringify(store)); } catch (e) { return false; }
+    document.documentElement.classList.add('sg-notice-leaving');
+    location.replace(last.u);
+    return true;
+  }
+
+  /* Note la page « réelle » affichée (pour y revenir après une confirmation) */
+  function rememberPage() {
+    if (document.body.classList.contains('sg-noticepage') || transitPage(location.href)) return;
+    var u = location.pathname + location.search;
+    try { sessionStorage.setItem(LASTPAGE_KEY, JSON.stringify({ u: u, t: Date.now() })); } catch (e) {}
+  }
+
+  /* À l'arrivée : la confirmation mise de côté s'affiche en modale */
+  function noticeModal() {
+    var data = null;
+    try { data = JSON.parse(sessionStorage.getItem(NOTICE_KEY) || 'null'); } catch (e) {}
+    if (!data) return;
+    if (Date.now() - data.t > 30 * 1000 || !sameUrl(data.to, location.href)) {
+      if (Date.now() - data.t > 30 * 1000) try { sessionStorage.removeItem(NOTICE_KEY); } catch (e) {}
+      return;
+    }
+    try { sessionStorage.removeItem(NOTICE_KEY); } catch (e) {}
+
+    var prev = document.activeElement;
+    var wrap = uiEl('div', 'sg-modal sg-modal--notice');
+    /* Les liens qui ramènent à la page affichée ne servent plus à rien */
+    var links = (data.links || []).filter(function (l) { return !sameUrl(l.href, location.href); });
+    var ok = uiEl('button', 'sg-modal__btn' + (links.length ? ' sg-modal__btn--ghost' : ''));
+    ok.type = 'button';
+    ok.appendChild(uiEl('span', null, 'Fermer'));
+    var card = noticeCard(data, 'div', links, ok);
+    card.classList.add('sg-modal__box');
+    card.setAttribute('role', data.tone === 'error' ? 'alertdialog' : 'dialog');
+    card.setAttribute('aria-modal', 'true');
+    card.setAttribute('aria-labelledby', 'sg-notice-title');
+    if (data.message) card.setAttribute('aria-describedby', 'sg-notice-text');
+    wrap.appendChild(card);
+    document.body.appendChild(wrap);
+    document.documentElement.classList.add('sg-modal-open');
+
+    var focusables = function () { return Array.prototype.slice.call(card.querySelectorAll('a[href], button')); };
+    var close = function () {
+      if (!wrap.parentNode) return;
+      wrap.classList.remove('is-on');
+      document.removeEventListener('keydown', onKey, true);
+      document.documentElement.classList.remove('sg-modal-open');
+      setTimeout(function () { if (wrap.parentNode) wrap.parentNode.removeChild(wrap); }, 200);
+      if (prev && prev.focus) try { prev.focus({ preventScroll: true }); } catch (e) {}
+    };
+    var onKey = function (e) {
+      if (e.key === 'Escape') { e.preventDefault(); close(); }
+      if (e.key === 'Tab') {
+        var f = focusables();
+        var i = f.indexOf(document.activeElement);
+        e.preventDefault();
+        f[(i + (e.shiftKey ? -1 : 1) + f.length) % f.length].focus();
+      }
+    };
+    document.addEventListener('keydown', onKey, true);
+    wrap.addEventListener('mousedown', function (e) { if (e.target === wrap) close(); });
+    ok.addEventListener('click', close);
+    requestAnimationFrame(function () {
+      wrap.classList.add('is-on');
+      var first = focusables()[0];
+      if (first) try { first.focus({ preventScroll: true }); } catch (e) {}
+    });
   }
 
   /* Erreurs de saisie (template error_body : .block.block-error, ex. « Vous devez entrer un message avant de

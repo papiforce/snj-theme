@@ -188,3 +188,71 @@ body.sg-noticepage #wrap > .sg-divider--notice {
     animation: none;
   }
 }
+
+/* --- Confirmation en fenêtre (noticeRelay + noticeModal) -------------------------------------------------
+   La page de confirmation n'est que traversée : masquée le temps du retour à la page précédente, où le même
+   sceau « hanko » s'affiche dans une modale (.sg-modal, 59-topic.css). */
+html.sg-notice-leaving body {
+  visibility: hidden;
+}
+
+.sg-modal--notice .sg-notice.sg-modal__box {
+  width: min(480px, 100%);
+  margin: 0;
+  padding: 36px 28px 24px;
+  box-shadow: var(--sg-shadow);
+}
+
+/* La modale est hors de #wrap : on reprend ici le titre et son filet */
+.sg-modal--notice .sg-notice__title {
+  margin: 0 0 10px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--sg-text);
+  font-family: var(--sg-font-display);
+  font-size: 1.6rem;
+  font-weight: 400;
+  line-height: 1.2;
+  text-transform: none;
+}
+
+.sg-modal--notice .sg-notice__title::after {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 2px;
+  margin: 14px auto 0;
+  border-radius: 2px;
+  background: var(--tone);
+}
+
+.sg-modal--notice .sg-notice__actions {
+  flex-wrap: wrap;
+  margin-top: 26px;
+}
+
+.sg-modal--notice a.sg-modal__btn,
+.sg-modal--notice a.sg-modal__btn:visited {
+  text-decoration: none;
+}
+
+.sg-modal--notice a.sg-modal__btn:not(.sg-modal__btn--ghost),
+.sg-modal--notice a.sg-modal__btn:not(.sg-modal__btn--ghost):visited {
+  color: var(--sg-on-contrast);
+}
+
+.sg-modal--notice a.sg-modal__btn--ghost,
+.sg-modal--notice a.sg-modal__btn--ghost:visited {
+  color: var(--sg-text);
+}
+
+@media (max-width: 768px) {
+  .sg-modal--notice .sg-notice.sg-modal__box {
+    padding: 32px 20px 20px;
+  }
+
+  .sg-modal--notice .sg-notice__title {
+    font-size: 1.4rem;
+  }
+}
