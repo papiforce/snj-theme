@@ -22,8 +22,6 @@
     var cancel = function () {
       var meta = document.querySelector('meta[http-equiv="refresh" i]');
       if (!meta || !/url\s*=/i.test(meta.getAttribute('content') || '')) return;
-      /* Retour vers la page précédente en cours (noticeRelay) : ne pas l'interrompre */
-      if (document.documentElement.classList.contains('sg-notice-leaving')) return;
       try { window.stop(); } catch (e) {}
       meta.parentNode.removeChild(meta);
     };
@@ -331,8 +329,6 @@
      Construction de la barre
      ---------------------------------------------------------------------- */
   function mount() {
-    /* Page de confirmation : retour à la page précédente, où elle s'affiche en fenêtre */
-    if (noticeRelay()) return;
     if (document.getElementById('sg-sidebar')) return;
 
     /* Si le CSS du thème n'a pas chargé, on garde l'en-tête natif. */
@@ -448,8 +444,6 @@
     noticePage();
     errorBlocks();
     pollCards();
-    rememberPage();
-    noticeModal();
     applyTheme(storedTheme() || currentTheme());
   }
 
@@ -3366,8 +3360,9 @@
 
   /* Lit la page de confirmation : null si ce n'en est pas une, sinon le bloc natif, le ton, le titre court, le
      message et les liens (« Cliquez ici pour… ») avec leur libellé court et leur icône */
-  function noticeRead() {
-    var wrap = document.getElementById('wrap');
+  function noticeRead(doc) {
+    doc = doc || document;
+    var wrap = doc.getElementById('wrap');
     if (!wrap || wrap.querySelector('.sg-notice')) return null;
     /* Un seul .block ; les autres enfants ne peuvent être que des scripts, des styles ou des emplacements
        publicitaires de Forumactif (div sans classe), comme sur /modcp */
@@ -3388,7 +3383,7 @@
     });
     var text = [], links = [];
     lines.forEach(function (nodes) {
-      var holder = document.createElement('span');
+      var holder = doc.createElement('span');
       nodes.forEach(function (n) { holder.appendChild(n.cloneNode(true)); });
       var t = holder.textContent.replace(/\s+/g, ' ').trim();
       if (!t) return;
@@ -3492,25 +3487,10 @@
   }
 
   /* --------------------------------------------------------------------
-     Confirmations en fenêtre (un seul endroit pour toutes les actions du forum). Toute action qui aboutit à la
-     page de confirmation de Forumactif (formulaire envoyé ou simple lien) y passe sans s'y arrêter : le message
-     est mis de côté (sessionStorage « snj-notice ») et on retourne aussitôt à la page précédente, rechargée, où
-     il s'affiche dans une modale au sceau « hanko ». Page précédente = la dernière page « réelle » visitée
-     (« snj-lastpage » : ni la page d'écriture, ni la modération, ni une confirmation), seulement si l'on vient
-     bien d'elle (référent) ; sinon, ou si elle n'existe plus (sujet supprimé), la page de confirmation reste.
+     Confirmation en fenêtre : le sceau « hanko » dans une modale, pour les actions envoyées en arrière-plan
+     (action par action : on envoie, on lit la réponse de Forumactif avec noticeRead(doc), puis showNotice).
+     data = { tone, title, message, links: [{ href, label, icon, text }] }.
      -------------------------------------------------------------------- */
-  var NOTICE_KEY = 'snj-notice';
-  var LASTPAGE_KEY = 'snj-lastpage';
-
-  /* Pages de passage : elles mènent à une action, on n'y revient jamais après une confirmation */
-  function transitPage(url) {
-    try { url = new URL(url, location.href); } catch (e) { return true; }
-    if (url.origin !== location.origin) return true;
-    if (/^\/(post|modcp|login|admin)/.test(url.pathname)) return true;
-    if (/^\/privmsg/.test(url.pathname) && /mode=(post|reply|quote|edit)/.test(url.search)) return true;
-    return false;
-  }
-
   function sameUrl(a, b) {
     try {
       a = new URL(a, location.href); b = new URL(b, location.href);
@@ -3518,85 +3498,7 @@
     } catch (e) { return false; }
   }
 
-  /* Page de confirmation : renvoie à la page précédente si possible (true : la suite du montage est inutile) */
-  function noticeRelay() {
-    var data = noticeRead();
-    if (!data) return false;
-    var last = null;
-    try { last = JSON.parse(sessionStorage.getItem(LASTPAGE_KEY) || 'null'); } catch (e) {}
-    if (!last || !last.u || Date.now() - last.t > 60 * 60 * 1000) return false;
-    var ref = document.referrer || '';
-    /* On vient bien de cette page, directement (lien) ou par une page de passage (formulaire, modération) */
-    if (!ref || !(sameUrl(ref, last.u) || transitPage(ref))) return false;
-    if (sameUrl(last.u, location.href)) return false;
-    /* Sujet supprimé : la page précédente (le sujet) n'existe plus */
-    if (/^\/t\d+/.test(new URL(last.u, location.href).pathname) && /sujet[^.]*supprim/i.test(data.message)) return false;
-
-    var store = {
-      t: Date.now(),
-      to: last.u,
-      from: location.href,
-      y: last.y || 0,
-      tone: data.tone,
-      title: data.title,
-      message: data.message,
-      links: data.links.map(function (l) { return { href: l.href, label: l.label, icon: l.icon, text: l.text }; })
-    };
-    try { sessionStorage.setItem(NOTICE_KEY, JSON.stringify(store)); } catch (e) { return false; }
-    document.documentElement.classList.add('sg-notice-leaving');
-    location.replace(last.u);
-    return true;
-  }
-
-  /* Note la page « réelle » affichée (pour y revenir après une confirmation) */
-  function rememberPage() {
-    if (document.body.classList.contains('sg-noticepage') || transitPage(location.href)) return;
-    var u = location.pathname + location.search;
-    var t = Date.now();
-    /* La position de défilement est tenue à jour : on la retrouve en revenant après une confirmation */
-    var save = function () {
-      try { sessionStorage.setItem(LASTPAGE_KEY, JSON.stringify({ u: u, t: t, y: Math.round(window.scrollY) })); } catch (e) {}
-    };
-    save();
-    var pending = false;
-    window.addEventListener('scroll', function () {
-      if (pending) return;
-      pending = true;
-      setTimeout(function () { pending = false; save(); }, 150);
-    }, { passive: true });
-    window.addEventListener('pagehide', save);
-  }
-
-  /* Remet la page à la position où on l'avait laissée (le retour après une confirmation doit passer inaperçu) :
-     tout de suite, puis une fois les images et polices chargées, tant que le lecteur n'a pas défilé lui-même */
-  function restoreScroll(y) {
-    if (!y) return;
-    try { history.scrollRestoration = 'manual'; } catch (e) {}
-    var moved = false;
-    var stop = function () { moved = true; };
-    ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(function (ev) {
-      window.addEventListener(ev, stop, { once: true, passive: true });
-    });
-    var go = function () { if (!moved) window.scrollTo({ top: y, left: 0, behavior: 'instant' }); };
-    go();
-    requestAnimationFrame(go);
-    if (document.readyState === 'complete') setTimeout(go, 0);
-    else window.addEventListener('load', function () { go(); setTimeout(go, 300); });
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(go);
-  }
-
-  /* À l'arrivée : la confirmation mise de côté s'affiche en modale */
-  function noticeModal() {
-    var data = null;
-    try { data = JSON.parse(sessionStorage.getItem(NOTICE_KEY) || 'null'); } catch (e) {}
-    if (!data) return;
-    if (Date.now() - data.t > 30 * 1000 || !sameUrl(data.to, location.href)) {
-      if (Date.now() - data.t > 30 * 1000) try { sessionStorage.removeItem(NOTICE_KEY); } catch (e) {}
-      return;
-    }
-    try { sessionStorage.removeItem(NOTICE_KEY); } catch (e) {}
-    restoreScroll(data.y);
-
+  function showNotice(data) {
     var prev = document.activeElement;
     var wrap = uiEl('div', 'sg-modal sg-modal--notice');
     /* Les liens qui ramènent à la page affichée ne servent plus à rien */

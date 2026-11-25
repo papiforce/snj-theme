@@ -189,13 +189,8 @@ body.sg-noticepage #wrap > .sg-divider--notice {
   }
 }
 
-/* --- Confirmation en fenêtre (noticeRelay + noticeModal) -------------------------------------------------
-   La page de confirmation n'est que traversée : masquée le temps du retour à la page précédente, où le même
-   sceau « hanko » s'affiche dans une modale (.sg-modal, 59-topic.css). */
-html.sg-notice-leaving body {
-  visibility: hidden;
-}
-
+/* --- Confirmation en fenêtre (showNotice) : le sceau « hanko » dans une modale (.sg-modal, 59-topic.css),
+   pour les actions envoyées en arrière-plan, action par action. */
 .sg-modal--notice .sg-notice.sg-modal__box {
   width: min(480px, 100%);
   margin: 0;

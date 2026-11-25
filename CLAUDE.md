@@ -453,22 +453,15 @@ dans le panneau d'administration (PA), puis on commit.
   crédit que Forumactif fait varier selon la page. Dessous, « Sengoku no Jidai » au trait en Zen Antique sur toute la
   largeur du contenu (SVG ajusté au texte une fois la police chargée), sumi et gofun, estompé vers le bas, qui se
   remplit légèrement au survol. Les liens du pied de page doivent viser `#page-footer a…` (AwesomeBB les force en blanc).
-- **Confirmations en fenêtre** (`layout.js`, `noticeRelay` + `noticeModal` + `rememberPage`, + `61-notice.css` ;
-  **un seul endroit pour toutes les actions du forum**, formulaires comme simples liens) : la page de confirmation
-  (celle que lit `noticeRead`) n'est que **traversée** : son contenu (ton, titre, message, liens) est mis de côté
-  (`sessionStorage` `snj-notice`, valable 30 s), la page est masquée (`html.sg-notice-leaving`) et on retourne à la
-  **page précédente** par `location.replace` (rechargée, sans la confirmation dans l'historique), où le **sceau hanko
-  s'affiche en modale** (`.sg-modal--notice` : même carte, boutons de la modale, « Fermer », Échap, clic sur le voile,
-  focus gardé ; les liens qui ramènent à la page affichée sont retirés). **Position de défilement conservée** (on doit croire
-  n'avoir pas quitté la page) : `rememberPage` tient à jour `y` dans `snj-lastpage` (défilement, `pagehide`),
-  `restoreScroll` la rétablit à l'arrivée (`history.scrollRestoration = 'manual'`, puis de nouveau au chargement complet
-  et une fois les polices prêtes, tant que le lecteur n'a pas défilé). Page précédente = dernière page « réelle »
-  visitée (`snj-lastpage`, 1 h ; ni `/post`, ni `/modcp`, ni `/login`, ni l'écriture d'un MP, ni une confirmation),
-  retenue seulement si le référent est cette page ou une page de passage. **Sinon la page de confirmation reste**
-  (arrivée directe, sans référent, sujet supprimé dont la page n'existe plus). Choix de Vinny : page précédente par
-  défaut, sinon page de confirmation. Après un message publié, on revient donc sur la page du sujet d'où l'on venait
-  (pas forcément la dernière). Vérifié sur « Action impossible » (lien direct et passage par l'écriture) ; non
-  testé sur un vrai envoi.
+- **Confirmations en fenêtre, action par action** (`layout.js`, `showNotice(data)` + `noticeRead(doc)` +
+  `noticeCard`, + `61-notice.css`) : le sceau hanko dans une modale (`.sg-modal--notice` : même carte, boutons de la
+  modale, « Fermer », Échap, clic sur le voile, focus gardé ; les liens qui ramènent à la page affichée sont retirés).
+  Une action passée en fenêtre est **envoyée en arrière-plan** (`fetch`), la réponse de Forumactif est lue par
+  `noticeRead(doc)` (même lecture que la page de confirmation) puis affichée par `showNotice`, sans quitter la page.
+  **Une solution générique a été essayée puis abandonnée** (demande de Vinny, « trop de problèmes ») : traverser la
+  page de confirmation, revenir à la page précédente par `location.replace` et y ouvrir la modale (position de
+  défilement comprise). Ne pas la reproduire. Vinny accepte le **risque de double envoi** propre à l'envoi en
+  arrière-plan.
 - **Pages de confirmation sans redirection forcée** (`layout.js`, `noForcedRedirect`, en tête du module 10, toutes
   les pages) : après un envoi (message posté ou modifié, profil enregistré…), Forumactif affiche une confirmation
   qui renvoie d'office ailleurs après quelques secondes (`<meta http-equiv="refresh" content="N;url=…">` posée par
