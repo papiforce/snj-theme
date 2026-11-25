@@ -150,8 +150,8 @@
 
 .sgc-portrait {
   display: block;
-  width: 200px;
-  height: 400px;
+  width: 200px !important; /* le message impose height: auto à ses images (sélecteur à id) */
+  height: 400px !important;
   border-radius: 12px;
   background: var(--sg-surface-3, var(--sg-surface));
   object-fit: cover;
@@ -171,7 +171,7 @@
   border-bottom: 1px dashed var(--sg-border);
 }
 
-.sgc-fact:last-child {
+.sgc-fact:last-of-type { /* :last-of-type : le dernier enfant est souvent un <br> de Forumactif */
   border-bottom: 0;
 }
 
@@ -246,7 +246,7 @@
   padding-bottom: 20px;
 }
 
-.sgc-event:last-child {
+.sgc-event:last-of-type {
   padding-bottom: 0;
 }
 
@@ -261,7 +261,7 @@
   background: var(--sg-border);
 }
 
-.sgc-event:last-child::before {
+.sgc-event:last-of-type::before {
   display: none;
 }
 
@@ -320,8 +320,8 @@
 
 .sgc-player__avatar {
   flex: none;
-  width: 64px;
-  height: 64px;
+  width: 64px !important;
+  height: 64px !important;
   border-radius: 50%;
   background: var(--sg-surface-2);
   object-fit: cover;
@@ -363,8 +363,8 @@
 
   .sgc-portrait {
     order: -1;
-    width: 160px;
-    height: 320px;
+    width: 160px !important;
+    height: 320px !important;
     margin: 0 auto;
   }
 
