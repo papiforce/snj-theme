@@ -3176,7 +3176,7 @@
       var extra = uiEl('div', 'sg-ipbox');
       var first = tables[0];
       var ipText = (first.textContent.match(/\d{1,3}(?:\.\d{1,3}){3}|[0-9a-f:]{6,}/i) || [''])[0];
-      var host = (first.textContent.match(/\[\s*([^\]\s]+\.[^\]\s]+)\s*\]/) || [])[1] || '';
+      var host = ((doc.getElementById('wrap') || doc.body).textContent.match(/\[\s*([a-z0-9.-]+\.[a-z]{2,})\s*\]/i) || [])[1] || '';
       var ipLine = uiEl('p', 'sg-ipbox__ip');
       ipLine.appendChild(uiIco('lan'));
       ipLine.appendChild(uiEl('strong', null, ipText || 'Inconnue'));
@@ -3666,7 +3666,7 @@
     /* Ton lu sans les passages entre guillemets (un titre de sujet comme « … refusée » ne doit pas compter) */
     var all = (title + ' ' + message).replace(/"[^"]*"|«[^»]*»|“[^”]*”/g, ' ');
     var tone = /(désolé|erreur|impossible|ne pouvez|ne pouvez pas|n'existe|n’existe|interdit|refus|pas autoris|pas la permission|incorrect|invalide|échou)/i.test(all) ? 'error'
-      : /(succès|enregistr|supprim|envoy|mis à jour|modifi|verrouill|déplac|ajout|publi|fusionn|divis|surveill|marqué|clos)/i.test(all) ? 'done' : 'info';
+      : /(succès|enregistr|supprim|envoy|mis à jour|modifi|verrouill|déplac|ajout|publi|fusionn|divis|surveill|marqué|clos|pris en compte)/i.test(all) ? 'done' : 'info';
     if (/^(informations?|information|message|favoris)$/i.test(title) || !title) {
       title = tone === 'error' ? 'Action impossible' : tone === 'done' ? 'C’est fait' : 'Information';
       for (var i = 0; i < NOTICE_TITLES.length && tone === 'done'; i++) {
@@ -3802,7 +3802,8 @@
     ok.addEventListener('click', close);
     requestAnimationFrame(function () {
       wrap.classList.add('is-on');
-      var first = focusables()[0];
+      /* Le focus va sur le premier bouton de la fenêtre (pas sur un lien glissé dans le contenu) */
+      var first = card.querySelector('.sg-notice__actions a[href], .sg-notice__actions button') || focusables()[0];
       if (first) try { first.focus({ preventScroll: true }); } catch (e) {}
     });
   }

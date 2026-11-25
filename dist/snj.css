@@ -8486,6 +8486,11 @@ html.sg-busy * {
   text-decoration: none;
 }
 
+/* Liste personnalisée dans une fenêtre : plus courte, pour rester à l'écran */
+.sg-modal .sg-combo__list {
+  max-height: min(280px, 40vh);
+}
+
 /* --- 62-poll.css --- */
 /* ==========================================================================
    SNJ — Sondage affiché : carte « tōhyō » 投票 (le vote)

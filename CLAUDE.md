@@ -474,7 +474,31 @@ dans le panneau d'administration (PA), puis on commit.
   verrouiller / déverrouiller (GET `/modcp?mode=lock|unlock&t=N&tid=…`) et favoris (GET
   `/search?add_favourite=N&search_id=favouritesearch`, titre « Favoris ») répondent toutes par une page
   `message_body`. Ton lu **sans les passages entre guillemets** (« Test | Présentation refusée » passait en erreur).
-  Vote non testé (seul sondage du forum de test verrouillé).
+  **Autres actions en fenêtre** : **Supprimer le sujet** (`deleteTopic` : `confirmModal`, puis la page « Êtes-vous
+  sûr ? » de `/modcp?mode=delete&t=N` validée en arrière-plan, option `autoConfirm` de `bgAction` qui renvoie les champs
+  cachés + `confirm` ; en fermant la confirmation on rejoint le forum du fil d'Ariane ; non essayé jusqu'au bout pour
+  ne rien supprimer) ; **Déplacer le sujet** (`moveTopic` : la liste `new_forum` de `/modcp?mode=move` passe dans une
+  fenêtre en liste personnalisée à saisie, POST `/modcp` avec les champs cachés + `new_forum` + `confirm` ; page
+  relue en fermant, le fil d'Ariane change ; vérifié aller-retour Présentations → Archivées → Présentations) ;
+  **Adresse IP** du menu d'un message (`ipModal` : adresse, hôte, membres ayant posté depuis cette adresse, autres
+  adresses du membre, liens « Page complète » et « Chercher l'adresse ») ; **Clore le sondage** (`autoConfirm`).
+  `confirmModal` accepte `body` (contenu, ex. un formulaire) et `wide` ; Tab parcourt tous ses champs, Échap ferme
+  d'abord une liste ouverte ; les styles des listes personnalisées visent `:is(#wrap, .sg-modal) .sg-combo…`.
+  `showNotice` accepte `extra` (contenu) et `onClose`. **Sondage sur place** (`pollSwap`) : « Voir les résultats »
+  (`?vote=viewresult`), « Revenir au vote » et **« Annuler mon vote »** (`?action=cancel_vote` : Forumactif renvoie la
+  page du sujet sans confirmation ; bouton ajouté aux actions, fenêtre « Vote annulé ») ; vote vérifié (« Votre vote
+  a été pris en compte » → résultats) puis annulé.
+  **Inventaire** (relevé sur l'index, un forum, un sujet avec sondage, profil, membres, MP, favoris, sujets suivis,
+  groupes, qui est en ligne) : **en fenêtre** — `?watch|unwatch=topic|forum`, `?mark=topics`, `add_favourite`,
+  `/modcp?mode=lock|unlock|delete|move`, `/post?mode=delete` (message), `/post?mode=vote` (POST),
+  `/post?mode=close_vote`, `?action=cancel_vote`, `?vote=viewresult`, `/modcp?mode=ip`. **Gardent leur page** —
+  écriture (`/post?mode=reply|quote|editpost|newtopic`, choix de Vinny), `/modcp?mode=split` (choix des messages),
+  `/merge?t=N` (choix du sujet en plusieurs écrans), `/modcp?f=N` (modération du forum), `mode=trash` (retiré).
+  **À traiter avec leurs pages, pas encore refaites** — `?mark=forums` (index, barre masquée), favoris
+  (`delete_favourite[N]` + page « Êtes-vous sûr ? »), sujets suivis (`mark[]` + `valid`), messages privés (supprimer,
+  archiver, marquer lu / non lu), profil (`/profile` POST, « Profil mis à jour »), groupes (adhérer / quitter,
+  ajouter / retirer un membre), `/?mode=delete_cookies`, `/rgpd.php?view=send_confirm` ; profil d'un autre membre
+  (suivre, ami / ignoré, signaler) à relever quand le forum de test aura un second membre.
 - **Pages de confirmation sans redirection forcée** (`layout.js`, `noForcedRedirect`, en tête du module 10, toutes
   les pages) : après un envoi (message posté ou modifié, profil enregistré…), Forumactif affiche une confirmation
   qui renvoie d'office ailleurs après quelques secondes (`<meta http-equiv="refresh" content="N;url=…">` posée par

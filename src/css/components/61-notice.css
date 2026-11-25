@@ -341,3 +341,8 @@ html.sg-busy * {
   font-weight: 700;
   text-decoration: none;
 }
+
+/* Liste personnalisée dans une fenêtre : plus courte, pour rester à l'écran */
+.sg-modal .sg-combo__list {
+  max-height: min(280px, 40vh);
+}
