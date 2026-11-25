@@ -128,7 +128,8 @@ dans le panneau d'administration (PA), puis on commit.
   **toujours au bas de la carte** (`margin-top: auto` ; l'élément qui le précède garde 10px de marge basse).
   Verrouillés : carte atténuée (72 %). Grille de 2 colonnes, **même hauteur pour toutes les cartes** (`grid-auto-rows: 1fr`) ;
   1 colonne ≤ 768px. Soulèvement au survol. **« Poster un nouveau sujet » deux fois** : le bouton d'origine reste à droite
-  du titre de la page (en-tête), et un second, qui reprend son adresse, est **au-dessus de la grille, à gauche**
+  du titre de la page (en-tête) — **sauf si le forum n'a pas de sous-forum** (la barre est alors juste sous le titre :
+  le bouton de l'en-tête est retiré, demande de Vinny) —, et un second, qui reprend son adresse, est **au-dessus de la grille, à gauche**
   (`.sg-topics__bar`, style `.sg-action`, pleine largeur sur mobile). À l'extrême droite de cette barre, bouton
   **« Actions »** (icône `more_vert`, trois points verticaux, contour sur fond de surface) qui ouvre un menu (`.sg-menu`,
   `role="menu"`, flèches, Début/Fin, Échap, clic extérieur) : « Nouveaux messages depuis ma dernière visite », « Messages

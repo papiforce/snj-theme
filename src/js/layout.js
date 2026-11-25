@@ -1259,6 +1259,17 @@
       btn.appendChild(el('span', null, 'Poster un nouveau sujet'));
       bar.appendChild(btn);
     }
+    /* Forum sans sous-forum : la barre est juste sous le titre, le bouton de l'en-tête ferait doublon */
+    var hasSubs = document.querySelector('.sg-subforums') ||
+      document.querySelector('#wrap > .forum.type-table-forum .forum-section');
+    if (bar && !hasSubs) {
+      var headBtn = document.querySelector('.sg-pagehead__actions a[href*="mode=newtopic"]');
+      if (headBtn) {
+        var acts = headBtn.parentNode;
+        headBtn.remove();
+        if (!acts.children.length) acts.remove();
+      }
+    }
 
     /* Bouton « Actions » (trois points) à l'extrême droite : menu des recherches du forum et du suivi.
        On reprend les adresses des liens natifs (recherches limitées au forum en priorité). */
