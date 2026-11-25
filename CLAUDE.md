@@ -428,22 +428,31 @@ dans le panneau d'administration (PA), puis on commit.
   (onglets, cartes, champs, radios) ; leurs contenus particuliers (avatar, signature, listes) restent à reprendre.
 - **Codes des membres** (HTML collé dans un message, `64-codes.css`, modèles dans `src/codes/`) : le membre ne colle
   que du HTML à classes **`.sgc-…`**, tout le style vit dans le thème (tokens : clair et sombre sans rien changer ; pas
-  de `<style>`, d'attribut `style` ni de `data-*` dans les codes). Forumactif change chaque retour à la ligne en `<br>` :
-  ceux posés entre deux blocs sont masqués (`.sgc br`), seuls les textes (`.sgc-text`, `.sgc-value`,
-  `.sgc-event__text`, `.sgc-qa__a`) les gardent ; « dernier élément » en `:last-of-type` (le dernier enfant est souvent
-  un `<br>`) ; les images du message ont `height: auto` imposé par un sélecteur à id, d'où les tailles en `!important`.
-  Mise en page selon la largeur du message (`container-type`, `@container ≤ 600px`), pas de l'écran.
-  **Fiche de personnage « jinbutsu »** 人物 (`src/codes/fiche-personnage.html`), patterns réutilisables : `.sgc`
-  (racine ; accent = pays avec `.sgc--hi|mizu|kaze|kaminari|tsuchi|shokoku`, sinon couleur primaire) ; `.sgc-head`
-  (kanji en surtitre, nom en Zen Antique, sous-titre, filet d'accent de 56px — `.sgc-rule` seul) ; `.sgc-sec` (carte
-  `--sg-surface-2` numérotée automatiquement 01, 02… par compteur CSS, titre en Zen Antique sur une ligne, kanji à
-  droite) ; `.sgc-split` (fiche | portrait 200 × 400) ; `.sgc-facts` / `.sgc-fact` (libellé `.sgc-label` en petites
-  capitales | valeur `.sgc-value`, filets pointillés) ; `.sgc-cols` / `.sgc-field` (champs côte à côte sur
-  `--sg-surface`, `--wide` pleine largeur) ; `.sgc-text` (texte libre) et `.sgc-em` (passage à la couleur d'accent) ;
-  `.sgc-timeline` / `.sgc-event` (date en petites capitales, jalon rond sur un fil, titre en Zen Antique à la couleur
-  d'accent ; date au-dessus en largeur réduite) ; `.sgc-player` (hors RP : avatar rond, questions `.sgc-qa`). Les
-  losanges et filets dorés de l'ancienne fiche ne sont pas repris. Vérifié en injectant le code dans un message
-  (retours à la ligne changés en `<br>`), clair et sombre, largeur réduite ; pas encore posté pour de vrai.
+  de `<style>`, d'attribut `style` ni de `data-*` dans les codes). Le message est lu comme du **BBCode** : chaque retour
+  à la ligne devient un `<br>`, donc les codes passent à la ligne **dans des commentaires** (`<!--` en fin de ligne,
+  `-->` en début de la suivante, indentation comprise) ; par sécurité `.sgc br` est masqué, sauf dans les textes
+  (`.sgc-text`, `.sgc-quote`, `.sgc-step__text`, `.sgc-qa__a`, où une ligne vide fait un paragraphe). « Dernier
+  élément » en `:last-of-type` ; les images du message ont `height: auto` imposé par un sélecteur à id, d'où les tailles
+  en `!important`. Mise en page selon la largeur du message (`container-type`, `@container ≤ 640px`), pas de l'écran.
+  **Un premier essai reprenait la mise en page de l'ancienne fiche (sections numérotées, libellés à filet, losanges) :
+  refusé par Vinny** — la capture d'une ancienne fiche ne donne que les informations demandées, jamais le design.
+  **Fiche de personnage « jinbutsu »** 人物 (`src/codes/fiche-personnage.html`), patterns réutilisables : `.sgc` (racine ;
+  accent = pays avec `.sgc--hi|mizu|kaze|kaminari|tsuchi|shokoku`, sinon couleur primaire) ; **héros** `.sgc-hero`
+  (carte `--sg-surface-2` sur **kikkō** — référence durable —, net à droite, `.sgc-pat--kikko`, kanji du pays en
+  filigrane `.sgc-hero__kanji`) : **portrait 200 × 400** (format des avatars du forum) `.sgc-portrait` avec le **rang en
+  sceau hanko** `.sgc-seal` (carré à double filet incliné, comme les confirmations) ; surtitre `.sgc-eyebrow` (kanji +
+  petites capitales), nom `.sgc-name` en Zen Antique avec le filet d'accent de 56px (comme les en-têtes ; `.sgc-rule`
+  seul), **fuda** `.sgc-tags` / `.sgc-tag` (étiquettes libellé / valeur en Zen Antique, `--wide` sur 2 colonnes) ; le rang
+  n'est pas répété dans les étiquettes. **Séparateur de la refonte** `.sgc-notch` (filet en V, `--logo` avec le logo au
+  trait, `--up` pointe en haut pour fermer). **Parties** `.sgc-part` : **mon** `.sgc-mon` (kanji dans un cercle teinté),
+  titre en Zen Antique, filet qui file vers la droite. `.sgc-duo` : **grands chiffres** `.sgc-stats` (taille, poids ;
+  unité à la couleur d'accent) | texte. `.sgc-quote` : texte entre **crochets japonais 「 」**. **Chronologie**
+  `.sgc-chrono` / `.sgc-step` : « An » en petites capitales et l'année en grand chiffre Zen Antique, **tomoe du logo de
+  SnJ** (trois magatama, `.sgc-step__mark`) sur un fil, titre à la couleur d'accent ; en largeur réduite, tomoe et fil à
+  gauche, année sur une ligne. **Coulisses** `.sgc-backstage` (hors RP, « Derrière le shinobi ») sur **shippō**
+  (communauté), en Hagane, avatar rond, questions `.sgc-qa`. Vérifié en injectant le code dans un message (retours à la
+  ligne changés en `<br>`), clair, sombre, largeur réduite ; **pas encore posté pour de vrai** (un élément vide comme
+  `.sgc-notch` ou `.sgc-step__mark` pourrait être retiré par Forumactif).
   Récapitulatif des patterns : **forum** (accueil) = image en fond + panneau + kanji ; **sous-forum** = ema
   (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ; **confirmation** = hanko (sceau au kanji) ; **paramètres du profil** = ninbetsu-chō (onglets collants + cartes) ; **sondage** = tōhyō (carte sur shippō) ; **fiche de personnage** = jinbutsu (codes `.sgc-`) ;
   **permission** = étiquette tegata aux coins coupés.
