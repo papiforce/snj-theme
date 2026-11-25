@@ -3907,6 +3907,15 @@
       Array.prototype.slice.call(bc.querySelectorAll(':scope > label')).forEach(cpField);
       Array.prototype.slice.call(bc.querySelectorAll('.radio-wrap')).forEach(cpRadioWrap);
       bc.classList.add('sg-pcard__grid');
+      /* Bloc sans titre juste après une carte (nouveau mot de passe…) : ses champs rejoignent cette carte */
+      var prevCard = b.previousElementSibling;
+      if (!bh && prevCard && prevCard.classList.contains('sg-pcard')) {
+        var grid = prevCard.querySelector('.sg-pcard__grid');
+        if (grid) {
+          while (bc.firstChild) grid.appendChild(bc.firstChild);
+          b.classList.add('sg-hidden');
+        }
+      }
     });
 
     /* Boutons d'envoi : « Réinitialiser » (contour) puis « Enregistrer » (plein), à droite sous un filet */

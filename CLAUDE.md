@@ -401,8 +401,31 @@ dans le panneau d'administration (PA), puis on commit.
   **résultats** (`?vote=viewresult`) : une barre arrondie par choix (Asagi, plus soutenue pour le choix en tête,
   qui grandit à l'affichage), « N votes · P % », « Revenir au vote » et le total ; **mentions** natives (votes publics,
   fin du sondage) en ligne discrète avec icône, sous un filet pointillé.
+- **Paramètres du profil : registre « ninbetsu-chō »** 人別帳 (le registre des habitants d'Edo) (`layout.js`, fonctions
+  `profilePage`, `cpField`, `cpRadioWrap`, + `63-profile.css`) : pattern **réservé au panneau de l'utilisateur**
+  (`#wrap > .cp` avec ses onglets `.cp-sidebar` : `/profile?mode=editprofile&page_profil=…`, sujets surveillés,
+  favoris). Haut : séparateur avec le logo (sans widgets, comme l'écriture), en-tête au pattern des forums (fil
+  d'Ariane « Alendria › Mon profil › onglet » — nom du forum lu sur `link[rel="search"][title]` —, **titre = l'onglet**,
+  une action « Voir mon profil », description propre à l'onglet, `CP_TABS`). **Onglets collants** (demande de Vinny) :
+  colonne de 248px (comme la colonne de l'auteur des messages), `position: sticky` à 24px du haut, carte de surface,
+  icône Material Symbols par onglet (`CP_TABS`), onglet actif plein en sumi et gofun (icône pleine) ; ≤ 900px, **bande
+  collante en haut d'écran** qui défile à l'horizontale (onglet actif amené en vue). Les onglets natifs (colonne et
+  menu mobile) sont masqués. **Blocs natifs en cartes** `.sg-pcard` (fond de surface, sans contour ni ombre, titre
+  en Zen Antique avec icône dans un cercle teinté : Compte, Profil, Contact, Mes données — `CP_BLOCKS`), champs en
+  grille de 2 colonnes (1 sur mobile ; zone de texte et choix en pleine largeur). **Champs** (`cpField`, depuis chaque
+  `<label>` natif) : libellé en petites capitales (`CP_LABELS` : « Pseudo », « Mot de passe » ; astérisque
+  « obligatoire » en Ume), champ arrondi au style des listes personnalisées (`.sg-pinput`), aide discrète ; genre
+  (radios à image) et groupes Oui / Non des autres onglets (`.radio-wrap`, `cpRadioWrap`) en **contrôle segmenté**
+  `.sg-seg--auto` (une colonne par choix ; libellés longs sur plusieurs lignes) ; date de naissance : jour et mois en
+  `combo`, année en champ court, sur une ligne (« Jour », « Mois », « Année » natifs gardés en noms accessibles) ;
+  « Modifier le mot de passe » et « Exporter mes données » en boutons au contour (sans libellé en doublon au-dessus de
+  l'export) ; champs de mot de passe avec l'œil natif dans le champ ; un bloc sans titre qui suit une carte la rejoint.
+  **Boutons** à droite sous un filet : « Réinitialiser » (contour) puis « Enregistrer » (plein ; `<button>` de même nom
+  et valeur que le bouton natif). Envoi normal : page de confirmation « Profil enregistré » (« Modifier mon profil » en
+  premier). En bas : séparateur de fin et fil d'Ariane repris. Les autres onglets reçoivent l'habillage générique
+  (onglets, cartes, champs, radios) ; leurs contenus particuliers (avatar, signature, listes) restent à reprendre.
   Récapitulatif des patterns : **forum** (accueil) = image en fond + panneau + kanji ; **sous-forum** = ema
-  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ; **confirmation** = hanko (sceau au kanji) ; **sondage** = tōhyō (carte sur shippō) ;
+  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ; **confirmation** = hanko (sceau au kanji) ; **paramètres du profil** = ninbetsu-chō (onglets collants + cartes) ; **sondage** = tōhyō (carte sur shippō) ;
   **permission** = étiquette tegata aux coins coupés.
 - **Catégories de l'accueil** (`forums.js` + `40-zones.css`) : à gauche un sélecteur collant (Gestion, Hi, Mizu, Kaze,
   Kaminari, Tsuchi no Kuni, Shōkoku — « les petits pays », ex-Reste du Sekai) au style des raccourcis de l'Annexe, pastille = badge pour Gestion

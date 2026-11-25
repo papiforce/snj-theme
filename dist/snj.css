@@ -9296,3 +9296,28 @@ body.sg-cppage .sg-cpage + .sg-divider--end {
   line-height: 1.3;
   text-align: center;
 }
+
+/* Mot de passe : le champ natif est dans .password-container avec l'œil « afficher » de Forumactif */
+#wrap .sg-pfield__control > .password-container {
+  position: relative;
+  flex: 1 1 100%;
+  width: 100%;
+}
+
+#wrap .sg-pfield__control > .password-container input.sg-pinput {
+  padding-right: 48px;
+}
+
+#wrap .sg-pfield__control > .password-container .material-symbols-outlined {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  color: var(--sg-text-muted);
+  font-size: 20px;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+#wrap .sg-pfield__control > .password-container .material-symbols-outlined:hover {
+  color: var(--sg-text);
+}
