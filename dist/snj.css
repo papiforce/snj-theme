@@ -9324,23 +9324,34 @@ body.sg-cppage .sg-cpage + .sg-divider--end {
 
 /* --- 64-codes.css --- */
 /* ==========================================================================
-   Codes des membres (HTML dans les messages) — fiche de personnage « jinbutsu » 人物
-   Patterns réutilisables, préfixe .sgc- : un membre ne colle que du HTML à classes,
-   tout le style vit ici (tokens de la refonte : clair et sombre sans rien changer).
+   Codes des membres (HTML collé dans un message) — préfixe .sgc-
+   Le membre ne colle que du HTML à classes ; tout le style vit ici et suit les tokens
+   de la refonte (clair et sombre sans rien changer).
 
-   Forumactif transforme chaque retour à la ligne d'un message en <br> : ceux posés
-   entre deux blocs sont masqués ; seuls les textes (.sgc-text, .sgc-value,
-   .sgc-event__text, .sgc-qa) gardent leurs retours à la ligne.
+   Forumactif lit le message comme du BBCode : chaque retour à la ligne devient un <br>.
+   Les codes passent à la ligne DANS des commentaires (<!--  -->) ; par sécurité, les <br>
+   posés entre deux blocs sont masqués et seuls les textes gardent les leurs.
+
+   Patterns (réutilisables dans tout code) :
+   .sgc            racine, accent du pays : .sgc--hi|mizu|kaze|kaminari|tsuchi|shokoku
+   .sgc-hero       portrait + identité, kanji du pays en filigrane, motif kikkō
+   .sgc-portrait   portrait 200 × 400, avec .sgc-seal (sceau hanko) posé dessus
+   .sgc-eyebrow    surtitre en petites capitales ; .sgc-name nom en Zen Antique ; .sgc-rule filet
+   .sgc-tags       fuda : étiquettes libellé / valeur
+   .sgc-notch      séparateur de la refonte (filet en V), --up, --logo
+   .sgc-part       partie : mon (kanji dans un cercle) + titre + filet qui file
+   .sgc-duo        grands chiffres (.sgc-stats) | texte ; .sgc-quote texte entre 「 」 ; .sgc-text
+   .sgc-chrono     chronologie : année en grand, magatama sur un fil
+   .sgc-backstage  hors RP : le joueur derrière le shinobi, motif shippō
    ========================================================================== */
 
 .sgc {
   --sgc-ac: var(--sg-primary);
-  --sgc-gap: 16px;
+  --sgc-notch: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 25'%3E%3Cpath d='M0 .5L24 24.5L48 .5' fill='none' stroke='%23000'/%3E%3C/svg%3E");
   container-type: inline-size;
-  counter-reset: sgc-sec;
   display: flex;
   flex-direction: column;
-  gap: var(--sgc-gap);
+  gap: 32px;
   max-width: 920px;
   margin: 8px auto;
   color: var(--sg-text);
@@ -9354,7 +9365,7 @@ body.sg-cppage .sg-cpage + .sg-divider--end {
   display: none;
 }
 
-.sgc :is(.sgc-text, .sgc-value, .sgc-event__text, .sgc-qa__a) br {
+.sgc :is(.sgc-text, .sgc-quote, .sgc-step__text, .sgc-qa__a) br {
   display: inline;
 }
 
@@ -9362,7 +9373,6 @@ body.sg-cppage .sg-cpage + .sg-divider--end {
   max-width: 100%;
 }
 
-/* Couleur d'accent : celle du pays du personnage (sinon la couleur primaire) */
 .sgc--hi { --sgc-ac: var(--sg-group-hi); }
 .sgc--mizu { --sgc-ac: var(--sg-group-mizu); }
 .sgc--kaze { --sgc-ac: var(--sg-group-kaze); }
@@ -9370,304 +9380,508 @@ body.sg-cppage .sg-cpage + .sg-divider--end {
 .sgc--tsuchi { --sgc-ac: var(--sg-group-tsuchi); }
 .sgc--shokoku { --sgc-ac: var(--sg-group-autres); }
 
-/* --- En-tête : kanji en surtitre, nom en Zen Antique, sous-titre, filet ----- */
-.sgc-head {
+/* --- Motifs Edo (même tracé que l'accueil), nets à droite, estompés vers la gauche --- */
+.sgc-pat--kikko,
+.sgc-pat--shippo {
+  position: relative;
+  isolation: isolate;
+}
+
+.sgc-pat--kikko::before,
+.sgc-pat--shippo::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: color-mix(in srgb, var(--sgc-ac) 24%, transparent);
+  pointer-events: none;
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+
+.sgc-pat--kikko::before {
+  -webkit-mask:
+    linear-gradient(to left, #000, transparent 70%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34.64' height='60' viewBox='0 0 34.64 60'%3E%3Cpath d='M17.32 0L34.64 10V30L17.32 40L0 30V10Z M17.32 40V60' fill='none' stroke='%23000' stroke-width='1'/%3E%3C/svg%3E") repeat;
+  mask:
+    linear-gradient(to left, #000, transparent 70%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34.64' height='60' viewBox='0 0 34.64 60'%3E%3Cpath d='M17.32 0L34.64 10V30L17.32 40L0 30V10Z M17.32 40V60' fill='none' stroke='%23000' stroke-width='1'/%3E%3C/svg%3E") repeat;
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+
+.sgc-pat--shippo::before {
+  -webkit-mask:
+    linear-gradient(to left, #000, transparent 75%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='%23000' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='20'/%3E%3Ccircle cx='40' cy='0' r='20'/%3E%3Ccircle cx='0' cy='40' r='20'/%3E%3Ccircle cx='40' cy='40' r='20'/%3E%3Ccircle cx='20' cy='20' r='20'/%3E%3C/g%3E%3C/svg%3E") repeat;
+  mask:
+    linear-gradient(to left, #000, transparent 75%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='%23000' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='20'/%3E%3Ccircle cx='40' cy='0' r='20'/%3E%3Ccircle cx='0' cy='40' r='20'/%3E%3Ccircle cx='40' cy='40' r='20'/%3E%3Ccircle cx='20' cy='20' r='20'/%3E%3C/g%3E%3C/svg%3E") repeat;
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+
+/* --- Textes de base ----------------------------------------------------------- */
+.sgc-eyebrow {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 8px 0 4px;
-  text-align: center;
+  gap: 10px;
+  color: var(--sg-text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  line-height: 1.4;
+  text-transform: uppercase;
 }
 
-.sgc-head__kanji {
+.sgc-eyebrow__kanji {
   color: var(--sgc-ac);
-  font-family: var(--sg-font-jp, var(--sg-font-display));
+  font-family: var(--sg-font-jp);
   font-size: 0.85rem;
-  letter-spacing: 0.5em;
-  text-indent: 0.5em; /* l'espacement final ne décentre pas */
+  letter-spacing: 0.3em;
 }
 
-.sgc-head__title {
-  margin: 0;
+.sgc-name {
   color: var(--sg-text);
   font-family: var(--sg-font-display);
-  font-size: clamp(1.9rem, 6cqi, 2.6rem);
-  font-weight: 400;
-  line-height: 1.15;
+  font-size: clamp(2rem, 6.4cqi, 3rem);
+  line-height: 1.1;
+  overflow-wrap: anywhere;
 }
 
-.sgc-head__sub {
-  color: var(--sg-text-muted);
-  font-size: 0.9rem;
-}
-
-/* Filet d'accent sous le nom, réutilisable seul (.sgc-rule) */
-.sgc-rule,
-.sgc-head::after {
+.sgc-name::after {
   content: "";
   display: block;
   width: 56px;
   height: 3px;
-  margin: 10px auto 0;
+  margin-top: 16px;
   border-radius: 3px;
   background: var(--sgc-ac);
 }
 
-.sgc-rule {
-  margin: 0 auto;
+.sgc-sub {
+  color: var(--sg-text-muted);
 }
 
-/* --- Section : carte numérotée (01, 02…) avec titre et kanji --------------- */
-.sgc-sec {
-  counter-increment: sgc-sec;
+.sgc-rule {
+  display: block;
+  width: 56px;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--sgc-ac);
+}
+
+.sgc-text {
+  color: var(--sg-text);
+  line-height: 1.85;
+}
+
+/* --- Héros : portrait + identité ------------------------------------------- */
+.sgc-hero {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: 36px;
+  align-items: center;
   overflow: hidden;
-  border-radius: 14px;
+  padding: 28px;
+  border-radius: 18px;
   background: var(--sg-surface-2);
 }
 
-.sgc-sec__head {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  padding: 18px 20px 0;
-}
-
-.sgc-sec__head::before {
-  content: counter(sgc-sec, decimal-leading-zero);
+/* Kanji du pays en filigrane, comme celui des forums dans leur en-tête */
+.sgc-hero__kanji {
+  position: absolute;
+  right: -0.06em;
+  bottom: -0.2em;
+  z-index: -1;
   color: var(--sgc-ac);
-  font-family: var(--sg-font-display);
-  font-size: 1.05rem;
+  font-family: var(--sg-font-jp);
+  font-size: 15rem;
+  line-height: 1;
+  opacity: 0.09;
+  pointer-events: none;
+  user-select: none;
 }
 
-.sgc-sec__title {
-  flex: 1;
+.sgc-hero__main {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
   min-width: 0;
-  margin: 0;
+}
+
+.sgc-portrait {
+  position: relative;
+  width: 200px;
+}
+
+.sgc-portrait__img {
+  display: block;
+  width: 200px !important; /* le message impose height: auto à ses images (sélecteur à id) */
+  height: 400px !important;
+  border-radius: 14px;
+  background: var(--sg-surface);
+  object-fit: cover;
+}
+
+/* --- Sceau hanko : carré à double filet, incliné comme un tampon ------------ */
+.sgc-seal {
+  position: absolute;
+  right: -16px;
+  bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  box-sizing: border-box;
+  border: 2px solid var(--sgc-ac);
+  border-radius: 6px;
+  background: var(--sg-surface-2);
+  box-shadow: inset 0 0 0 3px var(--sg-surface-2), inset 0 0 0 4px var(--sgc-ac);
+  color: var(--sgc-ac);
+  transform: rotate(-8deg);
+}
+
+.sgc-seal__value {
+  font-family: var(--sg-font-display);
+  font-size: 1.7rem;
+  line-height: 1;
+}
+
+.sgc-seal__label {
+  margin-top: 2px;
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* --- Fuda : étiquettes libellé / valeur ------------------------------------ */
+.sgc-tags {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.sgc-tag {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 10px 14px 12px;
+  border-radius: 12px;
+  background: var(--sg-surface);
+}
+
+.sgc-tag--wide {
+  grid-column: span 2;
+}
+
+.sgc-tag__label {
+  color: var(--sg-text-muted);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.sgc-tag__value {
   overflow: hidden;
   color: var(--sg-text);
   font-family: var(--sg-font-display);
-  font-size: 1.4rem;
-  font-weight: 400;
-  line-height: 1.3;
+  font-size: 1.2rem;
+  line-height: 1.35;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.sgc-sec__kanji {
-  color: var(--sg-text-muted);
-  font-family: var(--sg-font-jp, var(--sg-font-display));
-  font-size: 1.1rem;
-  opacity: 0.7;
+/* --- Séparateur de la refonte : filet qui forme un V en son milieu ---------- */
+.sgc-notch {
+  position: relative;
+  height: 25px;
 }
 
-.sgc-sec__body {
-  padding: 16px 20px 20px;
+.sgc-notch::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--sg-border-strong, var(--sg-border));
+  -webkit-mask:
+    linear-gradient(#000 0 0) left top / calc(50% - 23px) 1px no-repeat,
+    linear-gradient(#000 0 0) right top / calc(50% - 23px) 1px no-repeat,
+    var(--sgc-notch) center top / 48px 25px no-repeat;
+  mask:
+    linear-gradient(#000 0 0) left top / calc(50% - 23px) 1px no-repeat,
+    linear-gradient(#000 0 0) right top / calc(50% - 23px) 1px no-repeat,
+    var(--sgc-notch) center top / 48px 25px no-repeat;
 }
 
-/* --- Identité : fiche (libellé / valeur) et portrait ----------------------- */
-.sgc-split {
+/* Pointe vers le haut (fin d'un ensemble) */
+.sgc-notch--up::after {
+  transform: scaleY(-1);
+}
+
+/* Avec le logo de SnJ au trait au-dessus de la pointe */
+.sgc-notch--logo {
+  margin-top: 44px;
+}
+
+.sgc-notch--logo::before {
+  content: "";
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  background: var(--sg-text-muted);
+  -webkit-mask: url("https://cdn.jsdelivr.net/gh/papiforce/snj-theme@b44435293a455829eb6ec7b2193db36fafb78071/assets/snj-logo-outline.svg") center / contain no-repeat;
+  mask: url("https://cdn.jsdelivr.net/gh/papiforce/snj-theme@b44435293a455829eb6ec7b2193db36fafb78071/assets/snj-logo-outline.svg") center / contain no-repeat;
+  transform: translateX(-50%);
+}
+
+/* --- Partie : mon (kanji dans un cercle teinté), titre, filet qui file ------ */
+.sgc-part {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sgc-part__head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.sgc-part__head::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, var(--sg-border-strong, var(--sg-border)), transparent);
+}
+
+.sgc-mon {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 200px;
-  gap: 24px;
+  flex: none;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--sgc-ac) 16%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--sgc-ac) 45%, transparent);
+  color: var(--sgc-ac);
+  font-family: var(--sg-font-jp);
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.sgc-part__title {
+  color: var(--sg-text);
+  font-family: var(--sg-font-display);
+  font-size: 1.55rem;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* --- Grands chiffres (taille, poids…) | texte ------------------------------- */
+.sgc-duo {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 32px;
   align-items: start;
 }
 
-.sgc-portrait {
-  display: block;
-  width: 200px !important; /* le message impose height: auto à ses images (sélecteur à id) */
-  height: 400px !important;
-  border-radius: 12px;
-  background: var(--sg-surface-3, var(--sg-surface));
-  object-fit: cover;
+.sgc-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-right: 32px;
+  border-right: 1px solid var(--sg-border);
 }
 
-.sgc-facts {
+.sgc-stat {
   display: flex;
   flex-direction: column;
 }
 
-.sgc-fact {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 11px 0;
-  border-bottom: 1px dashed var(--sg-border);
+.sgc-stat__value {
+  color: var(--sg-text);
+  font-family: var(--sg-font-display);
+  font-size: 2.2rem;
+  line-height: 1.1;
+  white-space: nowrap;
 }
 
-.sgc-fact:last-of-type { /* :last-of-type : le dernier enfant est souvent un <br> de Forumactif */
-  border-bottom: 0;
+.sgc-stat__unit {
+  margin-left: 4px;
+  color: var(--sgc-ac);
+  font-size: 1.1rem;
 }
 
-/* Libellé en petites capitales, réutilisable partout (.sgc-label) */
-.sgc-label {
-  flex: none;
+.sgc-stat__label {
   color: var(--sg-text-muted);
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.14em;
-  line-height: 1.4;
   text-transform: uppercase;
 }
 
-.sgc-value {
-  min-width: 0;
+/* --- Texte entre crochets japonais 「 」 ------------------------------------ */
+.sgc-quote {
+  position: relative;
+  padding: 8px 48px;
   color: var(--sg-text);
-  text-align: right;
-  overflow-wrap: anywhere;
+  font-size: 1.05rem;
+  line-height: 1.9;
 }
 
-/* --- Champs côte à côte (traits particuliers…) ----------------------------- */
-.sgc-cols {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 12px;
-}
-
-.sgc-field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 14px 16px;
-  border-radius: 10px;
-  background: var(--sg-surface);
-}
-
-.sgc-field .sgc-value {
-  text-align: left;
-}
-
-.sgc-field--wide {
-  grid-column: 1 / -1;
-}
-
-/* --- Texte libre ------------------------------------------------------------ */
-.sgc-text {
-  margin: 0;
-  color: var(--sg-text);
-  line-height: 1.8;
-  text-align: justify;
-  hyphens: auto;
-}
-
-/* Mise en relief d'un passage dans le texte */
-.sgc-em {
+.sgc-quote::before,
+.sgc-quote::after {
+  position: absolute;
   color: var(--sgc-ac);
-  font-weight: 700;
+  font-family: var(--sg-font-jp);
+  font-size: 2.6rem;
+  line-height: 1;
 }
 
-/* --- Chronologie : date, jalon sur un fil, titre à la couleur d'accent ------ */
-.sgc-timeline {
+.sgc-quote::before {
+  content: "「";
+  top: -6px;
+  left: 0;
+}
+
+.sgc-quote::after {
+  content: "」";
+  right: 0;
+  bottom: -6px;
+}
+
+/* --- Chronologie : année en grand, magatama sur un fil ---------------------- */
+.sgc-chrono {
   display: flex;
   flex-direction: column;
 }
 
-.sgc-event {
+.sgc-step {
   position: relative;
   display: grid;
-  grid-template-columns: 76px minmax(0, 1fr);
-  gap: 0 28px;
-  padding-bottom: 20px;
+  grid-template-columns: 88px 28px minmax(0, 1fr);
+  gap: 0 16px;
+  padding-bottom: 32px;
 }
 
-.sgc-event:last-of-type {
+.sgc-step:last-of-type { /* :last-of-type : le dernier enfant peut être un <br> de Forumactif */
   padding-bottom: 0;
 }
 
-/* Fil vertical (s'arrête au dernier jalon) et jalon rond */
-.sgc-event::before {
+/* Fil qui relie les magatama (s'arrête au dernier) */
+.sgc-step::before {
   content: "";
   position: absolute;
-  top: 14px;
-  bottom: -6px;
-  left: 90px;
+  top: 40px;
+  bottom: 6px;
+  left: calc(88px + 16px + 14px);
   width: 1px;
   background: var(--sg-border);
 }
 
-.sgc-event:last-of-type::before {
+.sgc-step:last-of-type::before {
   display: none;
 }
 
-.sgc-event::after {
-  content: "";
-  position: absolute;
-  top: 8px;
-  left: 85px;
-  width: 11px;
-  height: 11px;
-  box-sizing: border-box;
-  border: 2px solid var(--sgc-ac);
-  border-radius: 50%;
-  background: var(--sg-surface-2);
+.sgc-step__year {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  color: var(--sg-text);
+  font-family: var(--sg-font-display);
+  font-size: 2rem;
+  line-height: 1;
 }
 
-.sgc-event__date {
-  padding-top: 2px;
+.sgc-step__era {
+  margin-bottom: 4px;
   color: var(--sg-text-muted);
-  font-size: 0.72rem;
+  font-family: var(--sg-font-body);
+  font-size: 0.66rem;
   font-weight: 700;
-  letter-spacing: 0.14em;
-  text-align: right;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
-.sgc-event__body {
-  min-width: 0;
+/* Magatama (une virgule du logo de SnJ) à la couleur du pays */
+.sgc-step__mark {
+  width: 22px;
+  height: 26px;
+  margin: 6px auto 0;
+  background: var(--sgc-ac);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='52 47 26 30'%3E%3Cpath d='M73.3 51.0Q72.5 50.3 70.6 49.4Q68.8 48.4 66.4 48.3Q64.1 48.2 61.9 49.1Q59.7 49.9 58.2 51.2Q56.7 52.6 55.6 54.4Q54.6 56.2 54.2 58.1Q53.9 60.0 54.2 61.6Q54.6 63.2 55.5 64.7Q56.4 66.3 57.4 67.5Q58.5 68.8 58.5 69.1Q58.6 69.5 57.3 71.1Q56.0 72.7 54.6 73.7Q53.2 74.7 53.3 75.1Q53.3 75.6 56.3 75.6Q59.3 75.7 62.4 74.8Q65.5 74.0 67.9 72.7Q70.3 71.3 72.0 69.6Q73.8 67.9 74.6 66.6Q75.3 65.4 75.9 64.0Q76.6 62.5 76.7 60.2Q76.9 57.8 76.7 56.8Q76.6 55.8 76.1 54.7Q75.6 53.6 74.8 52.6Q74.1 51.7 73.3 51.0Z'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='52 47 26 30'%3E%3Cpath d='M73.3 51.0Q72.5 50.3 70.6 49.4Q68.8 48.4 66.4 48.3Q64.1 48.2 61.9 49.1Q59.7 49.9 58.2 51.2Q56.7 52.6 55.6 54.4Q54.6 56.2 54.2 58.1Q53.9 60.0 54.2 61.6Q54.6 63.2 55.5 64.7Q56.4 66.3 57.4 67.5Q58.5 68.8 58.5 69.1Q58.6 69.5 57.3 71.1Q56.0 72.7 54.6 73.7Q53.2 74.7 53.3 75.1Q53.3 75.6 56.3 75.6Q59.3 75.7 62.4 74.8Q65.5 74.0 67.9 72.7Q70.3 71.3 72.0 69.6Q73.8 67.9 74.6 66.6Q75.3 65.4 75.9 64.0Q76.6 62.5 76.7 60.2Q76.9 57.8 76.7 56.8Q76.6 55.8 76.1 54.7Q75.6 53.6 74.8 52.6Q74.1 51.7 73.3 51.0Z'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 
-.sgc-event__title {
+.sgc-step__body {
+  min-width: 0;
+  padding-top: 2px;
+}
+
+.sgc-step__title {
   display: block;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
   color: var(--sgc-ac);
   font-family: var(--sg-font-display);
-  font-size: 1.1rem;
-  line-height: 1.4;
+  font-size: 1.25rem;
+  line-height: 1.3;
 }
 
-.sgc-event__text {
+.sgc-step__text {
   color: var(--sg-text);
-  line-height: 1.8;
-  text-align: justify;
-  hyphens: auto;
+  line-height: 1.85;
 }
 
-/* --- Hors RP : le joueur derrière le personnage ----------------------------- */
-.sgc-player {
+/* --- Hors RP : le joueur derrière le shinobi -------------------------------- */
+.sgc-backstage {
+  --sgc-ac: var(--sg-primary);
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 16px 20px;
-  border: 1px dashed var(--sg-border);
-  border-radius: 14px;
+  gap: 20px;
+  overflow: hidden;
+  padding: 20px 24px;
+  border-radius: 18px;
+  background: var(--sg-surface-2);
 }
 
-.sgc-player__avatar {
+.sgc-backstage__avatar {
   flex: none;
-  width: 64px !important;
-  height: 64px !important;
+  width: 72px !important;
+  height: 72px !important;
   border-radius: 50%;
-  background: var(--sg-surface-2);
+  background: var(--sg-surface);
   object-fit: cover;
 }
 
-.sgc-player__body {
+.sgc-backstage__body {
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   min-width: 0;
 }
 
-.sgc-player__body > .sgc-label {
-  margin-bottom: 2px;
+.sgc-backstage__title {
+  color: var(--sg-text);
+  font-family: var(--sg-font-display);
+  font-size: 1.2rem;
+  line-height: 1.3;
 }
 
 .sgc-qa {
   display: flex;
   flex-wrap: wrap;
-  gap: 0 8px;
+  gap: 2px 10px;
   line-height: 1.6;
 }
 
@@ -9680,54 +9894,105 @@ body.sg-cppage .sg-cpage + .sg-divider--end {
   font-weight: 700;
 }
 
-/* --- Largeurs réduites (taille du message, pas de l'écran) ------------------ */
-@container (max-width: 600px) {
-  .sgc-split {
+/* --- Message étroit (largeur du message, pas de l'écran) -------------------- */
+@container (max-width: 640px) {
+  .sgc {
+    gap: 28px;
+  }
+
+  .sgc-hero {
     grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: 28px;
+    padding: 24px 18px;
+    text-align: center;
   }
 
   .sgc-portrait {
-    order: -1;
+    width: 160px;
+  }
+
+  .sgc-portrait__img {
     width: 160px !important;
     height: 320px !important;
-    margin: 0 auto;
   }
 
-  .sgc-sec__head,
-  .sgc-sec__body {
-    padding-right: 16px;
-    padding-left: 16px;
+  .sgc-hero__main {
+    align-items: center;
+    width: 100%;
   }
 
-  .sgc-sec__title {
-    font-size: 1.2rem;
+  .sgc-name::after {
+    margin-right: auto;
+    margin-left: auto;
   }
 
-  .sgc-event {
+  .sgc-tags {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    text-align: left;
+  }
+
+  .sgc-duo {
     grid-template-columns: minmax(0, 1fr);
-    padding-left: 24px;
+    gap: 20px;
   }
 
-  .sgc-event::before {
-    left: 5px;
+  .sgc-stats {
+    flex-direction: row;
+    gap: 32px;
+    padding: 0 0 20px;
+    border-right: 0;
+    border-bottom: 1px solid var(--sg-border);
   }
 
-  .sgc-event::after {
-    left: 0;
-    top: 4px;
+  .sgc-quote {
+    padding: 8px 30px;
   }
 
-  .sgc-event__date {
-    padding: 0;
-    text-align: left;
+  .sgc-step {
+    grid-template-columns: 28px minmax(0, 1fr);
+    gap: 0 12px;
   }
 
-  .sgc-text,
-  .sgc-event__text {
-    text-align: left;
+  .sgc-step::before {
+    top: 34px;
+    left: 14px;
   }
 
-  .sgc-player {
+  .sgc-step__mark {
+    grid-row: 1 / span 2;
+    grid-column: 1;
+    margin-top: 2px;
+  }
+
+  .sgc-step__year {
+    grid-column: 2;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 4px;
+    font-size: 1.5rem;
+  }
+
+  .sgc-step__era {
+    margin: 0;
+  }
+
+  .sgc-step__body {
+    grid-column: 2;
+  }
+
+  .sgc-part__title {
+    font-size: 1.3rem;
+  }
+
+  .sgc-backstage {
     align-items: flex-start;
+    padding: 18px;
+  }
+
+  .sgc-backstage__avatar {
+    width: 56px !important;
+    height: 56px !important;
   }
 }
