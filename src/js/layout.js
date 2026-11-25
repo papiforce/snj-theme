@@ -465,6 +465,24 @@
     'Reste du Sekai': { slug: 'shokoku', tone: 'autres' }
   };
 
+  /* Bouton d'action de l'en-tête depuis un bouton natif (déplacé). « Sujet verrouillé » : Forumactif en fait un
+     lien vers la réponse, mais ce n'est qu'un état. Il devient une étiquette sans interaction ; son adresse reste
+     lisible (data-reply-href) pour le bouton « Répondre au sujet » du bas (staff). */
+  function headAction(b) {
+    var ic = b.querySelector('.material-symbols-outlined');
+    if ((ic && ic.textContent.trim() === 'lock') || /verrouill/i.test(b.textContent)) {
+      var st = uiEl('span', 'sg-action sg-action--status');
+      if (b.getAttribute('href')) st.setAttribute('data-reply-href', b.getAttribute('href'));
+      if (b.getAttribute('title')) st.setAttribute('title', b.getAttribute('title'));
+      if (b.getAttribute('style')) st.setAttribute('style', b.getAttribute('style'));
+      while (b.firstChild) st.appendChild(b.firstChild);
+      if (b.parentNode) b.parentNode.removeChild(b);
+      return st;
+    }
+    b.className = 'sg-action';
+    return b;
+  }
+
   function pageHead() {
     if (document.querySelector('.sg-pagehead')) return;
     var isTopic = /^\/t\d+/.test(location.pathname);
@@ -528,21 +546,7 @@
     var actions = el('div', 'sg-pagehead__actions');
     Array.prototype.slice.call(native.querySelectorAll(':scope > a.btn')).forEach(function (b) {
       if (isTopic && /mode=newtopic/.test(b.getAttribute('href') || '')) return;
-      /* « Sujet verrouillé » : Forumactif en fait un lien vers la réponse, mais ce n'est qu'un état. Il devient
-         une étiquette sans interaction ; son adresse reste lisible (data-reply-href) pour le bouton du bas */
-      var ic = b.querySelector('.material-symbols-outlined');
-      if ((ic && ic.textContent.trim() === 'lock') || /verrouill/i.test(b.textContent)) {
-        var st = el('span', 'sg-action sg-action--status');
-        if (b.getAttribute('href')) st.setAttribute('data-reply-href', b.getAttribute('href'));
-        if (b.getAttribute('title')) st.setAttribute('title', b.getAttribute('title'));
-        if (b.getAttribute('style')) st.setAttribute('style', b.getAttribute('style'));
-        while (b.firstChild) st.appendChild(b.firstChild);
-        b.remove();
-        actions.appendChild(st);
-        return;
-      }
-      b.className = 'sg-action';
-      actions.appendChild(b);
+      actions.appendChild(headAction(b));
     });
     if (actions.children.length) row.appendChild(actions);
     head.appendChild(row);
@@ -1329,20 +1333,34 @@
     };
     var watch = find(/[?&](un)?watch=forum/);
     var watched = watch && /[?&]unwatch=forum/.test(watch.getAttribute('href'));
+    var markRead = find(/[?&]mark=topics/);
     var items = [
       [search('newposts'), 'new_releases', 'Nouveaux messages depuis ma dernière visite'],
       [search('unanswered'), 'mark_chat_unread', 'Messages sans réponse'],
-      [find(/[?&]mark=topics/), 'mark_chat_read', 'Marquer tous les sujets comme lus'],
+      /* Marquer comme lus, suivre / ne plus suivre : envoyés en arrière-plan, confirmation en fenêtre */
+      markRead && [function () {
+        bgAction({ url: markRead.getAttribute('href') }, {
+          done: function () {
+            Array.prototype.slice.call(document.querySelectorAll('.sg-topics .sg-topic.is-new')).forEach(function (c) {
+              c.classList.remove('is-new');
+              var n = c.querySelector('.sg-topic__new');
+              if (n) n.remove();
+            });
+          }
+        });
+      }, 'mark_chat_read', 'Marquer tous les sujets comme lus'],
       null,
-      [watch, watched ? 'notifications_off' : 'notifications_active', watched ? 'Ne plus suivre les sujets de ce forum' : 'Suivre les sujets de ce forum'],
+      watch && watchItem(watch.getAttribute('href'), 'forum', 'sg-topics-menu'),
       [search('watchsearch'), 'bookmarks', 'Mes sujets suivis']
-    ].filter(function (it) { return it === null || it[0]; });
+    ].filter(function (it) { return it === null || (it && it[0]); });
     while (items.length && items[0] === null) items.shift();
     while (items.length && items[items.length - 1] === null) items.pop();
 
     if (items.length) {
       bar = bar || el('div', 'sg-topics__bar');
-      bar.appendChild(actionsMenu(items.map(function (it) { return it && [it[0].getAttribute('href'), it[1], it[2]]; }), 'sg-topics-menu'));
+      bar.appendChild(actionsMenu(items.map(function (it) {
+        return it && [typeof it[0] === 'function' ? it[0] : it[0].getAttribute('href'), it[1], it[2]];
+      }), 'sg-topics-menu'));
     }
 
     /* Deuxième ligne : « Trier » (le formulaire natif est déplacé dans une fenêtre) puis « Sauter vers »
@@ -1584,12 +1602,24 @@
     var bar = el('div', 'sg-tbar');
     var watch = find(/[?&](un)?watch=topic/, topic);
     var watched = watch && /unwatch=topic/.test(watch.getAttribute('href'));
+    /* Favoris, suivre / ne plus suivre : envoyés en arrière-plan, confirmation en fenêtre. Une fois le sujet en
+       favori, l'entrée mène à la liste des favoris. */
+    var fav = find(/add_favourite/);
+    var favState = { done: false };
     var items = [
-      [find(/add_favourite/), 'bookmark_add', 'Ajouter à mes favoris'],
-      [watch, watched ? 'notifications_off' : 'notifications_active', watched ? 'Ne plus suivre ce sujet' : 'Suivre ce sujet'],
+      fav && [function () {
+        if (favState.done) { location.href = '/search?search_id=favouritesearch'; return; }
+        bgAction({ url: fav.getAttribute('href') }, {
+          done: function () {
+            favState.done = true;
+            retitleItem('sg-topic-menu', 'Ajouter à mes favoris', 'bookmarks', 'Voir mes favoris');
+          }
+        });
+      }, 'bookmark_add', 'Ajouter à mes favoris'],
+      watch && watchItem(watch.getAttribute('href'), 'topic', 'sg-topic-menu'),
       null,
       [function () { copyLink(location.origin + location.pathname); }, 'link', 'Copier le lien du sujet']
-    ].filter(function (it) { return it === null || it[0]; }).map(function (it) {
+    ].filter(function (it) { return it === null || (it && it[0]); }).map(function (it) {
       return it && [typeof it[0] === 'function' ? it[0] : it[0].getAttribute('href'), it[1], it[2]];
     });
     while (items.length && items[0] === null) items.shift();
@@ -1785,6 +1815,30 @@
         trash: null, /* retiré à la demande : la suppression suffit */
         'delete': [7, 'delete', 'Supprimer', 'danger']
       };
+      var lockState = {};
+      var lockToggle = function (href, mode) {
+        lockState.href = href;
+        lockState.mode = mode;
+        return function () {
+          var was = lockState.mode;
+          bgAction({ url: lockState.href }, {
+            done: function () {
+              freshPage().then(function (doc) {
+                var next = doc.querySelector('#topic .topic-admin a[href*="mode=' + (was === 'lock' ? 'unlock' : 'lock') + '"]');
+                if (next) lockState.href = next.getAttribute('href');
+                lockState.mode = was === 'lock' ? 'unlock' : 'lock';
+                retitleItem('sg-mod-menu', MOD[was][2], MOD[lockState.mode][1], MOD[lockState.mode][2]);
+                /* En-tête : « Répondre au sujet » ↔ « Sujet verrouillé » */
+                var nb = Array.prototype.slice.call(doc.querySelectorAll('#topic .topic-header a.btn')).filter(function (b) {
+                  return !/mode=newtopic/.test(b.getAttribute('href') || '');
+                })[0];
+                var cur = document.querySelector('.sg-pagehead__actions .sg-action, .sg-pagehead__actions .sg-action--status');
+                if (nb && cur) cur.parentNode.replaceChild(headAction(document.importNode(nb, true)), cur);
+              });
+            }
+          });
+        };
+      };
       var modItems = admin ? Array.prototype.slice.call(admin.querySelectorAll('a[href]')).map(function (a, i) {
         var href = a.getAttribute('href');
         var mode = /^\/merge/.test(href) ? 'merge' : ((href.match(/[?&]mode=([a-z]+)/) || [])[1] || '');
@@ -1792,6 +1846,9 @@
         var spec = MOD[mode];
         var nat = a.querySelector('.material-symbols-outlined, i');
         if (!spec) spec = [5, nat ? nat.textContent.trim() : 'build', a.getAttribute('title') || a.textContent.trim()];
+        /* Verrouiller / déverrouiller : envoyé en arrière-plan, confirmation en fenêtre, puis l'en-tête et
+           l'entrée se mettent à jour d'après la page relue */
+        if (mode === 'lock' || mode === 'unlock') return { rank: spec[0] * 100 + i, item: [lockToggle(href, mode), spec[1], spec[2]] };
         return { rank: spec[0] * 100 + i, item: [href, spec[1], spec[2], spec[3]] };
       }).filter(Boolean).sort(function (x, y) { return x.rank - y.rank; }) : [];
       if (modItems.length) {
@@ -3033,6 +3090,19 @@
      barres arrondies (Asagi, le choix en tête plus marqué), votes et pourcentage ; les mentions (votes publics,
      fin du sondage) en ligne discrète avec icône. Les champs, boutons et liens natifs sont déplacés.
      -------------------------------------------------------------------- */
+  /* Recharge une carte de sondage après une action (vote, clôture) : le bloc natif est relu sur la page,
+     remis à sa place puis mis en forme comme les autres */
+  function refreshPoll(b) {
+    freshPage().then(function (doc) {
+      var nb = Array.prototype.slice.call(doc.querySelectorAll('.block')).filter(function (x) {
+        return x.querySelector(':scope > .block-content > form.poll, :scope > .block-content > dl.poll');
+      })[0];
+      if (!nb || !b.parentNode) return;
+      b.parentNode.replaceChild(document.importNode(nb, true), b);
+      pollCards();
+    });
+  }
+
   function pollCards() {
     var el = uiEl, ico = uiIco;
     Array.prototype.slice.call(document.querySelectorAll('.block')).forEach(function (b) {
@@ -3065,7 +3135,10 @@
           confirmModal({
             icon: 'lock', title: 'Clore ce sondage ?',
             text: 'Plus personne ne pourra voter.', confirm: 'Clore le sondage', busy: 'Un instant…', danger: true,
-            onConfirm: function () { location.href = href; }
+            onConfirm: function (ctl) {
+              ctl.close();
+              bgAction({ url: href }, { done: function () { refreshPoll(b); }, other: function () { refreshPoll(b); } });
+            }
           });
         });
         head.appendChild(cb);
@@ -3123,6 +3196,18 @@
         form.insertBefore(opts, form.firstChild);
         form.appendChild(acts);
         body.appendChild(form);
+        /* Vote envoyé en arrière-plan : confirmation en fenêtre, puis la carte est relue (résultats ou vote) */
+        form.addEventListener('submit', function (ev) {
+          ev.preventDefault();
+          var fd = new FormData(form);
+          var params = new URLSearchParams();
+          fd.forEach(function (v, k) { if (typeof v === 'string') params.append(k, v); });
+          var sb = form.querySelector('button.sg-pollc__btn[type="submit"]');
+          if (sb && sb.name && !params.has(sb.name)) params.append(sb.name, sb.value);
+          if (sb) sb.disabled = true;
+          var after = function () { refreshPoll(b); };
+          bgAction({ url: form.action || location.href, body: params }, { done: after, other: after });
+        });
       }
 
       /* Résultats : barres */
@@ -3334,6 +3419,11 @@
     info: { kanji: '報', label: 'Avis' }
   };
   var NOTICE_TITLES = [
+    [/ne surveillez plus/i, 'Suivi arrêté'],
+    [/surveillez/i, 'Suivi activé'],
+    [/marqués? comme lus?/i, 'Sujets marqués comme lus'],
+    [/ajouté à vos favoris/i, 'Ajouté aux favoris'],
+    [/sondage[^.]*(clos|fermé|verrouill|termin)/i, 'Sondage clos'],
     [/message[^.]*(enregistr|envoy|publi)/i, 'Message publié'],
     [/message[^.]*modifi/i, 'Message modifié'],
     [/message[^.]*supprim/i, 'Message supprimé'],
@@ -3350,6 +3440,7 @@
     [/(surveill|suivi)/i, 'Suivi mis à jour']
   ];
   var NOTICE_LINKS = [
+    [/favoris/i, 'Mes favoris', 'bookmarks'],
     [/voir (votre|le|ce|mon) message|voir le message/i, 'Voir le message', 'visibility'],
     [/sujet/i, 'Retour au sujet', 'forum'],
     [/forum/i, 'Retour au forum', 'view_agenda'],
@@ -3403,10 +3494,11 @@
     });
     var message = text.join(' ');
     var title = hd.textContent.replace(/\s+/g, ' ').trim();
-    var all = title + ' ' + message;
+    /* Ton lu sans les passages entre guillemets (un titre de sujet comme « … refusée » ne doit pas compter) */
+    var all = (title + ' ' + message).replace(/"[^"]*"|«[^»]*»|“[^”]*”/g, ' ');
     var tone = /(désolé|erreur|impossible|ne pouvez|ne pouvez pas|n'existe|n’existe|interdit|refus|pas autoris|pas la permission|incorrect|invalide|échou)/i.test(all) ? 'error'
-      : /(succès|enregistr|supprim|envoy|mis à jour|modifi|verrouill|déplac|ajout|publi|fusionn|divis)/i.test(all) ? 'done' : 'info';
-    if (/^(informations?|information|message)$/i.test(title) || !title) {
+      : /(succès|enregistr|supprim|envoy|mis à jour|modifi|verrouill|déplac|ajout|publi|fusionn|divis|surveill|marqué|clos)/i.test(all) ? 'done' : 'info';
+    if (/^(informations?|information|message|favoris)$/i.test(title) || !title) {
       title = tone === 'error' ? 'Action impossible' : tone === 'done' ? 'C’est fait' : 'Information';
       for (var i = 0; i < NOTICE_TITLES.length && tone === 'done'; i++) {
         if (NOTICE_TITLES[i][0].test(message)) { title = NOTICE_TITLES[i][1]; break; }
@@ -3542,6 +3634,83 @@
       var first = focusables()[0];
       if (first) try { first.focus({ preventScroll: true }); } catch (e) {}
     });
+  }
+
+  /* Action envoyée en arrière-plan, puis sa confirmation en fenêtre (showNotice), sans quitter la page.
+     req = { url, body } (body : URLSearchParams → POST) ; opts.done(doc) met la page à jour après un succès ;
+     opts.other(doc) quand Forumactif ne répond pas par une confirmation. Une action GET qui échoue retombe sur la
+     navigation normale. Le risque de double envoi est accepté (choix de Vinny). */
+  function bgAction(req, opts) {
+    opts = opts || {};
+    var parse = function (html) { return new DOMParser().parseFromString(html, 'text/html'); };
+    var init = { credentials: 'same-origin' };
+    if (req.body) {
+      init.method = 'POST';
+      init.headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+      init.body = req.body.toString();
+    }
+    document.documentElement.classList.add('sg-busy');
+    var end = function () { document.documentElement.classList.remove('sg-busy'); };
+    return fetch(req.url, init).then(function (r) { return r.text(); }).then(function (html) {
+      end();
+      var doc = parse(html);
+      var data = noticeRead(doc);
+      if (!data) {
+        if (opts.other) opts.other(doc);
+        else if (!req.body) location.href = req.url;
+        else toast('L’action n’a pas pu aboutir.');
+        return;
+      }
+      showNotice({
+        tone: data.tone,
+        title: data.title,
+        message: data.message,
+        links: data.links.map(function (l) { return { href: l.href, label: l.label, icon: l.icon, text: l.text }; })
+      });
+      if (data.tone !== 'error' && opts.done) opts.done(doc);
+    }).catch(function () {
+      end();
+      if (!req.body) location.href = req.url;
+      else toast('L’action n’a pas pu aboutir.');
+    });
+  }
+
+  /* Page actuelle relue (pour mettre à jour un morceau de page après une action) */
+  function freshPage() {
+    return fetch(location.pathname + location.search, { credentials: 'same-origin', cache: 'no-store' })
+      .then(function (r) { return r.text(); })
+      .then(function (html) { return new DOMParser().parseFromString(html, 'text/html'); });
+  }
+
+  /* Change l'icône et le libellé d'une entrée de menu (repérée par son libellé actuel) */
+  function retitleItem(menuId, oldLabel, icon, label) {
+    var it = Array.prototype.slice.call(document.querySelectorAll('#' + menuId + ' .sg-menu__item')).filter(function (a) {
+      return a.textContent.indexOf(oldLabel) >= 0;
+    })[0];
+    if (!it) return;
+    var ic = it.querySelector('.material-symbols-outlined');
+    var tx = it.querySelector('span:not(.material-symbols-outlined)');
+    if (ic) ic.textContent = icon;
+    if (tx) tx.textContent = label;
+  }
+
+  /* Suivre / ne plus suivre (sujet ou forum) : entrée de menu qui envoie en arrière-plan et bascule ensuite */
+  function watchItem(href, kind, menuId) {
+    var on = new RegExp('[?&]unwatch=' + kind).test(href);
+    var LABELS = kind === 'topic'
+      ? ['Suivre ce sujet', 'Ne plus suivre ce sujet']
+      : ['Suivre les sujets de ce forum', 'Ne plus suivre les sujets de ce forum'];
+    var st = { href: href, on: on };
+    return [function () {
+      var was = st.on;
+      bgAction({ url: st.href }, {
+        done: function () {
+          st.on = !was;
+          st.href = was ? st.href.replace('unwatch=' + kind, 'watch=' + kind) : st.href.replace('watch=' + kind, 'unwatch=' + kind);
+          retitleItem(menuId, LABELS[was ? 1 : 0], st.on ? 'notifications_off' : 'notifications_active', LABELS[st.on ? 1 : 0]);
+        }
+      });
+    }, on ? 'notifications_off' : 'notifications_active', LABELS[on ? 1 : 0]];
   }
 
   /* Erreurs de saisie (template error_body : .block.block-error, ex. « Vous devez entrer un message avant de

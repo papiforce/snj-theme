@@ -8396,6 +8396,12 @@ body.sg-noticepage #wrap > .sg-divider--notice {
   }
 }
 
+/* Action en cours d'envoi en arrière-plan (bgAction) */
+html.sg-busy,
+html.sg-busy * {
+  cursor: progress !important;
+}
+
 /* --- 62-poll.css --- */
 /* ==========================================================================
    SNJ — Sondage affiché : carte « tōhyō » 投票 (le vote)

@@ -251,3 +251,9 @@ body.sg-noticepage #wrap > .sg-divider--notice {
     font-size: 1.4rem;
   }
 }
+
+/* Action en cours d'envoi en arrière-plan (bgAction) */
+html.sg-busy,
+html.sg-busy * {
+  cursor: progress !important;
+}

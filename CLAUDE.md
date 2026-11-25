@@ -461,7 +461,20 @@ dans le panneau d'administration (PA), puis on commit.
   **Une solution générique a été essayée puis abandonnée** (demande de Vinny, « trop de problèmes ») : traverser la
   page de confirmation, revenir à la page précédente par `location.replace` et y ouvrir la modale (position de
   défilement comprise). Ne pas la reproduire. Vinny accepte le **risque de double envoi** propre à l'envoi en
-  arrière-plan.
+  arrière-plan. **Brique** `bgAction({ url, body }, { done(doc), other(doc) })` (envoi, lecture, fenêtre ; GET qui
+  échoue → navigation normale ; curseur d'attente `html.sg-busy`), avec `freshPage()` (page relue pour mettre à jour un
+  morceau), `retitleItem(menuId, ancienLibellé, icône, libellé)` et `watchItem(href, 'topic'|'forum', menuId)`.
+  **Actions passées en fenêtre** (choix de Vinny) : modération du sujet (**Verrouiller / Déverrouiller** : l'entrée du
+  menu et l'en-tête « Répondre au sujet » ↔ « Sujet verrouillé » se mettent à jour d'après la page relue,
+  `headAction()` partagée avec `pageHead`) ; actions du sujet (**Ajouter à mes favoris**, qui devient ensuite « Voir mes
+  favoris » ; **Suivre / Ne plus suivre ce sujet**, qui bascule) ; actions du forum (**Marquer tous les sujets comme
+  lus**, qui retire les pastilles « Nouveau » ; **Suivre / Ne plus suivre les sujets de ce forum**) ; **sondage** (vote
+  et « Clore le sondage » : la carte est relue ensuite, `refreshPoll`). L'envoi d'un message (écritoire) garde la page
+  de confirmation (choix de Vinny). Réponses de Forumactif relevées : suivre / ne plus suivre, marquer comme lus,
+  verrouiller / déverrouiller (GET `/modcp?mode=lock|unlock&t=N&tid=…`) et favoris (GET
+  `/search?add_favourite=N&search_id=favouritesearch`, titre « Favoris ») répondent toutes par une page
+  `message_body`. Ton lu **sans les passages entre guillemets** (« Test | Présentation refusée » passait en erreur).
+  Vote non testé (seul sondage du forum de test verrouillé).
 - **Pages de confirmation sans redirection forcée** (`layout.js`, `noForcedRedirect`, en tête du module 10, toutes
   les pages) : après un envoi (message posté ou modifié, profil enregistré…), Forumactif affiche une confirmation
   qui renvoie d'office ailleurs après quelques secondes (`<meta http-equiv="refresh" content="N;url=…">` posée par
