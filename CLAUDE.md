@@ -127,7 +127,7 @@ dans le panneau d'administration (PA), puis on commit.
   retiré). Titre en Zen Antique (2 lignes max), description sur 1 ligne, « par » + auteur coloré, pages du sujet en
   pastilles ; en pied (pointillé) réponses et vues, dernier message (avatar, auteur coloré, date vers le message),
   **toujours au bas de la carte** (`margin-top: auto` ; l'élément qui le précède garde 10px de marge basse).
-  Verrouillés : carte atténuée (72 %). Grille de 2 colonnes, **même hauteur pour toutes les cartes** (`grid-auto-rows: 1fr`) ;
+  Verrouillés : carte atténuée (72 %), **sauf les annonces** (et annonces globales) verrouillées, qui restent à pleine opacité (demande de Vinny). Grille de 2 colonnes, **même hauteur pour toutes les cartes** (`grid-auto-rows: 1fr`) ;
   1 colonne ≤ 768px. Soulèvement au survol. **« Poster un nouveau sujet » deux fois** : le bouton d'origine reste à droite
   du titre de la page (en-tête) — **sauf si le forum n'a pas de sous-forum** (la barre est alors juste sous le titre :
   le bouton de l'en-tête est retiré, demande de Vinny) —, et un second, qui reprend son adresse, est **au-dessus de la grille, à gauche**

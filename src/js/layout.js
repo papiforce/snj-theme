@@ -1162,7 +1162,8 @@
     var unread = /post_new|folder_new/.test(cls);
 
     var card = el('li', 'sg-topic' + (unread ? ' is-new' : '') + (flags.length ? ' is-' + flags[0][2] : '') +
-      (locked && flags[0][2] !== 'locked' ? ' is-locked' : ''));
+      /* annonce verrouillée : pastille seulement, pleine opacité */
+      (locked && flags[0][2] === 'sticky' ? ' is-locked' : ''));
     var top = el('div', 'sg-topic__flags');
     flags.forEach(function (f) {
       var chip = el('span', 'sg-topic__flag sg-topic__flag--' + f[2]);
