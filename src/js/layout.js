@@ -3722,6 +3722,16 @@
 
     /* Listes : combo (date de naissance : jour, mois, puis l'année en champ court sur la même ligne) */
     var selects = Array.prototype.slice.call(control.querySelectorAll('select'));
+    if (selects.length) {
+      /* Petits libellés natifs (« Jour », « Mois », « Année ») : retirés, gardés comme noms accessibles */
+      var names = [];
+      Array.prototype.slice.call(control.childNodes).forEach(function (n) {
+        if (n.nodeType === 3) { if (n.textContent.trim()) names.push(n.textContent.trim().replace(/\s*:\s*$/, '')); n.remove(); }
+      });
+      selects.forEach(function (sel, k) { if (names[k]) sel.setAttribute('aria-label', names[k]); });
+      var yIn = control.querySelector('input[maxlength="4"]');
+      if (yIn && names[selects.length]) yIn.setAttribute('aria-label', names[selects.length]);
+    }
     selects.forEach(function (sel) {
       if (sel.multiple) return;
       var wrap = sel.closest('.select') || sel;
@@ -3730,7 +3740,7 @@
     });
     if (selects.length > 1) control.classList.add('sg-pfield__control--row');
     var year = selects.length ? control.querySelector('input.sg-pinput[maxlength="4"]') : null;
-    if (year) { year.classList.add('sg-pinput--year'); year.setAttribute('placeholder', 'Année'); year.setAttribute('aria-label', 'Année'); }
+    if (year) { year.classList.add('sg-pinput--year'); year.setAttribute('placeholder', 'Année'); if (!year.getAttribute('aria-label')) year.setAttribute('aria-label', 'Année'); }
 
     /* Liens-boutons natifs (changer le mot de passe, exporter ses données) : boutons au contour */
     Array.prototype.slice.call(control.querySelectorAll('a.btn')).forEach(function (a) {
@@ -3798,7 +3808,7 @@
     var crumbs = el('nav', 'sg-crumbs');
     crumbs.setAttribute('aria-label', "Fil d'Ariane");
     var ol = el('ol', 'sg-crumbs__list');
-    var site = document.querySelector('meta[property="og:site_name"]');
+    var site = document.querySelector('link[rel="search"][title]');
     var crumb = function (href, text, icon, here) {
       var li = el('li', 'sg-crumbs__item');
       var a = el(here ? 'span' : 'a', 'sg-crumbs__link' + (here ? ' sg-crumbs__here' : ''));
@@ -3808,7 +3818,7 @@
       li.appendChild(a);
       ol.appendChild(li);
     };
-    crumb('/', site && site.getAttribute('content') || 'Accueil', 'home');
+    crumb('/', site && site.getAttribute('title') || 'Accueil', 'home');
     if (ud.user_id) crumb('/u' + ud.user_id, 'Mon profil');
     crumb('', curLabel, null, true);
     crumbs.appendChild(ol);

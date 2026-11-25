@@ -9071,6 +9071,15 @@ body.sg-cppage #wrap > .cp-mobile-menu,
   flex: 1 1 140px;
 }
 
+/* Date de naissance : jour, mois et année sur une ligne */
+.sg-pfield__control--row {
+  flex-wrap: nowrap;
+}
+
+.sg-pfield__control--row > .sg-combo {
+  flex: 1 1 0;
+}
+
 .sg-pfield__hint {
   margin: 0;
   color: var(--sg-text-muted);
@@ -9085,6 +9094,7 @@ body.sg-cppage #wrap > .cp-mobile-menu,
   flex: 1 1 100%;
   width: 100%;
   min-width: 0;
+  max-width: none;
   height: 46px;
   margin: 0;
   padding: 0 16px;
