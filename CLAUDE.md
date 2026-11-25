@@ -435,7 +435,7 @@ dans le panneau d'administration (PA), puis on commit.
   enregistrés / invisibles / invités, record en discret), « Aperçus récemment » (connectés des 24 h, pseudos en pastilles colorées,
   magatama pleins du logo de SnJ pour le staff, « + N autres » au-delà de 24, shippō ; lien « Voir qui arpente le
   Sekai » vers `/viewonline`, toujours au bas de la carte), Groupes (bannières **nobori** sans hampe : une par groupe,
-  mon kanji ou icône, nom vertical, effectif, ondulation au survol). Nombre de messages, de membres et dernier inscrit :
+  mon kanji ou icône, nom vertical, effectif, ondulation au survol ; étoffe de 280px sur tous les formats, pour que « Kaminari no Kuni » tienne au-dessus de la queue d'aronde). Nombre de messages, de membres et dernier inscrit :
   extrait `src/templates/index_body-snippet.html` ajouté au template `index_body` (absents d'AwesomeBB par défaut).
   Connectés des 24 h activés (PA › Affichage › Page d'accueil › Généralités).
   **Groupes** (PA › Utilisateurs & Groupes) : Hi, Mizu, Kaze, Kaminari, Tsuchi no Kuni, **Shōkoku** (小国, petits pays,

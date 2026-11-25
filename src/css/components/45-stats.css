@@ -408,7 +408,9 @@ body.sg-stats-on #index .block-subtle {
   align-items: center;
   gap: 12px;
   width: 86%;
-  height: 248px; /* « Kaminari no Kuni » tient en entier */
+  /* « Kaminari no Kuni » (le plus long) tient en entier au-dessus de la queue d'aronde, qui commence à 86 % :
+     14 (haut) + 36 (mon) + 12 + ~161 (nom) + marge ≤ 0,86 × 280 */
+  height: 280px;
   padding: 14px 0 30px;
   background:
     linear-gradient(90deg, rgba(255, 255, 255, 0.1), transparent 35%, transparent 70%, rgba(0, 0, 0, 0.16)),
@@ -503,10 +505,6 @@ body.sg-stats-on #index .block-subtle {
   .sg-nobori {
     grid-template-columns: repeat(4, minmax(0, 1fr));
     row-gap: 18px;
-  }
-
-  .sg-nobori__cloth {
-    height: 220px;
   }
 
   .sg-nobori__name {
