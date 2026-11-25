@@ -243,6 +243,13 @@ dans le panneau d'administration (PA), puis on commit.
   `reply`) **centré** sous le dernier message, qui reprend l'adresse du bouton de l'en-tête (`mode=reply`) ; le bloc
   natif `.quick-reply` est masqué (`#topic:has(.sg-treply) .quick-reply`). Pas de bouton sans lien de réponse (sujet
   verrouillé, visiteur). Le style de l'éditeur SCEditor reste dans `59-topic.css` pour la page de réponse.
+  **Sujets similaires** (`similarTopics`) : **sous « Répondre au sujet »**, plus de bloc repliable (`#ptrafic_open` /
+  `#ptrafic_close` masqués) ; intitulé discret « Sujets similaires » (petites capitales, icône `library_books`, comme
+  les permissions), puis les **cartes de sujet** (même pattern yagasuri, `topicCard(row)` partagée avec les pages de
+  forum) en grille de 2 colonnes. Forumactif ne donne que les titres : chaque carte est lue dans la liste de son forum
+  (page du sujet → dernier forum du fil d'Ariane → ligne `.posts-section` de la 1re page), cache `sessionStorage`
+  `snj-similar` de 5 min ; carte provisoire au titre seul en attendant (ou si le sujet n'est pas en 1re page). Chaque
+  carte prend la couleur de la catégorie de **son** forum (`.sg-topic.sg-tone-…`).
   **Bas de page** (`.sg-tfoot`) : séparateur de fin, « Sauter vers » (`jumpBox`, forum du sujet coché) à gauche,
   à droite la liste déroulante **« Modération »** (`actionsMenu` avec `lead: 'gavel'`, chevron qui pivote, bouton au
   style `.sg-tool` des listes personnalisées, `#sg-mod-menu`) qui remplace les icônes natives de `.topic-admin`

@@ -1111,6 +1111,122 @@
      sujets suivis) ; dessous, « Trier » et « Sauter vers » (formulaires natifs déplacés, listes
      déroulantes personnalisées). Le bloc « Modérateurs » est remplacé par le séparateur de fin.
      -------------------------------------------------------------------- */
+  /* Carte de sujet (motif yagasuri) construite depuis une ligne native de la liste des sujets
+     (.posts-section) : pages de forum et « Sujets similaires » de la page d'un sujet */
+  function topicCard(row) {
+    var el = function (tag, cls, text) {
+      var e = document.createElement(tag);
+      if (cls) e.className = cls;
+      if (text !== undefined) e.textContent = text;
+      return e;
+    };
+    var ico = function (name) { var i = el('span', 'material-symbols-outlined', name); i.setAttribute('aria-hidden', 'true'); return i; };
+    var num = function (node) { return node ? parseInt(node.textContent.replace(/[^\d]/g, ''), 10) || 0 : 0; };
+    var plural = function (n, one, many) { return n + ' ' + (n > 1 ? many : one); };
+    /* Pseudo coloré : on garde la couleur du groupe telle que Forumactif l'écrit */
+    var person = function (a, cls) {
+      var out = el('a', cls);
+      out.href = a.getAttribute('href');
+      var colored = a.querySelector('span[style]');
+      var name = el('span', colored ? colored.className : '', a.textContent.trim());
+      if (colored) name.setAttribute('style', colored.getAttribute('style'));
+      out.appendChild(name);
+      return out;
+    };
+
+    var link = row.querySelector('.posts-description h3 a');
+    if (!link) return null;
+    var icon = row.querySelector('.posts-icon');
+    var cls = icon ? icon.className : '';
+    var flags = [];
+    if (/folder_global/.test(cls)) flags.push(['public', 'Annonce globale', 'announce']);
+    else if (/folder_announce/.test(cls)) flags.push(['campaign', 'Annonce', 'announce']);
+    if (/folder_sticky/.test(cls)) flags.push(['push_pin', 'Épinglé', 'sticky']);
+    if (/locked/.test(cls)) flags.push(['lock', 'Verrouillé', 'locked']);
+    var unread = /post_new|folder_new/.test(cls);
+
+    var card = el('li', 'sg-topic' + (unread ? ' is-new' : '') + (flags.length ? ' is-' + flags[0][2] : ''));
+    var top = el('div', 'sg-topic__flags');
+    flags.forEach(function (f) {
+      var chip = el('span', 'sg-topic__flag sg-topic__flag--' + f[2]);
+      chip.appendChild(ico(f[0]));
+      chip.appendChild(el('span', null, f[1]));
+      top.appendChild(chip);
+    });
+    if (unread) top.appendChild(el('span', 'sg-topic__new', 'Nouveau'));
+    if (top.children.length) card.appendChild(top);
+
+    var title = el('h3', 'sg-topic__title');
+    var tone = titleToneOf(link);
+    if (tone) title.classList.add('sg-tcolor--' + tone);
+    var a = el('a', 'sg-topic__link', link.textContent.trim());
+    a.href = link.getAttribute('href');
+    title.appendChild(a);
+    card.appendChild(title);
+
+    var desc = row.querySelector('.topic-description');
+    if (desc && desc.textContent.trim()) card.appendChild(el('p', 'sg-topic__desc', desc.textContent.trim()));
+
+    var author = row.querySelector('.posts-description p a[href^="/u"]');
+    if (author) {
+      var by = el('p', 'sg-topic__by');
+      by.appendChild(document.createTextNode('par '));
+      by.appendChild(person(author, 'sg-topic__author'));
+      card.appendChild(by);
+    }
+
+    /* Pages du sujet, s'il en a plusieurs */
+    var pages = Array.prototype.slice.call(row.querySelectorAll('.posts-description .pagination a, .posts-description a[href*="-p"]'))
+      .filter(function (p) { return /^\d+$/.test(p.textContent.trim()); });
+    if (pages.length) {
+      var pl = el('p', 'sg-topic__pages');
+      pl.appendChild(ico('auto_stories'));
+      pages.forEach(function (p) {
+        var pa = el('a', 'sg-topic__page', p.textContent.trim());
+        pa.href = p.getAttribute('href');
+        pl.appendChild(pa);
+      });
+      card.appendChild(pl);
+    }
+
+    var foot = el('div', 'sg-topic__foot');
+    var stats = el('p', 'sg-topic__stats');
+    var replies = num(row.querySelector('.posts-statistics-replies'));
+    var views = num(row.querySelector('.posts-statistics-views'));
+    stats.appendChild(ico('forum'));
+    stats.appendChild(el('span', null, plural(replies, 'réponse', 'réponses')));
+    stats.appendChild(ico('visibility'));
+    stats.appendChild(el('span', null, plural(views, 'vue', 'vues')));
+    foot.appendChild(stats);
+
+    var last = row.querySelector('.posts-lastpost');
+    var lastTime = last && last.querySelector('a.posts-lastpost-time');
+    if (last && lastTime) {
+      var lp = el('div', 'sg-topic__last');
+      var avatarImg = last.querySelector('.avatar-default img');
+      var av = el('span', 'sg-topic__avatar');
+      if (avatarImg) {
+        var im = el('img');
+        im.src = avatarImg.getAttribute('src');
+        im.alt = '';
+        im.loading = 'lazy';
+        av.appendChild(im);
+      } else av.appendChild(ico('person'));
+      lp.appendChild(av);
+      var info = el('div', 'sg-topic__lastinfo');
+      var lastAuthor = last.querySelector('.posts-lastpost-author a[href^="/u"]');
+      if (lastAuthor) info.appendChild(person(lastAuthor, 'sg-topic__lastauthor'));
+      var t = el('a', 'sg-topic__time', lastTime.textContent.replace(/access_time/, '').trim());
+      t.href = lastTime.getAttribute('href');
+      t.setAttribute('title', 'Voir le dernier message');
+      info.appendChild(t);
+      lp.appendChild(info);
+      foot.appendChild(lp);
+    }
+    card.appendChild(foot);
+    return card;
+  }
+
   function topics() {
     if (document.querySelector('.sg-topics')) return;
     if (!/^\/f\d+/.test(location.pathname)) return;
@@ -1145,97 +1261,8 @@
 
     blocks.forEach(function (block) {
       Array.prototype.slice.call(block.querySelectorAll('.posts-section')).forEach(function (row) {
-        var link = row.querySelector('.posts-description h3 a');
-        if (!link) return;
-        var icon = row.querySelector('.posts-icon');
-        var cls = icon ? icon.className : '';
-        var flags = [];
-        if (/folder_global/.test(cls)) flags.push(['public', 'Annonce globale', 'announce']);
-        else if (/folder_announce/.test(cls)) flags.push(['campaign', 'Annonce', 'announce']);
-        if (/folder_sticky/.test(cls)) flags.push(['push_pin', 'Épinglé', 'sticky']);
-        if (/locked/.test(cls)) flags.push(['lock', 'Verrouillé', 'locked']);
-        var unread = /post_new|folder_new/.test(cls);
-
-        var card = el('li', 'sg-topic' + (unread ? ' is-new' : '') + (flags.length ? ' is-' + flags[0][2] : ''));
-        var top = el('div', 'sg-topic__flags');
-        flags.forEach(function (f) {
-          var chip = el('span', 'sg-topic__flag sg-topic__flag--' + f[2]);
-          chip.appendChild(ico(f[0]));
-          chip.appendChild(el('span', null, f[1]));
-          top.appendChild(chip);
-        });
-        if (unread) top.appendChild(el('span', 'sg-topic__new', 'Nouveau'));
-        if (top.children.length) card.appendChild(top);
-
-        var title = el('h3', 'sg-topic__title');
-        var tone = titleToneOf(link);
-        if (tone) title.classList.add('sg-tcolor--' + tone);
-        var a = el('a', 'sg-topic__link', link.textContent.trim());
-        a.href = link.getAttribute('href');
-        title.appendChild(a);
-        card.appendChild(title);
-
-        var desc = row.querySelector('.topic-description');
-        if (desc && desc.textContent.trim()) card.appendChild(el('p', 'sg-topic__desc', desc.textContent.trim()));
-
-        var author = row.querySelector('.posts-description p a[href^="/u"]');
-        if (author) {
-          var by = el('p', 'sg-topic__by');
-          by.appendChild(document.createTextNode('par '));
-          by.appendChild(person(author, 'sg-topic__author'));
-          card.appendChild(by);
-        }
-
-        /* Pages du sujet, s'il en a plusieurs */
-        var pages = Array.prototype.slice.call(row.querySelectorAll('.posts-description .pagination a, .posts-description a[href*="-p"]'))
-          .filter(function (p) { return /^\d+$/.test(p.textContent.trim()); });
-        if (pages.length) {
-          var pl = el('p', 'sg-topic__pages');
-          pl.appendChild(ico('auto_stories'));
-          pages.forEach(function (p) {
-            var pa = el('a', 'sg-topic__page', p.textContent.trim());
-            pa.href = p.getAttribute('href');
-            pl.appendChild(pa);
-          });
-          card.appendChild(pl);
-        }
-
-        var foot = el('div', 'sg-topic__foot');
-        var stats = el('p', 'sg-topic__stats');
-        var replies = num(row.querySelector('.posts-statistics-replies'));
-        var views = num(row.querySelector('.posts-statistics-views'));
-        stats.appendChild(ico('forum'));
-        stats.appendChild(el('span', null, plural(replies, 'réponse', 'réponses')));
-        stats.appendChild(ico('visibility'));
-        stats.appendChild(el('span', null, plural(views, 'vue', 'vues')));
-        foot.appendChild(stats);
-
-        var last = row.querySelector('.posts-lastpost');
-        var lastTime = last && last.querySelector('a.posts-lastpost-time');
-        if (last && lastTime) {
-          var lp = el('div', 'sg-topic__last');
-          var avatarImg = last.querySelector('.avatar-default img');
-          var av = el('span', 'sg-topic__avatar');
-          if (avatarImg) {
-            var im = el('img');
-            im.src = avatarImg.getAttribute('src');
-            im.alt = '';
-            im.loading = 'lazy';
-            av.appendChild(im);
-          } else av.appendChild(ico('person'));
-          lp.appendChild(av);
-          var info = el('div', 'sg-topic__lastinfo');
-          var lastAuthor = last.querySelector('.posts-lastpost-author a[href^="/u"]');
-          if (lastAuthor) info.appendChild(person(lastAuthor, 'sg-topic__lastauthor'));
-          var t = el('a', 'sg-topic__time', lastTime.textContent.replace(/access_time/, '').trim());
-          t.href = lastTime.getAttribute('href');
-          t.setAttribute('title', 'Voir le dernier message');
-          info.appendChild(t);
-          lp.appendChild(info);
-          foot.appendChild(lp);
-        }
-        card.appendChild(foot);
-        grid.appendChild(card);
+        var card = topicCard(row);
+        if (card) grid.appendChild(card);
       });
     });
 
@@ -1435,6 +1462,92 @@
      Les éléments natifs sont déplacés ou restylés, jamais recopiés (les scripts de Forumactif
      — citation, J'aime, éditeur — continuent de fonctionner).
      -------------------------------------------------------------------- */
+  /* --------------------------------------------------------------------
+     Sujets similaires (page d'un sujet) : sous « Répondre au sujet », en cartes de
+     sujet (yagasuri), grille de 2 colonnes, sans repli. Forumactif ne donne que les
+     titres : chaque carte est lue dans la liste de son forum (page du sujet → forum,
+     première page), cache de session « snj-similar » de 5 min. Faute de mieux, la
+     carte garde le titre seul.
+     -------------------------------------------------------------------- */
+  function similarTopics(topic, after) {
+    if (topic.querySelector('.sg-similar')) return;
+    var open = document.getElementById('ptrafic_open');
+    var closed = document.getElementById('ptrafic_close');
+    var links = open ? Array.prototype.slice.call(open.querySelectorAll('.block-content a[href^="/t"]')) : [];
+    if (!links.length) return;
+
+    var head = document.querySelector('.sg-pagehead');
+    var section = uiEl('section', 'sg-topics sg-similar');
+    if (head) (head.className.match(/sg-tone-[a-z]+/) || []).forEach(function (c) { section.classList.add(c); });
+    section.setAttribute('aria-label', 'Sujets similaires');
+    var title = uiEl('h2', 'sg-similar__title');
+    title.appendChild(uiIco('library_books'));
+    title.appendChild(uiEl('span', null, 'Sujets similaires'));
+    section.appendChild(title);
+    var grid = uiEl('ul', 'sg-topics__grid');
+    section.appendChild(grid);
+
+    var KEY = 'snj-similar';
+    var TTL = 5 * 60 * 1000;
+    var cache = {};
+    try { cache = JSON.parse(sessionStorage.getItem(KEY) || '{}'); } catch (e) {}
+    var save = function () { try { sessionStorage.setItem(KEY, JSON.stringify(cache)); } catch (e) {} };
+    var parse = function (html) { return new DOMParser().parseFromString(html, 'text/html'); };
+    var get = function (url) {
+      return fetch(url, { credentials: 'same-origin' }).then(function (r) { return r.ok ? r.text() : ''; });
+    };
+    var forums = {};
+    var forumPage = function (url) { return forums[url] || (forums[url] = get(url).then(parse)); };
+
+    var fill = function (li, rowHtml, tone) {
+      var row = parse('<div>' + rowHtml + '</div>').querySelector('.posts-section');
+      var card = row && topicCard(row);
+      if (!card) return;
+      if (tone) card.classList.add('sg-tone-' + tone);
+      li.parentNode.replaceChild(card, li);
+    };
+
+    links.forEach(function (a) {
+      var href = a.getAttribute('href');
+      var tid = (href.match(/^\/t(\d+)/) || [])[1];
+      /* Carte provisoire : le titre seul, remplacée dès que les détails arrivent */
+      var li = uiEl('li', 'sg-topic is-light');
+      var h = uiEl('h3', 'sg-topic__title');
+      var ta = uiEl('a', 'sg-topic__link', a.textContent.trim());
+      ta.href = href;
+      h.appendChild(ta);
+      li.appendChild(h);
+      grid.appendChild(li);
+      if (!tid) return;
+
+      var hit = cache[tid];
+      if (hit && Date.now() - hit.t < TTL) {
+        if (hit.h) fill(li, hit.h, hit.tone);
+        return;
+      }
+      get(href).then(function (html) {
+        var doc = parse(html);
+        var crumbs = Array.prototype.slice.call(doc.querySelectorAll('#breadcrumbs a'));
+        var meta = crumbs[1] ? CATEGORIES[crumbs[1].textContent.trim()] : null;
+        var tone = meta ? meta.tone : '';
+        var fl = crumbs.filter(function (c) { return /^\/f\d+/.test(c.getAttribute('href') || ''); });
+        if (!fl.length) throw 0;
+        return forumPage(fl[fl.length - 1].getAttribute('href')).then(function (fdoc) {
+          var link = fdoc.querySelector('.posts-description h3 a[href^="/t' + tid + '-"]');
+          var row = link && link.closest('.posts-section');
+          cache[tid] = { t: Date.now(), h: row ? row.outerHTML : '', tone: tone };
+          save();
+          if (row) fill(li, row.outerHTML, tone);
+        });
+      }).catch(function () {});
+    });
+
+    if (open) open.classList.add('sg-hidden');
+    if (closed) closed.classList.add('sg-hidden');
+    after.parentNode.insertBefore(section, after.nextSibling);
+    document.body.classList.add('sg-similar-on');
+  }
+
   function topicPage() {
     if (!/^\/t\d+/.test(location.pathname)) return;
     var topic = document.getElementById('topic');
@@ -1617,6 +1730,10 @@
       var after = qr || posts[posts.length - 1];
       if (after) after.parentNode.insertBefore(replyBar, qr || after.nextSibling);
     }
+
+    /* Sujets similaires, sous « Répondre au sujet » (ou sous le dernier message) */
+    var simAfter = topic.querySelector('.sg-treply') || posts[posts.length - 1];
+    if (simAfter) similarTopics(topic, simAfter);
 
     /* 4. Bas de page : séparateur de fin, « Sauter vers » et modération */
     var anchor = topic.querySelector('.topic-actions.bottom') || topic.querySelector('form[name="jumpbox"]');

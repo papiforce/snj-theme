@@ -6699,6 +6699,48 @@ html.sg-modal-open {
   }
 }
 
+/* --- Sujets similaires (fonction similarTopics) ------------------------------
+   Sous « Répondre au sujet » : cartes de sujet (57-topics.css), grille de 2 colonnes,
+   sans repli ; le bloc natif (#ptrafic_open / #ptrafic_close) est masqué. */
+#topic .block-ptrafic.sg-hidden {
+  display: none !important;
+}
+
+.sg-similar {
+  margin: var(--sg-space-8) 0 0;
+}
+
+/* Intitulé discret, comme celui des permissions */
+#wrap .sg-similar__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 14px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--sg-text-muted);
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.sg-similar__title .material-symbols-outlined {
+  color: var(--ph);
+  font-size: 18px;
+}
+
+/* Chaque carte prend la couleur de la catégorie de son propre forum */
+#wrap .sg-topic.sg-tone-gestion { --ph: var(--sg-contrast); }
+#wrap .sg-topic.sg-tone-hi { --ph: var(--sg-nation-hi); }
+#wrap .sg-topic.sg-tone-mizu { --ph: var(--sg-nation-mizu); }
+#wrap .sg-topic.sg-tone-kaze { --ph: var(--sg-nation-kaze); }
+#wrap .sg-topic.sg-tone-kaminari { --ph: var(--sg-nation-kaminari); }
+#wrap .sg-topic.sg-tone-tsuchi { --ph: var(--sg-nation-tsuchi); }
+#wrap .sg-topic.sg-tone-autres { --ph: var(--sg-nation-autres); }
+
 /* --- 60-write.css --- */
 /* ==========================================================================
    SNJ — Page d'écriture d'un message (/post) : écritoire « suzuri » 硯
