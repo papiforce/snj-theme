@@ -441,6 +441,7 @@
     topicPage();
     perms();
     writePage();
+    profilePage();
     noticePage();
     errorBlocks();
     pollCards();
@@ -3620,6 +3621,289 @@
 
   /* Lit la page de confirmation : null si ce n'en est pas une, sinon le bloc natif, le ton, le titre court, le
      message et les liens (« Cliquez ici pour… ») avec leur libellé court et leur icône */
+
+  /* --------------------------------------------------------------------
+     Paramètres du profil : registre « ninbetsu-chō » 人別帳 (le registre des habitants d'Edo). Pattern réservé aux
+     pages du panneau de l'utilisateur (`#wrap > .cp` avec ses onglets `.cp-sidebar` : /profile?mode=editprofile…,
+     sujets surveillés, favoris). En-tête au pattern des forums (fil d'Ariane, titre = l'onglet, « Voir mon
+     profil »), onglets en colonne collante à gauche (bande collante en haut sur mobile), puis chaque bloc natif en
+     carte ; les champs (libellé en petites capitales, champ arrondi), les listes en combo, les boutons radio en
+     contrôle segmenté, les boutons au style de la refonte. Le formulaire natif est gardé (envoi normal, page de
+     confirmation « Profil enregistré »).
+     -------------------------------------------------------------------- */
+  var CP_TABS = {
+    informations: ['badge', 'Ton compte, ton profil et tes moyens de contact.'],
+    preferences: ['tune', 'Les réglages du forum qui te concernent.'],
+    signature: ['draw', 'Le texte affiché sous chacun de tes messages.'],
+    avatars: ['account_circle', 'Ton portrait sur le forum.'],
+    friendsfoes: ['group', 'Les shinobis que tu suis de près, ou que tu préfères ignorer.'],
+    followers: ['how_to_reg', 'Les membres dont tu suis l’activité.'],
+    notifications: ['notifications', 'Ce qui te prévient de l’activité du forum.'],
+    watchsearch: ['visibility', 'Les sujets dont tu reçois les réponses.'],
+    favouritesearch: ['bookmark', 'Les sujets que tu as mis de côté.']
+  };
+  var CP_BLOCKS = {
+    'Enregistrement': ['key', 'Compte'],
+    'Profil personnalisé': ['person', 'Profil'],
+    'Champs de contact': ['alternate_email', 'Contact'],
+    'Export de données': ['download', 'Mes données']
+  };
+  var CP_LABELS = {
+    "Nom d'utilisateur": 'Pseudo',
+    'Adresse e-mail': 'Adresse e-mail',
+    'Changer votre mot de passe': 'Mot de passe',
+    'Téléchargez les informations et contenus que vous avez publiés sur ce forum': 'Exporter mes données'
+  };
+
+  function cpKey(href) {
+    var m = (href || '').match(/page_profil=([a-z]+)/) || (href || '').match(/search_id=([a-z]+)/);
+    return m ? m[1] : '';
+  }
+
+  /* Un <label> natif (texte puis champ) devient un champ de la refonte : libellé, aide, contrôle */
+  function cpField(label) {
+    var el = uiEl, ico = uiIco;
+    var head = label.querySelector(':scope > span:not(.description)');
+    if (!head) return;
+    var raw = head.textContent.replace(/\s+/g, ' ').trim();
+    var required = /\*/.test(raw);
+    var text = raw.replace(/\*/g, '').replace(/\s*:\s*$/, '').trim();
+    text = CP_LABELS[text] || text;
+    var field = el('div', 'sg-pfield');
+    var lab = el('label', 'sg-pfield__label', text);
+    if (required) {
+      var req = el('span', 'sg-pfield__req', '*');
+      req.setAttribute('title', 'Obligatoire');
+      lab.appendChild(req);
+    }
+    field.appendChild(lab);
+    var hint = label.querySelector(':scope > .description');
+    var control = el('div', 'sg-pfield__control');
+    Array.prototype.slice.call(label.childNodes).forEach(function (n) {
+      if (n === head || n === hint) return;
+      if (n.nodeName === 'BR') return;
+      if (n.nodeType === 3 && !n.textContent.trim()) return;
+      control.appendChild(n);
+    });
+    field.appendChild(control);
+    if (hint && hint.textContent.trim()) field.appendChild(el('p', 'sg-pfield__hint', hint.textContent.replace(/\s+/g, ' ').trim()));
+    label.parentNode.replaceChild(field, label);
+
+    /* Champs simples */
+    var inputs = Array.prototype.slice.call(control.querySelectorAll('input[type="text"], input[type="email"], input[type="url"], input[type="password"], input[type="number"], input:not([type]), textarea'));
+    inputs.forEach(function (i) { i.classList.add('sg-pinput'); });
+    if (inputs.length === 1 && !inputs[0].id) inputs[0].id = 'sg-pf-' + Math.random().toString(36).slice(2);
+    if (inputs.length === 1) lab.setAttribute('for', inputs[0].id);
+    if (control.querySelector('textarea')) field.classList.add('sg-pfield--wide');
+
+    /* Boutons radio à image (genre…) : contrôle segmenté, libellés pris dans l'infobulle des images */
+    var list = control.querySelector('ul.profile_field_list');
+    var radios = list ? Array.prototype.slice.call(list.querySelectorAll('input[type="radio"]')) : [];
+    if (radios.length) {
+      var seg = el('div', 'sg-seg sg-seg--auto');
+      seg.setAttribute('role', 'radiogroup');
+      seg.setAttribute('aria-label', text);
+      radios.forEach(function (r) {
+        var li = r.closest('li');
+        var img = li && li.querySelector('img');
+        var name = (img && (img.getAttribute('title') || img.getAttribute('alt'))) || (li ? li.textContent.trim() : '') || r.value;
+        name = name.replace(/^Empty$/i, 'Autre');
+        var opt = el('label', 'sg-seg__opt');
+        opt.appendChild(r);
+        var face = el('span', 'sg-seg__face');
+        face.appendChild(el('span', null, name));
+        opt.appendChild(face);
+        seg.appendChild(opt);
+      });
+      list.parentNode.replaceChild(seg, list);
+      field.classList.add('sg-pfield--wide');
+      lab.removeAttribute('for');
+    }
+
+    /* Listes : combo (date de naissance : jour, mois, puis l'année en champ court sur la même ligne) */
+    var selects = Array.prototype.slice.call(control.querySelectorAll('select'));
+    selects.forEach(function (sel) {
+      if (sel.multiple) return;
+      var wrap = sel.closest('.select') || sel;
+      var c = combo(sel, {});
+      wrap.parentNode.replaceChild(c.box, wrap);
+    });
+    if (selects.length > 1) control.classList.add('sg-pfield__control--row');
+    var year = selects.length ? control.querySelector('input.sg-pinput[maxlength="4"]') : null;
+    if (year) { year.classList.add('sg-pinput--year'); year.setAttribute('placeholder', 'Année'); year.setAttribute('aria-label', 'Année'); }
+
+    /* Liens-boutons natifs (changer le mot de passe, exporter ses données) : boutons au contour */
+    Array.prototype.slice.call(control.querySelectorAll('a.btn')).forEach(function (a) {
+      var label2 = a.textContent.trim();
+      var icon = /export/i.test(label2) ? 'download' : /modifier/i.test(label2) ? 'edit' : 'arrow_forward';
+      if (/modifier/i.test(label2) && /mot de passe/i.test(text)) label2 = 'Modifier le mot de passe';
+      if (/export/i.test(label2)) label2 = 'Exporter mes données';
+      a.className = 'sg-pbtn sg-pbtn--ghost';
+      a.textContent = '';
+      a.appendChild(ico(icon));
+      a.appendChild(el('span', null, label2));
+    });
+  }
+
+  function profilePage() {
+    var cp = document.querySelector('#wrap > .cp');
+    var side = document.querySelector('#wrap > .cp-sidebar');
+    if (!cp || !side || document.querySelector('.sg-cpage')) return;
+    var el = uiEl, ico = uiIco;
+    var ud = window._userdata || {};
+    var tabs = Array.prototype.slice.call(side.querySelectorAll('.tabs li'));
+    if (!tabs.length) return;
+    var current = cpKey(location.search) || 'informations';
+    var curLabel = '';
+
+    /* Onglets : colonne collante (bande collante en haut sur mobile) */
+    var nav = el('nav', 'sg-ptabs');
+    nav.setAttribute('aria-label', 'Paramètres du profil');
+    var ul = el('ul', 'sg-ptabs__list');
+    tabs.forEach(function (li) {
+      var a = li.querySelector('a');
+      if (!a) return;
+      var name = a.textContent.trim();
+      var href = a.getAttribute('href');
+      var active = li.classList.contains('activetab');
+      var key = active ? current : cpKey(href);
+      if (active) curLabel = name;
+      var item = el('li', 'sg-ptabs__item');
+      var link = el('a', 'sg-ptabs__link' + (active ? ' is-active' : ''));
+      link.href = active || !href || href === '#' ? location.pathname + location.search : href;
+      if (active) link.setAttribute('aria-current', 'page');
+      link.appendChild(ico((CP_TABS[key] || ['chevron_right'])[0]));
+      link.appendChild(el('span', 'sg-ptabs__text', name));
+      item.appendChild(link);
+      ul.appendChild(item);
+    });
+    nav.appendChild(ul);
+    curLabel = curLabel || 'Mon profil';
+
+    /* En-tête : séparateur avec le logo, fil d'Ariane, titre = l'onglet, « Voir mon profil », description */
+    var topDiv = el('div', 'sg-divider sg-divider--cp');
+    topDiv.setAttribute('role', 'separator');
+    var logo = el('span', 'sg-divider__logo sg-divider__logo--mask');
+    logo.setAttribute('aria-hidden', 'true');
+    topDiv.appendChild(logo);
+    var topRule = el('span', 'sg-divider__rule');
+    topRule.setAttribute('aria-hidden', 'true');
+    topRule.appendChild(el('span', 'sg-divider__line'));
+    topRule.insertAdjacentHTML('beforeend', '<svg class="sg-divider__notch" viewBox="0 0 48 25" aria-hidden="true"><path d="M0 .5L24 24.5L48 .5"/></svg>');
+    topRule.appendChild(el('span', 'sg-divider__line'));
+    topDiv.appendChild(topRule);
+
+    var head = el('section', 'sg-pagehead sg-pagehead--cp');
+    head.setAttribute('aria-label', 'En-tête de la page');
+    var crumbs = el('nav', 'sg-crumbs');
+    crumbs.setAttribute('aria-label', "Fil d'Ariane");
+    var ol = el('ol', 'sg-crumbs__list');
+    var site = document.querySelector('meta[property="og:site_name"]');
+    var crumb = function (href, text, icon, here) {
+      var li = el('li', 'sg-crumbs__item');
+      var a = el(here ? 'span' : 'a', 'sg-crumbs__link' + (here ? ' sg-crumbs__here' : ''));
+      if (icon) a.appendChild(ico(icon));
+      a.appendChild(el('span', null, text));
+      if (here) a.setAttribute('aria-current', 'page'); else a.href = href;
+      li.appendChild(a);
+      ol.appendChild(li);
+    };
+    crumb('/', site && site.getAttribute('content') || 'Accueil', 'home');
+    if (ud.user_id) crumb('/u' + ud.user_id, 'Mon profil');
+    crumb('', curLabel, null, true);
+    crumbs.appendChild(ol);
+    head.appendChild(crumbs);
+    var row = el('div', 'sg-pagehead__row');
+    var h1 = el('h1', 'sg-pagehead__title');
+    h1.appendChild(el('span', 'sg-pagehead__text', curLabel));
+    row.appendChild(h1);
+    if (ud.user_id) {
+      var acts = el('div', 'sg-pagehead__actions');
+      var see = el('a', 'sg-action');
+      see.href = '/u' + ud.user_id;
+      see.appendChild(ico('person'));
+      see.appendChild(el('span', null, 'Voir mon profil'));
+      acts.appendChild(see);
+      row.appendChild(acts);
+    }
+    head.appendChild(row);
+    if (CP_TABS[current]) head.appendChild(el('div', 'sg-pagehead__desc', CP_TABS[current][1]));
+
+    /* Grille : onglets | contenu */
+    var page = el('div', 'sg-cpage');
+    cp.parentNode.insertBefore(topDiv, cp);
+    cp.parentNode.insertBefore(head, cp);
+    cp.parentNode.insertBefore(page, cp);
+    page.appendChild(nav);
+    var main = el('div', 'sg-cpage__main');
+    page.appendChild(main);
+    main.appendChild(cp);
+    side.classList.add('sg-hidden');
+    var mobileMenu = document.querySelector('#wrap > .cp-mobile-menu');
+    if (mobileMenu) mobileMenu.classList.add('sg-hidden');
+
+    /* Blocs natifs en cartes */
+    Array.prototype.slice.call(cp.querySelectorAll('.block')).forEach(function (b) {
+      var bh = b.querySelector(':scope > .block-header');
+      var bc = b.querySelector(':scope > .block-content');
+      if (!b.textContent.trim() && !b.querySelector('input, select, textarea, img')) { b.classList.add('sg-hidden'); return; }
+      b.classList.add('sg-pcard');
+      if (bh) {
+        var t = bh.textContent.replace(/\s+/g, ' ').trim();
+        var spec = CP_BLOCKS[t] || ['tune', t];
+        var h = el('h2', 'sg-pcard__title');
+        h.appendChild(ico(spec[0]));
+        h.appendChild(el('span', null, spec[1]));
+        bh.parentNode.replaceChild(h, bh);
+      }
+      if (!bc) return;
+      /* Phrase « Les champs marqués d'un * sont obligatoires » : aide discrète sous le titre */
+      Array.prototype.slice.call(bc.querySelectorAll(':scope > p')).forEach(function (p) {
+        if (/\*/.test(p.textContent)) { p.className = 'sg-pcard__hint'; p.textContent = 'Les champs marqués d’un * sont obligatoires.'; }
+      });
+      Array.prototype.slice.call(bc.querySelectorAll(':scope > br')).forEach(function (br) { br.remove(); });
+      Array.prototype.slice.call(bc.querySelectorAll(':scope > label')).forEach(cpField);
+      bc.classList.add('sg-pcard__grid');
+    });
+
+    /* Boutons d'envoi : « Réinitialiser » (contour) puis « Enregistrer » (plein), à droite sous un filet */
+    Array.prototype.slice.call(cp.querySelectorAll('.form-buttons')).forEach(function (fs) {
+      fs.classList.add('sg-pactions');
+      Array.prototype.slice.call(fs.querySelectorAll('input[type="submit"], input[type="reset"], input[type="button"]')).forEach(function (i) {
+        var isReset = i.type === 'reset';
+        var btn = el('button', 'sg-pbtn' + (isReset ? ' sg-pbtn--ghost' : ''));
+        btn.type = i.type === 'button' ? 'button' : i.type;
+        if (i.name) btn.name = i.name;
+        btn.value = i.value;
+        btn.appendChild(ico(isReset ? 'restart_alt' : /enregistr|valider|envoyer|submit/i.test(i.value + i.name) ? 'save' : 'check'));
+        btn.appendChild(el('span', null, i.value));
+        i.parentNode.replaceChild(btn, i);
+      });
+      var subs = fs.querySelectorAll('button.sg-pbtn:not(.sg-pbtn--ghost)');
+      Array.prototype.slice.call(subs).forEach(function (b) { fs.appendChild(b); });
+    });
+
+    /* Séparateur de fin et fil d'Ariane repris */
+    var endDiv = el('div', 'sg-divider sg-divider--end');
+    endDiv.setAttribute('role', 'separator');
+    var rule = el('span', 'sg-divider__rule');
+    rule.setAttribute('aria-hidden', 'true');
+    rule.appendChild(el('span', 'sg-divider__line'));
+    rule.insertAdjacentHTML('beforeend', '<svg class="sg-divider__notch" viewBox="0 0 48 25" aria-hidden="true"><path d="M0 .5L24 24.5L48 .5"/></svg>');
+    rule.appendChild(el('span', 'sg-divider__line'));
+    endDiv.appendChild(rule);
+    page.parentNode.insertBefore(endDiv, page.nextSibling);
+    var endNav = el('nav', 'sg-crumbs sg-crumbs--end');
+    endNav.setAttribute('aria-label', "Fil d'Ariane");
+    endNav.appendChild(ol.cloneNode(true));
+    endDiv.parentNode.insertBefore(endNav, endDiv.nextSibling);
+
+    document.body.classList.add('sg-cppage', 'sg-pagehead-on');
+    /* Mobile : l'onglet actif visible dans la bande */
+    var act = nav.querySelector('.is-active');
+    if (act && nav.scrollWidth > nav.clientWidth) ul.scrollLeft = act.offsetLeft - 16;
+  }
+
   function noticeRead(doc) {
     doc = doc || document;
     var wrap = doc.getElementById('wrap');

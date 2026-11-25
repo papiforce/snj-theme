@@ -1,0 +1,401 @@
+/* ==========================================================================
+   SNJ — Paramètres du profil : registre « ninbetsu-chō » 人別帳
+   Construit par src/js/layout.js (profilePage, cpField). Pattern réservé aux pages du panneau de
+   l'utilisateur (#wrap > .cp + .cp-sidebar : /profile?mode=editprofile…, sujets surveillés, favoris).
+     1. En-tête au pattern des forums (55-pagehead.css) : fil d'Ariane, titre = l'onglet, « Voir mon profil ».
+     2. Grille : onglets en colonne collante (248px, comme la colonne de l'auteur des messages) | cartes.
+        Mobile : bande d'onglets collante en haut d'écran, qui défile horizontalement.
+     3. Cartes de surface sans contour, titre en Zen Antique ; champs : libellé en petites capitales, champ
+        arrondi, aide discrète ; radios en contrôle segmenté, listes en combo.
+     4. Boutons à droite sous un filet : « Réinitialiser » (contour), « Enregistrer » (plein).
+   ========================================================================== */
+
+body.sg-cppage #wrap > .cp-sidebar,
+body.sg-cppage #wrap > .cp-mobile-menu,
+.sg-cppage .sg-hidden {
+  display: none !important;
+}
+
+.sg-cpage {
+  display: grid;
+  grid-template-columns: 248px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  font-size: 16px; /* AwesomeBB réduit la taille du texte dans #wrap */
+  line-height: 1.6;
+}
+
+/* Le conteneur natif ne garde ni marge ni colonne */
+#wrap .sg-cpage .cp,
+#wrap .sg-cpage .cp-inner {
+  float: none;
+  width: auto;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* --- Onglets ---------------------------------------------------------------------------------------------- */
+.sg-ptabs {
+  position: sticky;
+  top: 24px;
+  z-index: 4;
+  padding: 8px;
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-surface);
+}
+
+#wrap .sg-ptabs__list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#wrap .sg-ptabs__item {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+#wrap a.sg-ptabs__link,
+#wrap a.sg-ptabs__link:visited {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: calc(var(--sg-radius-lg) - 4px);
+  color: var(--sg-text-muted);
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.sg-ptabs__link > * {
+  transition: none;
+}
+
+.sg-ptabs__link .material-symbols-outlined {
+  flex: none;
+  font-size: 20px;
+}
+
+.sg-ptabs__text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#wrap a.sg-ptabs__link:hover,
+#wrap a.sg-ptabs__link:focus-visible {
+  background: var(--sg-surface-2);
+  color: var(--sg-text);
+}
+
+#wrap a.sg-ptabs__link.is-active,
+#wrap a.sg-ptabs__link.is-active:visited {
+  background: var(--sg-contrast);
+  color: var(--sg-on-contrast);
+}
+
+#wrap a.sg-ptabs__link.is-active .material-symbols-outlined {
+  font-variation-settings: "FILL" 1;
+}
+
+/* --- Cartes ----------------------------------------------------------------------------------------------- */
+#wrap .sg-cpage .block.sg-pcard {
+  margin: 0 0 24px;
+  padding: 24px;
+  border: 0;
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-surface);
+  box-shadow: none;
+}
+
+#wrap .sg-pcard > .block-content {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+#wrap .sg-pcard__title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 18px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--sg-text);
+  font-family: var(--sg-font-display);
+  font-size: 1.35rem;
+  font-weight: 400;
+  line-height: 1.2;
+  text-transform: none;
+}
+
+.sg-pcard__title .material-symbols-outlined {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--sg-primary) 16%, transparent);
+  color: var(--sg-primary);
+  font-size: 20px;
+}
+
+#wrap .sg-pcard__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 20px;
+}
+
+#wrap .sg-pcard__grid > :not(.sg-pfield),
+#wrap .sg-pcard__grid > .sg-pfield--wide {
+  grid-column: 1 / -1;
+}
+
+#wrap .sg-pcard__hint {
+  margin: -8px 0 0;
+  color: var(--sg-text-muted);
+  font-size: 0.85rem;
+}
+
+/* --- Champs ----------------------------------------------------------------------------------------------- */
+.sg-pfield {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+#wrap label.sg-pfield__label {
+  display: block;
+  margin: 0;
+  padding: 0;
+  color: var(--sg-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.sg-pfield__req {
+  margin-left: 4px;
+  color: var(--sg-accent-2);
+}
+
+.sg-pfield__control {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.sg-pfield__control > .sg-combo {
+  flex: 1 1 140px;
+}
+
+.sg-pfield__hint {
+  margin: 0;
+  color: var(--sg-text-muted);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+/* Forumactif impose « border-radius: 0 !important » et un fond transparent à .input-subtle, d'où les !important */
+#wrap input.sg-pinput,
+#wrap textarea.sg-pinput {
+  box-sizing: border-box;
+  flex: 1 1 100%;
+  width: 100%;
+  min-width: 0;
+  height: 46px;
+  margin: 0;
+  padding: 0 16px;
+  border: 1px solid var(--sg-border-strong, var(--sg-border));
+  border-radius: var(--sg-radius-lg) !important;
+  background: var(--sg-surface) !important;
+  box-shadow: none;
+  color: var(--sg-text);
+  font: inherit;
+  font-size: 0.95rem;
+  outline: none;
+}
+
+#wrap textarea.sg-pinput {
+  height: auto;
+  min-height: 140px;
+  padding: 12px 16px;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+#wrap input.sg-pinput:hover,
+#wrap textarea.sg-pinput:hover {
+  background: var(--sg-surface-2) !important;
+}
+
+#wrap input.sg-pinput:focus,
+#wrap textarea.sg-pinput:focus {
+  border-color: var(--sg-accent-1);
+  background: var(--sg-surface) !important;
+}
+
+#wrap input.sg-pinput--year {
+  flex: 0 0 104px;
+  width: 104px;
+  text-align: center;
+}
+
+/* Contrôle segmenté : autant de colonnes que de choix */
+.sg-seg.sg-seg--auto {
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-template-columns: none;
+  width: 100%;
+}
+
+#wrap .sg-pcard .sg-seg__opt {
+  display: block;
+  margin: 0;
+}
+
+/* --- Boutons ---------------------------------------------------------------------------------------------- */
+#wrap .sg-pbtn,
+#wrap a.sg-pbtn:visited {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 46px;
+  margin: 0;
+  padding: 0 20px;
+  border: 0;
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-contrast);
+  box-shadow: none;
+  color: var(--sg-on-contrast);
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: none;
+  text-transform: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform 0.3s var(--sg-ease), box-shadow 0.3s var(--sg-ease);
+}
+
+#wrap .sg-pbtn > * {
+  transition: none;
+}
+
+#wrap .sg-pbtn .material-symbols-outlined {
+  font-size: 20px;
+}
+
+#wrap .sg-pbtn:not(.sg-pbtn--ghost):hover,
+#wrap .sg-pbtn:not(.sg-pbtn--ghost):focus-visible {
+  transform: translateY(-2px);
+  box-shadow: var(--sg-shadow);
+}
+
+#wrap .sg-pbtn--ghost,
+#wrap a.sg-pbtn--ghost:visited {
+  border: 1px solid var(--sg-border-strong, var(--sg-border));
+  background: var(--sg-surface);
+  color: var(--sg-text);
+}
+
+#wrap .sg-pbtn--ghost:hover,
+#wrap .sg-pbtn--ghost:focus-visible {
+  background: var(--sg-surface-2);
+}
+
+#wrap .sg-pbtn:focus-visible {
+  outline: 2px solid var(--sg-accent-1);
+  outline-offset: 2px;
+}
+
+#wrap .sg-cpage fieldset.sg-pactions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  margin: 8px 0 0;
+  padding: 20px 0 0;
+  border: 0;
+  border-top: 1px solid var(--sg-border);
+  background: none;
+}
+
+/* --- Bas de page ------------------------------------------------------------------------------------------ */
+body.sg-cppage .sg-cpage + .sg-divider--end {
+  margin-top: 0;
+}
+
+/* --- Responsive ------------------------------------------------------------------------------------------- */
+@media (max-width: 900px) {
+  .sg-cpage {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  /* Bande d'onglets collante en haut d'écran, qui défile à l'horizontale */
+  .sg-ptabs {
+    top: 0;
+    margin: 0 -4px;
+    padding: 6px;
+    box-shadow: var(--sg-shadow);
+  }
+
+  #wrap .sg-ptabs__list {
+    flex-direction: row;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  #wrap .sg-ptabs__list::-webkit-scrollbar {
+    display: none;
+  }
+
+  #wrap .sg-ptabs__item {
+    flex: none;
+  }
+
+  #wrap a.sg-ptabs__link {
+    gap: 8px;
+    padding: 0 14px;
+  }
+}
+
+@media (max-width: 768px) {
+  #wrap .sg-cpage .block.sg-pcard {
+    padding: 20px 16px;
+  }
+
+  #wrap .sg-pcard__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sg-seg.sg-seg--auto {
+    grid-auto-flow: row;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #wrap .sg-cpage fieldset.sg-pactions {
+    flex-direction: column-reverse;
+  }
+
+  #wrap .sg-pactions .sg-pbtn,
+  #wrap .sg-pfield__control > .sg-pbtn {
+    width: 100%;
+  }
+}
