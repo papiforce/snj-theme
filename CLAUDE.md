@@ -459,7 +459,10 @@ dans le panneau d'administration (PA), puis on commit.
   (`sessionStorage` `snj-notice`, valable 30 s), la page est masquée (`html.sg-notice-leaving`) et on retourne à la
   **page précédente** par `location.replace` (rechargée, sans la confirmation dans l'historique), où le **sceau hanko
   s'affiche en modale** (`.sg-modal--notice` : même carte, boutons de la modale, « Fermer », Échap, clic sur le voile,
-  focus gardé ; les liens qui ramènent à la page affichée sont retirés). Page précédente = dernière page « réelle »
+  focus gardé ; les liens qui ramènent à la page affichée sont retirés). **Position de défilement conservée** (on doit croire
+  n'avoir pas quitté la page) : `rememberPage` tient à jour `y` dans `snj-lastpage` (défilement, `pagehide`),
+  `restoreScroll` la rétablit à l'arrivée (`history.scrollRestoration = 'manual'`, puis de nouveau au chargement complet
+  et une fois les polices prêtes, tant que le lecteur n'a pas défilé). Page précédente = dernière page « réelle »
   visitée (`snj-lastpage`, 1 h ; ni `/post`, ni `/modcp`, ni `/login`, ni l'écriture d'un MP, ni une confirmation),
   retenue seulement si le référent est cette page ou une page de passage. **Sinon la page de confirmation reste**
   (arrivée directe, sans référent, sujet supprimé dont la page n'existe plus). Choix de Vinny : page précédente par

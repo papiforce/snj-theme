@@ -3536,6 +3536,7 @@
       t: Date.now(),
       to: last.u,
       from: location.href,
+      y: last.y || 0,
       tone: data.tone,
       title: data.title,
       message: data.message,
@@ -3551,7 +3552,37 @@
   function rememberPage() {
     if (document.body.classList.contains('sg-noticepage') || transitPage(location.href)) return;
     var u = location.pathname + location.search;
-    try { sessionStorage.setItem(LASTPAGE_KEY, JSON.stringify({ u: u, t: Date.now() })); } catch (e) {}
+    var t = Date.now();
+    /* La position de défilement est tenue à jour : on la retrouve en revenant après une confirmation */
+    var save = function () {
+      try { sessionStorage.setItem(LASTPAGE_KEY, JSON.stringify({ u: u, t: t, y: Math.round(window.scrollY) })); } catch (e) {}
+    };
+    save();
+    var pending = false;
+    window.addEventListener('scroll', function () {
+      if (pending) return;
+      pending = true;
+      setTimeout(function () { pending = false; save(); }, 150);
+    }, { passive: true });
+    window.addEventListener('pagehide', save);
+  }
+
+  /* Remet la page à la position où on l'avait laissée (le retour après une confirmation doit passer inaperçu) :
+     tout de suite, puis une fois les images et polices chargées, tant que le lecteur n'a pas défilé lui-même */
+  function restoreScroll(y) {
+    if (!y) return;
+    try { history.scrollRestoration = 'manual'; } catch (e) {}
+    var moved = false;
+    var stop = function () { moved = true; };
+    ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(function (ev) {
+      window.addEventListener(ev, stop, { once: true, passive: true });
+    });
+    var go = function () { if (!moved) window.scrollTo({ top: y, left: 0, behavior: 'instant' }); };
+    go();
+    requestAnimationFrame(go);
+    if (document.readyState === 'complete') setTimeout(go, 0);
+    else window.addEventListener('load', function () { go(); setTimeout(go, 300); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(go);
   }
 
   /* À l'arrivée : la confirmation mise de côté s'affiche en modale */
@@ -3564,6 +3595,7 @@
       return;
     }
     try { sessionStorage.removeItem(NOTICE_KEY); } catch (e) {}
+    restoreScroll(data.y);
 
     var prev = document.activeElement;
     var wrap = uiEl('div', 'sg-modal sg-modal--notice');
