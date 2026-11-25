@@ -3840,7 +3840,6 @@
     var crumbs = el('nav', 'sg-crumbs');
     crumbs.setAttribute('aria-label', "Fil d'Ariane");
     var ol = el('ol', 'sg-crumbs__list');
-    var site = document.querySelector('link[rel="search"][title]');
     var crumb = function (href, text, icon, here) {
       var li = el('li', 'sg-crumbs__item');
       var a = el(here ? 'span' : 'a', 'sg-crumbs__link' + (here ? ' sg-crumbs__here' : ''));
@@ -3850,16 +3849,24 @@
       li.appendChild(a);
       ol.appendChild(li);
     };
-    crumb('/', site && site.getAttribute('title') || 'Accueil', 'home');
-    if (ud.user_id) crumb('/u' + ud.user_id, 'Mon profil');
-    crumb('', curLabel, null, true);
+    /* Accueil › Profil › onglet ; sur l'onglet « Profil » lui-même : Accueil › Profil (demande de Vinny) */
+    var viewing = (location.pathname.match(/^\/u\d+/) || [])[0];
+    var profHref = viewing || (ud.user_id ? '/u' + ud.user_id : '');
+    var onProfile = /^profil$/i.test(curLabel);
+    crumb('/', 'Accueil', 'home');
+    if (onProfile) crumb('', 'Profil', null, true);
+    else {
+      if (profHref) crumb(profHref, 'Profil');
+      crumb('', curLabel, null, true);
+    }
     crumbs.appendChild(ol);
     head.appendChild(crumbs);
     var row = el('div', 'sg-pagehead__row');
     var h1 = el('h1', 'sg-pagehead__title');
     h1.appendChild(el('span', 'sg-pagehead__text', curLabel));
     row.appendChild(h1);
-    if (ud.user_id) {
+    /* « Voir mon profil » : inutile sur les pages du profil affiché (doublon) */
+    if (ud.user_id && !viewing) {
       var acts = el('div', 'sg-pagehead__actions');
       var see = el('a', 'sg-action');
       see.href = '/u' + ud.user_id;

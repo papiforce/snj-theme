@@ -405,8 +405,10 @@ dans le panneau d'administration (PA), puis on commit.
   `profilePage`, `cpField`, `cpRadioWrap`, + `63-profile.css`) : pattern **réservé au panneau de l'utilisateur**
   (`#wrap > .cp` avec ses onglets `.cp-sidebar` : `/profile?mode=editprofile&page_profil=…`, sujets surveillés,
   favoris). Haut : séparateur avec le logo (sans widgets, comme l'écriture), en-tête au pattern des forums (fil
-  d'Ariane « Alendria › Mon profil › onglet » — nom du forum lu sur `link[rel="search"][title]` —, **titre = l'onglet**,
-  une action « Voir mon profil », description propre à l'onglet, `CP_TABS`). **Onglets collants** (demande de Vinny) :
+  d'Ariane **« Accueil › Profil › onglet »**, onglet non cliquable ; sur l'onglet « Profil » lui-même, **« Accueil ›
+  Profil »** (demande de Vinny) ; « Profil » mène au profil affiché `/uN` —, **titre = l'onglet**,
+  une action « Voir mon profil » (absente sur les pages `/uN`, qui ont aussi la colonne `.cp-sidebar` : Profil, Groupes,
+  Récompenses, et reçoivent pour l'instant le même habillage), description propre à l'onglet, `CP_TABS`). **Onglets collants** (demande de Vinny) :
   colonne de 248px (comme la colonne de l'auteur des messages), `position: sticky` à 24px du haut, carte de surface,
   icône Material Symbols par onglet (`CP_TABS`), onglet actif plein en sumi et gofun (icône pleine) ; ≤ 900px, **bande
   collante en haut d'écran** qui défile à l'horizontale (onglet actif amené en vue). Les onglets natifs (colonne et
