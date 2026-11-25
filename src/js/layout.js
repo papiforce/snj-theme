@@ -1696,6 +1696,8 @@
           var href = a.getAttribute('href');
           /* Supprimer : confirmation dans une fenêtre sur la page plutôt que sur la page native */
           if (/btn-delete/.test(li.className)) mItems.push([function () { deletePost(href, post); }, spec[0], spec[1], 'danger']);
+          /* Adresse IP : l'essentiel de la page de modération dans une fenêtre */
+          else if (/btn-ip/.test(li.className)) mItems.push([function () { ipModal(href); }, spec[0], spec[1]]);
           else mItems.push([href, spec[0], spec[1]]);
         });
         var link = location.origin + location.pathname + '#' + (permalink ? (permalink.getAttribute('href').split('#')[1] || post.id) : post.id);
@@ -1849,6 +1851,10 @@
         /* Verrouiller / déverrouiller : envoyé en arrière-plan, confirmation en fenêtre, puis l'en-tête et
            l'entrée se mettent à jour d'après la page relue */
         if (mode === 'lock' || mode === 'unlock') return { rank: spec[0] * 100 + i, item: [lockToggle(href, mode), spec[1], spec[2]] };
+        /* Supprimer et déplacer : en fenêtre aussi (diviser et fusionner gardent leur page : ils demandent de choisir
+           des messages ou un sujet sur plusieurs écrans) */
+        if (mode === 'delete') return { rank: spec[0] * 100 + i, item: [function () { deleteTopic(href); }, spec[1], spec[2], spec[3]] };
+        if (mode === 'move') return { rank: spec[0] * 100 + i, item: [function () { moveTopic(href); }, spec[1], spec[2]] };
         return { rank: spec[0] * 100 + i, item: [href, spec[1], spec[2], spec[3]] };
       }).filter(Boolean).sort(function (x, y) { return x.rank - y.rank; }) : [];
       if (modItems.length) {
@@ -3090,6 +3096,132 @@
      barres arrondies (Asagi, le choix en tête plus marqué), votes et pourcentage ; les mentions (votes publics,
      fin du sondage) en ligne discrète avec icône. Les champs, boutons et liens natifs sont déplacés.
      -------------------------------------------------------------------- */
+
+  /* Forum du fil d'Ariane (dernier niveau de forum de l'en-tête) */
+  function crumbForum() {
+    var l = Array.prototype.slice.call(document.querySelectorAll('.sg-pagehead .sg-crumbs a[href^="/f"]'));
+    return l.length ? l[l.length - 1].getAttribute('href') : '/';
+  }
+
+  /* Supprimer le sujet (modération) : confirmation en fenêtre, page « Êtes-vous sûr ? » validée en arrière-plan,
+     puis la confirmation de Forumactif ; en la fermant, on rejoint le forum (le sujet n'existe plus). */
+  function deleteTopic(href) {
+    confirmModal({
+      icon: 'delete',
+      title: 'Supprimer ce sujet ?',
+      text: 'Le sujet et tous ses messages seront supprimés définitivement. Cette action est irréversible.',
+      confirm: 'Supprimer',
+      busy: 'Suppression…',
+      danger: true,
+      onConfirm: function (ctl) {
+        ctl.close();
+        var forum = crumbForum();
+        bgAction({ url: href }, { autoConfirm: true, onClose: function () { location.href = forum; } });
+      }
+    });
+  }
+
+  /* Déplacer le sujet : le formulaire natif (liste des forums) est lu, sa liste passe dans une fenêtre (liste
+     personnalisée à saisie, arborescence), puis le déplacement est envoyé en arrière-plan. La page est relue en
+     fermant la confirmation (le fil d'Ariane change). */
+  function moveTopic(href) {
+    var parse = function (html) { return new DOMParser().parseFromString(html, 'text/html'); };
+    fetch(href, { credentials: 'same-origin' }).then(function (r) { return r.text(); }).then(function (html) {
+      var doc = parse(html);
+      var form = Array.prototype.slice.call(doc.querySelectorAll('#wrap form')).filter(function (f) {
+        return f.querySelector('select[name="new_forum"]');
+      })[0];
+      if (!form) { location.href = href; return; }
+      var holder = uiEl('form', 'sg-modal__form');
+      holder.addEventListener('submit', function (e) { e.preventDefault(); });
+      var lab = uiEl('label', 'sg-modal__label', 'Vers le forum');
+      holder.appendChild(lab);
+      var sel = document.importNode(form.querySelector('select[name="new_forum"]'), true);
+      var field = uiEl('div', 'sg-modal__field');
+      holder.appendChild(field);
+      var start = sel.value;
+      var cb = combo(sel, { search: true, tree: true });
+      field.appendChild(cb.box);
+      if (cb.field) { cb.field.id = 'sg-move-forum'; lab.setAttribute('for', cb.field.id); }
+      confirmModal({
+        icon: 'drive_file_move',
+        title: 'Déplacer ce sujet',
+        text: 'Choisis le forum où le sujet doit aller.',
+        body: holder,
+        wide: true,
+        confirm: 'Déplacer',
+        busy: 'Déplacement…',
+        onConfirm: function (ctl) {
+          if (sel.value === start || /^(-1|c\d+)$/.test(sel.value)) { ctl.fail('Choisis un autre forum que celui du sujet.'); return; }
+          var params = new URLSearchParams();
+          Array.prototype.slice.call(form.querySelectorAll('input[type="hidden"]')).forEach(function (i) { if (i.name) params.append(i.name, i.value); });
+          params.append('new_forum', sel.value);
+          var ok = form.querySelector('[name="confirm"]');
+          params.append('confirm', ok ? ok.value : 'Oui');
+          ctl.close();
+          bgAction({ url: new URL(form.getAttribute('action') || '/modcp', location.origin + '/').href, body: params },
+            { onClose: function () { location.reload(); } });
+        }
+      });
+    }).catch(function () { location.href = href; });
+  }
+
+  /* Adresse IP d'un message (modération) : l'adresse, l'hôte, les membres qui ont posté depuis cette adresse
+     et les autres adresses du membre, dans une fenêtre ; la page complète reste accessible. */
+  function ipModal(href) {
+    fetch(href, { credentials: 'same-origin' }).then(function (r) { return r.text(); }).then(function (html) {
+      var doc = new DOMParser().parseFromString(html, 'text/html');
+      var tables = Array.prototype.slice.call(doc.querySelectorAll('#wrap table.table1'));
+      if (!tables.length) { location.href = href; return; }
+      var extra = uiEl('div', 'sg-ipbox');
+      var first = tables[0];
+      var ipText = (first.textContent.match(/\d{1,3}(?:\.\d{1,3}){3}|[0-9a-f:]{6,}/i) || [''])[0];
+      var host = (first.textContent.match(/\[\s*([^\]\s]+\.[^\]\s]+)\s*\]/) || [])[1] || '';
+      var ipLine = uiEl('p', 'sg-ipbox__ip');
+      ipLine.appendChild(uiIco('lan'));
+      ipLine.appendChild(uiEl('strong', null, ipText || 'Inconnue'));
+      if (host) ipLine.appendChild(uiEl('span', 'sg-ipbox__host', host));
+      extra.appendChild(ipLine);
+      var sections = [[1, 'Membres ayant posté depuis cette adresse'], [2, 'Autres adresses de ce membre']];
+      sections.forEach(function (sp) {
+        var t = tables[sp[0]];
+        if (!t) return;
+        var users = Array.prototype.slice.call(t.querySelectorAll('a[href^="/u"]'));
+        var ips = users.length ? [] : (t.textContent.match(/\d{1,3}(?:\.\d{1,3}){3}/g) || []);
+        if (!users.length && !ips.length) return;
+        extra.appendChild(uiEl('p', 'sg-ipbox__label', sp[1]));
+        var ul = uiEl('ul', 'sg-ipbox__list');
+        users.forEach(function (a) {
+          var li = uiEl('li');
+          var x = uiEl('a', null, a.textContent.trim());
+          x.href = a.getAttribute('href');
+          li.appendChild(x);
+          ul.appendChild(li);
+        });
+        ips.forEach(function (ip) { ul.appendChild(uiEl('li', null, ip)); });
+        extra.appendChild(ul);
+      });
+      var look = first.querySelector('a[href^="http"]');
+      var links = [{ href: href, label: 'Page complète', icon: 'open_in_new', text: 'Voir toutes les informations de modération' }];
+      if (look) links.push({ href: look.getAttribute('href'), label: 'Chercher l’adresse', icon: 'travel_explore', text: 'Chercher l’adresse IP (site extérieur)' });
+      showNotice({ tone: 'info', title: 'Adresse IP', message: '', extra: extra, links: links });
+    }).catch(function () { location.href = href; });
+  }
+
+  /* Sondage : change d'affichage sur place (résultats, retour au vote, vote annulé) en relisant le bloc natif */
+  function pollSwap(b, url, after) {
+    fetch(url, { credentials: 'same-origin', cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (html) {
+      var doc = new DOMParser().parseFromString(html, 'text/html');
+      var nb = Array.prototype.slice.call(doc.querySelectorAll('.block')).filter(function (x) {
+        return x.querySelector(':scope > .block-content > form.poll, :scope > .block-content > dl.poll');
+      })[0];
+      if (!nb || !b.parentNode) { location.href = url; return; }
+      b.parentNode.replaceChild(document.importNode(nb, true), b);
+      pollCards();
+      if (after) after();
+    }).catch(function () { location.href = url; });
+  }
+
   /* Recharge une carte de sondage après une action (vote, clôture) : le bloc natif est relu sur la page,
      remis à sa place puis mis en forme comme les autres */
   function refreshPoll(b) {
@@ -3137,7 +3269,7 @@
             text: 'Plus personne ne pourra voter.', confirm: 'Clore le sondage', busy: 'Un instant…', danger: true,
             onConfirm: function (ctl) {
               ctl.close();
-              bgAction({ url: href }, { done: function () { refreshPoll(b); }, other: function () { refreshPoll(b); } });
+              bgAction({ url: href }, { autoConfirm: true, done: function () { refreshPoll(b); }, other: function () { refreshPoll(b); } });
             }
           });
         });
@@ -3270,6 +3402,37 @@
       });
       if (meta.children.length) body.appendChild(meta);
       bc.insertBefore(body, bc.firstChild);
+
+      /* Affichages du sondage sur place, sans quitter la page : résultats (?vote=viewresult), retour au vote, et
+         « Annuler mon vote » (?action=cancel_vote : Forumactif renvoie la page du sujet, sans confirmation) */
+      var cancel = b.querySelector('a[href*="action=cancel_vote"]');
+      if (cancel) {
+        var cli = cancel.closest('li');
+        var cBtn = el('button', 'sg-pollc__btn sg-pollc__btn--ghost');
+        cBtn.type = 'button';
+        cBtn.appendChild(ico('undo'));
+        cBtn.appendChild(el('span', null, 'Annuler mon vote'));
+        var cHref = cancel.getAttribute('href');
+        cBtn.addEventListener('click', function () {
+          cBtn.disabled = true;
+          pollSwap(b, cHref, function () {
+            showNotice({ tone: 'done', title: 'Vote annulé', message: 'Ton vote a été retiré : tu peux voter de nouveau.', links: [] });
+          });
+        });
+        var where = b.querySelector('.sg-pollc__results ~ .sg-pollc__actions') || b.querySelector('.sg-pollc__actions');
+        if (where) where.insertBefore(cBtn, where.firstChild);
+        if (cli && !cli.textContent.replace(cancel.textContent, '').trim()) cli.remove();
+        else cancel.remove();
+      }
+      Array.prototype.slice.call(b.querySelectorAll('.sg-pollc__actions a.sg-pollc__btn')).forEach(function (a) {
+        var u = a.getAttribute('href') || '';
+        if (!/vote=viewresult/.test(u) && !/^\/t\d+/.test(u)) return;
+        a.addEventListener('click', function (ev) {
+          if (ev.metaKey || ev.ctrlKey || ev.shiftKey) return;
+          ev.preventDefault();
+          pollSwap(b, u);
+        });
+      });
     });
   }
 
@@ -3295,6 +3458,8 @@
     var p = uiEl('p', 'sg-modal__text', opts.text);
     p.id = id + '-d';
     box.appendChild(p);
+    if (opts.body) box.appendChild(opts.body);
+    if (opts.wide) box.classList.add('sg-modal__box--wide');
     var err = uiEl('p', 'sg-modal__error');
     err.hidden = true;
     box.appendChild(err);
@@ -3322,10 +3487,14 @@
       if (prev && prev.focus) try { prev.focus({ preventScroll: true }); } catch (e) {}
     };
     var onKey = function (e) {
-      if (e.key === 'Escape' && !busy) { e.preventDefault(); close(); }
+      /* Une liste personnalisée ouverte dans la fenêtre se ferme d'abord */
+      if (e.key === 'Escape' && !busy && !box.querySelector('.sg-combo.is-open')) { e.preventDefault(); close(); }
       if (e.key === 'Tab') {
+        var f = Array.prototype.slice.call(box.querySelectorAll('button:not([disabled]), input:not([type="hidden"]):not([tabindex="-1"]), a[href]'))
+          .filter(function (x) { return x.offsetParent !== null; });
+        var i = f.indexOf(document.activeElement);
         e.preventDefault();
-        (document.activeElement === no ? yes : no).focus();
+        if (f.length) f[(i + (e.shiftKey ? -1 : 1) + f.length) % f.length].focus();
       }
     };
     document.addEventListener('keydown', onKey, true);
@@ -3524,6 +3693,7 @@
       p.id = 'sg-notice-text';
       card.appendChild(p);
     }
+    if (data.extra) card.appendChild(data.extra);
     if (links.length || extra) {
       var acts = uiEl('div', 'sg-notice__actions' + (inModal ? ' sg-modal__actions' : ''));
       links.forEach(function (l, i) {
@@ -3616,6 +3786,7 @@
       document.documentElement.classList.remove('sg-modal-open');
       setTimeout(function () { if (wrap.parentNode) wrap.parentNode.removeChild(wrap); }, 200);
       if (prev && prev.focus) try { prev.focus({ preventScroll: true }); } catch (e) {}
+      if (data.onClose) data.onClose();
     };
     var onKey = function (e) {
       if (e.key === 'Escape') { e.preventDefault(); close(); }
@@ -3654,6 +3825,21 @@
     return fetch(req.url, init).then(function (r) { return r.text(); }).then(function (html) {
       end();
       var doc = parse(html);
+      /* Page « Êtes-vous sûr ? » de Forumactif (formulaire avec un bouton « confirm » et des champs cachés) :
+         la question a déjà été posée dans notre fenêtre, on la valide directement */
+      if (opts.autoConfirm && !req.body) {
+        var cf = Array.prototype.slice.call(doc.querySelectorAll('#wrap form')).filter(function (f) {
+          return f.querySelector('[name="confirm"]');
+        })[0];
+        if (cf) {
+          var params = new URLSearchParams();
+          Array.prototype.slice.call(cf.querySelectorAll('input[type="hidden"]')).forEach(function (i) { if (i.name) params.append(i.name, i.value); });
+          var ok = cf.querySelector('[name="confirm"]');
+          params.append('confirm', ok.value || 'confirm');
+          var action = new URL(cf.getAttribute('action') || req.url, location.origin + '/').href;
+          return bgAction({ url: action, body: params }, opts);
+        }
+      }
       var data = noticeRead(doc);
       if (!data) {
         if (opts.other) opts.other(doc);
@@ -3661,13 +3847,15 @@
         else toast('L’action n’a pas pu aboutir.');
         return;
       }
+      var ok2 = data.tone !== 'error';
       showNotice({
         tone: data.tone,
         title: data.title,
         message: data.message,
-        links: data.links.map(function (l) { return { href: l.href, label: l.label, icon: l.icon, text: l.text }; })
+        links: data.links.map(function (l) { return { href: l.href, label: l.label, icon: l.icon, text: l.text }; }),
+        onClose: ok2 && opts.onClose ? function () { opts.onClose(data, doc); } : null
       });
-      if (data.tone !== 'error' && opts.done) opts.done(doc);
+      if (ok2 && opts.done) opts.done(doc, data);
     }).catch(function () {
       end();
       if (!req.body) location.href = req.url;

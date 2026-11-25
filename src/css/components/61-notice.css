@@ -257,3 +257,87 @@ html.sg-busy,
 html.sg-busy * {
   cursor: progress !important;
 }
+
+/* --- Fenêtres de formulaire (confirmModal avec opts.body : déplacer un sujet…) ------------------------------- */
+.sg-modal__box--wide {
+  width: min(520px, 100%);
+}
+
+.sg-modal__form {
+  margin: 18px 0 0;
+  text-align: left;
+}
+
+.sg-modal__label {
+  display: block;
+  margin: 0 0 8px;
+  color: var(--sg-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.sg-modal__field .sg-combo {
+  width: 100%;
+}
+
+/* --- Adresse IP d'un message (ipModal) ---------------------------------------------------------------------- */
+.sg-ipbox {
+  margin: 4px 0 0;
+  text-align: left;
+}
+
+.sg-ipbox__ip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+}
+
+.sg-ipbox__ip .material-symbols-outlined {
+  color: var(--tone);
+  font-size: 20px;
+}
+
+.sg-ipbox__host {
+  flex-basis: 100%;
+  color: var(--sg-text-muted);
+  font-size: 0.85rem;
+  text-align: center;
+  word-break: break-all;
+}
+
+.sg-ipbox__label {
+  margin: 18px 0 8px;
+  color: var(--sg-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.sg-ipbox__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sg-ipbox__list li {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--sg-surface-2);
+  font-size: 0.85rem;
+}
+
+.sg-ipbox__list a {
+  color: var(--sg-text);
+  font-weight: 700;
+  text-decoration: none;
+}

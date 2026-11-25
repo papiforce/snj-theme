@@ -4683,7 +4683,7 @@ body.sg-topics-on .sg-topics {
   min-width: 0;
 }
 
-#wrap .sg-combo__native {
+:is(#wrap, .sg-modal) .sg-combo__native {
   position: absolute !important;
   width: 1px !important;
   height: 1px !important;
@@ -4694,7 +4694,7 @@ body.sg-topics-on .sg-topics {
   pointer-events: none;
 }
 
-#wrap .sg-combo__control {
+:is(#wrap, .sg-modal) .sg-combo__control {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -4713,24 +4713,24 @@ body.sg-topics-on .sg-topics {
   cursor: pointer;
 }
 
-#wrap .sg-combo--search .sg-combo__control {
+:is(#wrap, .sg-modal) .sg-combo--search .sg-combo__control {
   cursor: text;
 }
 
-#wrap .sg-combo__control:hover,
-#wrap .sg-combo.is-open .sg-combo__control {
+:is(#wrap, .sg-modal) .sg-combo__control:hover,
+:is(#wrap, .sg-modal) .sg-combo.is-open .sg-combo__control {
   background: var(--sg-surface-2);
 }
 
 /* Pas d'anneau au clic ; au clavier, l'anneau reste sur le bouton (« Trier par ») */
-#wrap button.sg-combo__control:focus-visible {
+:is(#wrap, .sg-modal) button.sg-combo__control:focus-visible {
   outline: 2px solid var(--sg-accent-1);
   outline-offset: 2px;
 }
 
-#wrap .sg-combo__control:focus-within,
-#wrap input.sg-combo__input:focus,
-#wrap input.sg-combo__input:focus-visible {
+:is(#wrap, .sg-modal) .sg-combo__control:focus-within,
+:is(#wrap, .sg-modal) input.sg-combo__input:focus,
+:is(#wrap, .sg-modal) input.sg-combo__input:focus-visible {
   outline: none;
   box-shadow: none;
 }
@@ -4755,11 +4755,11 @@ body.sg-topics-on .sg-topics {
   margin-left: auto;
 }
 
-#wrap .sg-combo__control .sg-combo__chevron {
+:is(#wrap, .sg-modal) .sg-combo__control .sg-combo__chevron {
   transition: transform 0.25s var(--sg-ease);
 }
 
-#wrap .sg-combo.is-open .sg-combo__chevron {
+:is(#wrap, .sg-modal) .sg-combo.is-open .sg-combo__chevron {
   transform: rotate(180deg);
 }
 
@@ -4783,7 +4783,7 @@ body.sg-topics-on .sg-topics {
 }
 
 /* Champ de saisie de « Sauter vers » (AwesomeBB stylise les <input>) */
-#wrap input.sg-combo__input {
+:is(#wrap, .sg-modal) input.sg-combo__input {
   flex: 1;
   min-width: 0;
   height: 100%;
@@ -4799,18 +4799,18 @@ body.sg-topics-on .sg-topics {
   font-weight: 700;
 }
 
-#wrap input.sg-combo__input::placeholder {
+:is(#wrap, .sg-modal) input.sg-combo__input::placeholder {
   color: var(--sg-text);
   opacity: 1;
 }
 
-#wrap .sg-combo.is-open input.sg-combo__input::placeholder {
+:is(#wrap, .sg-modal) .sg-combo.is-open input.sg-combo__input::placeholder {
   color: var(--sg-text-muted);
   font-weight: 400;
 }
 
 /* Liste */
-#wrap .sg-combo__list {
+:is(#wrap, .sg-modal) .sg-combo__list {
   position: absolute;
   top: calc(100% + 8px);
   left: 0;
@@ -4829,16 +4829,16 @@ body.sg-topics-on .sg-topics {
   list-style: none;
 }
 
-#wrap .sg-combo__list[hidden] {
+:is(#wrap, .sg-modal) .sg-combo__list[hidden] {
   display: none;
 }
 
-#wrap .sg-combo__list > li {
+:is(#wrap, .sg-modal) .sg-combo__list > li {
   margin: 0;
   border: 0;
 }
 
-#wrap .sg-combo__opt {
+:is(#wrap, .sg-modal) .sg-combo__opt {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -4850,7 +4850,7 @@ body.sg-topics-on .sg-topics {
   cursor: pointer;
 }
 
-#wrap .sg-combo__opt[hidden] {
+:is(#wrap, .sg-modal) .sg-combo__opt[hidden] {
   display: none;
 }
 
@@ -4861,7 +4861,7 @@ body.sg-topics-on .sg-topics {
 }
 
 /* Sous-forums : petit filet d'arborescence */
-#wrap .sg-combo__opt.is-deep .sg-combo__label::before {
+:is(#wrap, .sg-modal) .sg-combo__opt.is-deep .sg-combo__label::before {
   content: "";
   display: inline-block;
   width: 8px;
@@ -4873,7 +4873,7 @@ body.sg-topics-on .sg-topics {
 }
 
 /* Catégories : intitulés de groupe */
-#wrap .sg-combo__opt.is-cat {
+:is(#wrap, .sg-modal) .sg-combo__opt.is-cat {
   margin-top: 4px;
   color: var(--sg-text-muted);
   font-size: 0.72rem;
@@ -4882,21 +4882,21 @@ body.sg-topics-on .sg-topics {
   text-transform: uppercase;
 }
 
-#wrap .sg-combo__opt.is-cat:first-child {
+:is(#wrap, .sg-modal) .sg-combo__opt.is-cat:first-child {
   margin-top: 0;
 }
 
-#wrap .sg-combo__opt.is-active {
+:is(#wrap, .sg-modal) .sg-combo__opt.is-active {
   background: var(--sg-surface-2);
   color: var(--sg-text);
 }
 
 /* Résultat de recherche affiché seulement pour garder l'arborescence */
-#wrap .sg-combo__opt.is-context:not(.is-cat) {
+:is(#wrap, .sg-modal) .sg-combo__opt.is-context:not(.is-cat) {
   color: var(--sg-text-muted);
 }
 
-#wrap .sg-combo__opt.is-selected {
+:is(#wrap, .sg-modal) .sg-combo__opt.is-selected {
   font-weight: 700;
 }
 
@@ -4911,7 +4911,7 @@ body.sg-topics-on .sg-topics {
   visibility: visible;
 }
 
-#wrap .sg-combo__empty {
+:is(#wrap, .sg-modal) .sg-combo__empty {
   padding: 12px;
   color: var(--sg-text-muted);
   font-size: 0.9rem;
@@ -8400,6 +8400,90 @@ body.sg-noticepage #wrap > .sg-divider--notice {
 html.sg-busy,
 html.sg-busy * {
   cursor: progress !important;
+}
+
+/* --- Fenêtres de formulaire (confirmModal avec opts.body : déplacer un sujet…) ------------------------------- */
+.sg-modal__box--wide {
+  width: min(520px, 100%);
+}
+
+.sg-modal__form {
+  margin: 18px 0 0;
+  text-align: left;
+}
+
+.sg-modal__label {
+  display: block;
+  margin: 0 0 8px;
+  color: var(--sg-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.sg-modal__field .sg-combo {
+  width: 100%;
+}
+
+/* --- Adresse IP d'un message (ipModal) ---------------------------------------------------------------------- */
+.sg-ipbox {
+  margin: 4px 0 0;
+  text-align: left;
+}
+
+.sg-ipbox__ip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+}
+
+.sg-ipbox__ip .material-symbols-outlined {
+  color: var(--tone);
+  font-size: 20px;
+}
+
+.sg-ipbox__host {
+  flex-basis: 100%;
+  color: var(--sg-text-muted);
+  font-size: 0.85rem;
+  text-align: center;
+  word-break: break-all;
+}
+
+.sg-ipbox__label {
+  margin: 18px 0 8px;
+  color: var(--sg-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.sg-ipbox__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sg-ipbox__list li {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--sg-surface-2);
+  font-size: 0.85rem;
+}
+
+.sg-ipbox__list a {
+  color: var(--sg-text);
+  font-weight: 700;
+  text-decoration: none;
 }
 
 /* --- 62-poll.css --- */
