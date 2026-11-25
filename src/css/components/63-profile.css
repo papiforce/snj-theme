@@ -409,3 +409,13 @@ body.sg-cppage .sg-cpage + .sg-divider--end {
     width: 100%;
   }
 }
+
+/* Libellé d'un groupe de boutons radio (pas de <label> : le groupe porte son nom) */
+#wrap span.sg-pfield__label {
+  display: block;
+  color: var(--sg-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}

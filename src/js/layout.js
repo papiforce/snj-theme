@@ -3652,7 +3652,8 @@
     "Nom d'utilisateur": 'Pseudo',
     'Adresse e-mail': 'Adresse e-mail',
     'Changer votre mot de passe': 'Mot de passe',
-    'Téléchargez les informations et contenus que vous avez publiés sur ce forum': 'Exporter mes données'
+    /* Libellé vide : le bouton dit déjà tout (« Exporter mes données »), l'explication passe au-dessus de lui */
+    'Téléchargez les informations et contenus que vous avez publiés sur ce forum': ''
   };
 
   function cpKey(href) {
@@ -3668,9 +3669,10 @@
     var raw = head.textContent.replace(/\s+/g, ' ').trim();
     var required = /\*/.test(raw);
     var text = raw.replace(/\*/g, '').replace(/\s*:\s*$/, '').trim();
-    text = CP_LABELS[text] || text;
+    if (CP_LABELS.hasOwnProperty(text)) text = CP_LABELS[text];
     var field = el('div', 'sg-pfield');
     var lab = el('label', 'sg-pfield__label', text);
+    if (!text) lab.classList.add('sg-hidden');
     if (required) {
       var req = el('span', 'sg-pfield__req', '*');
       req.setAttribute('title', 'Obligatoire');
@@ -3685,8 +3687,10 @@
       if (n.nodeType === 3 && !n.textContent.trim()) return;
       control.appendChild(n);
     });
+    var hintEl = hint && hint.textContent.trim() ? el('p', 'sg-pfield__hint', hint.textContent.replace(/\s+/g, ' ').trim()) : null;
+    if (hintEl && !text) field.appendChild(hintEl);
     field.appendChild(control);
-    if (hint && hint.textContent.trim()) field.appendChild(el('p', 'sg-pfield__hint', hint.textContent.replace(/\s+/g, ' ').trim()));
+    if (hintEl && text) field.appendChild(hintEl);
     label.parentNode.replaceChild(field, label);
 
     /* Champs simples */
@@ -3753,6 +3757,34 @@
       a.appendChild(ico(icon));
       a.appendChild(el('span', null, label2));
     });
+  }
+
+  /* Groupe de boutons radio natif (.radio-wrap : libellé, aide, Oui / Non…) → champ avec contrôle segmenté */
+  function cpRadioWrap(w) {
+    var el = uiEl;
+    var head = w.querySelector(':scope > .radio-label');
+    var radios = Array.prototype.slice.call(w.querySelectorAll('input[type="radio"]'));
+    if (!head || !radios.length) return;
+    var text = head.textContent.replace(/\s+/g, ' ').replace(/\s*:\s*$/, '').trim();
+    var field = el('div', 'sg-pfield sg-pfield--wide');
+    field.appendChild(el('span', 'sg-pfield__label', text));
+    var hint = w.querySelector(':scope > .description');
+    if (hint && hint.textContent.trim()) field.appendChild(el('p', 'sg-pfield__hint', hint.textContent.replace(/\s+/g, ' ').trim()));
+    var seg = el('div', 'sg-seg sg-seg--auto');
+    seg.setAttribute('role', 'radiogroup');
+    seg.setAttribute('aria-label', text);
+    radios.forEach(function (r) {
+      var lab = r.closest('label');
+      var name = lab ? lab.textContent.replace(/\s+/g, ' ').trim() : r.value;
+      var opt = el('label', 'sg-seg__opt');
+      opt.appendChild(r);
+      var face = el('span', 'sg-seg__face');
+      face.appendChild(el('span', null, name));
+      opt.appendChild(face);
+      seg.appendChild(opt);
+    });
+    field.appendChild(seg);
+    w.parentNode.replaceChild(field, w);
   }
 
   function profilePage() {
@@ -3873,6 +3905,7 @@
       });
       Array.prototype.slice.call(bc.querySelectorAll(':scope > br')).forEach(function (br) { br.remove(); });
       Array.prototype.slice.call(bc.querySelectorAll(':scope > label')).forEach(cpField);
+      Array.prototype.slice.call(bc.querySelectorAll('.radio-wrap')).forEach(cpRadioWrap);
       bc.classList.add('sg-pcard__grid');
     });
 
