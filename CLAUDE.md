@@ -122,7 +122,8 @@ dans le panneau d'administration (PA), puis on commit.
   sur le fond de surface, avec en fond le motif **yagasuri** 矢絣 (empennes de flèches ; une flèche lancée = un message
   posté), **réservé aux sujets**, à la couleur de la catégorie (`--ph`, Ume pour le motif des annonces), net à droite et estompé
   vers la gauche, comme le seigaiha des cartes Gestion. Pastilles de statut (Annonce / Annonce globale en couleur primaire `--sg-primary` / `--sg-primary-fg`, Épinglé,
-  Verrouillé), « Nouveau » en Asagi ; **pas d'icône dans le coin supérieur droit** (l'indicateur de participation a été
+  Verrouillé) ; **Verrouillé s'ajoute à côté du type** (annonce, note) : Forumactif garde alors la classe du type
+  (`folder_announce`…) et le verrou ne se lit que dans l'infobulle de `.posts-icon` (« Ce sujet est verrouillé… »), « Nouveau » en Asagi ; **pas d'icône dans le coin supérieur droit** (l'indicateur de participation a été
   retiré). Titre en Zen Antique (2 lignes max), description sur 1 ligne, « par » + auteur coloré, pages du sujet en
   pastilles ; en pied (pointillé) réponses et vues, dernier message (avatar, auteur coloré, date vers le message),
   **toujours au bas de la carte** (`margin-top: auto` ; l'élément qui le précède garde 10px de marge basse).
@@ -176,7 +177,10 @@ dans le panneau d'administration (PA), puis on commit.
   est le dernier niveau du fil d'Ariane (sans lien, en gras, coupé à 40ch) ; **titre sur une ligne, coupé en ellipse**
   (texte dans `.sg-pagehead__text`, le filet `::after` reste dessous ; titre complet en infobulle) ; **description du
   sujet** dessous : absente de la page, elle est lue dans la liste des sujets du forum (1re page seulement ; cache de
-  session `snj-tdesc`) ; une seule action, « Répondre au sujet ». **Retirés** : la cloche des notifications push du
+  session `snj-tdesc`) ; une seule action, « Répondre au sujet ». Sujet verrouillé : Forumactif met à la place un lien
+  « Sujet verrouillé » vers la réponse ; il devient une **étiquette sans interaction** (`span.sg-action--status`, ni
+  survol ni clic, demande de Vinny), son adresse gardée en `data-reply-href` pour le bouton « Répondre au sujet » du bas
+  (staff). **Retirés** : la cloche des notifications push du
   sujet (`#push-bell`) et « Poster un nouveau sujet ». Sur mobile (forums et sujets) : fil d'Ariane, titre,
   description, puis les boutons (`.sg-pagehead__row` en `display: contents` + `order`).
   Couleur de la catégorie posée sur `#topic` (`#topic.sg-tone-…`). Classe `body.sg-topicpage` (et `sg-topicpage-on`).

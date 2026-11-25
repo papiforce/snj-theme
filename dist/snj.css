@@ -3980,6 +3980,23 @@ body.sg-topicpage #topic > .topic-actions:not(.bottom) {
   transition: none;
 }
 
+/* État sans interaction (« Sujet verrouillé ») : même allure qu'une action, mais ni survol, ni focus, ni clic */
+#wrap .sg-action--status {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 46px;
+  padding: 0 20px;
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-contrast);
+  color: var(--sg-on-contrast);
+  font-size: 0.95rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: default;
+  user-select: none;
+}
+
 /* Action secondaire : contour sur fond de surface (réservée, plus utilisée sur les sujets) */
 #wrap a.sg-action--ghost,
 #wrap a.sg-action--ghost:visited {
@@ -4053,7 +4070,8 @@ body.sg-topicpage #topic > .topic-actions:not(.bottom) {
     flex: none;
   }
 
-  #wrap a.sg-action {
+  #wrap a.sg-action,
+  #wrap .sg-action--status {
     justify-content: center;
     width: 100%;
   }

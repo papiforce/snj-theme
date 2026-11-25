@@ -528,6 +528,19 @@
     var actions = el('div', 'sg-pagehead__actions');
     Array.prototype.slice.call(native.querySelectorAll(':scope > a.btn')).forEach(function (b) {
       if (isTopic && /mode=newtopic/.test(b.getAttribute('href') || '')) return;
+      /* « Sujet verrouillé » : Forumactif en fait un lien vers la réponse, mais ce n'est qu'un état. Il devient
+         une étiquette sans interaction ; son adresse reste lisible (data-reply-href) pour le bouton du bas */
+      var ic = b.querySelector('.material-symbols-outlined');
+      if ((ic && ic.textContent.trim() === 'lock') || /verrouill/i.test(b.textContent)) {
+        var st = el('span', 'sg-action sg-action--status');
+        if (b.getAttribute('href')) st.setAttribute('data-reply-href', b.getAttribute('href'));
+        if (b.getAttribute('title')) st.setAttribute('title', b.getAttribute('title'));
+        if (b.getAttribute('style')) st.setAttribute('style', b.getAttribute('style'));
+        while (b.firstChild) st.appendChild(b.firstChild);
+        b.remove();
+        actions.appendChild(st);
+        return;
+      }
       b.className = 'sg-action';
       actions.appendChild(b);
     });
@@ -1142,10 +1155,14 @@
     if (/folder_global/.test(cls)) flags.push(['public', 'Annonce globale', 'announce']);
     else if (/folder_announce/.test(cls)) flags.push(['campaign', 'Annonce', 'announce']);
     if (/folder_sticky/.test(cls)) flags.push(['push_pin', 'Épinglé', 'sticky']);
-    if (/locked/.test(cls)) flags.push(['lock', 'Verrouillé', 'locked']);
+    /* Une annonce ou une note verrouillée garde sa classe de type (folder_announce…) :
+       le verrou ne se lit alors que dans l'infobulle de l'icône */
+    var locked = /locked/.test(cls) || /verrouill/i.test(icon ? icon.getAttribute('title') || '' : '');
+    if (locked) flags.push(['lock', 'Verrouillé', 'locked']);
     var unread = /post_new|folder_new/.test(cls);
 
-    var card = el('li', 'sg-topic' + (unread ? ' is-new' : '') + (flags.length ? ' is-' + flags[0][2] : ''));
+    var card = el('li', 'sg-topic' + (unread ? ' is-new' : '') + (flags.length ? ' is-' + flags[0][2] : '') +
+      (locked && flags[0][2] !== 'locked' ? ' is-locked' : ''));
     var top = el('div', 'sg-topic__flags');
     flags.forEach(function (f) {
       var chip = el('span', 'sg-topic__flag sg-topic__flag--' + f[2]);
@@ -1719,10 +1736,12 @@
     /* 3. Réponse rapide remplacée par un bouton « Répondre au sujet », centré, qui reprend l'adresse du bouton
        de l'en-tête (formulaire natif masqué ; absent si le sujet est verrouillé ou pour un visiteur) */
     var replyLink = document.querySelector('.sg-pagehead a.sg-action[href*="mode=reply"]') || find(/mode=reply/);
-    if (replyLink && !topic.querySelector('.sg-treply')) {
+    var lockedReply = document.querySelector('.sg-pagehead .sg-action--status[data-reply-href]');
+    var replyHref = replyLink ? replyLink.getAttribute('href') : lockedReply ? lockedReply.getAttribute('data-reply-href') : '';
+    if (replyHref && !topic.querySelector('.sg-treply')) {
       var replyBar = el('div', 'sg-treply');
       var rb = el('a', 'sg-action');
-      rb.href = replyLink.getAttribute('href');
+      rb.href = replyHref;
       rb.appendChild(ico('reply'));
       rb.appendChild(el('span', null, 'Répondre au sujet'));
       replyBar.appendChild(rb);
