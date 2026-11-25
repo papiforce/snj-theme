@@ -426,8 +426,26 @@ dans le panneau d'administration (PA), puis on commit.
   et valeur que le bouton natif). Envoi normal : page de confirmation « Profil enregistré » (« Modifier mon profil » en
   premier). En bas : séparateur de fin et fil d'Ariane repris. Les autres onglets reçoivent l'habillage générique
   (onglets, cartes, champs, radios) ; leurs contenus particuliers (avatar, signature, listes) restent à reprendre.
+- **Codes des membres** (HTML collé dans un message, `64-codes.css`, modèles dans `src/codes/`) : le membre ne colle
+  que du HTML à classes **`.sgc-…`**, tout le style vit dans le thème (tokens : clair et sombre sans rien changer ; pas
+  de `<style>`, d'attribut `style` ni de `data-*` dans les codes). Forumactif change chaque retour à la ligne en `<br>` :
+  ceux posés entre deux blocs sont masqués (`.sgc br`), seuls les textes (`.sgc-text`, `.sgc-value`,
+  `.sgc-event__text`, `.sgc-qa__a`) les gardent ; « dernier élément » en `:last-of-type` (le dernier enfant est souvent
+  un `<br>`) ; les images du message ont `height: auto` imposé par un sélecteur à id, d'où les tailles en `!important`.
+  Mise en page selon la largeur du message (`container-type`, `@container ≤ 600px`), pas de l'écran.
+  **Fiche de personnage « jinbutsu »** 人物 (`src/codes/fiche-personnage.html`), patterns réutilisables : `.sgc`
+  (racine ; accent = pays avec `.sgc--hi|mizu|kaze|kaminari|tsuchi|shokoku`, sinon couleur primaire) ; `.sgc-head`
+  (kanji en surtitre, nom en Zen Antique, sous-titre, filet d'accent de 56px — `.sgc-rule` seul) ; `.sgc-sec` (carte
+  `--sg-surface-2` numérotée automatiquement 01, 02… par compteur CSS, titre en Zen Antique sur une ligne, kanji à
+  droite) ; `.sgc-split` (fiche | portrait 200 × 400) ; `.sgc-facts` / `.sgc-fact` (libellé `.sgc-label` en petites
+  capitales | valeur `.sgc-value`, filets pointillés) ; `.sgc-cols` / `.sgc-field` (champs côte à côte sur
+  `--sg-surface`, `--wide` pleine largeur) ; `.sgc-text` (texte libre) et `.sgc-em` (passage à la couleur d'accent) ;
+  `.sgc-timeline` / `.sgc-event` (date en petites capitales, jalon rond sur un fil, titre en Zen Antique à la couleur
+  d'accent ; date au-dessus en largeur réduite) ; `.sgc-player` (hors RP : avatar rond, questions `.sgc-qa`). Les
+  losanges et filets dorés de l'ancienne fiche ne sont pas repris. Vérifié en injectant le code dans un message
+  (retours à la ligne changés en `<br>`), clair et sombre, largeur réduite ; pas encore posté pour de vrai.
   Récapitulatif des patterns : **forum** (accueil) = image en fond + panneau + kanji ; **sous-forum** = ema
-  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ; **confirmation** = hanko (sceau au kanji) ; **paramètres du profil** = ninbetsu-chō (onglets collants + cartes) ; **sondage** = tōhyō (carte sur shippō) ;
+  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ; **confirmation** = hanko (sceau au kanji) ; **paramètres du profil** = ninbetsu-chō (onglets collants + cartes) ; **sondage** = tōhyō (carte sur shippō) ; **fiche de personnage** = jinbutsu (codes `.sgc-`) ;
   **permission** = étiquette tegata aux coins coupés.
 - **Catégories de l'accueil** (`forums.js` + `40-zones.css`) : à gauche un sélecteur collant (Gestion, Hi, Mizu, Kaze,
   Kaminari, Tsuchi no Kuni, Shōkoku — « les petits pays », ex-Reste du Sekai) au style des raccourcis de l'Annexe, pastille = badge pour Gestion
