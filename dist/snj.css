@@ -10411,6 +10411,8 @@ body.sg-cppage .sg-cpage + .sg-divider--end {
 /* AwesomeBB pose une coche de validation (label.has-success::after) et sa case dessinée (span::before) */
 #wrap .sg-sealchk::after,
 #wrap .sg-sealchk::before,
+#wrap .sg-sealchk .help-block::before,
+#wrap .sg-sealchk .help-block::after,
 #wrap .sg-sealchk__seal::before,
 #wrap .sg-sealchk__seal::after {
   content: none;
