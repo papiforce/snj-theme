@@ -11352,6 +11352,11 @@ body.sg-authpage .sg-auth + .sg-divider--end {
   box-shadow: none;
 }
 
+/* Un <fieldset> prend la largeur de son contenu (min-width: min-content) : l'éditeur débordait sur mobile */
+#wrap .sg-sigform #postingbox fieldset.fields1 {
+  min-width: 0;
+}
+
 #wrap .sg-sigform #parent_editor_simple > .clear,
 #wrap .sg-sigform .corners-top,
 #wrap .sg-sigform .corners-bottom {
