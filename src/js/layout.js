@@ -3882,6 +3882,8 @@
     img.addEventListener('error', function () {
       if (!img.getAttribute('src')) return;
       frame.classList.add('is-broken');
+      emptyIco.textContent = 'broken_image';
+      emptyTxt.textContent = 'Image introuvable';
       checks.textContent = '';
       if (active) check('link_off', 'Image introuvable à cette adresse', 'bad');
     });
@@ -3915,6 +3917,7 @@
         show(active.key);
       }
       frame.classList.remove('is-broken');
+      emptyIco.textContent = 'account_circle';
       frame.classList.toggle('is-removed', removed);
       frame.classList.toggle('is-preview', !!active);
       if (removed) {

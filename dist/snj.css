@@ -11140,6 +11140,11 @@ body.sg-authpage .sg-auth + .sg-divider--end {
   gap: 8px;
 }
 
+/* Le flex-basis 100 % des champs du profil écraserait la hauteur dans cette colonne */
+#wrap .sg-avatar__panel input.sg-pinput {
+  flex: none;
+}
+
 .sg-avatar__panel[hidden] {
   display: none;
 }
