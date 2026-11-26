@@ -450,7 +450,8 @@ dans le panneau d'administration (PA), puis on commit.
   validateur impose son rouge), emplacement du sceau en pointillé Ume ; il disparaît une fois le sceau posé. La case
   native est rendue invisible quoi qu'impose AwesomeBB (`!important`) **et glissée sous le sceau** (même place, plan
   inférieur ; sceau à `z-index: 1` et fond plein, demande de Vinny), et la case qu'AwesomeBB dessine sur
-  tout `span` suivant une case (ici le message) est retirée (`.help-block::before`). **Étape 2** : carte « Ton compte » au **pattern du profil** (`cpField`, `.sg-pcard`,
+  tout `span` suivant une case (ici le message) est retirée (`.help-block::before`). Règle demandée par Vinny en plus : `#frmAgreement input[type=checkbox]:checked + span::before` sorti de l'écran
+  (`position: absolute; left: -9999999px`). **Étape 2** : carte « Ton compte » au **pattern du profil** (`cpField`, `.sg-pcard`,
   `.sg-pinput`), aides sous le pseudo et l'e-mail, **œil natif** de Forumactif dans le champ du mot de passe (il
   enveloppe le champ dans `.password-container` avec une `<i>` « visibility », après nos scripts ; un second œil ajouté
   par nos soins faisait doublon : l'icône native est seulement rendue accessible au clavier), **jauge** de
