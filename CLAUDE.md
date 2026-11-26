@@ -448,7 +448,8 @@ dans le panneau d'administration (PA), puis on commit.
   d'une case) ajoute `has-error` et un message `.help-block.form-error` : **message sous le libellé** (demande de Vinny ;
   le sceau est une grille sceau | texte, le message en 2e rangée de la colonne du texte), en Ume (`!important` : le
   validateur impose son rouge), emplacement du sceau en pointillé Ume ; il disparaît une fois le sceau posé. La case
-  native est rendue invisible quoi qu'impose AwesomeBB (`!important`, `clip-path`), et la case qu'AwesomeBB dessine sur
+  native est rendue invisible quoi qu'impose AwesomeBB (`!important`) **et glissée sous le sceau** (même place, plan
+  inférieur ; sceau à `z-index: 1` et fond plein, demande de Vinny), et la case qu'AwesomeBB dessine sur
   tout `span` suivant une case (ici le message) est retirée (`.help-block::before`). **Étape 2** : carte « Ton compte » au **pattern du profil** (`cpField`, `.sg-pcard`,
   `.sg-pinput`), aides sous le pseudo et l'e-mail, **œil natif** de Forumactif dans le champ du mot de passe (il
   enveloppe le champ dans `.password-container` avec une `<i>` « visibility », après nos scripts ; un second œil ajouté
