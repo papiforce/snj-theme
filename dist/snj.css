@@ -10925,3 +10925,12 @@ body.sg-authpage .sg-auth + .sg-divider--end {
     padding: 10px 0;
   }
 }
+
+/* Saisie automatique du navigateur : garder le fond et la couleur du champ (Chrome le teinte en bleu) */
+#wrap .sg-auth input.sg-pinput:-webkit-autofill,
+#wrap .sg-auth input.sg-pinput:-webkit-autofill:hover,
+#wrap .sg-auth input.sg-pinput:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 100px var(--sg-surface) inset;
+  -webkit-text-fill-color: var(--sg-text);
+  caret-color: var(--sg-text);
+}

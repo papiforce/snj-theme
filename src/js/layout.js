@@ -4176,8 +4176,10 @@
     lab.setAttribute('for', input.id);
     field.appendChild(lab);
     var control = el('div', 'sg-pfield__control');
-    input.parentNode.insertBefore(field, input);
-    control.appendChild(input);
+    /* Le mot de passe peut déjà être enveloppé par Forumactif (.password-container + œil) : on déplace l'ensemble */
+    var node = input.parentNode && input.parentNode.classList && input.parentNode.classList.contains('password-container') ? input.parentNode : input;
+    node.parentNode.insertBefore(field, node);
+    control.appendChild(node);
     field.appendChild(control);
     input.classList.add('sg-pinput');
     input.removeAttribute('placeholder');
