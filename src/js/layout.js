@@ -3747,6 +3747,8 @@
       });
       var save = fs.querySelector('button.sg-pbtn:not(.sg-pbtn--ghost)');
       if (save) fs.appendChild(save);
+      /* Espaces insécables natifs entre les boutons : ils élargissaient l'écart */
+      Array.prototype.slice.call(fs.childNodes).forEach(function (n) { if (n.nodeType === 3) n.remove(); });
       var panel = fs.closest('.panel');
       if (panel) panel.classList.add('sg-sig__foot');
     }
