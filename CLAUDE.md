@@ -445,8 +445,11 @@ dans le panneau d'administration (PA), puis on commit.
   sceaux ne sont pas posés. La case native est placée **après** le sceau et le texte : AwesomeBB dessine sa propre case
   (avec un contour rouge en erreur) sur le `span` qui suit une case (`input + span::before`) ; états par
   `.sg-sealchk:has(input:checked)`. La validation de Forumactif (`form-validator`, à la soumission et au changement
-  d'une case) ajoute `has-error` et un message `.help-block.form-error` : message masqué, emplacement du sceau en
-  pointillé Ume. **Étape 2** : carte « Ton compte » au **pattern du profil** (`cpField`, `.sg-pcard`,
+  d'une case) ajoute `has-error` et un message `.help-block.form-error` : **message sous le libellé** (demande de Vinny ;
+  le sceau est une grille sceau | texte, le message en 2e rangée de la colonne du texte), en Ume (`!important` : le
+  validateur impose son rouge), emplacement du sceau en pointillé Ume ; il disparaît une fois le sceau posé. La case
+  native est rendue invisible quoi qu'impose AwesomeBB (`!important`, `clip-path`), et la case qu'AwesomeBB dessine sur
+  tout `span` suivant une case (ici le message) est retirée (`.help-block::before`). **Étape 2** : carte « Ton compte » au **pattern du profil** (`cpField`, `.sg-pcard`,
   `.sg-pinput`), aides sous le pseudo et l'e-mail, **œil natif** de Forumactif dans le champ du mot de passe (il
   enveloppe le champ dans `.password-container` avec une `<i>` « visibility », après nos scripts ; un second œil ajouté
   par nos soins faisait doublon : l'icône native est seulement rendue accessible au clavier), **jauge** de
