@@ -10522,7 +10522,7 @@ body.sg-cppage .sg-cpage + .sg-divider--end {
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 10px;
-  margin: 24px 0 0;
+  margin: 6px 0 0;
   padding: 20px 0 0;
   border: 0;
   border-top: 1px solid var(--sg-border);
