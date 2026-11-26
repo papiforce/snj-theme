@@ -4066,6 +4066,11 @@
     });
     Array.prototype.slice.call(content.querySelectorAll(':scope > br')).forEach(function (br) { br.remove(); });
 
+    Array.prototype.slice.call(content.querySelectorAll(':scope > label')).forEach(function (lab) {
+      if (lab.querySelector('input[type="text"], input[type="email"], input[type="password"]')) cpField(lab);
+    });
+    content.classList.add('sg-pcard__grid');
+
     /* Case « actualités par e-mail » : interrupteur, comme les réglages de l'écritoire */
     var news = content.querySelector('input[name="wantsnews"]');
     var newsLabel = news && news.closest('label');
@@ -4079,10 +4084,9 @@
       sw.appendChild(el('span', 'sg-switch__thumb'));
       opt.appendChild(sw);
       newsLabel.parentNode.replaceChild(opt, newsLabel);
+      var fsb = content.querySelector('.form-buttons');
+      if (fsb) content.insertBefore(opt, fsb);
     }
-
-    Array.prototype.slice.call(content.querySelectorAll(':scope > label')).forEach(cpField);
-    content.classList.add('sg-pcard__grid');
 
     /* Aides */
     var HINTS = { username: 'Ton nom sur le forum, visible de tous.', email: 'Pour confirmer ton compte et retrouver ton mot de passe.' };
@@ -4142,8 +4146,6 @@
       pw.addEventListener('input', function () { setTimeout(read, 0); });
       read();
     }
-    if (opt) content.appendChild(opt);
-
     /* Boutons : « Réinitialiser » (contour) puis « Créer mon compte » (plein), à droite sous un filet */
     var fs = form.querySelector('.form-buttons');
     if (fs) {

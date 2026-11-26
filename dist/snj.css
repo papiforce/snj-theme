@@ -10405,6 +10405,19 @@ body.sg-cppage .sg-cpage + .sg-divider--end {
   cursor: pointer;
 }
 
+/* AwesomeBB pose une coche de validation (label.has-success::after) et sa case dessinée (span::before) */
+#wrap .sg-sealchk::after,
+#wrap .sg-sealchk::before,
+#wrap .sg-sealchk__seal::before,
+#wrap .sg-sealchk__seal::after {
+  content: none;
+  display: none;
+}
+
+#wrap .sg-sealchk__text {
+  font-weight: 400;
+}
+
 #wrap .sg-sealchk:hover {
   background: var(--sg-surface-2);
 }
@@ -10516,7 +10529,19 @@ body.sg-cppage .sg-cpage + .sg-divider--end {
   background: none;
 }
 
-/* Interrupteur sur toute la largeur de la carte */
+/* Le bloc natif « block-login » est étroit : la carte prend toute la colonne */
+#wrap .sg-reg form#ucp {
+  width: auto;
+  max-width: none;
+}
+
+/* Interrupteur sur toute la largeur de la carte (sans la coche de validation d'AwesomeBB) */
+#wrap .sg-reg .sg-opt::before,
+#wrap .sg-reg .sg-opt::after {
+  content: none;
+  display: none;
+}
+
 #wrap .sg-opt.sg-opt--wide {
   grid-column: 1 / -1;
   justify-content: space-between;
