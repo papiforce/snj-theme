@@ -252,7 +252,8 @@ dans le panneau d'administration (PA), puis on commit.
   les permissions), puis les **cartes de sujet** (même pattern yagasuri, `topicCard(row)` partagée avec les pages de
   forum) en grille de 2 colonnes. Forumactif ne donne que les titres : chaque carte est lue dans la liste de son forum
   (page du sujet → dernier forum du fil d'Ariane → ligne `.posts-section` de la 1re page), cache `sessionStorage`
-  `snj-similar` de 5 min ; carte provisoire au titre seul en attendant (ou si le sujet n'est pas en 1re page). Chaque
+  `snj-similar` de 5 min ; carte provisoire au titre seul en attendant (ou si le sujet n'est pas en 1re page). **Aucun sujet
+  similaire** : Forumactif garde son bloc (titre + boîte vide) ; `#ptrafic_open` et `#ptrafic_close` sont alors masqués. Chaque
   carte prend la couleur de la catégorie de **son** forum (`.sg-topic.sg-tone-…`).
   **Bas de page** (`.sg-tfoot`) : séparateur de fin, « Sauter vers » (`jumpBox`, forum du sujet coché) à gauche,
   à droite la liste déroulante **« Modération »** (`actionsMenu` avec `lead: 'gavel'`, chevron qui pivote, bouton au
@@ -426,6 +427,33 @@ dans le panneau d'administration (PA), puis on commit.
   et valeur que le bouton natif). Envoi normal : page de confirmation « Profil enregistré » (« Modifier mon profil » en
   premier). En bas : séparateur de fin et fil d'Ariane repris. Les autres onglets reçoivent l'habillage générique
   (onglets, cartes, champs, radios) ; leurs contenus particuliers (avatar, signature, listes) restent à reprendre.
+- **Inscription : serment « kishōmon »** 起請文 (le serment écrit qu'on scellait de son sceau) (`layout.js`, fonctions
+  `regPage`, `regOath`, `regAccount`, `sealCheck`, `regDivider`, + `65-register.css`) : pattern **réservé à
+  l'inscription** (`/register`). Étape 1 : `form#frmAgreement` (GET `/register`, `step=2`, cases `agreement=1` et
+  `privacy=1`) ; étape 2 : `form#ucp` avec `#username_reg` (pseudo, e-mail, mot de passe, case `wantsnews`, POST). Les
+  formulaires natifs restent en place (noms, valeurs, envoi). Haut : séparateur avec le logo, en-tête au pattern des
+  forums (« Accueil › Inscription », titre **« Rejoindre le Sekai »**, description propre à l'étape). Grille comme le
+  profil : **colonne des étapes collante** (248px ; « 誓 Serment », « 名 Compte » en mon reliés par un fil ; étape
+  faite : coche Asagi ; en cours : sumi et gofun ; puis « Déjà un compte ? Se connecter ») | contenu ; ≤ 900px, étapes
+  côte à côte en haut, sans aide. **Étape 1** : carte du règlement sur **kikkō** (références durables) en haut, surtitre
+  « 起請文 · Règlement », « Conditions d'utilisation » + filet de 56px ; paragraphes natifs regroupés en **articles
+  numérotés en kanji** (一 二 三 四, cercle teinté Hagane) : un paragraphe qui commence par un `<strong>` ouvre un
+  article (intitulé court retiré du texte et pris pour titre ; long : gardé, titre court tiré de `OATH_TITLES`) ;
+  l'engagement natif (texte rouge, lignes entre `<br>`) devient « Ton engagement » (fond `--sg-surface-2`, coches
+  Asagi) ; les deux cases deviennent des **sceaux à apposer** (`.sg-sealchk` : carré en pointillé, puis sceau 印 à
+  double filet Asagi posé avec le rebond des confirmations) ; « J'accepte le règlement » désactivé tant que les deux
+  sceaux ne sont pas posés. **Étape 2** : carte « Ton compte » au **pattern du profil** (`cpField`, `.sg-pcard`,
+  `.sg-pinput`), aides sous le pseudo et l'e-mail, **œil** dans le champ du mot de passe (`.sg-pw__eye`), **jauge** de
+  trois traits (Ume faible, Hagane moyen, Asagi fort) calculée par `passwordStrength()` de Forumactif (la jauge native
+  `#cont_pwd` est masquée), actualités en interrupteur `.sg-opt`, « Réinitialiser » puis « Créer mon compte ».
+  AwesomeBB pose une coche de validation (`label.has-success::after`) et une case dessinée (`span::before`) : retirées.
+  Erreurs de Forumactif (`.block-error`) remontées au-dessus du formulaire. **Vérification en visiteur** sans se
+  déconnecter : la page est lue en visiteur (`fetch('/register', {credentials: 'omit'})`, étape 2 :
+  `/register?step=2&agreement=1&privacy=1`), puis écrite dans l'onglet (`document.open/write/close`, après
+  `history.replaceState` vers `/register`) ; pour une version pas encore publiée, remplacer dans ce HTML le SHA du CSS
+  et le `/NNNNN.js` par `layout.js` sur jsDelivr. Mobile vérifié par mesures dans une iframe de 390px (les captures
+  masquent les iframes et les champs de mot de passe). Non testé : l'envoi (création d'un compte), les erreurs, une
+  éventuelle étape suivante (champs de profil obligatoires, captcha).
 - **Codes des membres** (HTML collé dans un message, `64-codes.css`, modèles dans `src/codes/`) : le membre ne colle
   que du HTML à classes **`.sgc-…`**, tout le style vit dans le thème (tokens : clair et sombre sans rien changer ; pas
   de `<style>`, d'attribut `style` ni de `data-*` dans les codes). Le message est lu comme du **BBCode** : chaque retour
@@ -454,7 +482,7 @@ dans le panneau d'administration (PA), puis on commit.
   ligne changés en `<br>`), clair, sombre, largeur réduite ; **pas encore posté pour de vrai** (un élément vide comme
   `.sgc-notch` ou `.sgc-step__mark` pourrait être retiré par Forumactif).
   Récapitulatif des patterns : **forum** (accueil) = image en fond + panneau + kanji ; **sous-forum** = ema
-  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ; **confirmation** = hanko (sceau au kanji) ; **paramètres du profil** = ninbetsu-chō (onglets collants + cartes) ; **sondage** = tōhyō (carte sur shippō) ; **fiche de personnage** = jinbutsu (codes `.sgc-`) ;
+  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ; **confirmation** = hanko (sceau au kanji) ; **paramètres du profil** = ninbetsu-chō (onglets collants + cartes) ; **inscription** = kishōmon (étapes collantes, articles en kanji, sceaux à apposer) ; **sondage** = tōhyō (carte sur shippō) ; **fiche de personnage** = jinbutsu (codes `.sgc-`) ;
   **permission** = étiquette tegata aux coins coupés.
 - **Catégories de l'accueil** (`forums.js` + `40-zones.css`) : à gauche un sélecteur collant (Gestion, Hi, Mizu, Kaze,
   Kaminari, Tsuchi no Kuni, Shōkoku — « les petits pays », ex-Reste du Sekai) au style des raccourcis de l'Annexe, pastille = badge pour Gestion
