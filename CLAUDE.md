@@ -465,6 +465,23 @@ dans le panneau d'administration (PA), puis on commit.
   et le `/NNNNN.js` par `layout.js` sur jsDelivr. Mobile vérifié par mesures dans une iframe de 390px (les captures
   masquent les iframes et les champs de mot de passe). Non testé : l'envoi (création d'un compte), les erreurs, une
   éventuelle étape suivante (champs de profil obligatoires, captcha).
+- **Connexion et mot de passe oublié : poste-frontière « sekisho »** 関所 (où l'on présentait son laissez-passer)
+  (`layout.js`, fonctions `authPage`, `authField`, + `66-auth.css`) : pattern **réservé à `/login`** (`.block-login`
+  avec `form#panel-password`) **et à `/profile?mode=sendpassword`** (`form[name="form_recupmdp"]`). Formulaires natifs
+  gardés (noms, champs cachés `redirect` / `query`, envoi). Haut : séparateur avec le logo, en-tête au pattern des
+  forums (« Accueil › Connexion » / « Accueil › Connexion › Mot de passe oublié », titre, description). Grille : **carte
+  du formulaire** (`.sg-authcard`, titre au pattern des cartes du profil : `login` « Tes identifiants » / `lock_reset`
+  « Ton compte » ; champs au pattern du profil, `authField` : libellé en petites capitales, `.sg-pinput` ; « Connexion
+  automatique » en interrupteur `.sg-opt` « Rester connecté sur cet appareil » ; pied sous un filet : lien discret à
+  gauche — « Mot de passe oublié ? » / « Retour à la connexion » — et bouton plein à droite — « Se connecter » /
+  « Recevoir un nouveau mot de passe ») | **carte d'à-côté** sur **seigaiha** (parcours ; `.sg-authside`, surtitre au
+  kanji, titre en Zen Antique + filet de 40px, texte, bouton au contour) : « Rejoindre le Sekai » (vers `/register`) ou
+  « Revenir au poste » (vers `/login`) ; ≤ 900px une colonne ; ≤ 768px bouton plein au-dessus du lien, en pleine
+  largeur. **Onglet « Lien par e-mail » retiré** (demande de Vinny) : `.login-tabs` et `#panel-magic` masqués,
+  `#panel-password` forcé visible et `localStorage` `fa_login_tab` remis sur `tab-password` (le script natif rouvrait
+  le dernier onglet choisi). L'œil natif du mot de passe est déjà posé quand nos scripts passent : `authField` déplace
+  le `.password-container` entier. Saisie automatique du navigateur ramenée aux couleurs du thème (`:-webkit-autofill`).
+  Non testés : l'envoi (connexion, mot de passe oublié), les erreurs.
 - **Codes des membres** (HTML collé dans un message, `64-codes.css`, modèles dans `src/codes/`) : le membre ne colle
   que du HTML à classes **`.sgc-…`**, tout le style vit dans le thème (tokens : clair et sombre sans rien changer ; pas
   de `<style>`, d'attribut `style` ni de `data-*` dans les codes). Le message est lu comme du **BBCode** : chaque retour
@@ -493,7 +510,7 @@ dans le panneau d'administration (PA), puis on commit.
   ligne changés en `<br>`), clair, sombre, largeur réduite ; **pas encore posté pour de vrai** (un élément vide comme
   `.sgc-notch` ou `.sgc-step__mark` pourrait être retiré par Forumactif).
   Récapitulatif des patterns : **forum** (accueil) = image en fond + panneau + kanji ; **sous-forum** = ema
-  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ; **confirmation** = hanko (sceau au kanji) ; **paramètres du profil** = ninbetsu-chō (onglets collants + cartes) ; **inscription** = kishōmon (étapes collantes, articles en kanji, sceaux à apposer) ; **sondage** = tōhyō (carte sur shippō) ; **fiche de personnage** = jinbutsu (codes `.sgc-`) ;
+  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ; **confirmation** = hanko (sceau au kanji) ; **paramètres du profil** = ninbetsu-chō (onglets collants + cartes) ; **inscription** = kishōmon (étapes collantes, articles en kanji, sceaux à apposer) ; **connexion** = sekisho (formulaire | carte d'à-côté sur seigaiha) ; **sondage** = tōhyō (carte sur shippō) ; **fiche de personnage** = jinbutsu (codes `.sgc-`) ;
   **permission** = étiquette tegata aux coins coupés.
 - **Catégories de l'accueil** (`forums.js` + `40-zones.css`) : à gauche un sélecteur collant (Gestion, Hi, Mizu, Kaze,
   Kaminari, Tsuchi no Kuni, Shōkoku — « les petits pays », ex-Reste du Sekai) au style des raccourcis de l'Annexe, pastille = badge pour Gestion
