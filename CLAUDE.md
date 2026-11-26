@@ -426,10 +426,23 @@ dans le panneau d'administration (PA), puis on commit.
   **Boutons** à droite sous un filet : « Réinitialiser » (contour) puis « Enregistrer » (plein ; `<button>` de même nom
   et valeur que le bouton natif). Envoi normal : page de confirmation « Profil enregistré » (« Modifier mon profil » en
   premier). En bas : séparateur de fin et fil d'Ariane repris. Les autres onglets reçoivent l'habillage générique
-  (onglets, cartes, champs, radios) ; leurs contenus particuliers (signature, listes) restent à reprendre.
+  (onglets, cartes, champs, radios) ; leurs contenus particuliers (listes) restent à reprendre.
   **Ordre des onglets** (`CP_ORDER`) : Informations, Avatar, Signature | Préférences, Notifications | Sujets surveillés,
   Favoris, un filet entre les groupes (`.sg-ptabs__sep`, vertical dans la bande mobile) ; onglet inconnu après, dans
   l'ordre natif (les pages `/uN` ne sont pas réordonnées).
+- **Onglet « Signature »** (`layout.js`, fonction `sigPanel`, + `68-signature.css`) : carte « Ta signature » (icône
+  `draw`) dont l'**éditeur reprend celui de l'écritoire « suzuri »** : `form.sg-sigform` partage les règles de
+  l'éditeur de `60-write.css` (sélecteurs `:is(.sg-writeform, .sg-sigform)` : barre d'outils posée sur la carte, icônes
+  Material Symbols, infobulles, fenêtres des outils, couleurs de la refonte, mode texte bloqué, zone de saisie sur
+  `--sg-surface-2` arrondie à 12px) et appelle `editorToolbar(form)` et `editorFrameTheme(form)`. `#postingbox`
+  n'est jamais déplacé. Zone de saisie de 220px au moins. **Aperçu** (après « Prévisualiser », bloc natif `#preview`
+  dans le formulaire) : encart `--sg-surface-2` « Aperçu, pas encore enregistré » (Asagi, petites capitales), la
+  signature sous un filet pointillé comme sous un message. Aide native (`#smiley-box` : HTML, BBCode, smileys) en ligne
+  discrète sous l'éditeur (coche Asagi activé, icône `block` désactivé). Boutons au pattern du profil (`.sg-pactions`) :
+  « Prévisualiser » (contour) puis « Enregistrer » (plein) ; les espaces insécables natifs entre eux sont retirés.
+  Attention : le `fieldset.fields1` natif garde `min-width: min-content` (débordement de l'éditeur sur mobile) : remis
+  à 0. Pour tester une page `/post` dans une iframe, `history.replaceState` doit venir **après** `document.open()`
+  (qui remet l'adresse de la page parente). Non testé : l'enregistrement réel.
 - **Onglet « Avatar » : portrait « nigao-e »** 似顔絵 (`layout.js`, fonction `avatarPanel`, + `67-avatar.css`) : pattern
   **réservé au choix de l'avatar** (`page_profil=avatars`). Carte « Ton portrait » : **portrait 200 × 400** au style
   de l'avatar des messages (arrondi 12px, sans cadre, `object-fit: cover`) | **« Nouveau portrait »** en contrôle
@@ -529,7 +542,7 @@ dans le panneau d'administration (PA), puis on commit.
   ligne changés en `<br>`), clair, sombre, largeur réduite ; **pas encore posté pour de vrai** (un élément vide comme
   `.sgc-notch` ou `.sgc-step__mark` pourrait être retiré par Forumactif).
   Récapitulatif des patterns : **forum** (accueil) = image en fond + panneau + kanji ; **sous-forum** = ema
-  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ; **confirmation** = hanko (sceau au kanji) ; **paramètres du profil** = ninbetsu-chō (onglets collants + cartes) ; **avatar** = nigao-e (portrait 200 × 400 + sources) ; **inscription** = kishōmon (étapes collantes, articles en kanji, sceaux à apposer) ; **connexion** = sekisho (formulaire | carte d'à-côté sur seigaiha) ; **sondage** = tōhyō (carte sur shippō) ; **fiche de personnage** = jinbutsu (codes `.sgc-`) ;
+  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ; **confirmation** = hanko (sceau au kanji) ; **paramètres du profil** = ninbetsu-chō (onglets collants + cartes) ; **avatar** = nigao-e (portrait 200 × 400 + sources) ; **signature** = éditeur de l'écritoire suzuri ; **inscription** = kishōmon (étapes collantes, articles en kanji, sceaux à apposer) ; **connexion** = sekisho (formulaire | carte d'à-côté sur seigaiha) ; **sondage** = tōhyō (carte sur shippō) ; **fiche de personnage** = jinbutsu (codes `.sgc-`) ;
   **permission** = étiquette tegata aux coins coupés.
 - **Catégories de l'accueil** (`forums.js` + `40-zones.css`) : à gauche un sélecteur collant (Gestion, Hi, Mizu, Kaze,
   Kaminari, Tsuchi no Kuni, Shōkoku — « les petits pays », ex-Reste du Sekai) au style des raccourcis de l'Annexe, pastille = badge pour Gestion
