@@ -3652,8 +3652,311 @@
     'Enregistrement': ['key', 'Compte'],
     'Profil personnalisé': ['person', 'Profil'],
     'Champs de contact': ['alternate_email', 'Contact'],
-    'Export de données': ['download', 'Mes données']
+    'Export de données': ['download', 'Mes données'],
+    'Panneau de contrôle des Avatars': ['account_circle', 'Ton portrait']
   };
+  /* Ordre des onglets : identité (informations, portrait, signature), réglages, listes ; filet entre les groupes */
+  var CP_ORDER = [['informations', 'avatars', 'signature'], ['preferences', 'notifications'], ['friendsfoes', 'followers', 'watchsearch', 'favouritesearch']];
+
+  /* --------------------------------------------------------------------
+     Onglet « Avatar » : portrait « nigao-e » 似顔絵. Aucun champ natif à l'écran : la case « Supprimer l'image »,
+     l'envoi de fichier et les deux adresses restent dans le formulaire (masqués) et reçoivent les choix. Une seule
+     source à la fois : en remplir une vide les autres. Aperçu au format des messages (200 × 400).
+     -------------------------------------------------------------------- */
+  function avatarPanel(b, bc) {
+    var el = uiEl, ico = uiIco;
+    var form = b.closest('form');
+    var q = function (s) { return bc.querySelector(s); };
+    var del = q('input[name="avatardel"]');
+    var file = q('input[type="file"][name="avatar"]');
+    var copy = q('input[name="avatarurl"]');
+    var link = q('input[name="avatarremoteurl"]');
+    var curImg = q('img');
+    var curSrc = curImg ? curImg.getAttribute('src') : '';
+    var intro = bc.textContent.replace(/\s+/g, ' ');
+    var maxH = +((intro.match(/hauteur de (\d+)/i) || [])[1] || 0);
+    var maxW = +((intro.match(/(\d+) pixels? de largeur/i) || [])[1] || 0);
+    var maxKb = +((intro.match(/(\d+)\s*ko/i) || [])[1] || 0);
+
+    /* Champs natifs gardés dans le formulaire, hors de l'écran ; les <label> d'origine sont retirés */
+    var keep = el('div', 'sg-avatar__native');
+    keep.setAttribute('aria-hidden', 'true');
+    [del, file, copy, link].forEach(function (i) { if (i) { i.tabIndex = -1; keep.appendChild(i); } });
+    while (bc.firstChild) bc.removeChild(bc.firstChild);
+    bc.appendChild(keep);
+
+    var box = el('div', 'sg-avatar');
+    bc.appendChild(box);
+
+    /* Colonne du portrait */
+    var stage = el('div', 'sg-avatar__stage');
+    var frame = el('figure', 'sg-avatar__frame');
+    var img = el('img', 'sg-avatar__img');
+    img.alt = 'Aperçu du portrait';
+    var empty = el('div', 'sg-avatar__empty');
+    var emptyIco = ico('account_circle');
+    var emptyTxt = el('span', null, 'Aucun portrait');
+    empty.appendChild(emptyIco);
+    empty.appendChild(emptyTxt);
+    frame.appendChild(img);
+    frame.appendChild(empty);
+    stage.appendChild(frame);
+    var state = el('p', 'sg-avatar__state');
+    state.setAttribute('aria-live', 'polite');
+    stage.appendChild(state);
+    var checks = el('ul', 'sg-avatar__checks');
+    checks.setAttribute('aria-live', 'polite');
+    stage.appendChild(checks);
+    var removeBtn = null;
+    if (del && curSrc) {
+      removeBtn = el('button', 'sg-pbtn sg-pbtn--ghost sg-avatar__remove');
+      removeBtn.type = 'button';
+      removeBtn.setAttribute('aria-pressed', 'false');
+      stage.appendChild(removeBtn);
+    }
+    box.appendChild(stage);
+
+    /* Colonne des sources : contrôle segmenté, puis le panneau de la source choisie */
+    var side = el('div', 'sg-avatar__side');
+    side.appendChild(el('span', 'sg-pfield__label', 'Nouveau portrait'));
+    var seg = el('div', 'sg-seg sg-seg--auto sg-avatar__seg');
+    seg.setAttribute('role', 'radiogroup');
+    seg.setAttribute('aria-label', 'Source du portrait');
+    side.appendChild(seg);
+    var panels = el('div', 'sg-avatar__panels');
+    side.appendChild(panels);
+    box.appendChild(side);
+
+    var sources = [];
+    var addSource = function (key, input, icon, label, build) {
+      if (!input) return;
+      var opt = el('label', 'sg-seg__opt');
+      var r = el('input');
+      r.type = 'radio';
+      r.name = 'sg-avsrc';
+      r.value = key;
+      r.setAttribute('form', 'sg-none'); /* jamais envoyé avec le formulaire */
+      opt.appendChild(r);
+      var face = el('span', 'sg-seg__face');
+      face.appendChild(ico(icon));
+      face.appendChild(el('span', null, label));
+      opt.appendChild(face);
+      seg.appendChild(opt);
+      var panel = el('div', 'sg-avatar__panel');
+      panel.hidden = true;
+      build(panel);
+      panels.appendChild(panel);
+      r.addEventListener('change', function () { show(key); });
+      sources.push({ key: key, input: input, radio: r, panel: panel });
+    };
+    var show = function (key) {
+      sources.forEach(function (s) { s.panel.hidden = s.key !== key; s.radio.checked = s.key === key; });
+    };
+
+    /* Fichier : zone de dépôt (clic ou glisser-déposer) */
+    var drop, dropName, dropMeta, dropClear;
+    addSource('file', file, 'upload', 'Fichier', function (p) {
+      drop = el('button', 'sg-avatar__drop');
+      drop.type = 'button';
+      drop.appendChild(ico('add_photo_alternate'));
+      var dt = el('span', 'sg-avatar__droptext');
+      dropName = el('strong', null, 'Choisir une image');
+      dropMeta = el('span', null, 'ou la déposer ici');
+      dt.appendChild(dropName);
+      dt.appendChild(dropMeta);
+      drop.appendChild(dt);
+      p.appendChild(drop);
+      dropClear = el('button', 'sg-avatar__clear');
+      dropClear.type = 'button';
+      dropClear.setAttribute('aria-label', 'Retirer le fichier');
+      dropClear.setAttribute('title', 'Retirer le fichier');
+      dropClear.appendChild(ico('close'));
+      dropClear.hidden = true;
+      p.appendChild(dropClear);
+      p.appendChild(el('p', 'sg-pfield__hint', 'Envoyée depuis ton appareil et gardée sur le forum.'));
+      drop.addEventListener('click', function () { file.click(); });
+      dropClear.addEventListener('click', function () { file.value = ''; sync(); drop.focus(); });
+      ['dragenter', 'dragover'].forEach(function (t) {
+        drop.addEventListener(t, function (e) { e.preventDefault(); drop.classList.add('is-over'); });
+      });
+      ['dragleave', 'dragend'].forEach(function (t) {
+        drop.addEventListener(t, function () { drop.classList.remove('is-over'); });
+      });
+      drop.addEventListener('drop', function (e) {
+        e.preventDefault();
+        drop.classList.remove('is-over');
+        var files = e.dataTransfer && e.dataTransfer.files;
+        if (!files || !files.length) return;
+        try { file.files = files; } catch (err) { return; }
+        file.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+    });
+
+    /* Adresses : copiée sur le forum, ou liée */
+    var urlField = function (input, hint) {
+      return function (p) {
+        var f = el('input', 'sg-pinput');
+        f.type = 'url';
+        f.placeholder = 'https://…';
+        f.setAttribute('aria-label', 'Adresse de l’image');
+        f.value = input.value;
+        f.autocomplete = 'off';
+        p.appendChild(f);
+        p.appendChild(el('p', 'sg-pfield__hint', hint));
+        var t;
+        f.addEventListener('input', function () {
+          input.value = f.value.trim();
+          clearTimeout(t);
+          t = setTimeout(function () { pick(input); }, 350);
+        });
+        input._sgMirror = f;
+      };
+    };
+    addSource('copy', copy, 'cloud_download', 'Importer', urlField(copy, 'Colle l’adresse d’une image : elle est copiée sur le forum.'));
+    addSource('link', link, 'link', 'Lier', urlField(link, 'L’image reste à son adresse d’origine : si elle disparaît, ton portrait aussi.'));
+
+    /* Rappel du format */
+    var rules = el('ul', 'sg-avatar__rules');
+    var rule = function (icon, text) {
+      var li = el('li');
+      li.appendChild(ico(icon));
+      li.appendChild(el('span', null, text));
+      rules.appendChild(li);
+    };
+    rule('crop_portrait', 'Format des messages : 200 × 400 px, en portrait.');
+    if (maxW && maxH) rule('aspect_ratio', maxW + ' × ' + maxH + ' px au plus.');
+    if (maxKb) rule('weight', maxKb + ' Ko au plus.');
+    side.appendChild(rules);
+
+    /* État */
+    var objUrl = '';
+    var removed = false;
+    var active = null; /* source remplie */
+    var fileKb = 0;
+
+    /* Une source remplie vide les autres, et annule « Retirer mon portrait » */
+    function pick(input) {
+      var filled = input === file ? !!(file.files && file.files.length) : !!input.value.trim();
+      if (filled) {
+        sources.forEach(function (s) {
+          if (s.input === input) return;
+          s.input.value = '';
+          if (s.input._sgMirror) s.input._sgMirror.value = '';
+        });
+        removed = false;
+        if (del) del.checked = false;
+      }
+      sync();
+    }
+    if (file) file.addEventListener('change', function () { pick(file); });
+
+    if (removeBtn) removeBtn.addEventListener('click', function () {
+      removed = !removed;
+      del.checked = removed;
+      if (removed) sources.forEach(function (s) {
+        s.input.value = '';
+        if (s.input._sgMirror) s.input._sgMirror.value = '';
+      });
+      sync();
+    });
+
+    function check(icon, text, tone) {
+      var li = el('li', tone ? 'is-' + tone : null);
+      li.appendChild(ico(icon));
+      li.appendChild(el('span', null, text));
+      checks.appendChild(li);
+    }
+
+    function measure() {
+      checks.textContent = '';
+      if (!active || !img.naturalWidth) return;
+      var w = img.naturalWidth, h = img.naturalHeight;
+      var size = w + ' × ' + h + ' px';
+      if (w === 200 && h === 400) check('check_circle', size + ' : format idéal', 'ok');
+      else if (Math.abs(w * 2 - h) <= 2) check('check_circle', size + ' : bonnes proportions', 'ok');
+      else check('crop', size + ' : recadrée à l’affichage', 'warn');
+      if (active.key !== 'link' && maxW && maxH && (w > maxW || h > maxH)) check('error', 'Trop grande : ' + maxW + ' × ' + maxH + ' px au plus', 'bad');
+      if (active.key === 'file' && maxKb && fileKb > maxKb) check('error', 'Trop lourde : ' + fileKb + ' Ko, ' + maxKb + ' Ko au plus', 'bad');
+    }
+    img.addEventListener('load', function () { frame.classList.remove('is-broken'); measure(); });
+    img.addEventListener('error', function () {
+      if (!img.getAttribute('src')) return;
+      frame.classList.add('is-broken');
+      checks.textContent = '';
+      if (active) check('link_off', 'Image introuvable à cette adresse', 'bad');
+    });
+
+    function setState(icon, text, tone) {
+      state.textContent = '';
+      state.className = 'sg-avatar__state' + (tone ? ' is-' + tone : '');
+      state.appendChild(ico(icon));
+      state.appendChild(el('span', null, text));
+    }
+
+    function sync() {
+      active = null;
+      sources.forEach(function (s) {
+        var filled = s.input === file ? !!(file.files && file.files.length) : !!s.input.value.trim();
+        if (filled && !active) active = s;
+      });
+      if (objUrl) { URL.revokeObjectURL(objUrl); objUrl = ''; }
+      fileKb = 0;
+      if (file && drop) {
+        var f = file.files && file.files[0];
+        dropName.textContent = f ? f.name : 'Choisir une image';
+        dropMeta.textContent = f ? Math.ceil(f.size / 1024) + ' Ko · cliquer pour changer' : 'ou la déposer ici';
+        drop.classList.toggle('is-filled', !!f);
+        dropClear.hidden = !f;
+        if (f) fileKb = Math.ceil(f.size / 1024);
+      }
+      var src = '';
+      if (active) {
+        src = active.input === file ? (objUrl = URL.createObjectURL(file.files[0])) : active.input.value.trim();
+        show(active.key);
+      }
+      frame.classList.remove('is-broken');
+      frame.classList.toggle('is-removed', removed);
+      frame.classList.toggle('is-preview', !!active);
+      if (removed) {
+        img.removeAttribute('src');
+        emptyTxt.textContent = 'Sans portrait';
+        setState('delete', 'Retiré à l’enregistrement', 'bad');
+      } else if (src) {
+        img.src = src;
+        setState('visibility', 'Aperçu, pas encore enregistré', 'preview');
+      } else if (curSrc) {
+        img.src = curSrc;
+        setState('check', 'Portrait actuel');
+      } else {
+        img.removeAttribute('src');
+        emptyTxt.textContent = 'Aucun portrait';
+        setState('info', 'Pas encore de portrait');
+      }
+      frame.classList.toggle('is-empty', !img.getAttribute('src'));
+      if (!active || !src) checks.textContent = '';
+      else if (img.complete && img.naturalWidth) measure();
+      if (removeBtn) {
+        removeBtn.setAttribute('aria-pressed', removed ? 'true' : 'false');
+        removeBtn.textContent = '';
+        removeBtn.appendChild(ico(removed ? 'undo' : 'delete'));
+        removeBtn.appendChild(el('span', null, removed ? 'Garder mon portrait' : 'Retirer mon portrait'));
+      }
+    }
+
+    /* « Réinitialiser » : les champs natifs reviennent à leur état, l'écran suit */
+    if (form) form.addEventListener('reset', function () {
+      setTimeout(function () {
+        removed = !!(del && del.checked);
+        sources.forEach(function (s) { if (s.input._sgMirror) s.input._sgMirror.value = s.input.value; });
+        sync();
+        if (!active && sources[0]) show(sources[0].key);
+      }, 0);
+    });
+
+    if (sources[0]) show(sources[0].key);
+    sync();
+    b.classList.add('sg-pcard--avatar');
+  }
   var CP_LABELS = {
     "Nom d'utilisateur": 'Pseudo',
     'Adresse e-mail': 'Adresse e-mail',
@@ -4365,9 +4668,33 @@
     var nav = el('nav', 'sg-ptabs');
     nav.setAttribute('aria-label', 'Paramètres du profil');
     var ul = el('ul', 'sg-ptabs__list');
-    tabs.forEach(function (li) {
+    /* Ordre de la refonte (CP_ORDER) ; onglet inconnu : après, dans l'ordre natif */
+    var rankOf = function (key) {
+      for (var g = 0; g < CP_ORDER.length; g++) {
+        var i = CP_ORDER[g].indexOf(key);
+        if (i >= 0) return [g, i];
+      }
+      return [CP_ORDER.length, 0];
+    };
+    var items = tabs.map(function (li, n) {
+      var a = li.querySelector('a');
+      var key = li.classList.contains('activetab') ? current : cpKey(a && a.getAttribute('href'));
+      return { li: li, n: n, r: rankOf(key) };
+    });
+    var known = items.some(function (it) { return it.r[0] < CP_ORDER.length; });
+    if (known) items.sort(function (x, y) { return x.r[0] - y.r[0] || x.r[1] - y.r[1] || x.n - y.n; });
+    var lastGroup = null;
+    items.forEach(function (it) {
+      var li = it.li;
       var a = li.querySelector('a');
       if (!a) return;
+      if (known && lastGroup !== null && it.r[0] !== lastGroup) {
+        var sep = el('li', 'sg-ptabs__sep');
+        sep.setAttribute('role', 'presentation');
+        sep.setAttribute('aria-hidden', 'true');
+        ul.appendChild(sep);
+      }
+      lastGroup = it.r[0];
       var name = a.textContent.trim();
       var href = a.getAttribute('href');
       var active = li.classList.contains('activetab');
@@ -4469,6 +4796,11 @@
         bh.parentNode.replaceChild(h, bh);
       }
       if (!bc) return;
+      /* Onglet « Avatar » : panneau du portrait */
+      if (bc.querySelector('input[name="avatarurl"], input[name="avatarremoteurl"], input[type="file"][name="avatar"]')) {
+        avatarPanel(b, bc);
+        return;
+      }
       /* Phrase « Les champs marqués d'un * sont obligatoires » : aide discrète sous le titre */
       Array.prototype.slice.call(bc.querySelectorAll(':scope > p')).forEach(function (p) {
         if (/\*/.test(p.textContent)) { p.className = 'sg-pcard__hint'; p.textContent = 'Les champs marqués d’un * sont obligatoires.'; }

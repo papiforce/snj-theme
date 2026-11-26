@@ -10934,3 +10934,382 @@ body.sg-authpage .sg-auth + .sg-divider--end {
   -webkit-text-fill-color: var(--sg-text);
   caret-color: var(--sg-text);
 }
+
+/* --- 67-avatar.css --- */
+/* ==========================================================================================================
+   Onglet « Avatar » des paramètres du profil : portrait « nigao-e » 似顔絵 (layout.js, avatarPanel)
+   Portrait au format des messages (200 × 400, arrondi 12px, sans cadre) | source du nouveau portrait (contrôle
+   segmenté Fichier / Importer / Lier) et rappel du format. Aucun champ natif à l'écran.
+   Filets entre les groupes d'onglets (ordre de la refonte, CP_ORDER).
+   ========================================================================================================== */
+
+/* --- Onglets : filet entre deux groupes ------------------------------------------------------------------- */
+#wrap .sg-ptabs__sep {
+  height: 1px;
+  margin: 6px 14px;
+  padding: 0;
+  border: 0;
+  background: var(--sg-border);
+  list-style: none;
+}
+
+/* --- Champs natifs : dans le formulaire, hors de l'écran --------------------------------------------------- */
+#wrap .sg-avatar__native {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* --- Disposition : portrait | sources ---------------------------------------------------------------------- */
+#wrap .sg-pcard--avatar > .block-content {
+  position: relative;
+}
+
+.sg-avatar {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: 32px;
+  align-items: start;
+}
+
+.sg-avatar__stage {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+/* Portrait : même style que l'avatar d'un message (59-topic.css) */
+#wrap .sg-avatar__frame {
+  position: relative;
+  width: 200px;
+  height: 400px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--sg-surface-2);
+}
+
+#wrap .sg-avatar__img {
+  display: block;
+  width: 200px !important;
+  height: 400px !important;
+  max-width: none;
+  margin: 0;
+  border: 0;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.sg-avatar__frame.is-empty .sg-avatar__img,
+.sg-avatar__frame.is-broken .sg-avatar__img {
+  visibility: hidden;
+}
+
+/* Vide, retiré ou introuvable : silhouette sur pointillé */
+.sg-avatar__empty {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px dashed var(--sg-border-strong, var(--sg-border));
+  border-radius: 12px;
+  color: var(--sg-text-muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.sg-avatar__empty .material-symbols-outlined {
+  font-size: 56px;
+  font-variation-settings: "wght" 200;
+}
+
+.sg-avatar__frame.is-empty .sg-avatar__empty,
+.sg-avatar__frame.is-broken .sg-avatar__empty {
+  display: flex;
+}
+
+.sg-avatar__frame.is-removed .sg-avatar__empty {
+  border-color: color-mix(in srgb, var(--sg-accent-2) 60%, transparent);
+  color: var(--sg-accent-2);
+}
+
+/* Aperçu : liseré Asagi à l'intérieur du portrait */
+.sg-avatar__frame.is-preview:not(.is-broken)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--sg-accent-1);
+  border-radius: 12px;
+  pointer-events: none;
+}
+
+/* État et vérifications, sous le portrait */
+.sg-avatar__state {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--sg-text-muted);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.sg-avatar__state .material-symbols-outlined {
+  flex: none;
+  font-size: 18px;
+}
+
+.sg-avatar__state.is-preview {
+  color: var(--sg-accent-1);
+}
+
+.sg-avatar__state.is-bad {
+  color: var(--sg-accent-2);
+}
+
+#wrap .sg-avatar__checks {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#wrap .sg-avatar__checks:empty {
+  display: none;
+}
+
+#wrap .sg-avatar__checks li {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: var(--sg-text-muted);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.sg-avatar__checks .material-symbols-outlined {
+  flex: none;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+#wrap .sg-avatar__checks li.is-ok .material-symbols-outlined {
+  color: var(--sg-accent-1);
+}
+
+#wrap .sg-avatar__checks li.is-bad {
+  color: var(--sg-accent-2);
+}
+
+#wrap .sg-avatar__remove {
+  width: 100%;
+}
+
+#wrap .sg-avatar__remove:hover,
+#wrap .sg-avatar__remove[aria-pressed="false"]:focus-visible {
+  border-color: var(--sg-accent-2);
+  color: var(--sg-accent-2);
+}
+
+/* --- Sources ----------------------------------------------------------------------------------------------- */
+.sg-avatar__side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.sg-avatar__panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sg-avatar__panel[hidden] {
+  display: none;
+}
+
+/* Zone de dépôt */
+#wrap button.sg-avatar__drop {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  min-height: 112px;
+  margin: 0;
+  padding: 20px 56px 20px 24px;
+  border: 1px dashed var(--sg-border-strong, var(--sg-border));
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-surface-2);
+  color: var(--sg-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+#wrap button.sg-avatar__drop:hover,
+#wrap button.sg-avatar__drop.is-over {
+  border-color: var(--sg-accent-1);
+  background: color-mix(in srgb, var(--sg-accent-1) 8%, var(--sg-surface-2));
+}
+
+#wrap button.sg-avatar__drop:focus-visible {
+  outline: 2px solid var(--sg-accent-1);
+  outline-offset: 2px;
+}
+
+#wrap button.sg-avatar__drop.is-filled {
+  border-style: solid;
+}
+
+.sg-avatar__drop > .material-symbols-outlined {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--sg-accent-1) 16%, transparent);
+  color: var(--sg-accent-1);
+  font-size: 24px;
+}
+
+.sg-avatar__drop > * {
+  transition: none;
+}
+
+.sg-avatar__droptext {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sg-avatar__droptext strong {
+  overflow: hidden;
+  font-size: 0.95rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sg-avatar__droptext span {
+  color: var(--sg-text-muted);
+  font-size: 0.85rem;
+}
+
+#wrap button.sg-avatar__clear {
+  position: absolute;
+  top: 34px;
+  right: 12px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--sg-text-muted);
+  cursor: pointer;
+}
+
+#wrap button.sg-avatar__clear[hidden] {
+  display: none;
+}
+
+#wrap button.sg-avatar__clear:hover {
+  background: var(--sg-surface);
+  color: var(--sg-accent-2);
+}
+
+/* Rappel du format */
+#wrap .sg-avatar__rules {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 8px 0 0;
+  padding: 16px 0 0;
+  border-top: 1px dashed var(--sg-border);
+  list-style: none;
+}
+
+#wrap .sg-avatar__rules li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: var(--sg-text-muted);
+  font-size: 0.85rem;
+}
+
+.sg-avatar__rules .material-symbols-outlined {
+  flex: none;
+  color: var(--sg-primary);
+  font-size: 18px;
+}
+
+/* --- Mobile ------------------------------------------------------------------------------------------------ */
+@media (max-width: 900px) {
+  #wrap .sg-ptabs__sep {
+    flex: none;
+    width: 1px;
+    height: auto;
+    margin: 10px 4px;
+  }
+}
+
+@media (max-width: 768px) {
+  .sg-avatar {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  .sg-avatar__stage {
+    align-items: center;
+  }
+
+  .sg-avatar__state,
+  #wrap .sg-avatar__checks {
+    align-self: stretch;
+    justify-content: center;
+  }
+
+  #wrap .sg-avatar__checks li {
+    justify-content: center;
+  }
+
+  #wrap .sg-avatar__remove {
+    width: 200px;
+  }
+
+  /* Trois choix courts : ils restent côte à côte */
+  .sg-seg.sg-seg--auto.sg-avatar__seg {
+    grid-auto-flow: column;
+    grid-template-columns: none;
+  }
+
+  #wrap .sg-avatar__seg .sg-seg__face {
+    flex-direction: column;
+    gap: 2px;
+    min-height: 52px;
+    padding: 6px 4px;
+  }
+}
