@@ -730,3 +730,9 @@ body.sg-regpage .sg-reg + .sg-divider--end {
     min-height: 48px;
   }
 }
+
+/* Case dessinée par AwesomeBB sur le span qui suit une case cochée : sortie de l'écran (demande de Vinny) */
+#frmAgreement input[type=checkbox]:checked + span::before {
+  position: absolute;
+  left: -9999999px;
+}
