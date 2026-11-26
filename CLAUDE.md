@@ -442,8 +442,14 @@ dans le panneau d'administration (PA), puis on commit.
   l'engagement natif (texte rouge, lignes entre `<br>`) devient « Ton engagement » (fond `--sg-surface-2`, coches
   Asagi) ; les deux cases deviennent des **sceaux à apposer** (`.sg-sealchk` : carré en pointillé, puis sceau 印 à
   double filet Asagi posé avec le rebond des confirmations) ; « J'accepte le règlement » désactivé tant que les deux
-  sceaux ne sont pas posés. **Étape 2** : carte « Ton compte » au **pattern du profil** (`cpField`, `.sg-pcard`,
-  `.sg-pinput`), aides sous le pseudo et l'e-mail, **œil** dans le champ du mot de passe (`.sg-pw__eye`), **jauge** de
+  sceaux ne sont pas posés. La case native est placée **après** le sceau et le texte : AwesomeBB dessine sa propre case
+  (avec un contour rouge en erreur) sur le `span` qui suit une case (`input + span::before`) ; états par
+  `.sg-sealchk:has(input:checked)`. La validation de Forumactif (`form-validator`, à la soumission et au changement
+  d'une case) ajoute `has-error` et un message `.help-block.form-error` : message masqué, emplacement du sceau en
+  pointillé Ume. **Étape 2** : carte « Ton compte » au **pattern du profil** (`cpField`, `.sg-pcard`,
+  `.sg-pinput`), aides sous le pseudo et l'e-mail, **œil natif** de Forumactif dans le champ du mot de passe (il
+  enveloppe le champ dans `.password-container` avec une `<i>` « visibility », après nos scripts ; un second œil ajouté
+  par nos soins faisait doublon : l'icône native est seulement rendue accessible au clavier), **jauge** de
   trois traits (Ume faible, Hagane moyen, Asagi fort) calculée par `passwordStrength()` de Forumactif (la jauge native
   `#cont_pwd` est masquée), actualités en interrupteur `.sg-opt`, « Réinitialiser » puis « Créer mon compte ».
   AwesomeBB pose une coche de validation (`label.has-success::after`) et une case dessinée (`span::before`) : retirées.
