@@ -10431,7 +10431,7 @@ body.sg-cppage .sg-cpage + .sg-divider--end {
   grid-row: 2;
   align-self: start;
   margin: 4px 0 0;
-  color: var(--sg-accent-2);
+  color: var(--sg-accent-2) !important; /* form-validator impose son rouge */
   font-size: 0.82rem;
   font-weight: 700;
   line-height: 1.4;
@@ -10588,7 +10588,7 @@ body.sg-cppage .sg-cpage + .sg-divider--end {
 #wrap .sg-reg .sg-pfield .help-block.form-error {
   flex: 1 1 100%;
   margin: 0;
-  color: var(--sg-accent-2);
+  color: var(--sg-accent-2) !important;
   font-size: 0.82rem;
   font-weight: 700;
 }
