@@ -426,7 +426,26 @@ dans le panneau d'administration (PA), puis on commit.
   **Boutons** à droite sous un filet : « Réinitialiser » (contour) puis « Enregistrer » (plein ; `<button>` de même nom
   et valeur que le bouton natif). Envoi normal : page de confirmation « Profil enregistré » (« Modifier mon profil » en
   premier). En bas : séparateur de fin et fil d'Ariane repris. Les autres onglets reçoivent l'habillage générique
-  (onglets, cartes, champs, radios) ; leurs contenus particuliers (avatar, signature, listes) restent à reprendre.
+  (onglets, cartes, champs, radios) ; leurs contenus particuliers (signature, listes) restent à reprendre.
+  **Ordre des onglets** (`CP_ORDER`) : Informations, Avatar, Signature | Préférences, Notifications | Sujets surveillés,
+  Favoris, un filet entre les groupes (`.sg-ptabs__sep`, vertical dans la bande mobile) ; onglet inconnu après, dans
+  l'ordre natif (les pages `/uN` ne sont pas réordonnées).
+- **Onglet « Avatar » : portrait « nigao-e »** 似顔絵 (`layout.js`, fonction `avatarPanel`, + `67-avatar.css`) : pattern
+  **réservé au choix de l'avatar** (`page_profil=avatars`). Carte « Ton portrait » : **portrait 200 × 400** au style
+  de l'avatar des messages (arrondi 12px, sans cadre, `object-fit: cover`) | **« Nouveau portrait »** en contrôle
+  segmenté **Fichier** (zone de dépôt : clic ou glisser-déposer, nom et poids du fichier, ✕ pour le retirer) /
+  **Importer** (adresse copiée sur le forum, `avatarurl`) / **Lier** (adresse liée, `avatarremoteurl`), puis le rappel
+  du format (200 × 400 conseillé ; maximum et poids lus dans la consigne native : 200 × 600 px, 64 Ko).
+  **Aucun champ natif à l'écran** : la case `avatardel`, l'`<input type="file">` et les deux adresses restent dans
+  le formulaire, hors de l'écran (`.sg-avatar__native`) ; radios du contrôle segmenté hors formulaire
+  (`form="sg-none"`). **Une seule source** : en remplir une vide les autres et annule le retrait. **Aperçu** immédiat
+  (fichier par `URL.createObjectURL`, adresse après 350ms) avec liseré Asagi et « Aperçu, pas encore enregistré » ;
+  sous le portrait, les dimensions (« format idéal » à 200 × 400, « bonnes proportions » en 1:2, sinon « recadrée à
+  l'affichage »), « Trop grande » / « Trop lourde » en Ume, « Image introuvable » (cadre en pointillé). **« Retirer mon
+  portrait »** (bouton au contour, Ume au survol) coche `avatardel`, vide les sources, cadre « Sans portrait » ;
+  « Garder mon portrait » l'annule. « Réinitialiser » remet l'écran d'après les champs natifs. Boutons du bas
+  inchangés (demande de Vinny). Attention : le bouton natif s'appelle `reset`, donc `form.reset` est masqué
+  (`HTMLFormElement.prototype.reset.call(form)`). Non testé : l'enregistrement réel (envoi, copie, erreurs de taille).
 - **Inscription : serment « kishōmon »** 起請文 (le serment écrit qu'on scellait de son sceau) (`layout.js`, fonctions
   `regPage`, `regOath`, `regAccount`, `sealCheck`, `regDivider`, + `65-register.css`) : pattern **réservé à
   l'inscription** (`/register`). Étape 1 : `form#frmAgreement` (GET `/register`, `step=2`, cases `agreement=1` et
@@ -510,7 +529,7 @@ dans le panneau d'administration (PA), puis on commit.
   ligne changés en `<br>`), clair, sombre, largeur réduite ; **pas encore posté pour de vrai** (un élément vide comme
   `.sgc-notch` ou `.sgc-step__mark` pourrait être retiré par Forumactif).
   Récapitulatif des patterns : **forum** (accueil) = image en fond + panneau + kanji ; **sous-forum** = ema
-  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ; **confirmation** = hanko (sceau au kanji) ; **paramètres du profil** = ninbetsu-chō (onglets collants + cartes) ; **inscription** = kishōmon (étapes collantes, articles en kanji, sceaux à apposer) ; **connexion** = sekisho (formulaire | carte d'à-côté sur seigaiha) ; **sondage** = tōhyō (carte sur shippō) ; **fiche de personnage** = jinbutsu (codes `.sgc-`) ;
+  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ; **confirmation** = hanko (sceau au kanji) ; **paramètres du profil** = ninbetsu-chō (onglets collants + cartes) ; **avatar** = nigao-e (portrait 200 × 400 + sources) ; **inscription** = kishōmon (étapes collantes, articles en kanji, sceaux à apposer) ; **connexion** = sekisho (formulaire | carte d'à-côté sur seigaiha) ; **sondage** = tōhyō (carte sur shippō) ; **fiche de personnage** = jinbutsu (codes `.sgc-`) ;
   **permission** = étiquette tegata aux coins coupés.
 - **Catégories de l'accueil** (`forums.js` + `40-zones.css`) : à gauche un sélecteur collant (Gestion, Hi, Mizu, Kaze,
   Kaminari, Tsuchi no Kuni, Shōkoku — « les petits pays », ex-Reste du Sekai) au style des raccourcis de l'Annexe, pastille = badge pour Gestion
