@@ -418,6 +418,17 @@
   font-weight: 400;
 }
 
+/* Validation de Forumactif (form-validator) : son message répète la consigne du bouton ; seule la couleur
+   signale la case oubliée */
+#wrap .sg-sealchk .help-block,
+#wrap .sg-sealchk .form-error {
+  display: none !important;
+}
+
+#wrap .sg-sealchk.has-error .sg-sealchk__seal {
+  border-color: var(--sg-accent-2);
+}
+
 #wrap .sg-sealchk:hover {
   background: var(--sg-surface-2);
 }
@@ -453,7 +464,7 @@
 }
 
 /* Sceau apposé : double filet Asagi, comme le sceau 済 des confirmations, posé avec un rebond */
-.sg-sealchk input:checked + .sg-sealchk__seal {
+.sg-sealchk:has(input:checked) .sg-sealchk__seal {
   border-style: solid;
   border-color: var(--sg-accent-1);
   background: color-mix(in srgb, var(--sg-accent-1) 14%, transparent);
@@ -461,11 +472,11 @@
   animation: sg-notice-stamp 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) both;
 }
 
-.sg-sealchk input:checked + .sg-sealchk__seal .sg-sealchk__kanji {
+.sg-sealchk:has(input:checked) .sg-sealchk__kanji {
   opacity: 1;
 }
 
-.sg-sealchk input:focus-visible + .sg-sealchk__seal {
+.sg-sealchk:has(input:focus-visible) .sg-sealchk__seal {
   outline: 2px solid var(--sg-accent-1);
   outline-offset: 3px;
 }
@@ -477,7 +488,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sg-sealchk input:checked + .sg-sealchk__seal {
+  .sg-sealchk:has(input:checked) .sg-sealchk__seal {
     animation: none;
     transform: rotate(-6deg);
   }
@@ -550,45 +561,24 @@
   border-radius: 14px;
 }
 
-/* Mot de passe : l'œil est un bouton, dans le champ */
-#wrap .sg-reg .password-container {
-  position: relative;
+/* Erreurs de saisie de Forumactif (form-validator) sous un champ */
+#wrap .sg-reg .sg-pfield .help-block.form-error {
   flex: 1 1 100%;
-  width: 100%;
-}
-
-#wrap .sg-reg .password-container input.sg-pinput {
-  padding-right: 52px;
-}
-
-#wrap .sg-pw__eye {
-  position: absolute;
-  top: 50%;
-  right: 6px;
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
   margin: 0;
-  padding: 0;
-  border: 0;
+  color: var(--sg-accent-2);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+#wrap .sg-reg input.sg-pinput.error {
+  border-color: var(--sg-accent-2);
+}
+
+/* L'œil de Forumactif (dans .password-container) : cible au clavier */
+#wrap .sg-reg .password-container > i:focus-visible {
   border-radius: 50%;
-  background: none;
-  color: var(--sg-text-muted);
-  cursor: pointer;
-  transform: translateY(-50%);
-}
-
-#wrap .sg-pw__eye:hover,
-#wrap .sg-pw__eye:focus-visible {
-  background: var(--sg-surface-2);
-  color: var(--sg-text);
-}
-
-#wrap .sg-pw__eye .material-symbols-outlined {
-  position: static;
-  font-size: 20px;
-  transform: none;
+  outline: 2px solid var(--sg-accent-1);
+  outline-offset: 4px;
 }
 
 /* Jauge de force : trois traits, Ume (faible), Hagane (moyen), Asagi (fort) */

@@ -3831,7 +3831,6 @@
   function sealCheck(input, content) {
     var el = uiEl;
     var row = el('label', 'sg-sealchk');
-    row.appendChild(input);
     var seal = el('span', 'sg-sealchk__seal');
     seal.setAttribute('aria-hidden', 'true');
     seal.appendChild(el('span', 'sg-sealchk__kanji', '印'));
@@ -3839,6 +3838,8 @@
     var text = el('span', 'sg-sealchk__text');
     while (content.firstChild) text.appendChild(content.firstChild);
     row.appendChild(text);
+    /* La case en dernier : AwesomeBB dessine sa propre case sur le « span » qui suit une case (input + span) */
+    row.appendChild(input);
     return row;
   }
 
@@ -4096,28 +4097,24 @@
       if (field && !field.querySelector('.sg-pfield__hint')) field.appendChild(el('p', 'sg-pfield__hint', HINTS[n]));
     });
 
-    /* Mot de passe : l'œil dans le champ, et la jauge de force lue sur les indicateurs natifs */
+    /* Mot de passe : la jauge de force ; l'œil est celui de Forumactif, qui enveloppe le champ dans
+       .password-container avec une icône « visibility » (posé après nos scripts) : il est rendu accessible au clavier */
     var pw = content.querySelector('#password_reg');
     var pwField = pw && pw.closest('.sg-pfield');
     if (pw && pwField) {
       pwField.classList.add('sg-pfield--wide');
-      var box = el('div', 'password-container');
-      pw.parentNode.insertBefore(box, pw);
-      box.appendChild(pw);
-      var eye = el('button', 'sg-pw__eye');
-      eye.type = 'button';
-      eye.setAttribute('aria-label', 'Afficher le mot de passe');
-      eye.setAttribute('aria-pressed', 'false');
-      eye.appendChild(ico('visibility'));
-      box.appendChild(eye);
-      eye.addEventListener('click', function () {
-        var shown = pw.type === 'text';
-        pw.type = shown ? 'password' : 'text';
-        eye.setAttribute('aria-pressed', String(!shown));
-        eye.setAttribute('aria-label', shown ? 'Afficher le mot de passe' : 'Masquer le mot de passe');
-        eye.firstChild.textContent = shown ? 'visibility' : 'visibility_off';
-        pw.focus();
-      });
+      var eyeA11y = function () {
+        var i = pwField.querySelector('.password-container > i');
+        if (!i || i.getAttribute('role')) return;
+        i.setAttribute('role', 'button');
+        i.setAttribute('tabindex', '0');
+        i.setAttribute('aria-label', 'Afficher ou masquer le mot de passe');
+        i.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); i.click(); }
+        });
+      };
+      if (window.MutationObserver) new MutationObserver(eyeA11y).observe(pwField, { childList: true, subtree: true });
+      eyeA11y();
       var nat = document.getElementById('cont_pwd');
       if (nat) nat.classList.add('sg-hidden');
       var meter = el('div', 'sg-pwmeter');
