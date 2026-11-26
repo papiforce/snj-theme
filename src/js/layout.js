@@ -4129,21 +4129,17 @@
       var mLabel = el('span', 'sg-pwmeter__label', 'Force du mot de passe');
       meter.appendChild(mLabel);
       pwField.appendChild(meter);
-      var LEVELS = [['pwd_bad', 1, 'Faible'], ['pwd_middle', 2, 'Moyen'], ['pwd_good', 3, 'Fort']];
+      /* Même calcul que la jauge native (passwordStrength de Forumactif : bad / good / strong) */
+      var LEVELS = { bad: [1, 'faible'], good: [2, 'moyen'], strong: [3, 'fort'] };
+      var userIn = content.querySelector('input[name="username"]');
       var read = function () {
-        var level = 0, text = 'Force du mot de passe';
-        if (pw.value) LEVELS.forEach(function (l) {
-          var d = document.getElementById(l[0]);
-          if (d && d.style.display && d.style.display !== 'none') { level = l[1]; text = l[2]; }
-        });
-        meter.setAttribute('data-level', String(level));
-        mLabel.textContent = level ? 'Mot de passe ' + text.toLowerCase() : text;
+        var res = pw.value && typeof window.passwordStrength === 'function' ? window.passwordStrength(pw.value, userIn ? userIn.value : '') : '';
+        var l = LEVELS[res];
+        meter.setAttribute('data-level', l ? String(l[0]) : '0');
+        mLabel.textContent = l ? 'Mot de passe ' + l[1] : 'Force du mot de passe';
       };
-      if (window.MutationObserver) {
-        var mo = new MutationObserver(read);
-        LEVELS.forEach(function (l) { var d = document.getElementById(l[0]); if (d) mo.observe(d, { attributes: true, attributeFilter: ['style'] }); });
-      }
-      pw.addEventListener('input', function () { setTimeout(read, 0); });
+      pw.addEventListener('input', read);
+      if (userIn) userIn.addEventListener('input', read);
       read();
     }
     /* Boutons : « Réinitialiser » (contour) puis « Créer mon compte » (plein), à droite sous un filet */
