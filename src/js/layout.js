@@ -443,6 +443,7 @@
     writePage();
     profilePage();
     regPage();
+    authPage();
     noticePage();
     errorBlocks();
     pollCards();
@@ -4158,6 +4159,193 @@
       /* Réinitialiser : la jauge se vide aussi */
       form.addEventListener('reset', function () { setTimeout(function () { if (pw) pw.dispatchEvent(new Event('input')); }, 0); });
     }
+  }
+
+  /* --------------------------------------------------------------------
+     Connexion et mot de passe oublié : poste-frontière « sekisho » 関所 (où l'on présentait son laissez-passer).
+     Pattern réservé à /login (bloc .block-login avec #panel-password) et à /profile?mode=sendpassword
+     (form[name="form_recupmdp"]). Formulaires natifs gardés (noms, champs cachés, envoi) ; seul l'habillage change.
+     Carte du formulaire | carte d'à-côté (inscription ou retour à la connexion), sur seigaiha (parcours).
+     L'onglet « Lien par e-mail » de Forumactif est retiré (demande de Vinny).
+     -------------------------------------------------------------------- */
+  function authField(input, label, hint) {
+    var el = uiEl;
+    var field = el('div', 'sg-pfield');
+    if (!input.id) input.id = 'sg-auth-' + input.name;
+    var lab = el('label', 'sg-pfield__label', label);
+    lab.setAttribute('for', input.id);
+    field.appendChild(lab);
+    var control = el('div', 'sg-pfield__control');
+    input.parentNode.insertBefore(field, input);
+    control.appendChild(input);
+    field.appendChild(control);
+    input.classList.add('sg-pinput');
+    input.removeAttribute('placeholder');
+    input.required = true;
+    if (hint) field.appendChild(el('p', 'sg-pfield__hint', hint));
+    return field;
+  }
+
+  function authPage() {
+    var wrap = document.getElementById('wrap');
+    if (!wrap || document.querySelector('.sg-auth')) return;
+    var loginPanel = wrap.querySelector('.block-login #panel-password');
+    var recover = wrap.querySelector('form[name="form_recupmdp"]');
+    if (!loginPanel && !recover) return;
+    var el = uiEl, ico = uiIco;
+    var isLogin = !!loginPanel;
+    var block = (loginPanel || recover).closest('.block');
+    var form = loginPanel || recover;
+
+    var crumbsData = isLogin
+      ? [['/', 'Accueil', 'home'], [null, 'Connexion']]
+      : [['/', 'Accueil', 'home'], ['/login', 'Connexion'], [null, 'Mot de passe oublié']];
+
+    /* En-tête : séparateur avec le logo, fil d'Ariane, titre, description */
+    var topDiv = regDivider(true);
+    var head = el('section', 'sg-pagehead sg-pagehead--auth');
+    head.setAttribute('aria-label', 'En-tête de la page');
+    var crumbs = el('nav', 'sg-crumbs');
+    crumbs.setAttribute('aria-label', "Fil d'Ariane");
+    var ol = el('ol', 'sg-crumbs__list');
+    crumbsData.forEach(function (c) {
+      var li = el('li', 'sg-crumbs__item');
+      var a = el(c[0] ? 'a' : 'span', 'sg-crumbs__link' + (c[0] ? '' : ' sg-crumbs__here'));
+      if (c[2]) a.appendChild(ico(c[2]));
+      a.appendChild(el('span', null, c[1]));
+      if (c[0]) a.href = c[0]; else a.setAttribute('aria-current', 'page');
+      li.appendChild(a);
+      ol.appendChild(li);
+    });
+    crumbs.appendChild(ol);
+    head.appendChild(crumbs);
+    var row = el('div', 'sg-pagehead__row');
+    var h1 = el('h1', 'sg-pagehead__title');
+    h1.appendChild(el('span', 'sg-pagehead__text', isLogin ? 'Connexion' : 'Mot de passe oublié'));
+    row.appendChild(h1);
+    head.appendChild(row);
+    head.appendChild(el('div', 'sg-pagehead__desc', isLogin
+      ? 'Ravi de te revoir, shinobi. Présente-toi au poste pour reprendre ta route dans le Sekai.'
+      : 'Indique ton pseudo et ton adresse e-mail : un nouveau mot de passe t’y sera envoyé.'));
+
+    /* Grille : carte du formulaire | carte d'à-côté */
+    var page = el('div', 'sg-auth');
+    var main = el('section', 'sg-authcard');
+    main.setAttribute('aria-labelledby', 'sg-authcard-title');
+    var ttl = el('h2', 'sg-pcard__title');
+    ttl.id = 'sg-authcard-title';
+    ttl.appendChild(ico(isLogin ? 'login' : 'lock_reset'));
+    ttl.appendChild(el('span', null, isLogin ? 'Tes identifiants' : 'Ton compte'));
+    main.appendChild(ttl);
+    page.appendChild(main);
+
+    block.parentNode.insertBefore(topDiv, block);
+    block.parentNode.insertBefore(head, block);
+    block.parentNode.insertBefore(page, block);
+    main.appendChild(form);
+    form.classList.add('sg-authform');
+
+    if (isLogin) {
+      /* Un seul mode de connexion : l'onglet « Lien par e-mail » et son panneau sont retirés */
+      try { localStorage.setItem('fa_login_tab', 'tab-password'); } catch (e) {}
+      form.hidden = false;
+      var magic = block.querySelector('#panel-magic');
+      var tabs = block.querySelector('.login-tabs');
+      if (magic) magic.classList.add('sg-hidden');
+      if (tabs) tabs.classList.add('sg-hidden');
+
+      var user = form.querySelector('input[name="username"]');
+      var pass = form.querySelector('input[name="password"]');
+      var grid = el('div', 'sg-authform__fields');
+      form.insertBefore(grid, form.firstChild);
+      if (user) grid.appendChild(authField(user, 'Pseudo'));
+      if (pass) grid.appendChild(authField(pass, 'Mot de passe'));
+      if (user) user.setAttribute('autocomplete', 'username');
+      if (pass) pass.setAttribute('autocomplete', 'current-password');
+
+      /* « Connexion automatique » : interrupteur, comme les réglages de l'écritoire */
+      var auto = form.querySelector('input[name="autologin"]');
+      var autoLabel = auto && auto.closest('label');
+      if (auto) {
+        var opt = el('label', 'sg-opt sg-opt--wide');
+        opt.appendChild(auto);
+        opt.appendChild(el('span', 'sg-opt__text', 'Rester connecté sur cet appareil'));
+        var sw = el('span', 'sg-switch');
+        sw.setAttribute('aria-hidden', 'true');
+        sw.appendChild(el('span', 'sg-switch__thumb'));
+        opt.appendChild(sw);
+        grid.appendChild(opt);
+        if (autoLabel) autoLabel.remove();
+      }
+
+      /* Pied : « Mot de passe oublié ? » à gauche, « Se connecter » à droite, sous un filet */
+      var submit = form.querySelector('input[type="submit"][name="login"]');
+      var acts = el('div', 'sg-authform__actions');
+      var lost = block.querySelector('.login-footer a[href*="sendpassword"]');
+      var forgot = el('a', 'sg-authform__link', 'Mot de passe oublié ?');
+      forgot.href = lost ? lost.getAttribute('href') : '/profile?mode=sendpassword';
+      acts.appendChild(forgot);
+      if (submit) {
+        var btn = el('button', 'sg-pbtn');
+        btn.type = 'submit';
+        btn.name = submit.name;
+        btn.value = submit.value;
+        btn.appendChild(ico('login'));
+        btn.appendChild(el('span', null, 'Se connecter'));
+        submit.parentNode.replaceChild(btn, submit);
+        acts.appendChild(btn);
+      }
+      form.appendChild(acts);
+    } else {
+      var grid2 = el('div', 'sg-authform__fields');
+      form.insertBefore(grid2, form.firstChild);
+      var u2 = form.querySelector('input[name="username"]');
+      var e2 = form.querySelector('input[name="email"]');
+      if (u2) { grid2.appendChild(authField(u2, 'Pseudo')); u2.setAttribute('autocomplete', 'username'); }
+      if (e2) { grid2.appendChild(authField(e2, 'Adresse e-mail', 'Celle de ton compte : le nouveau mot de passe y sera envoyé.')); e2.setAttribute('autocomplete', 'email'); }
+      var sub2 = form.querySelector('input[type="submit"]');
+      var acts2 = el('div', 'sg-authform__actions');
+      var back = el('a', 'sg-authform__link', 'Retour à la connexion');
+      back.href = '/login';
+      acts2.appendChild(back);
+      if (sub2) {
+        var btn2 = el('button', 'sg-pbtn');
+        btn2.type = 'submit';
+        if (sub2.name) btn2.name = sub2.name;
+        btn2.value = sub2.value;
+        btn2.appendChild(ico('send'));
+        btn2.appendChild(el('span', null, 'Recevoir un nouveau mot de passe'));
+        sub2.parentNode.replaceChild(btn2, sub2);
+        acts2.appendChild(btn2);
+      }
+      form.appendChild(acts2);
+    }
+
+    /* Carte d'à-côté, sur seigaiha (parcours) : s'inscrire, ou revenir à la connexion */
+    var side = el('aside', 'sg-authside sg-pat sg-pat--seigaiha');
+    side.appendChild(el('span', 'sg-authside__eyebrow', isLogin ? '新 · Nouveau shinobi ?' : '入 · Tu t’en souviens ?'));
+    side.appendChild(el('h2', 'sg-authside__title', isLogin ? 'Rejoindre le Sekai' : 'Revenir au poste'));
+    side.appendChild(el('p', 'sg-authside__text', isLogin
+      ? 'Deux étapes : prêter serment sur le règlement, puis créer ton compte. Ta fiche de présentation t’attendra ensuite.'
+      : 'Si ton mot de passe t’est revenu, reconnecte-toi directement.'));
+    var cta = el('a', 'sg-pbtn sg-pbtn--ghost');
+    var regLink = block.querySelector('.login-footer a[href^="/register"]');
+    cta.href = isLogin ? (regLink ? regLink.getAttribute('href') : '/register') : '/login';
+    cta.appendChild(ico(isLogin ? 'how_to_reg' : 'login'));
+    cta.appendChild(el('span', null, isLogin ? 'S’inscrire' : 'Se connecter'));
+    side.appendChild(cta);
+    page.appendChild(side);
+
+    /* Reste du bloc natif (titre, pied « S'enregistrer / Récupérer mon mot de passe ») : masqué */
+    block.classList.add('sg-hidden');
+
+    var endDiv = regDivider(false);
+    page.parentNode.insertBefore(endDiv, page.nextSibling);
+    var endNav = el('nav', 'sg-crumbs sg-crumbs--end');
+    endNav.setAttribute('aria-label', "Fil d'Ariane");
+    endNav.appendChild(ol.cloneNode(true));
+    endDiv.parentNode.insertBefore(endNav, endDiv.nextSibling);
+    document.body.classList.add('sg-authpage', 'sg-pagehead-on');
   }
 
   function profilePage() {

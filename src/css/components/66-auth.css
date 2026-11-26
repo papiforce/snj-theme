@@ -1,0 +1,187 @@
+/* ==========================================================================
+   SNJ — Connexion et mot de passe oublié : poste-frontière « sekisho » 関所
+   Construit par src/js/layout.js (authPage, authField). Pattern réservé à /login et à
+   /profile?mode=sendpassword.
+     1. En-tête au pattern des forums : fil d'Ariane, titre, description.
+     2. Grille : carte du formulaire (champs du profil, interrupteur, lien + bouton sous un filet)
+        | carte d'à-côté sur seigaiha (parcours) : s'inscrire, ou revenir à la connexion.
+     3. L'onglet « Lien par e-mail » de Forumactif est retiré.
+   ========================================================================== */
+
+.sg-authpage .sg-hidden {
+  display: none !important;
+}
+
+.sg-auth {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr);
+  gap: 24px;
+  align-items: start;
+  font-size: 16px; /* AwesomeBB réduit la taille du texte dans #wrap */
+  line-height: 1.6;
+}
+
+/* --- Carte du formulaire ---------------------------------------------------------------------------------- */
+.sg-authcard {
+  padding: 28px;
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-surface);
+}
+
+#wrap .sg-authform {
+  display: block;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.sg-authform__fields {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Interrupteur : sans la coche de validation d'AwesomeBB */
+#wrap .sg-auth .sg-opt::before,
+#wrap .sg-auth .sg-opt::after,
+#wrap .sg-auth .sg-opt__text::before,
+#wrap .sg-auth .sg-opt__text::after {
+  content: none;
+  display: none;
+}
+
+/* Erreurs de saisie de Forumactif (form-validator) sous un champ */
+#wrap .sg-auth .sg-pfield .help-block.form-error {
+  flex: 1 1 100%;
+  margin: 0;
+  color: var(--sg-accent-2) !important;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+#wrap .sg-auth input.sg-pinput.error {
+  border-color: var(--sg-accent-2);
+}
+
+#wrap .sg-auth .sg-pfield .help-block::before,
+#wrap .sg-auth .sg-pfield .help-block::after {
+  content: none;
+  display: none;
+}
+
+/* Pied : lien à gauche, bouton à droite, sous un filet */
+.sg-authform__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--sg-border);
+}
+
+#wrap a.sg-authform__link,
+#wrap a.sg-authform__link:visited {
+  color: var(--sg-text-muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+#wrap a.sg-authform__link:hover,
+#wrap a.sg-authform__link:focus-visible {
+  color: var(--sg-text);
+}
+
+/* --- Carte d'à-côté (seigaiha : parcours) ----------------------------------------------------------------- */
+.sg-authside {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  overflow: hidden;
+  padding: 28px;
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-surface);
+}
+
+.sg-authside__eyebrow {
+  color: var(--sg-text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+#wrap .sg-authside__title {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--sg-text);
+  font-family: var(--sg-font-display);
+  font-size: 1.5rem;
+  font-weight: 400;
+  line-height: 1.2;
+  text-transform: none;
+}
+
+#wrap .sg-authside__title::after {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 3px;
+  margin-top: 12px;
+  border-radius: 3px;
+  background: var(--sg-primary);
+}
+
+#wrap .sg-authside__text {
+  margin: 4px 0 10px;
+  color: var(--sg-text-muted);
+  font-size: 0.95rem;
+  line-height: 1.65;
+}
+
+/* --- Bas de page ------------------------------------------------------------------------------------------ */
+body.sg-authpage .sg-auth + .sg-divider--end {
+  margin-top: 0;
+}
+
+/* --- Responsive ------------------------------------------------------------------------------------------- */
+@media (max-width: 900px) {
+  .sg-auth {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .sg-authcard,
+  .sg-authside {
+    padding: 22px 16px;
+  }
+
+  /* Bouton au-dessus, en pleine largeur, puis le lien */
+  .sg-authform__actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  #wrap .sg-auth .sg-pbtn {
+    width: 100%;
+    min-height: 48px;
+  }
+
+  #wrap a.sg-authform__link {
+    padding: 10px 0;
+  }
+}
