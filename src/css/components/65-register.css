@@ -1,0 +1,690 @@
+/* ==========================================================================
+   SNJ — Inscription : serment « kishōmon » 起請文
+   Construit par src/js/layout.js (regPage, regOath, regAccount, sealCheck). Pattern réservé à /register.
+     1. En-tête au pattern des forums : fil d'Ariane « Accueil › Inscription », « Rejoindre le Sekai ».
+     2. Grille : étapes en colonne collante (248px, comme les onglets du profil) | contenu.
+     3. Étape 1 : le règlement sur kikkō (références durables), articles numérotés en kanji, l'engagement,
+        deux sceaux à apposer (cases natives), « J'accepte le règlement » actif une fois les deux posés.
+     4. Étape 2 : carte « Ton compte » au pattern du profil, œil et jauge de force du mot de passe,
+        interrupteur pour les actualités, « Créer mon compte ».
+   ========================================================================== */
+
+.sg-regpage .sg-hidden {
+  display: none !important;
+}
+
+/* Le formulaire natif et ses blocs ne gardent ni fond, ni contour, ni marge */
+#wrap .sg-reg #agreement,
+#wrap .sg-reg #frmAgreement,
+#wrap .sg-reg #frmAgreement > .block,
+#wrap .sg-reg #frmAgreement .block-content {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  color: var(--sg-text);
+}
+
+.sg-reg {
+  display: grid;
+  grid-template-columns: 248px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  font-size: 16px; /* AwesomeBB réduit la taille du texte dans #wrap */
+  line-height: 1.6;
+}
+
+.sg-reg__main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+/* --- Étapes : colonne collante, mon au kanji reliés par un fil ------------------------------------------ */
+.sg-regsteps {
+  position: sticky;
+  top: 24px;
+  padding: 20px 18px;
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-surface);
+}
+
+#wrap .sg-regsteps__list {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#wrap .sg-regsteps__item {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* Fil entre deux étapes */
+#wrap .sg-regsteps__item:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 46px;
+  bottom: -18px;
+  left: 20px;
+  width: 1px;
+  background: var(--sg-border);
+}
+
+.sg-regsteps__mon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  box-sizing: border-box;
+  border: 1px solid var(--sg-border-strong, var(--sg-border));
+  border-radius: 50%;
+  color: var(--sg-text-muted);
+}
+
+.sg-regsteps__mon > * {
+  transition: none;
+}
+
+.sg-regsteps__kanji {
+  font-family: var(--sg-font-jp);
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.sg-regsteps__mon .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.sg-regsteps__item.is-current .sg-regsteps__mon {
+  border-color: var(--sg-contrast);
+  background: var(--sg-contrast);
+  color: var(--sg-on-contrast);
+}
+
+.sg-regsteps__item.is-done .sg-regsteps__mon {
+  border-color: var(--sg-accent-1);
+  background: color-mix(in srgb, var(--sg-accent-1) 16%, transparent);
+  color: var(--sg-accent-1);
+}
+
+.sg-regsteps__item.is-done .sg-regsteps__mon .material-symbols-outlined {
+  font-variation-settings: "FILL" 1, "wght" 600;
+}
+
+.sg-regsteps__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding-top: 1px;
+}
+
+.sg-regsteps__num {
+  color: var(--sg-text-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.sg-regsteps__name {
+  color: var(--sg-text-muted);
+  font-family: var(--sg-font-display);
+  font-size: 1.15rem;
+  line-height: 1.3;
+}
+
+.sg-regsteps__item.is-current .sg-regsteps__name,
+.sg-regsteps__item.is-done .sg-regsteps__name {
+  color: var(--sg-text);
+}
+
+.sg-regsteps__hint {
+  color: var(--sg-text-muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+#wrap .sg-regsteps__login {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  margin: 22px 0 0;
+  padding: 16px 0 0;
+  border-top: 1px solid var(--sg-border);
+  color: var(--sg-text-muted);
+  font-size: 0.88rem;
+}
+
+#wrap .sg-regsteps__login a {
+  color: var(--sg-text);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* --- Étape 1 : le serment ------------------------------------------------------------------------------- */
+.sg-oath {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: 28px;
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-surface);
+}
+
+/* Kikkō (références durables : le règlement), net à droite, estompé vers la gauche, sur le haut de la carte */
+.sg-oath::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: -1;
+  height: 260px;
+  background: color-mix(in srgb, var(--sg-primary) 18%, transparent);
+  pointer-events: none;
+  -webkit-mask:
+    linear-gradient(to left, #000, transparent 65%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34.64' height='60' viewBox='0 0 34.64 60'%3E%3Cpath d='M17.32 0L34.64 10V30L17.32 40L0 30V10Z M17.32 40V60' fill='none' stroke='%23000' stroke-width='1'/%3E%3C/svg%3E") repeat;
+  -webkit-mask-composite: source-in;
+  mask:
+    linear-gradient(to left, #000, transparent 65%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34.64' height='60' viewBox='0 0 34.64 60'%3E%3Cpath d='M17.32 0L34.64 10V30L17.32 40L0 30V10Z M17.32 40V60' fill='none' stroke='%23000' stroke-width='1'/%3E%3C/svg%3E") repeat;
+  mask-composite: intersect;
+}
+
+.sg-oath::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: -1;
+  height: 260px;
+  background: linear-gradient(to bottom, transparent 40%, var(--sg-surface));
+  pointer-events: none;
+}
+
+.sg-oath__head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 26px;
+}
+
+.sg-oath__eyebrow {
+  color: var(--sg-text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+#wrap .sg-oath__title {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--sg-text);
+  font-family: var(--sg-font-display);
+  font-size: 1.7rem;
+  font-weight: 400;
+  line-height: 1.2;
+  text-transform: none;
+}
+
+#wrap .sg-oath__title::after {
+  content: "";
+  display: block;
+  width: 56px;
+  height: 3px;
+  margin-top: 14px;
+  border-radius: 3px;
+  background: var(--sg-primary);
+}
+
+/* Articles numérotés en kanji (一, 二, 三…) */
+#wrap .sg-oath__articles {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#wrap .sg-oath__article {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.sg-oath__num {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--sg-primary) 16%, transparent);
+  color: var(--sg-primary);
+  font-family: var(--sg-font-jp);
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.sg-oath__body {
+  min-width: 0;
+}
+
+#wrap .sg-oath__artitle {
+  margin: 6px 0 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--sg-text);
+  font-family: var(--sg-font-display);
+  font-size: 1.2rem;
+  font-weight: 400;
+  line-height: 1.3;
+  text-transform: none;
+}
+
+#wrap p.sg-oath__text {
+  margin: 0 0 10px;
+  color: var(--sg-text-muted);
+  font-size: 0.95rem;
+  line-height: 1.75;
+}
+
+#wrap p.sg-oath__text:last-child {
+  margin-bottom: 0;
+}
+
+#wrap .sg-oath__text strong,
+#wrap .sg-oath__text b {
+  color: var(--sg-text);
+  font-weight: 700;
+}
+
+#wrap .sg-oath__text a {
+  color: var(--sg-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* L'engagement */
+.sg-oath__vows {
+  margin: 28px 0 0;
+  padding: 20px 22px;
+  border-radius: 14px;
+  background: var(--sg-surface-2);
+}
+
+#wrap .sg-oath__vowhead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 6px;
+  color: var(--sg-text);
+  font-family: var(--sg-font-display);
+  font-size: 1.15rem;
+}
+
+.sg-oath__vowhead .material-symbols-outlined {
+  color: var(--sg-accent-1);
+  font-size: 22px;
+}
+
+#wrap .sg-oath__vowintro {
+  margin: 0 0 10px;
+  color: var(--sg-text-muted);
+  font-size: 0.92rem;
+}
+
+#wrap .sg-oath__vowlist {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#wrap .sg-oath__vow {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: var(--sg-text);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.sg-oath__vow .material-symbols-outlined {
+  flex: none;
+  margin-top: 2px;
+  color: var(--sg-accent-1);
+  font-size: 20px;
+}
+
+/* --- Sceaux à apposer (cases natives) ------------------------------------------------------------------ */
+.sg-oath__seals {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+
+#wrap .sg-sealchk {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--sg-border);
+  border-radius: 14px;
+  color: var(--sg-text);
+  font-size: 0.92rem;
+  font-weight: 400;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+#wrap .sg-sealchk:hover {
+  background: var(--sg-surface-2);
+}
+
+#wrap .sg-sealchk input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Emplacement du sceau : carré en pointillé, vide tant que la case n'est pas cochée */
+.sg-sealchk__seal {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  box-sizing: border-box;
+  border: 2px dashed var(--sg-border-strong, var(--sg-border));
+  border-radius: 10px;
+  color: var(--sg-accent-1);
+}
+
+.sg-sealchk__kanji {
+  font-family: var(--sg-font-display);
+  font-size: 1.45rem;
+  line-height: 1;
+  opacity: 0;
+  transition: none;
+}
+
+/* Sceau apposé : double filet Asagi, comme le sceau 済 des confirmations, posé avec un rebond */
+.sg-sealchk input:checked + .sg-sealchk__seal {
+  border-style: solid;
+  border-color: var(--sg-accent-1);
+  background: color-mix(in srgb, var(--sg-accent-1) 14%, transparent);
+  box-shadow: inset 0 0 0 3px var(--sg-surface), inset 0 0 0 4px color-mix(in srgb, var(--sg-accent-1) 55%, transparent);
+  animation: sg-notice-stamp 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+.sg-sealchk input:checked + .sg-sealchk__seal .sg-sealchk__kanji {
+  opacity: 1;
+}
+
+.sg-sealchk input:focus-visible + .sg-sealchk__seal {
+  outline: 2px solid var(--sg-accent-1);
+  outline-offset: 3px;
+}
+
+#wrap .sg-sealchk__text a {
+  color: var(--sg-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sg-sealchk input:checked + .sg-sealchk__seal {
+    animation: none;
+    transform: rotate(-6deg);
+  }
+}
+
+/* --- Boutons ---------------------------------------------------------------------------------------------- */
+.sg-oath__actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--sg-border);
+}
+
+#wrap .sg-reg .sg-pbtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* --- Étape 2 : la carte du compte (pattern du profil) ----------------------------------------------------- */
+#wrap .sg-reg .block.sg-pcard {
+  margin: 0;
+  padding: 28px;
+  border: 0;
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-surface);
+  box-shadow: none;
+}
+
+#wrap .sg-reg .sg-pcard > .block-content {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+#wrap .sg-reg .sg-pactions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  margin: 24px 0 0;
+  padding: 20px 0 0;
+  border: 0;
+  border-top: 1px solid var(--sg-border);
+  background: none;
+}
+
+/* Interrupteur sur toute la largeur de la carte */
+#wrap .sg-opt.sg-opt--wide {
+  grid-column: 1 / -1;
+  justify-content: space-between;
+  min-height: 48px;
+  padding: 0 16px;
+  border-radius: 14px;
+}
+
+/* Mot de passe : l'œil est un bouton, dans le champ */
+#wrap .sg-reg .password-container {
+  position: relative;
+  flex: 1 1 100%;
+  width: 100%;
+}
+
+#wrap .sg-reg .password-container input.sg-pinput {
+  padding-right: 52px;
+}
+
+#wrap .sg-pw__eye {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--sg-text-muted);
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+#wrap .sg-pw__eye:hover,
+#wrap .sg-pw__eye:focus-visible {
+  background: var(--sg-surface-2);
+  color: var(--sg-text);
+}
+
+#wrap .sg-pw__eye .material-symbols-outlined {
+  position: static;
+  font-size: 20px;
+  transform: none;
+}
+
+/* Jauge de force : trois traits, Ume (faible), Hagane (moyen), Asagi (fort) */
+.sg-pwmeter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sg-pwmeter__bars {
+  display: grid;
+  flex: none;
+  grid-template-columns: repeat(3, 40px);
+  gap: 4px;
+}
+
+.sg-pwmeter__bar {
+  height: 4px;
+  border-radius: 4px;
+  background: var(--sg-border);
+}
+
+.sg-pwmeter__label {
+  color: var(--sg-text-muted);
+  font-size: 0.82rem;
+}
+
+.sg-pwmeter[data-level="1"] { --pw: var(--sg-accent-2); }
+.sg-pwmeter[data-level="2"] { --pw: var(--sg-primary); }
+.sg-pwmeter[data-level="3"] { --pw: var(--sg-accent-1); }
+
+.sg-pwmeter[data-level="1"] .sg-pwmeter__bar:nth-child(-n + 1),
+.sg-pwmeter[data-level="2"] .sg-pwmeter__bar:nth-child(-n + 2),
+.sg-pwmeter[data-level="3"] .sg-pwmeter__bar {
+  background: var(--pw);
+}
+
+.sg-pwmeter:not([data-level="0"]) .sg-pwmeter__label {
+  color: var(--pw);
+  font-weight: 700;
+}
+
+/* --- Bas de page ------------------------------------------------------------------------------------------ */
+body.sg-regpage .sg-reg + .sg-divider--end {
+  margin-top: 0;
+}
+
+/* --- Responsive ------------------------------------------------------------------------------------------- */
+@media (max-width: 900px) {
+  .sg-reg {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  /* Étapes côte à côte en haut, sans les aides */
+  .sg-regsteps {
+    position: static;
+    padding: 14px 16px;
+  }
+
+  #wrap .sg-regsteps__list {
+    flex-direction: row;
+    gap: 12px;
+  }
+
+  #wrap .sg-regsteps__item {
+    flex: 1 1 0;
+    align-items: center;
+    gap: 10px;
+  }
+
+  #wrap .sg-regsteps__item:not(:last-child)::after {
+    display: none;
+  }
+
+  .sg-regsteps__hint {
+    display: none;
+  }
+
+  #wrap .sg-regsteps__login {
+    margin-top: 14px;
+    padding-top: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .sg-oath,
+  #wrap .sg-reg .block.sg-pcard {
+    padding: 22px 16px;
+  }
+
+  #wrap .sg-oath__article {
+    grid-template-columns: 32px minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .sg-oath__num {
+    width: 32px;
+    height: 32px;
+    font-size: 0.9rem;
+  }
+
+  #wrap .sg-oath__artitle {
+    margin-top: 3px;
+  }
+
+  .sg-oath__vows {
+    padding: 16px;
+  }
+
+  .sg-oath__seals {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sg-oath__actions,
+  #wrap .sg-reg .sg-pactions {
+    flex-direction: column-reverse;
+  }
+
+  #wrap .sg-reg .sg-pbtn {
+    width: 100%;
+    min-height: 48px;
+  }
+}

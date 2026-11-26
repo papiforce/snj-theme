@@ -442,6 +442,7 @@
     perms();
     writePage();
     profilePage();
+    regPage();
     noticePage();
     errorBlocks();
     pollCards();
@@ -1511,7 +1512,11 @@
     var open = document.getElementById('ptrafic_open');
     var closed = document.getElementById('ptrafic_close');
     var links = open ? Array.prototype.slice.call(open.querySelectorAll('.block-content a[href^="/t"]')) : [];
-    if (!links.length) return;
+    /* Aucun sujet similaire : Forumactif garde son bloc (titre + boîte vide) ; il est masqué */
+    if (!links.length) {
+      [open, closed].forEach(function (b) { if (b) b.classList.add('sg-hidden'); });
+      return;
+    }
 
     var head = document.querySelector('.sg-pagehead');
     var section = uiEl('section', 'sg-topics sg-similar');
@@ -3785,6 +3790,379 @@
     });
     field.appendChild(seg);
     w.parentNode.replaceChild(field, w);
+  }
+
+  /* --------------------------------------------------------------------
+     Inscription : serment « kishōmon » 起請文 (le serment écrit qu'on scellait de son sceau).
+     Pattern réservé à l'INSCRIPTION (/register) : étape 1 le règlement (form#frmAgreement), étape 2 le compte
+     (form#ucp avec #username_reg). Les formulaires natifs restent en place (champs, noms, envoi) ; seul
+     l'habillage change. Colonne des étapes collante | contenu, comme le panneau du profil.
+     -------------------------------------------------------------------- */
+  var REG_STEPS = [
+    ['誓', 'Serment', 'Lire et accepter le règlement'],
+    ['名', 'Compte', 'Pseudo, e-mail et mot de passe']
+  ];
+  var REG_DESC = [
+    'Avant de prendre place dans le Sekai, lis le règlement et appose ton sceau.',
+    'Dernière étape : choisis ton pseudo et tes identifiants.'
+  ];
+  var KANJI_NUM = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+  var OATH_TITLES = [[/^recueil/i, 'Données personnelles'], [/cookies/i, 'Cookies'], [/électroniques|e-mail/i, 'E-mails']];
+
+  function regDivider(withLogo) {
+    var el = uiEl;
+    var d = el('div', 'sg-divider ' + (withLogo ? 'sg-divider--cp' : 'sg-divider--end'));
+    d.setAttribute('role', 'separator');
+    if (withLogo) {
+      var logo = el('span', 'sg-divider__logo sg-divider__logo--mask');
+      logo.setAttribute('aria-hidden', 'true');
+      d.appendChild(logo);
+    }
+    var rule = el('span', 'sg-divider__rule');
+    rule.setAttribute('aria-hidden', 'true');
+    rule.appendChild(el('span', 'sg-divider__line'));
+    rule.insertAdjacentHTML('beforeend', '<svg class="sg-divider__notch" viewBox="0 0 48 25" aria-hidden="true"><path d="M0 .5L24 24.5L48 .5"/></svg>');
+    rule.appendChild(el('span', 'sg-divider__line'));
+    d.appendChild(rule);
+    return d;
+  }
+
+  /* Case native → sceau à apposer : un carré en pointillé qui reçoit le sceau 印 une fois coché */
+  function sealCheck(input, content) {
+    var el = uiEl;
+    var row = el('label', 'sg-sealchk');
+    row.appendChild(input);
+    var seal = el('span', 'sg-sealchk__seal');
+    seal.setAttribute('aria-hidden', 'true');
+    seal.appendChild(el('span', 'sg-sealchk__kanji', '印'));
+    row.appendChild(seal);
+    var text = el('span', 'sg-sealchk__text');
+    while (content.firstChild) text.appendChild(content.firstChild);
+    row.appendChild(text);
+    return row;
+  }
+
+  function regPage() {
+    var wrap = document.getElementById('wrap');
+    if (!wrap || document.querySelector('.sg-reg')) return;
+    var agree = wrap.querySelector('#frmAgreement');
+    var account = wrap.querySelector('form#ucp #username_reg') ? wrap.querySelector('form#ucp') : null;
+    if (!agree && !account) return;
+    var el = uiEl, ico = uiIco;
+    var step = agree ? 0 : 1;
+    var anchor = agree ? (agree.closest('#agreement') || agree) : account;
+
+    /* En-tête : séparateur avec le logo, fil d'Ariane, titre, description de l'étape */
+    var topDiv = regDivider(true);
+    var head = el('section', 'sg-pagehead sg-pagehead--reg');
+    head.setAttribute('aria-label', 'En-tête de la page');
+    var crumbs = el('nav', 'sg-crumbs');
+    crumbs.setAttribute('aria-label', "Fil d'Ariane");
+    var ol = el('ol', 'sg-crumbs__list');
+    [['/', 'Accueil', 'home'], [null, 'Inscription']].forEach(function (c) {
+      var li = el('li', 'sg-crumbs__item');
+      var a = el(c[0] ? 'a' : 'span', 'sg-crumbs__link' + (c[0] ? '' : ' sg-crumbs__here'));
+      if (c[2]) a.appendChild(ico(c[2]));
+      a.appendChild(el('span', null, c[1]));
+      if (c[0]) a.href = c[0]; else a.setAttribute('aria-current', 'page');
+      li.appendChild(a);
+      ol.appendChild(li);
+    });
+    crumbs.appendChild(ol);
+    head.appendChild(crumbs);
+    var row = el('div', 'sg-pagehead__row');
+    var h1 = el('h1', 'sg-pagehead__title');
+    h1.appendChild(el('span', 'sg-pagehead__text', 'Rejoindre le Sekai'));
+    row.appendChild(h1);
+    head.appendChild(row);
+    head.appendChild(el('div', 'sg-pagehead__desc', REG_DESC[step]));
+
+    /* Grille : étapes (colonne collante) | contenu */
+    var page = el('div', 'sg-reg');
+    var nav = el('nav', 'sg-regsteps');
+    nav.setAttribute('aria-label', 'Étapes de l’inscription');
+    var list = el('ol', 'sg-regsteps__list');
+    REG_STEPS.forEach(function (s, k) {
+      var li = el('li', 'sg-regsteps__item' + (k < step ? ' is-done' : k === step ? ' is-current' : ''));
+      if (k === step) li.setAttribute('aria-current', 'step');
+      var mon = el('span', 'sg-regsteps__mon');
+      mon.setAttribute('aria-hidden', 'true');
+      if (k < step) mon.appendChild(ico('check'));
+      else mon.appendChild(el('span', 'sg-regsteps__kanji', s[0]));
+      li.appendChild(mon);
+      var txt = el('span', 'sg-regsteps__text');
+      txt.appendChild(el('span', 'sg-regsteps__num', 'Étape ' + (k + 1)));
+      txt.appendChild(el('span', 'sg-regsteps__name', s[1]));
+      txt.appendChild(el('span', 'sg-regsteps__hint', s[2]));
+      li.appendChild(txt);
+      list.appendChild(li);
+    });
+    nav.appendChild(list);
+    var login = document.querySelector('a[href^="/login"]');
+    var already = el('p', 'sg-regsteps__login');
+    already.appendChild(el('span', null, 'Déjà un compte ?'));
+    var la = el('a', null, 'Se connecter');
+    la.href = login ? login.getAttribute('href') : '/login';
+    already.appendChild(la);
+    nav.appendChild(already);
+    page.appendChild(nav);
+    var main = el('div', 'sg-reg__main');
+    page.appendChild(main);
+
+    anchor.parentNode.insertBefore(topDiv, anchor);
+    anchor.parentNode.insertBefore(head, anchor);
+    anchor.parentNode.insertBefore(page, anchor);
+    /* Erreurs de Forumactif (pseudo déjà pris…) : au-dessus du formulaire */
+    Array.prototype.slice.call(wrap.querySelectorAll('.block-error')).forEach(function (b) { main.appendChild(b); });
+    main.appendChild(anchor);
+
+    if (agree) regOath(agree); else regAccount(account);
+
+    var endDiv = regDivider(false);
+    page.parentNode.insertBefore(endDiv, page.nextSibling);
+    var endNav = el('nav', 'sg-crumbs sg-crumbs--end');
+    endNav.setAttribute('aria-label', "Fil d'Ariane");
+    endNav.appendChild(ol.cloneNode(true));
+    endDiv.parentNode.insertBefore(endNav, endDiv.nextSibling);
+    document.body.classList.add('sg-regpage', 'sg-pagehead-on');
+  }
+
+  /* Étape 1 : le règlement en articles numérotés en kanji, l'engagement, deux sceaux à apposer */
+  function regOath(form) {
+    var el = uiEl, ico = uiIco;
+    var content = form.querySelector('.block-content');
+    if (!content) return;
+    var card = el('section', 'sg-oath sg-pat--kikko');
+    card.setAttribute('aria-labelledby', 'sg-oath-title');
+    var top = el('div', 'sg-oath__head');
+    top.appendChild(el('span', 'sg-oath__eyebrow', '起請文 · Règlement'));
+    var h2 = el('h2', 'sg-oath__title', 'Conditions d’utilisation');
+    h2.id = 'sg-oath-title';
+    top.appendChild(h2);
+    card.appendChild(top);
+
+    /* Articles : un paragraphe qui commence par un intitulé en gras ouvre un article, les suivants s'y ajoutent */
+    var arts = el('ol', 'sg-oath__articles');
+    var cur = null;
+    Array.prototype.slice.call(content.querySelectorAll(':scope > p')).forEach(function (p) {
+      /* Premier nœud non vide du paragraphe : un <strong> ouvre un nouvel article */
+      var first = p.firstChild;
+      while (first && first.nodeType === 3 && !first.textContent.trim()) first = first.nextSibling;
+      var strong = first && /^(STRONG|B)$/.test(first.nodeName) ? first : null;
+      if (strong || !cur) {
+        var lead = strong ? strong.textContent.replace(/\s+/g, ' ').trim().replace(/[.:]\s*$/, '') : '';
+        var title = lead;
+        OATH_TITLES.forEach(function (t) { if (t[0].test(lead)) title = t[1]; });
+        if (strong && lead.length <= 40) {
+          /* Intitulé court : il devient le titre de l'article, retiré du texte avec sa ponctuation */
+          var next = strong.nextSibling;
+          strong.remove();
+          if (next && next.nodeType === 3) next.textContent = next.textContent.replace(/^\s*[.:]\s*/, '');
+        } else if (strong) {
+          strong.classList.add('sg-oath__lead');
+        }
+        cur = el('li', 'sg-oath__article');
+        var num = el('span', 'sg-oath__num', KANJI_NUM[arts.children.length] || String(arts.children.length + 1));
+        num.setAttribute('aria-hidden', 'true');
+        cur.appendChild(num);
+        var body = el('div', 'sg-oath__body');
+        body.appendChild(el('h3', 'sg-oath__artitle', title || 'Article'));
+        cur.appendChild(body);
+        arts.appendChild(cur);
+      }
+      p.className = 'sg-oath__text';
+      cur.querySelector('.sg-oath__body').appendChild(p);
+    });
+    card.appendChild(arts);
+
+    /* L'engagement (texte natif en rouge, lignes séparées par des <br>) */
+    var vowSrc = content.querySelector(':scope > span');
+    if (vowSrc) {
+      var lines = [];
+      var buf = [];
+      Array.prototype.slice.call(vowSrc.childNodes).forEach(function (n) {
+        if (n.nodeName === 'BR') { if (buf.length) lines.push(buf); buf = []; return; }
+        buf.push(n);
+      });
+      if (buf.length) lines.push(buf);
+      lines = lines.filter(function (l) { return l.some(function (n) { return n.textContent.trim(); }); });
+      var vows = el('div', 'sg-oath__vows');
+      var vh = el('p', 'sg-oath__vowhead');
+      vh.appendChild(ico('history_edu'));
+      vh.appendChild(el('span', null, 'Ton engagement'));
+      vows.appendChild(vh);
+      var ul = el('ul', 'sg-oath__vowlist');
+      lines.forEach(function (l, k) {
+        var text = l.map(function (n) { return n.textContent; }).join('').replace(/\s+/g, ' ').trim();
+        if (k === 0 && /cliquant/i.test(text)) {
+          vows.appendChild(el('p', 'sg-oath__vowintro', text.replace(/^En cliquant sur le bouton\s*['’"«]?\s*J'accepte le règlement\s*['’"»]?\s*ci-dessous\s*:?/i, 'En acceptant le règlement :')));
+          return;
+        }
+        var li = el('li', 'sg-oath__vow');
+        li.appendChild(ico('task_alt'));
+        li.appendChild(el('span', null, text.replace(/^[-–]\s*/, '').replace(/\s*;\s*$/, '.')));
+        ul.appendChild(li);
+      });
+      vows.appendChild(ul);
+      card.appendChild(vows);
+      vowSrc.classList.add('sg-hidden');
+    }
+
+    /* Les deux cases : des sceaux à apposer */
+    var seals = el('div', 'sg-oath__seals');
+    var boxes = [];
+    Array.prototype.slice.call(content.querySelectorAll(':scope > label')).forEach(function (lab) {
+      var input = lab.querySelector('input[type="checkbox"]');
+      var txt = lab.querySelector('.checkbox > span') || lab;
+      if (!input) return;
+      boxes.push(input);
+      seals.appendChild(sealCheck(input, txt));
+      lab.classList.add('sg-hidden');
+    });
+    card.appendChild(seals);
+
+    /* Bouton : actif une fois les deux sceaux apposés */
+    var btns = form.querySelector('.form-buttons');
+    var submit = btns && btns.querySelector('button, input[type="submit"]');
+    var acts = el('div', 'sg-oath__actions');
+    if (submit) {
+      var btn = el('button', 'sg-pbtn');
+      btn.type = 'submit';
+      if (submit.name) btn.name = submit.name;
+      if (submit.value) btn.value = submit.value;
+      btn.appendChild(ico('approval'));
+      btn.appendChild(el('span', null, 'J’accepte le règlement'));
+      acts.appendChild(btn);
+      btns.classList.add('sg-hidden');
+      var sync = function () {
+        var ok = boxes.every(function (b) { return b.checked; });
+        btn.disabled = !ok;
+        btn.title = ok ? '' : 'Appose tes deux sceaux pour continuer';
+      };
+      boxes.forEach(function (b) { b.addEventListener('change', sync); });
+      sync();
+    }
+    card.appendChild(acts);
+
+    /* Le contenu natif restant (titre, <br>, champ caché) reste dans le formulaire, masqué ou vide */
+    var oldTitle = content.querySelector(':scope > h2');
+    if (oldTitle) oldTitle.classList.add('sg-hidden');
+    Array.prototype.slice.call(content.querySelectorAll(':scope > br')).forEach(function (br) { br.remove(); });
+    content.appendChild(card);
+  }
+
+  /* Étape 2 : le compte, au pattern des cartes du profil (champs, interrupteur, boutons) */
+  function regAccount(form) {
+    var el = uiEl, ico = uiIco;
+    var content = form.querySelector('.block-content');
+    if (!content) return;
+    form.classList.add('sg-pcard', 'sg-regcard');
+    var h = el('h2', 'sg-pcard__title');
+    h.appendChild(ico('badge'));
+    h.appendChild(el('span', null, 'Ton compte'));
+    form.insertBefore(h, content);
+    Array.prototype.slice.call(content.querySelectorAll(':scope > p')).forEach(function (p) {
+      if (/\*/.test(p.textContent)) { p.className = 'sg-pcard__hint'; p.textContent = 'Les champs marqués d’un * sont obligatoires.'; }
+    });
+    Array.prototype.slice.call(content.querySelectorAll(':scope > br')).forEach(function (br) { br.remove(); });
+
+    /* Case « actualités par e-mail » : interrupteur, comme les réglages de l'écritoire */
+    var news = content.querySelector('input[name="wantsnews"]');
+    var newsLabel = news && news.closest('label');
+    var opt = null;
+    if (news) {
+      opt = el('label', 'sg-opt sg-opt--wide');
+      opt.appendChild(news);
+      opt.appendChild(el('span', 'sg-opt__text', 'Recevoir les actualités du forum par e-mail'));
+      var sw = el('span', 'sg-switch');
+      sw.setAttribute('aria-hidden', 'true');
+      sw.appendChild(el('span', 'sg-switch__thumb'));
+      opt.appendChild(sw);
+      newsLabel.parentNode.replaceChild(opt, newsLabel);
+    }
+
+    Array.prototype.slice.call(content.querySelectorAll(':scope > label')).forEach(cpField);
+    content.classList.add('sg-pcard__grid');
+
+    /* Aides */
+    var HINTS = { username: 'Ton nom sur le forum, visible de tous.', email: 'Pour confirmer ton compte et retrouver ton mot de passe.' };
+    Object.keys(HINTS).forEach(function (n) {
+      var input = content.querySelector('input[name="' + n + '"]');
+      var field = input && input.closest('.sg-pfield');
+      if (field && !field.querySelector('.sg-pfield__hint')) field.appendChild(el('p', 'sg-pfield__hint', HINTS[n]));
+    });
+
+    /* Mot de passe : l'œil dans le champ, et la jauge de force lue sur les indicateurs natifs */
+    var pw = content.querySelector('#password_reg');
+    var pwField = pw && pw.closest('.sg-pfield');
+    if (pw && pwField) {
+      pwField.classList.add('sg-pfield--wide');
+      var box = el('div', 'password-container');
+      pw.parentNode.insertBefore(box, pw);
+      box.appendChild(pw);
+      var eye = el('button', 'sg-pw__eye');
+      eye.type = 'button';
+      eye.setAttribute('aria-label', 'Afficher le mot de passe');
+      eye.setAttribute('aria-pressed', 'false');
+      eye.appendChild(ico('visibility'));
+      box.appendChild(eye);
+      eye.addEventListener('click', function () {
+        var shown = pw.type === 'text';
+        pw.type = shown ? 'password' : 'text';
+        eye.setAttribute('aria-pressed', String(!shown));
+        eye.setAttribute('aria-label', shown ? 'Afficher le mot de passe' : 'Masquer le mot de passe');
+        eye.firstChild.textContent = shown ? 'visibility' : 'visibility_off';
+        pw.focus();
+      });
+      var nat = document.getElementById('cont_pwd');
+      if (nat) nat.classList.add('sg-hidden');
+      var meter = el('div', 'sg-pwmeter');
+      meter.setAttribute('aria-live', 'polite');
+      var bars = el('span', 'sg-pwmeter__bars');
+      bars.setAttribute('aria-hidden', 'true');
+      for (var i = 0; i < 3; i++) bars.appendChild(el('span', 'sg-pwmeter__bar'));
+      meter.appendChild(bars);
+      var mLabel = el('span', 'sg-pwmeter__label', 'Force du mot de passe');
+      meter.appendChild(mLabel);
+      pwField.appendChild(meter);
+      var LEVELS = [['pwd_bad', 1, 'Faible'], ['pwd_middle', 2, 'Moyen'], ['pwd_good', 3, 'Fort']];
+      var read = function () {
+        var level = 0, text = 'Force du mot de passe';
+        if (pw.value) LEVELS.forEach(function (l) {
+          var d = document.getElementById(l[0]);
+          if (d && d.style.display && d.style.display !== 'none') { level = l[1]; text = l[2]; }
+        });
+        meter.setAttribute('data-level', String(level));
+        mLabel.textContent = level ? 'Mot de passe ' + text.toLowerCase() : text;
+      };
+      if (window.MutationObserver) {
+        var mo = new MutationObserver(read);
+        LEVELS.forEach(function (l) { var d = document.getElementById(l[0]); if (d) mo.observe(d, { attributes: true, attributeFilter: ['style'] }); });
+      }
+      pw.addEventListener('input', function () { setTimeout(read, 0); });
+      read();
+    }
+    if (opt) content.appendChild(opt);
+
+    /* Boutons : « Réinitialiser » (contour) puis « Créer mon compte » (plein), à droite sous un filet */
+    var fs = form.querySelector('.form-buttons');
+    if (fs) {
+      fs.classList.add('sg-pactions');
+      Array.prototype.slice.call(fs.querySelectorAll('input[type="submit"], input[type="reset"]')).forEach(function (i) {
+        var isReset = i.type === 'reset';
+        var btn = el('button', 'sg-pbtn' + (isReset ? ' sg-pbtn--ghost' : ''));
+        btn.type = i.type;
+        if (i.name) btn.name = i.name;
+        btn.value = i.value;
+        btn.appendChild(ico(isReset ? 'restart_alt' : 'how_to_reg'));
+        btn.appendChild(el('span', null, isReset ? i.value : 'Créer mon compte'));
+        i.parentNode.replaceChild(btn, i);
+      });
+      var sub = fs.querySelector('button.sg-pbtn:not(.sg-pbtn--ghost)');
+      if (sub) fs.appendChild(sub);
+      /* Réinitialiser : la jauge se vide aussi */
+      form.addEventListener('reset', function () { setTimeout(function () { if (pw) pw.dispatchEvent(new Event('input')); }, 0); });
+    }
   }
 
   function profilePage() {
