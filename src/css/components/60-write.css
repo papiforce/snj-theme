@@ -13,9 +13,9 @@
 
 body.sg-writepage-on #wrap > .page-header,
 .sg-writepage .sg-hidden,
-.sg-writeform #smiley-box,
-.sg-writeform #message-box .left-box,
-.sg-writeform #helpbox {
+:is(.sg-writeform, .sg-sigform) #smiley-box,
+:is(.sg-writeform, .sg-sigform) #message-box .left-box,
+:is(.sg-writeform, .sg-sigform) #helpbox {
   display: none !important;
 }
 
@@ -221,7 +221,7 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
   font-weight: 700;
 }
 
-#wrap .sg-writeform #message-box {
+#wrap :is(.sg-writeform, .sg-sigform) #message-box {
   display: block;
   margin: 0;
   padding: 0;
@@ -229,18 +229,18 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
 }
 
 /* Saut de ligne natif entre l'aide et l'éditeur : un espace vide de 20px au-dessus de l'éditeur */
-#wrap .sg-writeform #message-box > br {
+#wrap :is(.sg-writeform, .sg-sigform) #message-box > br {
   display: none;
 }
 
-#wrap .sg-writeform #textarea_content {
+#wrap :is(.sg-writeform, .sg-sigform) #textarea_content {
   width: 100%;
   margin: 0;
   padding: 0;
 }
 
 /* Éditeur natif (SCEditor) : ses bordures et fonds sont en !important dans le CSS de Forumactif */
-.sg-writeform .sceditor-container {
+:is(.sg-writeform, .sg-sigform) .sceditor-container {
   width: 100% !important;
   min-height: 320px;
   overflow: visible;
@@ -252,7 +252,7 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
   color: var(--sg-text) !important;
 }
 
-.sg-writeform .sceditor-toolbar {
+:is(.sg-writeform, .sg-sigform) .sceditor-toolbar {
   display: flex !important;
   flex-wrap: nowrap;
   align-items: center;
@@ -264,11 +264,11 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
   scrollbar-width: none;
 }
 
-.sg-writeform .sceditor-toolbar::-webkit-scrollbar {
+:is(.sg-writeform, .sg-sigform) .sceditor-toolbar::-webkit-scrollbar {
   display: none;
 }
 
-.sg-writeform .sceditor-group {
+:is(.sg-writeform, .sg-sigform) .sceditor-group {
   display: flex !important;
   flex: none;
   margin: 0 6px 0 0 !important;
@@ -279,27 +279,27 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
   background: none !important;
 }
 
-.sg-writeform .sceditor-group:last-child,
-.sg-writeform .sceditor-group.sg-tb-last {
+:is(.sg-writeform, .sg-sigform) .sceditor-group:last-child,
+:is(.sg-writeform, .sg-sigform) .sceditor-group.sg-tb-last {
   margin-right: 0 !important;
   padding-right: 0 !important;
   border-right: 0 !important;
 }
 
-.sg-writeform .sceditor-button {
+:is(.sg-writeform, .sg-sigform) .sceditor-button {
   border: 0 !important;
   border-radius: 6px !important;
   background-color: transparent !important;
 }
 
-.sg-writeform .sceditor-button:hover,
-.sg-writeform .sceditor-button.active {
+:is(.sg-writeform, .sg-sigform) .sceditor-button:hover,
+:is(.sg-writeform, .sg-sigform) .sceditor-button.active {
   background-color: var(--sg-surface) !important;
   box-shadow: none !important;
 }
 
-.sg-writeform .sceditor-container textarea,
-.sg-writeform .sceditor-container iframe {
+:is(.sg-writeform, .sg-sigform) .sceditor-container textarea,
+:is(.sg-writeform, .sg-sigform) .sceditor-container iframe {
   border: 0 !important;
   border-radius: 12px !important;
   background: var(--sg-surface-2) !important;
@@ -309,25 +309,25 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
   line-height: 1.7;
 }
 
-.sg-writeform .sceditor-container textarea {
+:is(.sg-writeform, .sg-sigform) .sceditor-container textarea {
   box-sizing: border-box;
   padding: 16px !important;
 }
 
-.sg-writeform .sceditor-container textarea::placeholder {
+:is(.sg-writeform, .sg-sigform) .sceditor-container textarea::placeholder {
   color: var(--sg-text-muted);
 }
 
-.sg-writeform .sceditor-grip {
+:is(.sg-writeform, .sg-sigform) .sceditor-grip {
   opacity: 0.5;
 }
 
 /* Barre d'outils : boutons retirés (editorToolbar), icônes Material Symbols à la place des images d'origine */
-.sg-writeform .sg-tb--off {
+:is(.sg-writeform, .sg-sigform) .sg-tb--off {
   display: none !important;
 }
 
-.sg-writeform a.sceditor-button.sg-tb {
+:is(.sg-writeform, .sg-sigform) a.sceditor-button.sg-tb {
   display: inline-grid !important;
   place-items: center;
   width: 32px !important;
@@ -336,11 +336,11 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
   color: var(--sg-text-muted);
 }
 
-.sg-writeform a.sceditor-button.sg-tb > div {
+:is(.sg-writeform, .sg-sigform) a.sceditor-button.sg-tb > div {
   display: none !important;
 }
 
-.sg-writeform a.sceditor-button.sg-tb .material-symbols-outlined {
+:is(.sg-writeform, .sg-sigform) a.sceditor-button.sg-tb .material-symbols-outlined {
   width: 20px;
   font-size: 20px;
   line-height: 20px;
@@ -348,26 +348,26 @@ html[data-profile="right"] .sg-writeform > .sg-write__aside {
   transition: none;
 }
 
-.sg-writeform .sg-tb__svg {
+:is(.sg-writeform, .sg-sigform) .sg-tb__svg {
   width: 19px;
   height: 19px;
 }
 
-.sg-writeform a.sceditor-button.sg-tb:hover,
-.sg-writeform a.sceditor-button.sg-tb:focus-visible,
-.sg-writeform a.sceditor-button.sg-tb.active {
+:is(.sg-writeform, .sg-sigform) a.sceditor-button.sg-tb:hover,
+:is(.sg-writeform, .sg-sigform) a.sceditor-button.sg-tb:focus-visible,
+:is(.sg-writeform, .sg-sigform) a.sceditor-button.sg-tb.active {
   background-color: rgba(var(--sg-contrast-rgb), 0.12) !important;
   color: var(--sg-text);
 }
 
-.sg-writeform a.sceditor-button.sg-tb:hover,
-.sg-writeform a.sceditor-button.sg-tb.sg-tb--open {
+:is(.sg-writeform, .sg-sigform) a.sceditor-button.sg-tb:hover,
+:is(.sg-writeform, .sg-sigform) a.sceditor-button.sg-tb.sg-tb--open {
   background-color: var(--sg-contrast) !important;
   color: var(--sg-on-contrast);
 }
 
 /* Les fenêtres des outils débordent de l'éditeur : Forumactif coupait tout ce qui sortait de #textarea_content */
-.sg-writeform #textarea_content {
+:is(.sg-writeform, .sg-sigform) #textarea_content {
   overflow: visible !important;
 }
 

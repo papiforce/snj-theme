@@ -1,0 +1,156 @@
+/* ==========================================================================================================
+   Onglet « Signature » des paramètres du profil (layout.js, sigPanel)
+   L'éditeur est celui de l'écritoire « suzuri » : form.sg-sigform partage les règles de l'éditeur de
+   60-write.css (barre d'outils, icônes, infobulles, fenêtres des outils, zone de saisie sur --sg-surface-2).
+   Ici : la carte, l'aperçu, la mise en forme acceptée et les boutons.
+   ========================================================================================================== */
+
+#wrap .sg-pcard--sig > .block-content {
+  display: block;
+}
+
+#wrap form.sg-sigform {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+}
+
+/* Bloc natif de l'éditeur : restylé sur place (jamais déplacé) */
+#wrap .sg-sigform #postingbox,
+#wrap .sg-sigform #postingbox > .inner,
+#wrap .sg-sigform #postingbox fieldset.fields1,
+#wrap .sg-sigform #parent_editor_simple {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+#wrap .sg-sigform #parent_editor_simple > .clear,
+#wrap .sg-sigform .corners-top,
+#wrap .sg-sigform .corners-bottom {
+  display: none;
+}
+
+#wrap .sg-sigform #message-box {
+  display: block;
+  float: none;
+  width: auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+#wrap .sg-sigform #message-box > br {
+  display: none;
+}
+
+#wrap .sg-sigform #textarea_content {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Une signature est courte : zone de saisie plus basse que celle d'un message */
+.sg-sigform .sceditor-container {
+  min-height: 220px;
+}
+
+/* --- Aperçu : comme la signature sous un message (filet pointillé) --------------------------------------- */
+.sg-sig__preview {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--sg-surface-2);
+}
+
+#wrap .sg-sig__label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--sg-accent-1);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.sg-sig__label .material-symbols-outlined {
+  font-size: 18px;
+}
+
+.sg-sig__body {
+  padding-top: 12px;
+  border-top: 1px dashed var(--sg-border);
+  color: var(--sg-text);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+#wrap .sg-sig__body .post-content {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.sg-sig__body img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* --- Mise en forme acceptée (aide native) ---------------------------------------------------------------- */
+#wrap .sg-sig__modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+#wrap .sg-sig__modes li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: var(--sg-text-muted);
+  font-size: 0.85rem;
+}
+
+.sg-sig__modes .material-symbols-outlined {
+  font-size: 17px;
+}
+
+#wrap .sg-sig__modes li.is-on .material-symbols-outlined {
+  color: var(--sg-accent-1);
+}
+
+#wrap .sg-sig__modes li.is-off {
+  opacity: 0.75;
+}
+
+/* --- Boutons ----------------------------------------------------------------------------------------------- */
+#wrap .sg-sigform .sg-sig__foot,
+#wrap .sg-sigform .sg-sig__foot > .inner {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+#wrap .sg-sigform fieldset.sg-pactions {
+  margin-top: 0;
+}

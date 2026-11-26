@@ -3663,6 +3663,98 @@
      l'envoi de fichier et les deux adresses restent dans le formulaire (masqués) et reçoivent les choix. Une seule
      source à la fois : en remplir une vide les autres. Aperçu au format des messages (200 × 400).
      -------------------------------------------------------------------- */
+  /* --------------------------------------------------------------------
+     Onglet « Signature » : l'éditeur reprend celui de l'écritoire « suzuri » (barre d'outils en Material Symbols,
+     infobulles, fenêtres des outils, mode texte bloqué, zone de saisie sur --sg-surface-2) : form.sg-sigform
+     partage les règles de l'éditeur de 60-write.css. #postingbox n'est jamais déplacé (l'éditeur casserait).
+     -------------------------------------------------------------------- */
+  function sigPanel(b, bc) {
+    var el = uiEl, ico = uiIco;
+    var form = bc.querySelector('form');
+    var box = form && form.querySelector('#postingbox');
+    if (!form || !box || form.classList.contains('sg-sigform')) return;
+    form.classList.add('sg-sigform');
+    b.classList.add('sg-pcard', 'sg-pcard--sig');
+    bc.classList.remove('sg-pcard__grid');
+
+    /* Titre de la carte à la place de « Editer la signature » */
+    var nativeHead = form.querySelector(':scope > .block-header');
+    if (nativeHead) nativeHead.classList.add('sg-hidden');
+    var h = el('h2', 'sg-pcard__title');
+    h.appendChild(ico('draw'));
+    h.appendChild(el('span', null, 'Ta signature'));
+    b.insertBefore(h, b.firstChild);
+
+    /* Aperçu (après « Prévisualiser ») : comme la signature sous un message, sous un filet pointillé */
+    var prev = form.querySelector(':scope > #preview');
+    if (prev) {
+      var content = prev.querySelector('.post-content');
+      var sec = el('section', 'sg-sig__preview');
+      sec.setAttribute('aria-label', 'Aperçu de la signature');
+      var lab = el('p', 'sg-sig__label');
+      lab.appendChild(ico('visibility'));
+      lab.appendChild(el('span', null, 'Aperçu, pas encore enregistré'));
+      sec.appendChild(lab);
+      var body = el('div', 'sg-sig__body');
+      if (content) body.appendChild(content);
+      sec.appendChild(body);
+      prev.classList.add('sg-hidden');
+      form.insertBefore(sec, box);
+    }
+
+    /* Ce que la signature accepte (HTML, BBCode, smileys), lu dans l'aide native masquée */
+    var help = box.querySelector('#smiley-box');
+    if (help) {
+      var lines = [];
+      var buf = '';
+      Array.prototype.forEach.call(help.childNodes, function (n) {
+        if (n.nodeName === 'BR') { if (buf.trim()) lines.push(buf.trim()); buf = ''; return; }
+        if (n.nodeType === 1 && n.id === 'smileyContainer') return;
+        if (n.nodeType === 1 && /^(SCRIPT|STYLE)$/.test(n.nodeName)) return;
+        buf += ' ' + n.textContent;
+      });
+      if (buf.trim()) lines.push(buf.trim());
+      var modes = el('ul', 'sg-sig__modes');
+      modes.setAttribute('aria-label', 'Mise en forme acceptée');
+      lines.forEach(function (t) {
+        t = t.replace(/\s+/g, ' ');
+        var m = t.match(/(HTML|BBCode|smileys?)/i);
+        if (!m) return;
+        var off = /désactivé/i.test(t);
+        var what = /html/i.test(m[1]) ? 'HTML' : /bbcode/i.test(m[1]) ? 'BBCode' : 'Smileys';
+        var li = el('li', off ? 'is-off' : 'is-on');
+        li.appendChild(ico(off ? 'block' : 'check_circle'));
+        li.appendChild(el('span', null, what + (off ? ' désactivé' : ' activé') + (what === 'Smileys' ? 's' : '')));
+        li.setAttribute('title', t);
+        modes.appendChild(li);
+      });
+      if (modes.children.length) box.appendChild(modes);
+    }
+
+    /* Boutons : « Prévisualiser » (contour) puis « Enregistrer » (plein), à droite sous un filet */
+    var fs = form.querySelector('fieldset.submit-buttons');
+    if (fs) {
+      fs.classList.add('sg-pactions');
+      Array.prototype.slice.call(fs.querySelectorAll('input[type="submit"]')).forEach(function (i) {
+        var isPrev = i.name === 'preview';
+        var btn = el('button', 'sg-pbtn' + (isPrev ? ' sg-pbtn--ghost' : ''));
+        btn.type = 'submit';
+        btn.name = i.name;
+        btn.value = i.value;
+        btn.appendChild(ico(isPrev ? 'visibility' : 'save'));
+        btn.appendChild(el('span', null, i.value));
+        i.parentNode.replaceChild(btn, i);
+      });
+      var save = fs.querySelector('button.sg-pbtn:not(.sg-pbtn--ghost)');
+      if (save) fs.appendChild(save);
+      var panel = fs.closest('.panel');
+      if (panel) panel.classList.add('sg-sig__foot');
+    }
+
+    editorFrameTheme(form);
+    editorToolbar(form);
+  }
+
   function avatarPanel(b, bc) {
     var el = uiEl, ico = uiIco;
     var form = b.closest('form');
@@ -4786,6 +4878,7 @@
 
     /* Blocs natifs en cartes */
     Array.prototype.slice.call(cp.querySelectorAll('.block')).forEach(function (b) {
+      if (b.closest('.sg-sigform')) return; /* aperçu de la signature : repris par sigPanel */
       var bh = b.querySelector(':scope > .block-header');
       var bc = b.querySelector(':scope > .block-content');
       if (!b.textContent.trim() && !b.querySelector('input, select, textarea, img')) { b.classList.add('sg-hidden'); return; }
@@ -4799,6 +4892,11 @@
         bh.parentNode.replaceChild(h, bh);
       }
       if (!bc) return;
+      /* Onglet « Signature » : l'éditeur de l'écritoire */
+      if (bc.querySelector('#text_editor_textarea') && bc.querySelector('#postingbox')) {
+        sigPanel(b, bc);
+        return;
+      }
       /* Onglet « Avatar » : panneau du portrait */
       if (bc.querySelector('input[name="avatarurl"], input[name="avatarremoteurl"], input[type="file"][name="avatar"]')) {
         avatarPanel(b, bc);
