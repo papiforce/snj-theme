@@ -4228,7 +4228,7 @@
     head.appendChild(row);
     head.appendChild(el('div', 'sg-pagehead__desc', isLogin
       ? 'Ravi de te revoir, shinobi. Présente-toi au poste pour reprendre ta route dans le Sekai.'
-      : 'Indique ton pseudo et ton adresse e-mail : un nouveau mot de passe t’y sera envoyé.'));
+      : 'Indique ton pseudo et l’adresse e-mail de ton compte : un nouveau mot de passe t’y sera envoyé.'));
 
     /* Grille : carte du formulaire | carte d'à-côté */
     var page = el('div', 'sg-auth');
@@ -4304,7 +4304,7 @@
       var u2 = form.querySelector('input[name="username"]');
       var e2 = form.querySelector('input[name="email"]');
       if (u2) { grid2.appendChild(authField(u2, 'Pseudo')); u2.setAttribute('autocomplete', 'username'); }
-      if (e2) { grid2.appendChild(authField(e2, 'Adresse e-mail', 'Celle de ton compte : le nouveau mot de passe y sera envoyé.')); e2.setAttribute('autocomplete', 'email'); }
+      if (e2) { grid2.appendChild(authField(e2, 'Adresse e-mail')); e2.setAttribute('autocomplete', 'email'); }
       var sub2 = form.querySelector('input[type="submit"]');
       var acts2 = el('div', 'sg-authform__actions');
       var back = el('a', 'sg-authform__link', 'Retour à la connexion');
