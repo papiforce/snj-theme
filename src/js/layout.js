@@ -445,6 +445,7 @@
     regPage();
     authPage();
     memberList();
+    groupPage();
     noticePage();
     confirmPage();
     errorBlocks();
@@ -4526,7 +4527,10 @@
 
   /* Choix trop longs des contrôles segmentés du profil : libellés courts (phrase native en infobulle) */
   var CP_CHOICES = {
-    'Je ne souhaite pas recevoir de messages privés de masse': 'Pas de messages privés en masse'
+    'Je ne souhaite pas recevoir de messages privés de masse': 'Pas de messages privés en masse',
+    'Groupe ouvert': 'Ouvert',
+    'Groupe fermé': 'Fermé',
+    'Groupe invisible': 'Invisible'
   };
   function cpChoice(text) { return CP_CHOICES[text] || text; }
 
@@ -5508,6 +5512,323 @@
     endNav.appendChild(ol.cloneNode(true));
     endDiv.parentNode.insertBefore(endNav, endDiv.nextSibling);
     document.body.classList.add('sg-mlpage', 'sg-pagehead-on');
+  }
+
+  /* --------------------------------------------------------------------
+     Page d'un groupe (/gN-…, template groupcp_info_body) : en-tête au pattern des forums, à la couleur du groupe
+     (pays : couleur et kanji en filigrane ; Staffeux / Modérateurs : couleur de leur groupe) ; carte « Le groupe »
+     (membres, ton statut, rejoindre / quitter ; pour le responsable, type du groupe en contrôle segmenté) ; puis
+     les membres en cartes portrait de la liste des membres (.sg-mcard), le responsable en tête avec son bandeau ;
+     pour le responsable, une case par membre et la barre « Ajouter » / « Trouver » / « Retirer ». Formulaires
+     natifs gardés (noms, champs cachés avec tid) : tout est déplacé dedans, rien n'est envoyé en arrière-plan.
+     -------------------------------------------------------------------- */
+  var GROUP_META = {
+    'hi-no-kuni': ['火', 'hi'], 'mizu-no-kuni': ['水', 'mizu'], 'kaze-no-kuni': ['風', 'kaze'],
+    'kaminari-no-kuni': ['雷', 'kaminari'], 'tsuchi-no-kuni': ['土', 'tsuchi'], 'shokoku': ['他', 'autres'],
+    'staffeux': ['', 'staff'], 'moderateurs': ['', 'mod']
+  };
+  function groupPage() {
+    var m = location.pathname.match(/^\/g(\d+)-([a-z0-9-]+)/);
+    var wrap = document.getElementById('wrap');
+    if (!m || !wrap || document.querySelector('.sg-group')) return;
+    var info = Array.prototype.slice.call(wrap.querySelectorAll(':scope > .block')).filter(function (b) {
+      return b.querySelector('form dl.block-dl-default');
+    })[0];
+    var table = wrap.querySelector(':scope > form[name="post"] table.table1');
+    if (!info || !table) return;
+    var el = uiEl, ico = uiIco;
+    var meta = GROUP_META[m[2]] || ['', ''];
+    var infoForm = info.querySelector('form');
+    var nativeHead = wrap.querySelector(':scope > .page-header');
+    var nameSpan = (nativeHead && nativeHead.querySelector('.usr_grp_clr')) || info.querySelector('dd .usr_grp_clr');
+    var name = (nameSpan || nativeHead || {}).textContent ? (nameSpan || nativeHead).textContent.replace(/\s+/g, ' ').trim() : 'Groupe';
+
+    /* Valeurs de la fiche native (dt / dd) */
+    var dd = {};
+    Array.prototype.slice.call(info.querySelectorAll('dl.block-dl-default dt')).forEach(function (dt) {
+      var v = dt.nextElementSibling;
+      if (v && v.tagName === 'DD') dd[dt.textContent.replace(/\s*:\s*$/, '').trim().toLowerCase()] = v;
+    });
+    var pick = function (re) {
+      var k = Object.keys(dd).filter(function (x) { return re.test(x); })[0];
+      return k ? dd[k] : null;
+    };
+    var descDd = pick(/description/);
+    var statusDd = pick(/statut/);
+    var countDd = pick(/membres/);
+
+    /* En-tête */
+    var topDiv = regDivider(true);
+    var head = el('section', 'sg-pagehead sg-pagehead--group' + (meta[1] ? ' sg-tone-' + meta[1] : ''));
+    head.setAttribute('aria-label', 'En-tête de la page');
+    if (meta[0]) {
+      var kanji = el('span', 'sg-pagehead__kanji', meta[0]);
+      kanji.setAttribute('aria-hidden', 'true');
+      head.appendChild(kanji);
+    }
+    var crumbs = el('nav', 'sg-crumbs');
+    crumbs.setAttribute('aria-label', "Fil d'Ariane");
+    var ol = el('ol', 'sg-crumbs__list');
+    [['/', 'Accueil', 'home'], ['/groups', 'Groupes'], [null, name]].forEach(function (c) {
+      var li = el('li', 'sg-crumbs__item');
+      var a = el(c[0] ? 'a' : 'span', 'sg-crumbs__link' + (c[0] ? '' : ' sg-crumbs__here'));
+      if (c[2]) a.appendChild(ico(c[2]));
+      a.appendChild(el('span', null, c[1]));
+      if (c[0]) a.href = c[0]; else a.setAttribute('aria-current', 'page');
+      li.appendChild(a);
+      ol.appendChild(li);
+    });
+    crumbs.appendChild(ol);
+    head.appendChild(crumbs);
+    var row = el('div', 'sg-pagehead__row');
+    var h1 = el('h1', 'sg-pagehead__title');
+    h1.appendChild(el('span', 'sg-pagehead__text', name));
+    h1.setAttribute('title', name);
+    row.appendChild(h1);
+    head.appendChild(row);
+    var desc = descDd ? descDd.textContent.replace(/\s+/g, ' ').trim() : '';
+    if (desc) head.appendChild(el('div', 'sg-pagehead__desc', desc));
+    if (nativeHead) nativeHead.classList.add('sg-hidden');
+    info.parentNode.insertBefore(topDiv, info);
+    info.parentNode.insertBefore(head, info);
+
+    var page = el('div', 'sg-group' + (meta[1] ? ' sg-tone-' + meta[1] : ''));
+    info.parentNode.insertBefore(page, info);
+
+    /* Carte « Le groupe » : le bloc natif (et son formulaire) devient la carte */
+    info.classList.add('sg-pcard', 'sg-gcard');
+    page.appendChild(info);
+    var bh = info.querySelector(':scope > .block-header');
+    if (bh) {
+      var t = el('h2', 'sg-pcard__title');
+      t.appendChild(ico('groups'));
+      t.appendChild(el('span', null, 'Le groupe'));
+      bh.parentNode.replaceChild(t, bh);
+    }
+    var tiles = el('dl', 'sg-gcard__facts');
+    var tile = function (icon, label, value) {
+      if (!value) return;
+      var r = el('div', 'sg-gcard__fact');
+      var k = el('dt', 'sg-gcard__flabel');
+      k.appendChild(ico(icon));
+      k.appendChild(el('span', null, label));
+      r.appendChild(k);
+      r.appendChild(el('dd', 'sg-gcard__fvalue', value));
+      tiles.appendChild(r);
+    };
+    var count = countDd ? countDd.textContent.replace(/\s+/g, '').trim() : '';
+    tile('group', 'Membres', count ? count + (count === '1' ? ' shinobi' : ' shinobis') : '');
+    var joinBtns = statusDd ? Array.prototype.slice.call(statusDd.querySelectorAll('input[type="submit"]')) : [];
+    var statusText = statusDd ? Array.prototype.slice.call(statusDd.childNodes).filter(function (n) { return n.nodeType === 3; })
+      .map(function (n) { return n.textContent; }).join(' ').replace(/\s+/g, ' ').trim() : '';
+    var isMod = /mod[ée]rateur/i.test(statusText);
+    var STATUS = [[/mod[ée]rateur/i, 'Responsable du groupe'], [/attente/i, 'Demande en attente'], [/membre/i, 'Membre du groupe'], [/pas membre|n.êtes pas/i, 'Pas membre']];
+    var st = STATUS.filter(function (x) { return x[0].test(statusText); })[0];
+    tile('badge', 'Ton statut', st ? st[1] : statusText);
+    var dl = info.querySelector('dl.block-dl-default');
+    if (dl) { dl.parentNode.insertBefore(tiles, dl); dl.classList.add('sg-hidden'); }
+
+    /* Rejoindre / quitter : boutons du formulaire natif */
+    if (joinBtns.length) {
+      var acts = el('div', 'sg-gcard__actions');
+      joinBtns.forEach(function (i) {
+        var leave = i.name === 'unsub';
+        var b = el('button', 'sg-pbtn' + (leave ? ' sg-pbtn--ghost sg-pbtn--danger' : ''));
+        b.type = 'submit';
+        b.name = i.name;
+        b.value = i.value;
+        b.appendChild(ico(leave ? 'logout' : 'group_add'));
+        b.appendChild(el('span', null, leave ? 'Quitter le groupe' : 'Rejoindre le groupe'));
+        b.setAttribute('title', i.value);
+        acts.appendChild(b);
+        i.remove();
+      });
+      tiles.parentNode.insertBefore(acts, tiles.nextSibling);
+    }
+
+    /* Responsable : type du groupe en contrôle segmenté, « Mettre à jour » à côté */
+    var rw = info.querySelector('.radio-wrap');
+    if (rw) {
+      var upd = rw.querySelector('input[type="submit"]');
+      var box = el('div', 'sg-gcard__type');
+      rw.parentNode.insertBefore(box, rw);
+      box.appendChild(rw);
+      cpRadioWrap(rw);
+      Array.prototype.slice.call(rw.querySelectorAll('br')).forEach(function (x) { x.remove(); });
+      if (upd) {
+        var ub = el('button', 'sg-pbtn sg-pbtn--ghost');
+        ub.type = 'submit';
+        ub.name = upd.name;
+        ub.value = upd.value;
+        ub.appendChild(ico('save'));
+        ub.appendChild(el('span', null, 'Mettre à jour'));
+        var lab = upd.closest('label');
+        (lab || upd).remove();
+        box.appendChild(ub);
+      }
+    }
+
+    /* Membres : cartes portrait (pattern de la liste des membres) */
+    var mform = table.closest('form');
+    var sec = el('section', 'sg-gmembers');
+    var sh = el('h2', 'sg-gmembers__title');
+    sh.appendChild(ico('diversity_3'));
+    sh.appendChild(el('span', null, 'Les shinobis du groupe'));
+    sec.appendChild(sh);
+    var grid = el('div', 'sg-mlist');
+    sec.appendChild(grid);
+    var section = '';
+    var cards = 0;
+    Array.prototype.slice.call(table.querySelectorAll('tbody tr')).forEach(function (tr) {
+      if (tr.classList.contains('row3')) { section = tr.textContent.trim(); return; }
+      var link = tr.querySelector('td a[href^="/u"]');
+      if (!link) {
+        var txt = tr.textContent.replace(/\s+/g, ' ').trim();
+        if (txt) {
+          var empty = el('div', 'sg-topics__empty sg-mlist__empty');
+          empty.appendChild(ico('group_off'));
+          empty.appendChild(el('span', null, /cach|invisible/i.test(txt) ? 'Les membres de ce groupe sont cachés.' : 'Aucun shinobi dans ce groupe pour l’instant.'));
+          grid.appendChild(empty);
+        }
+        return;
+      }
+      var card = el('article', 'sg-mcard');
+      var pic = el('div', 'sg-mcard__portrait');
+      var img = link.querySelector('img');
+      if (img) {
+        var im = el('img');
+        im.src = img.getAttribute('src');
+        im.alt = '';
+        im.loading = 'lazy';
+        pic.appendChild(im);
+      } else { pic.classList.add('is-empty'); pic.appendChild(ico('person')); }
+      card.appendChild(pic);
+      var body = el('div', 'sg-mcard__body');
+      var h = el('h3', 'sg-mcard__name');
+      var a = el('a', 'sg-mcard__link');
+      a.href = link.getAttribute('href');
+      var colored = link.querySelector('.usr_grp_clr, [style*="color"]');
+      var uname = link.textContent.replace(/\s+/g, ' ').trim();
+      if (colored) a.appendChild(colored.cloneNode(true)); else a.textContent = uname;
+      a.setAttribute('title', uname);
+      h.appendChild(a);
+      body.appendChild(h);
+      var facts = el('ul', 'sg-mcard__facts');
+      var cell = function (re) {
+        var td = Array.prototype.slice.call(tr.querySelectorAll('td')).filter(function (x) { return re.test(x.getAttribute('data-th') || ''); })[0];
+        return td ? td.textContent.replace(/\s+/g, ' ').trim() : '';
+      };
+      var posts = cell(/^messages/i);
+      var from = cell(/localisation/i);
+      [['chat_bubble', posts ? posts + (posts === '1' || posts === '0' ? ' message' : ' messages') : ''], ['location_on', from]].forEach(function (f) {
+        if (!f[1]) return;
+        var li = el('li', 'sg-mcard__fact');
+        li.appendChild(ico(f[0]));
+        li.appendChild(el('span', null, f[1]));
+        li.setAttribute('title', f[1]);
+        facts.appendChild(li);
+      });
+      body.appendChild(facts);
+      card.appendChild(body);
+      /* Responsable du groupe : bandeau à la couleur du groupe */
+      if (/mod[ée]rateur/i.test(section)) {
+        var band = el('div', 'sg-role sg-role--lead');
+        band.appendChild(el('span', 'sg-role__label', 'Responsable'));
+        card.insertBefore(band, card.firstChild);
+        card.classList.add('is-lead');
+      }
+      /* Case de sélection du responsable */
+      var cb = tr.querySelector('input[type="checkbox"][name="members[]"]');
+      if (cb) {
+        cb.classList.add('sg-check');
+        cb.removeAttribute('onchange');
+        cb.setAttribute('aria-label', 'Sélectionner ' + uname);
+        card.appendChild(cb);
+        checkHit(cb).classList.add('sg-mcard__pick');
+        cb.addEventListener('change', function () { card.classList.toggle('is-picked', cb.checked); syncRemove(); });
+      }
+      grid.appendChild(card);
+      cards++;
+    });
+    if (!cards && !grid.querySelector('.sg-mlist__empty')) {
+      var none = el('div', 'sg-topics__empty sg-mlist__empty');
+      none.appendChild(ico('group_off'));
+      none.appendChild(el('span', null, 'Aucun shinobi dans ce groupe pour l’instant.'));
+      grid.appendChild(none);
+    }
+    mform.insertBefore(sec, table);
+    table.classList.add('sg-hidden');
+    page.appendChild(mform);
+
+    /* Outils du responsable : ajouter, trouver, retirer la sélection */
+    var addIn = mform.querySelector('#username');
+    var tools = addIn ? addIn.closest('.block') : null;
+    var removeBtn = null;
+    function syncRemove() {
+      if (!removeBtn) return;
+      var n = mform.querySelectorAll('input[name="members[]"]:checked').length;
+      removeBtn.disabled = !n;
+      removeBtn.querySelector('span:last-child').textContent = n ? 'Retirer (' + n + ')' : 'Retirer';
+    }
+    if (tools) {
+      tools.classList.add('sg-gtools');
+      var content = tools.querySelector('.block-content') || tools;
+      var barRow = el('div', 'sg-gtools__row');
+      var field = el('label', 'sg-mlbar__search sg-gtools__field');
+      field.appendChild(ico('person_add'));
+      addIn.classList.add('sg-pinput');
+      addIn.setAttribute('placeholder', 'Pseudo du shinobi à ajouter');
+      addIn.setAttribute('aria-label', 'Pseudo du shinobi à ajouter');
+      addIn.setAttribute('autocomplete', 'off');
+      field.appendChild(addIn);
+      barRow.appendChild(field);
+      var mk = function (input, cls, icon, label) {
+        if (!input) return null;
+        var b = el('button', 'sg-pbtn' + (cls ? ' ' + cls : ''));
+        b.type = input.type === 'button' ? 'button' : 'submit';
+        if (input.name) b.name = input.name;
+        if (input.id) { var id = input.id; input.removeAttribute('id'); b.id = id; }
+        b.value = input.value;
+        b.appendChild(ico(icon));
+        b.appendChild(el('span', null, label));
+        b.setAttribute('title', input.value);
+        input.parentNode.replaceChild(b, input);
+        return b;
+      };
+      var addB = mk(content.querySelector('input[name="add"]'), '', 'person_add', 'Ajouter');
+      var findB = mk(content.querySelector('input#find_user'), 'sg-pbtn--ghost', 'person_search', 'Trouver');
+      removeBtn = mk(content.querySelector('input[name="remove"]'), 'sg-pbtn--ghost sg-pbtn--danger', 'person_remove', 'Retirer');
+      [addB, findB].forEach(function (b) { if (b) barRow.appendChild(b); });
+      if (removeBtn) {
+        var spacer = el('span', 'sg-gtools__spacer');
+        barRow.appendChild(spacer);
+        barRow.appendChild(removeBtn);
+        if (!mform.querySelector('input[name="members[]"]')) removeBtn.classList.add('sg-hidden');
+      }
+      var note = content.querySelector(':scope > strong');
+      if (note) note.className = 'sg-gtools__note';
+      content.insertBefore(barRow, content.firstChild);
+      if (note) content.appendChild(note);
+      sec.appendChild(tools);
+      syncRemove();
+    }
+
+    /* « Sauter vers », pagination vide : masqués ; séparateur de fin et fil d'Ariane */
+    var jump = wrap.querySelector(':scope > form[name="jumpbox"]');
+    if (jump) jump.classList.add('sg-hidden');
+    var pag = mform.querySelector('.pagination');
+    if (pag) {
+      if (!pag.textContent.trim()) pag.classList.add('sg-hidden');
+      else { pag.classList.add('sg-mlpag'); sec.appendChild(pag); }
+    }
+    var endDiv = regDivider(false);
+    page.parentNode.insertBefore(endDiv, page.nextSibling);
+    var endNav = el('nav', 'sg-crumbs sg-crumbs--end');
+    endNav.setAttribute('aria-label', "Fil d'Ariane");
+    endNav.appendChild(ol.cloneNode(true));
+    endDiv.parentNode.insertBefore(endNav, endDiv.nextSibling);
+    document.title = name + ' · Groupes';
+    document.body.classList.add('sg-grouppage', 'sg-pagehead-on');
   }
 
   /* Onglets du profil affiché (/uN) : icône, description pour mon profil, pour celui d'un autre (%s = pseudo) */

@@ -12738,3 +12738,263 @@ body.sg-authpage .sg-auth + .sg-divider--end {
     font-size: 0.8rem;
   }
 }
+
+/* --- 73-group.css --- */
+/* ==========================================================================
+   SNJ — Page d'un groupe (/gN-…) : groupPage dans src/js/layout.js
+   En-tête à la couleur du groupe (pays + kanji, ou Staffeux / Modérateurs), carte « Le groupe », membres en cartes
+   portrait (.sg-mcard, 72-memberlist.css), outils du responsable.
+   ========================================================================== */
+
+.sg-grouppage .sg-hidden {
+  display: none !important;
+}
+
+.sg-pagehead.sg-tone-staff { --ph: var(--sg-group-staff); }
+.sg-pagehead.sg-tone-mod { --ph: var(--sg-group-mod); }
+
+.sg-group {
+  --gc: var(--sg-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sg-group.sg-tone-hi { --gc: var(--sg-nation-hi); }
+.sg-group.sg-tone-mizu { --gc: var(--sg-nation-mizu); }
+.sg-group.sg-tone-kaze { --gc: var(--sg-nation-kaze); }
+.sg-group.sg-tone-kaminari { --gc: var(--sg-nation-kaminari); }
+.sg-group.sg-tone-tsuchi { --gc: var(--sg-nation-tsuchi); }
+.sg-group.sg-tone-autres { --gc: var(--sg-nation-autres); }
+.sg-group.sg-tone-staff { --gc: var(--sg-group-staff); }
+.sg-group.sg-tone-mod { --gc: var(--sg-group-mod); }
+
+/* --- Carte « Le groupe » ----------------------------------------------------------------------------------- */
+#wrap .sg-group .block.sg-gcard {
+  margin: 0;
+  padding: 28px;
+  border: 0;
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-surface);
+  box-shadow: none;
+}
+
+#wrap .sg-gcard > .block-content,
+#wrap .sg-gcard form {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+#wrap .sg-gcard__facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+}
+
+.sg-gcard__fact {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--sg-surface-2);
+}
+
+#wrap .sg-gcard__flabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--sg-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.sg-gcard__flabel .material-symbols-outlined {
+  font-size: 16px;
+  color: var(--gc);
+}
+
+#wrap .sg-gcard__fvalue {
+  margin: 0;
+  color: var(--sg-text);
+  font-size: 1rem;
+}
+
+.sg-gcard__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+/* Responsable : type du groupe et « Mettre à jour », sous un filet */
+.sg-gcard__type {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--sg-border);
+}
+
+.sg-gcard__type .sg-pfield {
+  flex: 1 1 320px;
+  margin: 0;
+}
+
+#wrap .sg-gcard__type .sg-pbtn {
+  height: 46px;
+}
+
+/* --- Membres ---------------------------------------------------------------------------------------------- */
+#wrap .sg-group form[name="post"] {
+  margin: 0;
+  padding: 0;
+}
+
+.sg-gmembers {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+#wrap .sg-gmembers__title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  font-family: var(--sg-font-display);
+  font-size: 1.35rem;
+  font-weight: 400;
+  color: var(--sg-text);
+}
+
+.sg-gmembers__title .material-symbols-outlined {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--gc) 18%, transparent);
+  color: var(--gc);
+  font-size: 20px;
+}
+
+/* Bandeau du responsable : à la couleur du groupe */
+#wrap .sg-mcard > .sg-role--lead {
+  --role: var(--gc);
+  --on-role: var(--sg-surface);
+}
+
+.sg-tone-staff #wrap .sg-mcard > .sg-role--lead,
+#wrap .sg-group.sg-tone-staff .sg-mcard > .sg-role--lead {
+  --on-role: var(--sg-on-contrast);
+}
+
+/* Case de sélection : en haut à droite, au-dessus du lien étendu de la carte */
+#wrap .sg-mcard .sg-mcard__pick {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 3;
+  border-radius: 12px;
+  background: rgba(var(--ml-fade), 0.55);
+}
+
+#wrap .sg-mcard.is-picked {
+  box-shadow: inset 0 0 0 3px var(--sg-accent-1);
+}
+
+#wrap .sg-mcard.is-picked .sg-mcard__portrait img {
+  opacity: 0.8;
+}
+
+/* --- Outils du responsable --------------------------------------------------------------------------------- */
+#wrap .sg-group .block.sg-gtools {
+  margin: 0;
+  padding: 16px;
+  border: 0;
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-surface);
+  box-shadow: none;
+}
+
+#wrap .sg-gtools > .block-content {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.sg-gtools__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+#wrap .sg-gtools__field {
+  flex: 0 1 320px;
+}
+
+.sg-gtools__spacer {
+  flex: 1 1 0;
+}
+
+#wrap .sg-gtools .sg-pbtn {
+  height: 46px;
+}
+
+#wrap .sg-gtools .sg-pbtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+#wrap .sg-gtools__note {
+  display: block;
+  margin-top: 12px;
+  color: var(--sg-text-muted);
+  font-size: 0.85rem;
+  font-weight: 400;
+}
+
+/* --- Responsive ------------------------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  #wrap .sg-group .block.sg-gcard {
+    padding: 22px 16px;
+  }
+
+  .sg-gcard__actions,
+  .sg-gcard__type,
+  .sg-gtools__row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sg-gcard__type .sg-pfield,
+  #wrap .sg-gtools__field {
+    flex: none;
+  }
+
+  #wrap .sg-gcard .sg-pbtn,
+  #wrap .sg-gtools .sg-pbtn {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .sg-gtools__spacer {
+    display: none;
+  }
+}
