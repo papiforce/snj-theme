@@ -919,6 +919,7 @@ button.sg-sb-brand {
 
 /* « Voir toutes les notifications » : bouton au contour, collé en bas */
 #notif-menu.sg-notif #notif-view-all {
+  order: 99; /* AwesomeBB le place en tête (order: -1) */
   position: sticky;
   bottom: -12px;
   margin: auto -12px -12px;
