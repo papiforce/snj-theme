@@ -13111,3 +13111,8 @@ body.sg-authpage .sg-auth + .sg-divider--end {
   background: rgba(0, 0, 0, 0.55) !important;
   opacity: 1 !important;
 }
+
+/* AwesomeBB donne flex-basis: 100% aux champs : sans hauteur fixe, la colonne les écrase */
+#find_username.sg-finduser form > * {
+  flex: none;
+}
