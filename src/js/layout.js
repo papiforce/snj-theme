@@ -3807,20 +3807,18 @@
     }).catch(function () { done({}); });
   }
 
-  function watchList(cp) {
+  /* Liste de sujets à cocher, partagée par les Sujets surveillés et les Favoris : chaque ligne .posts-section (native
+     ou reconstruite) devient une carte de sujet yagasuri (topicCard) avec le forum du sujet sous le titre et sa case
+     native en tête de carte ; grille .sg-topics, couleur de catégorie de chaque forum, état vide, barre de sélection
+     sous la grille (« Tout sélectionner », action sur la sélection = bouton natif envoyé par requestSubmit).
+     opts = { cls, label, emptyIcon, emptyText, actIcon, actLabel, submit } */
+  function pickTopics(form, rows, opts) {
     var el = uiEl, ico = uiIco;
-    var list = cp.querySelector('form #memberlist.posts');
-    var form = list && list.closest('form');
-    if (!form || form.classList.contains('sg-watchform')) return false;
-    form.classList.add('sg-watchform');
-    /* Bloc natif « Sujets surveillés » : doublon du titre de la page */
-    Array.prototype.slice.call(form.querySelectorAll(':scope > .block')).forEach(function (b) { b.classList.add('sg-hidden'); b.setAttribute('data-sg-done', ''); });
-
-    var section = el('section', 'sg-topics sg-watch');
-    section.setAttribute('aria-label', 'Sujets surveillés');
+    var section = el('section', 'sg-topics ' + opts.cls);
+    section.setAttribute('aria-label', opts.label);
     var grid = el('ul', 'sg-topics__grid');
     var boxes = [];
-    Array.prototype.slice.call(list.querySelectorAll('.posts-section')).forEach(function (row) {
+    rows.forEach(function (row) {
       var box = row.querySelector('input[type="checkbox"]');
       var forum = row.querySelector('.posts-description a.postdetails');
       var card = topicCard(row);
@@ -3835,18 +3833,19 @@
         where.appendChild(fa);
         var title = card.querySelector('.sg-topic__title');
         title.parentNode.insertBefore(where, title.nextSibling);
+        card.setAttribute('data-forum', (forum.getAttribute('href').match(/^\/f\d+/) || [''])[0]);
       }
       /* Case de sélection, en tête de carte (la case native, dessinée) */
       if (box) {
         var top = card.querySelector('.sg-topic__flags');
         if (!top) { top = el('div', 'sg-topic__flags'); card.insertBefore(top, card.firstChild); }
         box.classList.add('sg-check');
+        box.removeAttribute('onchange');
         box.setAttribute('aria-label', 'Sélectionner « ' + card.querySelector('.sg-topic__link').textContent + ' »');
         top.insertBefore(box, top.firstChild);
         checkHit(box);
         boxes.push(box);
       }
-      if (forum) card.setAttribute('data-forum', (forum.getAttribute('href').match(/^\/f\d+/) || [''])[0]);
       grid.appendChild(card);
     });
     forumTones(function (map) {
@@ -3858,37 +3857,27 @@
     if (grid.children.length) section.appendChild(grid);
     else {
       var empty = el('p', 'sg-topics__empty');
-      empty.appendChild(ico('visibility_off'));
-      empty.appendChild(el('span', null, 'Tu ne suis aucun sujet pour l’instant.'));
+      empty.appendChild(ico(opts.emptyIcon));
+      empty.appendChild(el('span', null, opts.emptyText));
       section.appendChild(empty);
     }
-    list.parentNode.insertBefore(section, list);
-    list.classList.add('sg-hidden');
-    /* « Sauter vers » natif : absent des autres onglets du profil, masqué */
-    Array.prototype.slice.call(cp.querySelectorAll('form[name="jumpbox"]')).forEach(function (j) { j.classList.add('sg-hidden'); });
-
-    var valid = form.querySelector('input[name="valid"]');
-    Array.prototype.slice.call(form.querySelectorAll('.mark-buttons, .form-buttons')).forEach(function (x) {
-      x.classList.remove('form-buttons');
-      x.classList.add('sg-hidden');
-    });
-    if (!boxes.length || !valid) return true;
+    if (!boxes.length || !opts.submit) return section;
 
     var bar = el('div', 'sg-notifs__bar sg-watch__bar');
     var pick = el('button', 'sg-pbtn sg-pbtn--ghost');
     pick.type = 'button';
-    var stop = el('button', 'sg-pbtn sg-pbtn--ghost sg-pbtn--danger');
-    stop.type = 'button';
+    var act = el('button', 'sg-pbtn sg-pbtn--ghost sg-pbtn--danger');
+    act.type = 'button';
     var sync = function () {
       var sel = boxes.filter(function (i) { return i.checked; }).length;
       var all = sel === boxes.length;
       pick.textContent = '';
       pick.appendChild(ico(all ? 'remove_done' : 'done_all'));
       pick.appendChild(el('span', null, all ? 'Tout désélectionner' : 'Tout sélectionner'));
-      stop.textContent = '';
-      stop.appendChild(ico('visibility_off'));
-      stop.appendChild(el('span', null, sel ? 'Arrêter de suivre (' + sel + ')' : 'Arrêter de suivre'));
-      stop.disabled = !sel;
+      act.textContent = '';
+      act.appendChild(ico(opts.actIcon));
+      act.appendChild(el('span', null, sel ? opts.actLabel + ' (' + sel + ')' : opts.actLabel));
+      act.disabled = !sel;
       boxes.forEach(function (i) { i.closest('.sg-topic').classList.toggle('is-picked', i.checked); });
     };
     pick.addEventListener('click', function () {
@@ -3897,15 +3886,138 @@
       sync();
     });
     boxes.forEach(function (i) { i.addEventListener('change', sync); });
-    stop.addEventListener('click', function () {
-      if (form.requestSubmit) form.requestSubmit(valid); else valid.click();
+    act.addEventListener('click', function () {
+      if (form.requestSubmit) form.requestSubmit(opts.submit); else opts.submit.click();
     });
     bar.appendChild(pick);
-    bar.appendChild(stop);
+    bar.appendChild(act);
     section.appendChild(bar);
     sync();
+    return section;
+  }
+
+  /* Boutons, barres et blocs natifs d'une liste du profil : masqués (le bouton d'envoi reste dans le formulaire) */
+  function hideNativeList(cp, form) {
+    Array.prototype.slice.call(form.querySelectorAll(':scope > .block')).forEach(function (b) { b.classList.add('sg-hidden'); b.setAttribute('data-sg-done', ''); });
+    Array.prototype.slice.call(form.querySelectorAll('.mark-buttons, .form-buttons, :scope > div.btn, :scope > p.right-box')).forEach(function (x) {
+      x.classList.remove('form-buttons');
+      x.classList.add('sg-hidden');
+    });
+    /* « Sauter vers » natif : absent des autres onglets du profil, masqué */
+    Array.prototype.slice.call(cp.querySelectorAll('form[name="jumpbox"]')).forEach(function (j) { j.classList.add('sg-hidden'); });
+  }
+
+  /* Sujets surveillés (/search?search_id=watchsearch) : les lignes natives sont déjà des .posts-section */
+  function watchList(cp) {
+    var list = cp.querySelector('form #memberlist.posts');
+    var form = list && list.closest('form');
+    if (!form || form.classList.contains('sg-watchform')) return false;
+    form.classList.add('sg-watchform');
+    var section = pickTopics(form, Array.prototype.slice.call(list.querySelectorAll('.posts-section')), {
+      cls: 'sg-watch', label: 'Sujets surveillés',
+      emptyIcon: 'visibility_off', emptyText: 'Tu ne suis aucun sujet pour l’instant.',
+      actIcon: 'visibility_off', actLabel: 'Arrêter de suivre',
+      submit: form.querySelector('input[name="valid"]')
+    });
+    list.parentNode.insertBefore(section, list);
+    list.classList.add('sg-hidden');
+    hideNativeList(cp, form);
     return true;
   }
+
+  /* Favoris (/search?search_id=favouritesearch) : Forumactif donne un tableau (sujet, forum, réponses, auteur, vues,
+     dernier message, case delete_favourite[N]) ; chaque ligne est reconstruite en .posts-section pour topicCard.
+     Tri : les liens des en-têtes de colonnes deviennent une liste personnalisée « Trier par ». */
+  function favRow(tr) {
+    var el = uiEl;
+    var c = tr.children;
+    var topic = c[0] && c[0].querySelector('a[href^="/t"]');
+    if (!topic) return null;
+    var txt = function (td) { return td ? td.textContent.replace(/\s+/g, ' ').trim() : ''; };
+    var row = el('div', 'posts-section');
+    row.appendChild(el('div', 'posts-icon'));
+    var content = el('div', 'posts-content');
+    var descr = el('div', 'posts-description');
+    var h3 = el('h3');
+    var ta = el('a', null, topic.textContent.trim());
+    ta.setAttribute('href', topic.getAttribute('href'));
+    h3.appendChild(ta);
+    descr.appendChild(h3);
+    var p = el('p');
+    var forum = c[1] && c[1].querySelector('a[href^="/f"]');
+    if (forum) { var fa = el('a', 'postdetails', forum.textContent.trim()); fa.setAttribute('href', forum.getAttribute('href')); p.appendChild(fa); }
+    var author = c[3] && c[3].querySelector('a[href^="/u"]');
+    if (author) p.appendChild(author.cloneNode(true));
+    descr.appendChild(p);
+    var box = tr.querySelector('input[type="checkbox"]');
+    if (box) h3.insertBefore(box, h3.firstChild);
+    content.appendChild(descr);
+    var stats = el('div', 'posts-statistics');
+    stats.appendChild(el('span', 'posts-statistics-replies', txt(c[2])));
+    stats.appendChild(el('span', 'posts-statistics-views', txt(c[4])));
+    content.appendChild(stats);
+    var last = c[5];
+    if (last) {
+      var lp = el('div', 'posts-lastpost');
+      var la = last.querySelector('a[href^="/u"]');
+      if (la) { var lsp = el('span', 'posts-lastpost-author'); lsp.appendChild(la.cloneNode(true)); lp.appendChild(lsp); }
+      var date = last.firstChild && last.firstChild.nodeType === 3 ? last.firstChild.textContent.trim() : '';
+      var go = last.querySelector('a[href^="/t"]');
+      var time = el('a', 'posts-lastpost-time', date || 'Dernier message');
+      time.setAttribute('href', go ? go.getAttribute('href') : topic.getAttribute('href'));
+      lp.appendChild(time);
+      content.appendChild(lp);
+    }
+    row.appendChild(content);
+    return row;
+  }
+
+  function favList(cp) {
+    var el = uiEl, ico = uiIco;
+    var form = Array.prototype.slice.call(cp.querySelectorAll('form[name="post"]')).filter(function (f) {
+      return /favouritesearch/.test(f.getAttribute('action') || '') && f.querySelector('table.table1');
+    })[0];
+    if (!form || form.classList.contains('sg-favform')) return false;
+    form.classList.add('sg-favform');
+    var table = form.querySelector('table.table1');
+    var rows = Array.prototype.slice.call(table.querySelectorAll('tbody tr')).map(favRow).filter(Boolean);
+
+    /* Tri : liens natifs des en-têtes de colonnes */
+    var sorts = Array.prototype.slice.call(table.querySelectorAll('thead th a[href*="favouritesearch"]'));
+    var tools = null;
+    if (rows.length > 1 && sorts.length) {
+      var SORT_LABELS = { topic: 'Sujet', forum: 'Forum', replies: 'Réponses', author: 'Auteur', views: 'Vues', '': 'Dernier message' };
+      var cur = (location.search.match(/[?&]orderby=([a-z]+)/) || [])[1] || '';
+      var sel = el('select');
+      sel.setAttribute('aria-label', 'Trier les favoris');
+      sel.setAttribute('form', 'sg-none');
+      sorts.forEach(function (a) {
+        var key = (a.getAttribute('href').match(/[?&]orderby=([a-z]+)/) || [])[1] || '';
+        var o = el('option', null, SORT_LABELS[key] || a.textContent.trim());
+        o.value = a.getAttribute('href').replace(/&amp;/g, '&');
+        if (key === cur) o.selected = true;
+        sel.appendChild(o);
+      });
+      tools = el('div', 'sg-favs__tools');
+      var lab = el('span', 'sg-pfield__label', 'Trier par');
+      tools.appendChild(lab);
+      tools.appendChild(combo(sel, {}).box);
+      sel.addEventListener('change', function () { if (sel.value) location.href = sel.value; });
+    }
+
+    var section = pickTopics(form, rows, {
+      cls: 'sg-favs', label: 'Favoris',
+      emptyIcon: 'bookmark', emptyText: 'Aucun favori pour l’instant.',
+      actIcon: 'bookmark_remove', actLabel: 'Retirer des favoris',
+      submit: form.querySelector('input[name="valid"]')
+    });
+    if (tools) section.insertBefore(tools, section.firstChild);
+    table.parentNode.insertBefore(section, table);
+    table.classList.add('sg-hidden');
+    hideNativeList(cp, form);
+    return true;
+  }
+
 
   /* Case dessinée dans une zone cliquable de 44px (cible tactile), sans changer sa taille à l'écran */
   function checkHit(box) {
@@ -5253,6 +5365,8 @@
 
     /* Sujets surveillés : cartes de sujet */
     watchList(cp);
+    /* Favoris : cartes de sujet */
+    favList(cp);
 
     /* Blocs natifs en cartes */
     Array.prototype.slice.call(cp.querySelectorAll('.block')).forEach(function (b) {
