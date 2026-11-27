@@ -5808,6 +5808,29 @@
         findB.setAttribute('title', findNative.value);
         findB.addEventListener('click', function () { findNative.click(); });
         findNative.classList.add('sg-hidden');
+        /* Fenêtre native « Trouver un nom d'utilisateur » (chargée à chaque ouverture et à chaque recherche) :
+           textes de la refonte, liste des résultats en liste personnalisée */
+        var fw = document.getElementById('find_username');
+        if (fw && window.MutationObserver) {
+          fw.classList.add('sg-finduser');
+          var dress = function () {
+            var h1 = fw.querySelector('.page-header h1');
+            if (h1 && h1.textContent !== 'Trouver un shinobi') h1.textContent = 'Trouver un shinobi';
+            var d = fw.querySelector('.description');
+            if (d && !d.hasAttribute('data-sg')) { d.setAttribute('data-sg', ''); d.textContent = 'Tape un pseudo, ou une partie suivie de * (Uchi*).'; }
+            var q = fw.querySelector('#search_username');
+            if (q && !q.classList.contains('sg-pinput')) { q.classList.add('sg-pinput'); q.setAttribute('placeholder', 'Pseudo'); q.setAttribute('aria-label', 'Pseudo'); }
+            var list = fw.querySelector('#username_list');
+            if (list && !list.closest('.sg-combo')) {
+              list.setAttribute('aria-label', 'Shinobis trouvés');
+              var c = combo(list, {});
+              var spot = fw.querySelector('#use') || null;
+              (spot ? spot.parentNode : list.parentNode).insertBefore(c.box, spot);
+            }
+          };
+          new MutationObserver(dress).observe(fw, { childList: true, subtree: true });
+          dress();
+        }
       }
       removeBtn = mk(content.querySelector('input[name="remove"]'), 'sg-pbtn--ghost sg-pbtn--danger', 'person_remove', 'Retirer');
       [addB, findB].forEach(function (b) { if (b) barRow.appendChild(b); });
