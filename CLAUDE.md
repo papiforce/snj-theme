@@ -397,6 +397,17 @@ dans le panneau d'administration (PA), puis on commit.
   poster. ») : même famille (`errorBlocks()`, `61-notice.css`) : encart `.sg-alert` sur fond teinté d'Ume, sans
   contour ni ombre, **petit sceau 否** (40px, même rebond), message en gras, `role="alert"` ; sur la page d'écriture
   il rejoint la colonne de la lettre, juste au-dessus d'elle (inséré avant `#postingbox`, qui ne bouge pas).
+- **Page « Êtes-vous sûr ? »** (template `confirm_body` : `#wrap > .block.block-modal` avec un formulaire et les
+  boutons natifs `confirm` / `cancel` ; `layout.js`, fonction `confirmPage`, + `61-notice.css`) : **même famille que le
+  sceau « hanko »** (carte centrée, séparateur avec le logo au-dessus, défilement doux) avec le **sceau 問** (question,
+  `NOTICE_TONES.ask`), **Ume** si l'action détruit (`.is-danger`). Titre en question courte et explication au
+  tutoiement selon le message natif (`CONFIRM_KINDS` : favoris → « Retirer ces favoris ? » / « Retirer » ; sujet →
+  « Supprimer ce sujet ? » ; message ; suivi ; suppression générique ; sinon « Confirmer cette action ? » et la phrase
+  native, « Etes » corrigé en « Êtes »), espace insécable avant « ? ». Le **formulaire natif est gardé** (son adresse
+  porte la clé de session `tid`, ses champs cachés) : il rejoint la carte, sa phrase native est masquée (`hidden`), ses
+  deux boutons sont restylés en `.sg-pbtn` : « Annuler » (contour) puis l'action (pleine, Ume si elle détruit) ; sur
+  mobile l'action au-dessus, en pleine largeur. Vérifié sur la confirmation de suppression d'un sujet (lue en GET,
+  rien envoyé) et sur une confirmation de favoris reconstituée.
 - **Sondage affiché : carte « tōhyō »** 投票 (le vote) (`layout.js`, fonction `pollCards`, + `62-poll.css`) :
   pattern **réservé aux sondages**, partout où Forumactif les affiche (`.block` avec `form.poll` ou `dl.poll`) :
   carte de surface sans contour sur **motif shippō** (communauté : votes), net à droite et estompé vers la gauche ;
@@ -501,9 +512,9 @@ dans le panneau d'administration (PA), puis on commit.
   deviennent une liste personnalisée « Trier par » au-dessus de la grille, à droite (`.sg-favs__tools`, `combo`, Sujet,
   Forum, Réponses, Auteur, Vues, Dernier message ; tri en cours lu dans `orderby`, pleine largeur sur mobile), seulement
   s'il y a au moins deux favoris. Action « Retirer des favoris (N) » (`bookmark_remove`, contour Ume) : **envoi normal**
-  du bouton natif `valid` ; Forumactif affiche ensuite sa page « Êtes-vous sûr ? » (pas encore habillée). **Ne jamais
+  du bouton natif `valid` ; Forumactif affiche ensuite sa page « Êtes-vous sûr ? » (habillée par `confirmPage`). **Ne jamais
   envoyer ce formulaire en arrière-plan** (`fetch` POST sur `/search`) : un essai a renvoyé la page de connexion et
-  **déconnecté la session** (rien n'a été supprimé). Aucun favori : « Aucun favori pour l'instant. ». Deux favoris sur le
+  **déconnecté la session** (rien n'a été supprimé ; l'envoi n'avait pas la clé de session `tid` que porte le formulaire de confirmation). Aucun favori : « Aucun favori pour l'instant. ». Deux favoris sur le
   compte de test (« Informations | Présentation », « Informations | Fiche technique »). Non testé : le retrait.
 - **Onglet « Avatar » : portrait « nigao-e »** 似顔絵 (`layout.js`, fonction `avatarPanel`, + `67-avatar.css`) : pattern
   **réservé au choix de l'avatar** (`page_profil=avatars`). Carte « Ton portrait » : **portrait 200 × 400** au style
@@ -604,7 +615,7 @@ dans le panneau d'administration (PA), puis on commit.
   ligne changés en `<br>`), clair, sombre, largeur réduite ; **pas encore posté pour de vrai** (un élément vide comme
   `.sgc-notch` ou `.sgc-step__mark` pourrait être retiré par Forumactif).
   Récapitulatif des patterns : **forum** (accueil) = image en fond + panneau + kanji ; **sous-forum** = ema
-  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ; **confirmation** = hanko (sceau au kanji) ; **paramètres du profil** = ninbetsu-chō (onglets collants + cartes) ; **avatar** = nigao-e (portrait 200 × 400 + sources) ; **signature** = éditeur de l'écritoire suzuri ; **notifications** = alertes par famille en interrupteurs ; **sujets surveillés** et **favoris** = cartes yagasuri à cocher (`pickTopics`) ; **inscription** = kishōmon (étapes collantes, articles en kanji, sceaux à apposer) ; **connexion** = sekisho (formulaire | carte d'à-côté sur seigaiha) ; **sondage** = tōhyō (carte sur shippō) ; **fiche de personnage** = jinbutsu (codes `.sgc-`) ;
+  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ; **confirmation** = hanko (sceau au kanji ; 問 pour « Êtes-vous sûr ? ») ; **paramètres du profil** = ninbetsu-chō (onglets collants + cartes) ; **avatar** = nigao-e (portrait 200 × 400 + sources) ; **signature** = éditeur de l'écritoire suzuri ; **notifications** = alertes par famille en interrupteurs ; **sujets surveillés** et **favoris** = cartes yagasuri à cocher (`pickTopics`) ; **inscription** = kishōmon (étapes collantes, articles en kanji, sceaux à apposer) ; **connexion** = sekisho (formulaire | carte d'à-côté sur seigaiha) ; **sondage** = tōhyō (carte sur shippō) ; **fiche de personnage** = jinbutsu (codes `.sgc-`) ;
   **permission** = étiquette tegata aux coins coupés.
 - **Catégories de l'accueil** (`forums.js` + `40-zones.css`) : à gauche un sélecteur collant (Gestion, Hi, Mizu, Kaze,
   Kaminari, Tsuchi no Kuni, Shōkoku — « les petits pays », ex-Reste du Sekai) au style des raccourcis de l'Annexe, pastille = badge pour Gestion
