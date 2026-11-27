@@ -5619,7 +5619,7 @@
     card.setAttribute('aria-describedby', 'sg-notice-text');
     /* Le formulaire natif rejoint la carte ; sa phrase native est remplacée par le texte de la carte */
     var p = form.querySelector('.block-p-big');
-    if (p) p.classList.add('sg-hidden');
+    if (p) p.hidden = true;
     var fs = form.querySelector('fieldset') || form;
     fs.classList.remove('form-buttons');
     fs.classList.add('sg-notice__actions');
@@ -5666,7 +5666,6 @@
       if (window.scrollY > 40) return;
       top.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
     }, 150);
-    if (noBtn) try { noBtn.focus({ preventScroll: true }); } catch (e) { noBtn.focus(); }
   }
 
   function noticePage() {

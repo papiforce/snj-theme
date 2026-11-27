@@ -8501,6 +8501,10 @@ html.sg-busy * {
   padding: 0;
 }
 
+#wrap .sg-notice .block-p-big[hidden] {
+  display: none;
+}
+
 #wrap .sg-notice fieldset.sg-notice__actions {
   min-width: 0;
   margin: 28px 0 0;
