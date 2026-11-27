@@ -512,7 +512,8 @@ dans le panneau d'administration (PA), puis on commit.
   Invisible, `CP_CHOICES`) + « Mettre à jour ». **Membres en cartes portrait** (`.sg-mcard`, même pattern que la liste
   des membres), bandeau **« Responsable »** à la couleur du groupe sur le modérateur du groupe, case `members[]` dessinée
   en haut à droite (`checkHit`, contour Asagi une fois cochée) ; « Aucun autre shinobi » si seul le responsable est
-  listé, « membres cachés » pour un groupe invisible. **Outils** du responsable (`.sg-gtools`) : champ « Pseudo du shinobi
+  listé, « membres cachés » pour un groupe invisible. **Outils** du responsable (`.sg-gtools`), **entre la carte « Le groupe »
+  et la liste des membres** (demande de Vinny ; le formulaire natif est en colonne, 24px d'écart) : champ « Pseudo du shinobi
   à ajouter », « Ajouter », « Trouver », puis « Retirer (N) » (contour Ume, désactivé sans sélection). **« Trouver »** :
   le gestionnaire jQuery de Forumactif est lié à l'`input#find_user` d'origine avant nos scripts : l'original est gardé,
   masqué, et notre bouton lui transmet le clic. Sa fenêtre (`#find_username`) est **déplacée dans `<body>`** par jqModal
@@ -521,6 +522,16 @@ dans le panneau d'administration (PA), puis on commit.
   aux champs : `flex: none` dans la fenêtre. Vérifié sur `/g3-hi-no-kuni` et `/g2-staffeux` (le compte de test modère tous
   les groupes), clair, sombre, 390px. **Non vus** : la vue d'un membre non responsable (Rejoindre / Quitter), un vrai ajout
   ou retrait.
+- **Liste des groupes** (`/groups`, `layout.js`, fonction `groupsList`, + `74-groups.css`) : séparateur avec le logo,
+  en-tête au pattern des forums (« Accueil › Groupes », titre « Groupes », « Les nations et les cercles qui rassemblent
+  les shinobis du Sekai. »). Les groupes en **bannières nobori** (même composant que la carte « Les groupes » de
+  l'accueil, `.sg-nobori` de `45-stats.css`, `.sg-nobori--page` : colonnes de 140px alignées à gauche, 3 colonnes
+  ≤ 768px), dans deux cartes sur **shippō** (communauté) estompé vers la gauche : **« Les nations »** (les six pays,
+  d'après `GROUP_META`) puis **« Le staff »** (Administrateurs, Modérateurs, Staffeux et tout groupe inconnu ; icône
+  Material Symbols à la place du kanji, couleur du PA à défaut de ton). Sous chaque bannière : effectif, type
+  (Ouvert `lock_open`, Fermé `lock`, Invisible `visibility_off`) et **« Ton groupe »** en Asagi pour les groupes du
+  membre. Le bloc natif « Appartenance à un groupe » (doublon) est masqué, sauf s'il porte un formulaire (rejoindre un
+  groupe : carte `.sg-gjoin`, listes en `combo`, non vu sur le compte de test). Vérifié clair, sombre, 390px.
 - **Onglet « Signature »** (`layout.js`, fonction `sigPanel`, + `68-signature.css`) : carte « Ta signature » (icône
   `draw`) dont l'**éditeur reprend celui de l'écritoire « suzuri »** : `form.sg-sigform` partage les règles de
   l'éditeur de `60-write.css` (sélecteurs `:is(.sg-writeform, .sg-sigform)` : barre d'outils posée sur la carte, icônes
@@ -694,7 +705,7 @@ dans le panneau d'administration (PA), puis on commit.
   ligne changés en `<br>`), clair, sombre, largeur réduite ; **pas encore posté pour de vrai** (un élément vide comme
   `.sgc-notch` ou `.sgc-step__mark` pourrait être retiré par Forumactif).
   Récapitulatif des patterns : **forum** (accueil) = image en fond + panneau + kanji ; **sous-forum** = ema
-  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ; **confirmation** = hanko (sceau au kanji ; 問 pour « Êtes-vous sûr ? ») ; **paramètres du profil** = ninbetsu-chō (onglets collants + cartes) ; **avatar** = nigao-e (portrait 200 × 400 + sources) ; **profil affiché** = fiche en lecture seule (portrait + champs ; statistiques en compteurs sur kikkō) ; **signature** = éditeur de l'écritoire suzuri ; **notifications** = alertes par famille en interrupteurs ; **sujets surveillés** et **favoris** = cartes yagasuri à cocher (`pickTopics`) ; **inscription** = kishōmon (étapes collantes, articles en kanji, sceaux à apposer, vérification finale) ; **connexion** = sekisho (formulaire | carte d'à-côté sur seigaiha) ; **sondage** = tōhyō (carte sur shippō) ; **membres** = registre en cartes portrait ; **groupe** = en-tête à sa couleur + carte « Le groupe » + membres en cartes portrait ; **fiche de personnage** = jinbutsu (codes `.sgc-`) ;
+  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ; **confirmation** = hanko (sceau au kanji ; 問 pour « Êtes-vous sûr ? ») ; **paramètres du profil** = ninbetsu-chō (onglets collants + cartes) ; **avatar** = nigao-e (portrait 200 × 400 + sources) ; **profil affiché** = fiche en lecture seule (portrait + champs ; statistiques en compteurs sur kikkō) ; **signature** = éditeur de l'écritoire suzuri ; **notifications** = alertes par famille en interrupteurs ; **sujets surveillés** et **favoris** = cartes yagasuri à cocher (`pickTopics`) ; **inscription** = kishōmon (étapes collantes, articles en kanji, sceaux à apposer, vérification finale) ; **connexion** = sekisho (formulaire | carte d'à-côté sur seigaiha) ; **sondage** = tōhyō (carte sur shippō) ; **membres** = registre en cartes portrait ; **groupe** = en-tête à sa couleur + carte « Le groupe » + membres en cartes portrait ; **liste des groupes** = bannières nobori ; **fiche de personnage** = jinbutsu (codes `.sgc-`) ;
   **permission** = étiquette tegata aux coins coupés.
 - **Catégories de l'accueil** (`forums.js` + `40-zones.css`) : à gauche un sélecteur collant (Gestion, Hi, Mizu, Kaze,
   Kaminari, Tsuchi no Kuni, Shōkoku — « les petits pays », ex-Reste du Sekai) au style des raccourcis de l'Annexe, pastille = badge pour Gestion
