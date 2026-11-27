@@ -3757,6 +3757,214 @@
     editorToolbar(form);
   }
 
+  /* --------------------------------------------------------------------
+     Onglet « Notifications » : réglages des alertes (form notif_opts) et liste des notifications (.cp_notifs).
+     Les cases natives restent dans les formulaires (envoi normal) ; elles deviennent des interrupteurs (alertes) et
+     des cases dessinées (liste). Types regroupés par famille, libellés courts, phrase native en infobulle.
+     -------------------------------------------------------------------- */
+  var NOTIF_TYPES = {
+    2: ['shinobi', 'person_add', 'Demande d’amitié'],
+    4: ['shinobi', 'login', 'Connexion d’un ami'],
+    0: ['shinobi', 'mail', 'Message privé'],
+    5: ['shinobi', 'chat', 'Message sur ton profil'],
+    7: ['sujets', 'forum', 'Réponse dans un sujet suivi'],
+    13: ['sujets', 'post_add', 'Nouveau sujet dans un forum suivi'],
+    3: ['groupes', 'group_add', 'Demande d’adhésion à un groupe'],
+    14: ['groupes', 'military_tech', 'Nouvelle récompense'],
+    17: ['groupes', 'volunteer_activism', 'Achat participatif'],
+    6: ['moderation', 'flag', 'Abus signalé'],
+    1: ['moderation', 'assignment', 'Nouveau rapport']
+  };
+  var NOTIF_GROUPS = [['shinobi', 'Shinobis'], ['sujets', 'Sujets'], ['groupes', 'Groupes et récompenses'], ['moderation', 'Modération'], ['autres', 'Autres']];
+
+  function notifSwitch(input, label) {
+    var el = uiEl;
+    var cell = el('label', 'sg-nswitch');
+    if (!input) { cell.classList.add('is-none'); return cell; }
+    cell.appendChild(input);
+    input.setAttribute('aria-label', label);
+    var sw = el('span', 'sg-switch');
+    sw.setAttribute('aria-hidden', 'true');
+    sw.appendChild(el('span', 'sg-switch__thumb'));
+    cell.appendChild(sw);
+    if (input.disabled) {
+      cell.classList.add('is-off');
+      cell.setAttribute('title', 'Pas disponible pour cette alerte');
+    }
+    return cell;
+  }
+
+  function notifPrefs(b) {
+    var el = uiEl, ico = uiIco;
+    var form = b.querySelector('form[name="notif_opts"]');
+    var table = form && form.querySelector('table');
+    if (!table) return;
+    b.classList.add('sg-pcard', 'sg-pcard--alerts');
+    Array.prototype.slice.call(b.children).forEach(function (c) {
+      if (c.classList.contains('block-header') || c.nodeName === 'BR') c.classList.add('sg-hidden');
+    });
+
+    /* Titre et menu « Tout activer / Tout désactiver » */
+    var head = el('div', 'sg-pcard__head');
+    var h = el('h2', 'sg-pcard__title');
+    h.appendChild(ico('notifications'));
+    h.appendChild(el('span', null, 'Tes alertes'));
+    head.appendChild(h);
+    var setAll = function (on) {
+      Array.prototype.slice.call(form.querySelectorAll('.sg-nswitch input[type="checkbox"]:not(:disabled)')).forEach(function (i) { i.checked = on; });
+    };
+    head.appendChild(actionsMenu([
+      [function () { setAll(true); }, 'notifications_active', 'Tout activer'],
+      [function () { setAll(false); }, 'notifications_off', 'Tout désactiver']
+    ], 'sg-alerts-menu', { label: 'Toutes les alertes', iconOnly: true, cls: 'sg-menu--icon' }));
+    b.insertBefore(head, b.firstChild);
+    b.insertBefore(el('p', 'sg-pcard__hint', 'Choisis comment le forum te prévient : par e-mail, sur le forum (cloche et notifications push), ou les deux.'), head.nextSibling);
+
+    /* En-têtes des deux colonnes, puis une liste par famille */
+    var list = el('div', 'sg-alerts');
+    var cols = el('div', 'sg-alerts__cols');
+    cols.setAttribute('aria-hidden', 'true');
+    cols.appendChild(el('span'));
+    [['mail', 'E-mail'], ['notifications_active', 'Sur le forum']].forEach(function (c) {
+      var s = el('span', 'sg-alerts__col');
+      s.appendChild(ico(c[0]));
+      s.appendChild(el('span', 'sg-alerts__colname', c[1]));
+      cols.appendChild(s);
+    });
+    list.appendChild(cols);
+    var groups = {};
+    Array.prototype.slice.call(table.querySelectorAll('tbody tr')).forEach(function (tr) {
+      var td = tr.querySelectorAll('td');
+      if (td.length < 2) return;
+      var text = td[0].textContent.replace(/\s+/g, ' ').trim();
+      var mail = td[1].querySelector('input[type="checkbox"]');
+      var push = td[2] ? td[2].querySelector('input[type="checkbox"]') : null;
+      var id = (mail || push || {}).value;
+      var spec = NOTIF_TYPES[id] || ['autres', 'notifications', text];
+      var row = el('div', 'sg-alert');
+      row.setAttribute('role', 'group');
+      row.setAttribute('aria-label', spec[2]);
+      var lab = el('span', 'sg-alert__label');
+      lab.appendChild(ico(spec[1]));
+      var t = el('span', 'sg-alert__text', spec[2]);
+      t.setAttribute('title', text);
+      lab.appendChild(t);
+      row.appendChild(lab);
+      row.appendChild(notifSwitch(mail, spec[2] + ' : par e-mail'));
+      row.appendChild(notifSwitch(push, spec[2] + ' : sur le forum'));
+      (groups[spec[0]] = groups[spec[0]] || []).push(row);
+    });
+    NOTIF_GROUPS.forEach(function (g) {
+      if (!groups[g[0]]) return;
+      var sec = el('section', 'sg-alerts__group');
+      sec.setAttribute('aria-label', g[1]);
+      sec.appendChild(el('p', 'sg-alerts__gname', g[1]));
+      var box = el('div', 'sg-alerts__rows');
+      groups[g[0]].forEach(function (r) { box.appendChild(r); });
+      sec.appendChild(box);
+      list.appendChild(sec);
+    });
+    table.parentNode.insertBefore(list, table);
+    table.classList.add('sg-hidden');
+
+    /* Boutons natifs « Tout sélectionner / désélectionner » : remplacés par le menu ; « Réinitialiser » ajouté */
+    Array.prototype.slice.call(form.querySelectorAll('.mark-buttons')).forEach(function (m) { m.classList.add('sg-hidden'); });
+    var fb = form.querySelector('.form-buttons');
+    if (fb && !fb.querySelector('input[type="reset"]')) {
+      var rs = el('input');
+      rs.type = 'reset';
+      rs.value = 'Réinitialiser';
+      fb.insertBefore(rs, fb.firstChild);
+    }
+  }
+
+  function notifList(b) {
+    var el = uiEl, ico = uiIco;
+    var form = b.querySelector('form[name="notif_list"]') || b.querySelector('form');
+    var nativeHead = b.querySelector(':scope > .block-header');
+    var count = nativeHead ? parseInt(nativeHead.textContent, 10) : NaN;
+    var boxes = form ? Array.prototype.slice.call(form.querySelectorAll('input[type="checkbox"]')).filter(function (i) { return !i.closest('.mark-buttons'); }) : [];
+    /* Aucune notification : la carte n'est pas affichée (demande de Vinny) */
+    if (!form || count === 0 || !boxes.length) { b.classList.add('sg-hidden'); return; }
+    b.classList.add('sg-pcard', 'sg-pcard--notifs');
+    if (nativeHead) nativeHead.classList.add('sg-hidden');
+    var n = isNaN(count) ? boxes.length : count;
+    var h = el('h2', 'sg-pcard__title');
+    h.appendChild(ico('inbox'));
+    h.appendChild(el('span', null, n + (n > 1 ? ' notifications' : ' notification')));
+    b.insertBefore(h, b.firstChild);
+
+    /* Chaque notification : sa case (dessinée en CSS) à gauche, son contenu à droite */
+    boxes.forEach(function (i) {
+      var item = i.closest('li, tr') || i.parentNode;
+      if (item === form) item = i.parentNode;
+      item.classList.add('sg-nitem');
+      i.classList.add('sg-check');
+      i.setAttribute('aria-label', 'Sélectionner cette notification');
+    });
+
+    /* Barre : tout sélectionner, supprimer la sélection, tout supprimer */
+    var del = form.querySelector('input[name="delete"]');
+    var delAll = form.querySelector('input[name="delete_all"]');
+    var bar = el('div', 'sg-notifs__bar');
+    var pick = el('button', 'sg-pbtn sg-pbtn--ghost');
+    pick.type = 'button';
+    var delBtn = el('button', 'sg-pbtn sg-pbtn--ghost sg-pbtn--danger');
+    delBtn.type = 'button';
+    var sync = function () {
+      var sel = boxes.filter(function (i) { return i.checked; }).length;
+      var all = sel === boxes.length;
+      pick.textContent = '';
+      pick.appendChild(ico(all ? 'remove_done' : 'done_all'));
+      pick.appendChild(el('span', null, all ? 'Tout désélectionner' : 'Tout sélectionner'));
+      delBtn.textContent = '';
+      delBtn.appendChild(ico('delete'));
+      delBtn.appendChild(el('span', null, sel ? 'Supprimer (' + sel + ')' : 'Supprimer la sélection'));
+      delBtn.disabled = !sel;
+    };
+    pick.addEventListener('click', function () {
+      var all = boxes.every(function (i) { return i.checked; });
+      boxes.forEach(function (i) { i.checked = !all; });
+      sync();
+    });
+    boxes.forEach(function (i) { i.addEventListener('change', sync); });
+    var submitWith = function (btn) {
+      if (!btn) return;
+      if (form.requestSubmit) form.requestSubmit(btn); else btn.click();
+    };
+    delBtn.addEventListener('click', function () { submitWith(del); });
+    bar.appendChild(pick);
+    var right = el('div', 'sg-notifs__del');
+    if (del) right.appendChild(delBtn);
+    if (delAll) {
+      var allBtn = el('button', 'sg-pbtn sg-pbtn--danger');
+      allBtn.type = 'button';
+      allBtn.appendChild(ico('delete_sweep'));
+      allBtn.appendChild(el('span', null, 'Tout supprimer'));
+      allBtn.addEventListener('click', function () {
+        confirmModal({
+          danger: true,
+          icon: 'delete_sweep',
+          title: 'Supprimer toutes tes notifications ?',
+          text: 'Les ' + n + ' notifications seront effacées. Cette action est définitive.',
+          confirm: 'Tout supprimer',
+          busy: 'Suppression…',
+          onConfirm: function () { submitWith(delAll); }
+        });
+      });
+      right.appendChild(allBtn);
+    }
+    bar.appendChild(right);
+    sync();
+
+    /* Boutons natifs gardés dans le formulaire (ils portent le nom envoyé), masqués */
+    Array.prototype.slice.call(form.querySelectorAll('.mark-buttons, .form-buttons')).forEach(function (x) {
+      x.classList.remove('form-buttons');
+      x.classList.add('sg-hidden');
+    });
+    form.appendChild(bar);
+  }
+
   function avatarPanel(b, bc) {
     var el = uiEl, ico = uiIco;
     var form = b.closest('form');
@@ -4881,6 +5089,9 @@
     /* Blocs natifs en cartes */
     Array.prototype.slice.call(cp.querySelectorAll('.block')).forEach(function (b) {
       if (b.closest('.sg-sigform')) return; /* aperçu de la signature : repris par sigPanel */
+      /* Onglet « Notifications » : alertes, puis liste des notifications */
+      if (b.querySelector(':scope > form[name="notif_opts"]')) { notifPrefs(b); return; }
+      if (b.classList.contains('cp_notifs')) { notifList(b); return; }
       var bh = b.querySelector(':scope > .block-header');
       var bc = b.querySelector(':scope > .block-content');
       if (!b.textContent.trim() && !b.querySelector('input, select, textarea, img')) { b.classList.add('sg-hidden'); return; }
