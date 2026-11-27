@@ -476,6 +476,17 @@ dans le panneau d'administration (PA), puis on commit.
   **masqué de la barre d'onglets**. Pas de pastille
   « en ligne ». ≤ 768px : une colonne, portrait centré. Vérifié sur `/u1` (le mien), `/u2` (un autre),
   `/u2stats`, clair, sombre, 390px.
+- **Profil affiché, onglet Statistiques** (`/uNstats`, `layout.js`, `memberStats`, + `71-member.css`) : le bloc
+  natif (sous-titres `.sub-head`, `dl.profile-advanced-stats`, boutons de recherche) est masqué. **Trois compteurs**
+  (`.sg-mstats__kpi`, grille `auto-fit` de 200px min.) sur **kikkō** estompé vers la gauche, comme les « Chroniques »
+  de l'accueil : Messages, Sujets ouverts (« N % du forum · N par jour », nombres au format français), Expérience ;
+  icône dans un cercle teinté Hagane, libellé en petites capitales, nombre en Zen Antique. Puis la carte **« Repères »**
+  (icône `event`) en tuiles `--sg-surface-2` : Dernier message, Dernier sujet, Inscrit le (+ « depuis … »), Dernière
+  visite ; une ligne native inconnue y rejoint ses voisines ; le nombre de messages privés n'est pas repris. Sous un
+  filet, les recherches natives en boutons au contour : « Mes messages / Ses messages » (`/spa/uN`), « Mes sujets /
+  Ses sujets » (`/st/uN`, lien du nombre de sujets ouverts), « Mes participations / Ses participations » (`/sta/uN`) ;
+  pleine largeur sur mobile. Titre « Statistiques », fil d'Ariane « Accueil › Profil (de <pseudo>) › Statistiques ».
+  Vérifié sur `/u1stats` et `/u2stats`, clair, sombre, 390px.
 - **Onglet « Signature »** (`layout.js`, fonction `sigPanel`, + `68-signature.css`) : carte « Ta signature » (icône
   `draw`) dont l'**éditeur reprend celui de l'écritoire « suzuri »** : `form.sg-sigform` partage les règles de
   l'éditeur de `60-write.css` (sélecteurs `:is(.sg-writeform, .sg-sigform)` : barre d'outils posée sur la carte, icônes
@@ -649,7 +660,7 @@ dans le panneau d'administration (PA), puis on commit.
   ligne changés en `<br>`), clair, sombre, largeur réduite ; **pas encore posté pour de vrai** (un élément vide comme
   `.sgc-notch` ou `.sgc-step__mark` pourrait être retiré par Forumactif).
   Récapitulatif des patterns : **forum** (accueil) = image en fond + panneau + kanji ; **sous-forum** = ema
-  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ; **confirmation** = hanko (sceau au kanji ; 問 pour « Êtes-vous sûr ? ») ; **paramètres du profil** = ninbetsu-chō (onglets collants + cartes) ; **avatar** = nigao-e (portrait 200 × 400 + sources) ; **profil affiché** = fiche en lecture seule (portrait + champs) ; **signature** = éditeur de l'écritoire suzuri ; **notifications** = alertes par famille en interrupteurs ; **sujets surveillés** et **favoris** = cartes yagasuri à cocher (`pickTopics`) ; **inscription** = kishōmon (étapes collantes, articles en kanji, sceaux à apposer, vérification finale) ; **connexion** = sekisho (formulaire | carte d'à-côté sur seigaiha) ; **sondage** = tōhyō (carte sur shippō) ; **fiche de personnage** = jinbutsu (codes `.sgc-`) ;
+  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ; **confirmation** = hanko (sceau au kanji ; 問 pour « Êtes-vous sûr ? ») ; **paramètres du profil** = ninbetsu-chō (onglets collants + cartes) ; **avatar** = nigao-e (portrait 200 × 400 + sources) ; **profil affiché** = fiche en lecture seule (portrait + champs ; statistiques en compteurs sur kikkō) ; **signature** = éditeur de l'écritoire suzuri ; **notifications** = alertes par famille en interrupteurs ; **sujets surveillés** et **favoris** = cartes yagasuri à cocher (`pickTopics`) ; **inscription** = kishōmon (étapes collantes, articles en kanji, sceaux à apposer, vérification finale) ; **connexion** = sekisho (formulaire | carte d'à-côté sur seigaiha) ; **sondage** = tōhyō (carte sur shippō) ; **fiche de personnage** = jinbutsu (codes `.sgc-`) ;
   **permission** = étiquette tegata aux coins coupés.
 - **Catégories de l'accueil** (`forums.js` + `40-zones.css`) : à gauche un sélecteur collant (Gestion, Hi, Mizu, Kaze,
   Kaminari, Tsuchi no Kuni, Shōkoku — « les petits pays », ex-Reste du Sekai) au style des raccourcis de l'Annexe, pastille = badge pour Gestion
