@@ -47,8 +47,9 @@
 }
 
 #wrap .sg-nobori--page {
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 24px 12px;
+  /* Colonnes de même largeur dans les deux cartes, alignées à gauche */
+  grid-template-columns: repeat(auto-fill, 140px);
+  gap: 24px 20px;
 }
 
 /* La bannière prend la largeur de sa colonne (140px au plus), comme sur l'accueil */
@@ -121,5 +122,6 @@
   #wrap .sg-nobori--page {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 20px 8px;
+    justify-content: stretch;
   }
 }
