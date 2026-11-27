@@ -425,8 +425,7 @@ dans le panneau d'administration (PA), puis on commit.
   favoris). Haut : séparateur avec le logo (sans widgets, comme l'écriture), en-tête au pattern des forums (fil
   d'Ariane **« Accueil › Profil › onglet »**, onglet non cliquable ; sur l'onglet « Profil » lui-même, **« Accueil ›
   Profil »** (demande de Vinny) ; « Profil » mène au profil affiché `/uN` —, **titre = l'onglet**,
-  une action « Voir mon profil » (absente sur les pages `/uN`, qui ont aussi la colonne `.cp-sidebar` : Profil, Groupes,
-  Récompenses, et reçoivent pour l'instant le même habillage), description propre à l'onglet, `CP_TABS`). **Onglets collants** (demande de Vinny) :
+  une action « Voir mon profil » (absente sur les pages `/uN`, qui ont leur propre en-tête : voir « Profil affiché »), description propre à l'onglet, `CP_TABS`). **Onglets collants** (demande de Vinny) :
   colonne de 248px (comme la colonne de l'auteur des messages), `position: sticky` à 24px du haut, carte de surface,
   icône Material Symbols par onglet (`CP_TABS`), onglet actif plein en sumi et gofun (icône pleine) ; ≤ 900px, **liste
   déroulante personnalisée collante en haut d'écran** (demande de Vinny ; `combo()` sur une `<select>` hors formulaire,
@@ -455,6 +454,21 @@ dans le panneau d'administration (PA), puis on commit.
   **Ordre des onglets** (`CP_ORDER`) : Informations, Avatar, Signature | Préférences, Notifications | Sujets surveillés,
   Favoris, un filet entre les groupes (`.sg-ptabs__sep`, vertical dans la bande mobile) ; onglet inconnu après, dans
   l'ordre natif (les pages `/uN` ne sont pas réordonnées).
+- **Profil affiché : fiche en lecture seule** (`/uN` et ses onglets `/uNstats`…, `layout.js`, `profilePage` +
+  `memberProfile`, `VIEW_TABS`, + `71-member.css`) : même cadre que les paramètres du profil (onglets collants
+  Profil / Statistiques, icônes `person` / `bar_chart`). **Mon profil** : titre et fil d'Ariane « Profil », bouton
+  **« Modifier mon profil »** (`edit`) à droite du titre, vers `/profile?mode=editprofile&page_profil=informations`
+  (onglet Profil seulement). **Profil d'un autre** : « Profil de <pseudo> » au titre et au fil d'Ariane (aussi en
+  2e niveau sur ses autres onglets), sans bouton (demande de Vinny). Pseudo lu dans `.cp-sidebar .box-head strong`.
+  **Champs jamais modifiables ici, quel que soit le rôle du lecteur** : le bloc natif (champs `.field_editable` que
+  le script ajax de Forumactif ouvre au clic, lien « Administrer l'utilisateur ») est masqué ; la carte `.sg-mprof`
+  reprend chaque `dl` en lecture (valeur de `.field_uneditable`, sans champ ni bouton) : colonne du portrait (rôle
+  `.sg-role` comme les messages — Staffeux / Modérateur d'après `staffRoles`, sinon le rang ; puis **portrait 200 ×
+  400** tiré de `.mod-login-avatar img`) | pseudo coloré en Zen Antique, « Inscrit depuis … » (`memberSince`, date en
+  infobulle, le champ « Date d'inscription » n'est pas répété), filet, champs en grille de 2 colonnes (libellé en
+  petites capitales, valeur sur 3 lignes au plus ; vide ou « - » → « Non renseigné » en italique). Pas de pastille
+  « en ligne ». ≤ 768px : une colonne, portrait centré. Vérifié sur `/u1` (le mien), `/u2` (un autre),
+  `/u2stats`, clair, sombre, 390px.
 - **Onglet « Signature »** (`layout.js`, fonction `sigPanel`, + `68-signature.css`) : carte « Ta signature » (icône
   `draw`) dont l'**éditeur reprend celui de l'écritoire « suzuri »** : `form.sg-sigform` partage les règles de
   l'éditeur de `60-write.css` (sélecteurs `:is(.sg-writeform, .sg-sigform)` : barre d'outils posée sur la carte, icônes
@@ -628,7 +642,7 @@ dans le panneau d'administration (PA), puis on commit.
   ligne changés en `<br>`), clair, sombre, largeur réduite ; **pas encore posté pour de vrai** (un élément vide comme
   `.sgc-notch` ou `.sgc-step__mark` pourrait être retiré par Forumactif).
   Récapitulatif des patterns : **forum** (accueil) = image en fond + panneau + kanji ; **sous-forum** = ema
-  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ; **confirmation** = hanko (sceau au kanji ; 問 pour « Êtes-vous sûr ? ») ; **paramètres du profil** = ninbetsu-chō (onglets collants + cartes) ; **avatar** = nigao-e (portrait 200 × 400 + sources) ; **signature** = éditeur de l'écritoire suzuri ; **notifications** = alertes par famille en interrupteurs ; **sujets surveillés** et **favoris** = cartes yagasuri à cocher (`pickTopics`) ; **inscription** = kishōmon (étapes collantes, articles en kanji, sceaux à apposer, vérification finale) ; **connexion** = sekisho (formulaire | carte d'à-côté sur seigaiha) ; **sondage** = tōhyō (carte sur shippō) ; **fiche de personnage** = jinbutsu (codes `.sgc-`) ;
+  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ; **confirmation** = hanko (sceau au kanji ; 問 pour « Êtes-vous sûr ? ») ; **paramètres du profil** = ninbetsu-chō (onglets collants + cartes) ; **avatar** = nigao-e (portrait 200 × 400 + sources) ; **profil affiché** = fiche en lecture seule (portrait + champs) ; **signature** = éditeur de l'écritoire suzuri ; **notifications** = alertes par famille en interrupteurs ; **sujets surveillés** et **favoris** = cartes yagasuri à cocher (`pickTopics`) ; **inscription** = kishōmon (étapes collantes, articles en kanji, sceaux à apposer, vérification finale) ; **connexion** = sekisho (formulaire | carte d'à-côté sur seigaiha) ; **sondage** = tōhyō (carte sur shippō) ; **fiche de personnage** = jinbutsu (codes `.sgc-`) ;
   **permission** = étiquette tegata aux coins coupés.
 - **Catégories de l'accueil** (`forums.js` + `40-zones.css`) : à gauche un sélecteur collant (Gestion, Hi, Mizu, Kaze,
   Kaminari, Tsuchi no Kuni, Shōkoku — « les petits pays », ex-Reste du Sekai) au style des raccourcis de l'Annexe, pastille = badge pour Gestion
