@@ -175,7 +175,7 @@ dans le panneau d'administration (PA), puis on commit.
   vers la droite), `sg-menu--icon` (bouton rond sans contour, trois points des messages)), `combo(select, opts)` (listes personnalisées), `jumpBox(valeurCourante)` (« Sauter vers »),
   `copyLink(texte)` (copie synchrone par champ temporaire + `execCommand`, l'API Clipboard en repli : elle peut rester
   en attente d'une permission) et `toast(message)` (message discret `.sg-toast` en bas d'écran, au-dessus de la barre
-  mobile). À réutiliser sur toute nouvelle page plutôt que de les recopier.
+  mobile ; sur mobile, largeur ajustée au texte, 32px de marge, texte centré). À réutiliser sur toute nouvelle page plutôt que de les recopier.
 - **Page d'un sujet** (`layout.js`, `pageHead` + `topicPage`, + `59-topic.css` ; widgets par `home.js`) :
   **Au-dessus** : Guide du joueur, Saison et Annexe, puis le séparateur avec le logo (même mode `#sg-home.is-forum`
   que les forums ; `home.js` reconnaît `/fN…` et `/tN…`, placement « Sur les sujets » coché sur le module 11).
@@ -699,7 +699,7 @@ dans le panneau d'administration (PA), puis on commit.
   n'est pas répété dans les étiquettes. **Séparateur de la refonte** `.sgc-notch` (filet en V, `--logo` avec le logo au
   trait, `--up` pointe en haut pour fermer). **Parties** `.sgc-part` : **mon** `.sgc-mon` (kanji dans un cercle teinté),
   titre en Zen Antique, filet qui file vers la droite. `.sgc-duo` : **grands chiffres** `.sgc-stats` (taille, poids ;
-  unité à la couleur d'accent) | texte. `.sgc-quote` : texte entre **crochets japonais 「 」**. **Chronologie**
+  unité à la couleur d'accent) | texte. `.sgc-quote` : texte entre **crochets japonais 「 」** (en largeur réduite : padding de 8px, `::before` à `left: -31px`, `::after` à `right: -31px`, demande de Vinny). **Chronologie**
   `.sgc-chrono` / `.sgc-step` : « An » en petites capitales et l'année en grand chiffre Zen Antique, **tomoe du logo de
   SnJ** (trois magatama, `.sgc-step__mark`) sur un fil, titre à la couleur d'accent ; en largeur réduite, tomoe et fil à
   gauche, année sur une ligne. **Coulisses** `.sgc-backstage` (hors RP, « Derrière le shinobi ») sur **shippō**
