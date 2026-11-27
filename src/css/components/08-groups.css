@@ -35,7 +35,9 @@
   --sg-group-hi: color-mix(in srgb, var(--sg-nation-hi) 85%, #000);
   --sg-group-mizu: color-mix(in srgb, var(--sg-nation-mizu) 80%, #000);
   --sg-group-kaze: color-mix(in srgb, var(--sg-nation-kaze) 72%, #000);
-  --sg-group-kaminari: color-mix(in srgb, var(--sg-nation-kaminari) 62%, #000);
+  /* Kaminari : or vif plutôt que l'olive du mélange au noir, qu'on ne lisait plus comme du jaune (demande de
+     Vinny ; textes seulement, la couleur du groupe reste --sg-nation-kaminari). Contraste 3,3:1 sur le papier. */
+  --sg-group-kaminari: #a6850a;
   --sg-group-tsuchi: color-mix(in srgb, var(--sg-nation-tsuchi) 82%, #000);
   --sg-group-autres: color-mix(in srgb, var(--sg-nation-autres) 85%, #000);
 }

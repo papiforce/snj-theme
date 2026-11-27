@@ -5516,11 +5516,11 @@
   }
 
   /* --------------------------------------------------------------------
-     Liste des groupes (/groups, template groupcp_body) : en-tête au pattern des forums, puis les groupes en
-     bannières nobori (même composant que la carte « Les groupes » de l'accueil, 45-stats.css), en deux cartes :
-     les nations, puis le staff (et tout autre groupe). Sous chaque bannière : effectif, type du groupe (ouvert,
-     fermé, invisible) et « Ton groupe » si le membre en fait partie. Le bloc natif « Appartenance à un groupe »
-     (doublon des bannières) est masqué, sauf s'il porte un formulaire (rejoindre un groupe), alors habillé.
+     Liste des groupes (/groups, template groupcp_body) : en-tête au pattern des forums, puis les groupes en cartes
+     paysage (3 par ligne, demande de Vinny) en deux sections : les nations, puis le staff (et tout autre groupe).
+     Carte : étoffe à la couleur du groupe à gauche (mon kanji ou icône, queue d'aronde, comme les bannières nobori),
+     nom à la couleur du groupe, effectif, type (ouvert, fermé, invisible), « Ton groupe » ; motif shippō. Le bloc
+     natif « Appartenance à un groupe » (doublon) est masqué, sauf s'il porte un formulaire (rejoindre un groupe).
      -------------------------------------------------------------------- */
   function groupsList() {
     var wrap = document.getElementById('wrap');
@@ -5614,54 +5614,59 @@
       var count = parseInt(nb ? nb.textContent : (info.match(/:\s*(\d+)/) || [])[1], 10) || 0;
       var type = TYPES.filter(function (t) { return t[0].test(info); })[0];
 
-      var item = el('li', mine[mm[1]] ? 'is-mine' : null);
-      item.style.setProperty('--i', String(i));
-      var flag = el('a', 'sg-nobori__flag sg-flag--' + (meta[1] || 'other'));
-      flag.href = href;
+      var item = el('li');
+      var tile = el('a', 'sg-gtile sg-pat sg-pat--shippo sg-flag--' + (meta[1] || 'other') + (mine[mm[1]] ? ' is-mine' : ''));
+      tile.href = href;
       if (!meta[1]) {
         var col = (a.getAttribute('style') || '').match(/#[0-9a-f]{3,6}/i);
-        flag.style.setProperty('--flag', col ? col[0] : 'var(--sg-surface-2)');
-        if (!col) flag.style.setProperty('--on-flag', 'var(--sg-text)');
+        tile.style.setProperty('--flag', col ? col[0] : 'var(--sg-surface-2)');
+        if (!col) tile.style.setProperty('--on-flag', 'var(--sg-text)');
       }
-      flag.setAttribute('title', name + ' : ' + count + (count > 1 ? ' membres' : ' membre'));
-      var cloth = el('span', 'sg-nobori__cloth');
-      var mon = el('span', 'sg-nobori__mon');
-      mon.setAttribute('aria-hidden', 'true');
+      tile.setAttribute('title', name);
+      /* Étoffe à gauche, à la couleur du groupe, bas en queue d'aronde (comme les bannières nobori) */
+      var cloth = el('span', 'sg-gtile__cloth');
+      cloth.setAttribute('aria-hidden', 'true');
+      var mon = el('span', 'sg-gtile__mon');
       if (meta[0]) mon.textContent = meta[0]; else mon.appendChild(ico(ICONS[slug] || 'groups'));
       cloth.appendChild(mon);
-      cloth.appendChild(el('span', 'sg-nobori__name', name));
-      flag.appendChild(cloth);
-      var cnt = el('span', 'sg-nobori__count');
+      tile.appendChild(cloth);
+      var body = el('span', 'sg-gtile__body');
+      body.appendChild(el('span', 'sg-gtile__name', name));
+      var cnt = el('span', 'sg-gtile__count');
       cnt.appendChild(el('strong', null, count.toLocaleString('fr-FR')));
       cnt.appendChild(document.createTextNode(count > 1 ? ' membres' : ' membre'));
-      flag.appendChild(cnt);
-      item.appendChild(flag);
-      var metaLine = el('div', 'sg-nobori__meta');
+      body.appendChild(cnt);
+      var metaLine = el('span', 'sg-gtile__meta');
       if (type) {
-        var t = el('span', 'sg-nobori__type');
+        var t = el('span', 'sg-gtile__type');
         t.appendChild(ico(type[1]));
         t.appendChild(el('span', null, type[2]));
         metaLine.appendChild(t);
       }
       if (mine[mm[1]]) {
-        var me = el('span', 'sg-nobori__mine');
+        var me = el('span', 'sg-gtile__mine');
         me.appendChild(ico('check_circle'));
         me.appendChild(el('span', null, 'Ton groupe'));
         metaLine.appendChild(me);
       }
-      item.appendChild(metaLine);
+      body.appendChild(metaLine);
+      tile.appendChild(body);
+      var go = ico('arrow_forward');
+      go.classList.add('sg-gtile__go');
+      tile.appendChild(go);
+      item.appendChild(tile);
       (NATIONS[meta[1]] ? nations : others).push(item);
     });
 
     function card(icon, title, text, items) {
       if (!items.length) return;
-      var c = el('section', 'sg-pcard sg-glist sg-pat sg-pat--shippo');
+      var c = el('section', 'sg-gsection');
       var t = el('h2', 'sg-pcard__title');
       t.appendChild(ico(icon));
       t.appendChild(el('span', null, title));
       c.appendChild(t);
       c.appendChild(el('p', 'sg-glist__text', text));
-      var ul = el('ul', 'sg-nobori sg-nobori--page');
+      var ul = el('ul', 'sg-gtiles');
       items.forEach(function (it) { ul.appendChild(it); });
       c.appendChild(ul);
       page.appendChild(c);
