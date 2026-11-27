@@ -3863,6 +3863,8 @@
     }
     list.parentNode.insertBefore(section, list);
     list.classList.add('sg-hidden');
+    /* « Sauter vers » natif : absent des autres onglets du profil, masqué */
+    Array.prototype.slice.call(cp.querySelectorAll('form[name="jumpbox"]')).forEach(function (j) { j.classList.add('sg-hidden'); });
 
     var valid = form.querySelector('input[name="valid"]');
     Array.prototype.slice.call(form.querySelectorAll('.mark-buttons, .form-buttons')).forEach(function (x) {
