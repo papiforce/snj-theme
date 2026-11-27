@@ -5471,7 +5471,8 @@
       body.appendChild(facts);
       card.appendChild(body);
       var pm = b.querySelector('.member-icons a[href*="privmsg"]');
-      if (pm) {
+      /* Pas de message privé à soi-même */
+      if (pm && uid !== String((window._userdata || {}).user_id)) {
         var pmBtn = el('a', 'sg-mcard__pm');
         pmBtn.href = pm.getAttribute('href');
         pmBtn.setAttribute('aria-label', 'Écrire à ' + name);
