@@ -444,6 +444,7 @@
     profilePage();
     regPage();
     authPage();
+    memberList();
     noticePage();
     confirmPage();
     errorBlocks();
@@ -5292,6 +5293,229 @@
     endNav.appendChild(ol.cloneNode(true));
     endDiv.parentNode.insertBefore(endNav, endDiv.nextSibling);
     document.body.classList.add('sg-authpage', 'sg-pagehead-on');
+  }
+
+  /* --------------------------------------------------------------------
+     Liste des membres (/memberlist) : « registre des shinobis ». En-tête au pattern des forums, barre de recherche
+     (formulaire natif #form-block gardé : nom, tri, ordre ; tri et ordre s'appliquent dès qu'on les change), puis une
+     carte par membre sur shippō (communauté) : portrait 200 × 400 réduit, rôle du staff, pseudo coloré,
+     « Inscrit depuis … », dernière visite, messages ; toute la carte mène au profil ; message privé en bouton rond.
+     -------------------------------------------------------------------- */
+  function memberList() {
+    var wrap = document.getElementById('wrap');
+    var list = wrap && wrap.querySelector(':scope > #memberlist.members-block');
+    var form = wrap && wrap.querySelector(':scope > form#form-block');
+    if (!list || !form || document.querySelector('.sg-mlist')) return;
+    var el = uiEl, ico = uiIco;
+
+    /* En-tête */
+    var topDiv = regDivider(true);
+    var head = el('section', 'sg-pagehead sg-pagehead--ml');
+    head.setAttribute('aria-label', 'En-tête de la page');
+    var crumbs = el('nav', 'sg-crumbs');
+    crumbs.setAttribute('aria-label', "Fil d'Ariane");
+    var ol = el('ol', 'sg-crumbs__list');
+    [['/', 'Accueil', 'home'], [null, 'Membres']].forEach(function (c) {
+      var li = el('li', 'sg-crumbs__item');
+      var a = el(c[0] ? 'a' : 'span', 'sg-crumbs__link' + (c[0] ? '' : ' sg-crumbs__here'));
+      if (c[2]) a.appendChild(ico(c[2]));
+      a.appendChild(el('span', null, c[1]));
+      if (c[0]) a.href = c[0]; else a.setAttribute('aria-current', 'page');
+      li.appendChild(a);
+      ol.appendChild(li);
+    });
+    crumbs.appendChild(ol);
+    head.appendChild(crumbs);
+    var row = el('div', 'sg-pagehead__row');
+    var h1 = el('h1', 'sg-pagehead__title');
+    h1.appendChild(el('span', 'sg-pagehead__text', 'Membres'));
+    row.appendChild(h1);
+    head.appendChild(row);
+    head.appendChild(el('div', 'sg-pagehead__desc', 'Les shinobis qui arpentent le Sekai.'));
+    var nativeHead = wrap.querySelector(':scope > .page-header');
+    if (nativeHead) nativeHead.classList.add('sg-hidden');
+    form.parentNode.insertBefore(topDiv, form);
+    form.parentNode.insertBefore(head, form);
+
+    /* Barre de recherche : le formulaire natif, restylé */
+    form.classList.add('sg-mlbar');
+    var user = form.querySelector('input[name="username"]');
+    var mode = form.querySelector('select[name="mode"]');
+    var order = form.querySelector('select[name="order"]');
+    var submit = form.querySelector('input[type="submit"]');
+    var bar = el('div', 'sg-mlbar__row');
+    if (user) {
+      var search = el('label', 'sg-mlbar__search');
+      search.appendChild(ico('search'));
+      user.classList.add('sg-pinput');
+      user.setAttribute('placeholder', 'Chercher un shinobi');
+      user.setAttribute('aria-label', 'Chercher un shinobi par son pseudo');
+      user.setAttribute('autocomplete', 'off');
+      search.appendChild(user);
+      bar.appendChild(search);
+    }
+    if (mode) {
+      var sortBox = el('div', 'sg-mlbar__sort');
+      sortBox.appendChild(el('span', 'sg-mlbar__label', 'Trier par'));
+      var ML_MODES = { lastvisit: 'Dernière visite', joined: 'Inscription', username: 'Pseudo', interests: 'Signes distinctifs', posts: 'Messages', website: 'Site web', groups: 'Groupes', point: 'Expérience' };
+      Array.prototype.slice.call(mode.options).forEach(function (o) { if (ML_MODES[o.value]) o.text = ML_MODES[o.value]; });
+      /* Site web : champ masqué dans le profil (Liens utiles) ; inutile ici */
+      Array.prototype.slice.call(mode.options).forEach(function (o) { if (o.value === 'website' && !o.selected) o.remove(); });
+      mode.setAttribute('aria-label', 'Trier par');
+      sortBox.appendChild(combo(mode, {}).box);
+      bar.appendChild(sortBox);
+      mode.addEventListener('change', function () { form.requestSubmit ? form.requestSubmit() : form.submit(); });
+    }
+    if (order) {
+      /* Ordre : contrôle segmenté (radios hors formulaire), la liste native reçoit la valeur */
+      var seg = el('div', 'sg-seg sg-mlbar__order');
+      seg.setAttribute('role', 'radiogroup');
+      seg.setAttribute('aria-label', 'Ordre');
+      Array.prototype.slice.call(order.options).map(function (o) { return o; }).reverse().forEach(function (o) {
+        var opt = el('label', 'sg-seg__opt');
+        var r = el('input');
+        r.type = 'radio';
+        r.name = 'sg-ml-order';
+        r.setAttribute('form', 'sg-none');
+        r.value = o.value;
+        r.checked = o.selected;
+        r.addEventListener('change', function () {
+          order.value = o.value;
+          form.requestSubmit ? form.requestSubmit() : form.submit();
+        });
+        opt.appendChild(r);
+        var face = el('span', 'sg-seg__face');
+        face.appendChild(ico(o.value === 'DESC' ? 'arrow_downward' : 'arrow_upward'));
+        face.appendChild(el('span', null, o.value === 'DESC' ? 'Décroissant' : 'Croissant'));
+        opt.appendChild(face);
+        seg.appendChild(opt);
+      });
+      order.classList.add('sg-hidden');
+      var oldOrder = order.closest('.option');
+      bar.appendChild(seg);
+      if (oldOrder) oldOrder.classList.add('sg-hidden');
+    }
+    if (submit) {
+      var btn = el('button', 'sg-pbtn');
+      btn.type = 'submit';
+      if (submit.name) btn.name = submit.name;
+      btn.value = submit.value;
+      btn.appendChild(ico('search'));
+      btn.appendChild(el('span', null, 'Chercher'));
+      submit.parentNode.replaceChild(btn, submit);
+      bar.appendChild(btn);
+    }
+    var quick = form.querySelector('.quick-options');
+    form.insertBefore(bar, form.firstChild);
+    if (quick) {
+      /* Le reste du bloc natif (titres « Trier par » / « Ordre ») est masqué ; ses listes restent dans le formulaire */
+      if (order && order.parentNode) form.appendChild(order);
+      quick.classList.add('sg-hidden');
+    }
+
+    /* Cartes des membres */
+    var grid = el('section', 'sg-mlist');
+    grid.setAttribute('aria-label', 'Liste des membres');
+    var blocks = Array.prototype.slice.call(list.querySelectorAll(':scope > .member-block'));
+    var cards = [];
+    blocks.forEach(function (b) {
+      var link = b.querySelector('.member-header a[href^="/u"]');
+      if (!link) return;
+      var href = link.getAttribute('href');
+      var uid = (href.match(/^\/u(\d+)/) || [])[1];
+      var name = link.textContent.replace(/\s+/g, ' ').trim();
+      var card = el('article', 'sg-mcard sg-pat sg-pat--shippo');
+      var pic = el('div', 'sg-mcard__portrait');
+      var img = b.querySelector('.avatar-default img, img');
+      if (img) {
+        var im = el('img');
+        im.src = img.getAttribute('src');
+        im.alt = '';
+        im.loading = 'lazy';
+        pic.appendChild(im);
+      } else {
+        pic.classList.add('is-empty');
+        pic.appendChild(ico('person'));
+      }
+      card.appendChild(pic);
+      var body = el('div', 'sg-mcard__body');
+      var title = el('h2', 'sg-mcard__name');
+      var a = el('a', 'sg-mcard__link');
+      a.href = href;
+      var colored = link.querySelector('[style*="color"], .usr_grp_clr');
+      if (colored) a.appendChild(colored.cloneNode(true)); else a.textContent = name;
+      a.setAttribute('title', name);
+      title.appendChild(a);
+      body.appendChild(title);
+      var facts = el('ul', 'sg-mcard__facts');
+      var fact = function (icon, text, tip) {
+        if (!text) return;
+        var li = el('li', 'sg-mcard__fact');
+        li.appendChild(ico(icon));
+        li.appendChild(el('span', null, text));
+        if (tip) li.setAttribute('title', tip);
+        facts.appendChild(li);
+      };
+      Array.prototype.slice.call(b.querySelectorAll('.member-details > div')).forEach(function (d) {
+        var lab = d.querySelector('b');
+        var key = lab ? lab.textContent.replace(/\s*:\s*$/, '').trim() : '';
+        var val = d.textContent.replace(lab ? lab.textContent : '', '').replace(/\s+/g, ' ').trim();
+        var iconEl = d.querySelector('.material-symbols-outlined');
+        if (iconEl) val = val.replace(iconEl.textContent, '').trim();
+        if (!val) return;
+        if (/inscription/i.test(key)) { var s2 = memberSince(val); fact('calendar_month', s2 || 'Inscrit le ' + val, 'Inscrit le ' + val); }
+        else if (/derni[èe]re visite/i.test(key)) fact('visibility', 'Vu ' + val.replace(/^Aujourd'hui/, 'aujourd’hui').replace(/^Hier/, 'hier'), 'Dernière visite : ' + val);
+        else if (/messages/i.test(key)) fact('chat_bubble', val + (/^1$/.test(val) ? ' message' : ' messages'));
+        else fact('info', key + ' : ' + val);
+      });
+      body.appendChild(facts);
+      card.appendChild(body);
+      var pm = b.querySelector('.member-icons a[href*="privmsg"]');
+      if (pm) {
+        var pmBtn = el('a', 'sg-mcard__pm');
+        pmBtn.href = pm.getAttribute('href');
+        pmBtn.setAttribute('aria-label', 'Écrire à ' + name);
+        pmBtn.setAttribute('title', 'Écrire à ' + name);
+        pmBtn.appendChild(ico('mail'));
+        card.appendChild(pmBtn);
+      }
+      card.setAttribute('data-uid', uid || '');
+      grid.appendChild(card);
+      cards.push({ card: card, uid: uid, body: body });
+    });
+    if (!cards.length) {
+      var empty = el('div', 'sg-topics__empty sg-mlist__empty');
+      empty.appendChild(ico('person_search'));
+      empty.appendChild(el('span', null, user && user.value ? 'Aucun shinobi ne porte ce nom.' : 'Aucun shinobi pour l’instant.'));
+      grid.appendChild(empty);
+    }
+    list.classList.add('sg-hidden');
+    list.parentNode.insertBefore(grid, list);
+
+    /* Rôle du staff : bandeau des messages, en tête de la carte */
+    staffRoles(function (roles) {
+      cards.forEach(function (c) {
+        var role = c.uid && roles[c.uid];
+        if (role) c.body.insertBefore(roleBand(role), c.body.firstChild);
+      });
+    });
+
+    /* Pagination native : gardée, restylée ; puis séparateur de fin et fil d'Ariane */
+    var pag = wrap.querySelector(':scope > .pagination');
+    var after = grid;
+    if (pag) {
+      pag.classList.add('sg-mlpag');
+      if (!pag.textContent.trim()) pag.classList.add('sg-hidden');
+      list.parentNode.insertBefore(pag, grid.nextSibling);
+      after = pag;
+    }
+    var endDiv = regDivider(false);
+    after.parentNode.insertBefore(endDiv, after.nextSibling);
+    var endNav = el('nav', 'sg-crumbs sg-crumbs--end');
+    endNav.setAttribute('aria-label', "Fil d'Ariane");
+    endNav.appendChild(ol.cloneNode(true));
+    endDiv.parentNode.insertBefore(endNav, endDiv.nextSibling);
+    document.body.classList.add('sg-mlpage', 'sg-pagehead-on');
   }
 
   /* Onglets du profil affiché (/uN) : icône, description pour mon profil, pour celui d'un autre (%s = pseudo) */

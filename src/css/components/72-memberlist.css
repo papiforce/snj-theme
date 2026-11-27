@@ -1,0 +1,336 @@
+/* ==========================================================================
+   SNJ — Liste des membres (/memberlist) : registre des shinobis
+   Construit par src/js/layout.js (memberList). En-tête au pattern des forums, barre de recherche (formulaire natif
+   #form-block : nom, tri, ordre), cartes des membres sur shippō (communauté), pagination native, séparateur de fin.
+   ========================================================================== */
+
+.sg-mlpage .sg-hidden {
+  display: none !important;
+}
+
+/* --- Barre de recherche ----------------------------------------------------------------------------------- */
+#wrap form.sg-mlbar {
+  margin: 0 0 24px;
+  padding: 16px;
+  border: 0;
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-surface);
+  box-shadow: none;
+}
+
+.sg-mlbar__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+#wrap .sg-mlbar__search {
+  position: relative;
+  display: flex;
+  flex: 1 1 240px;
+  align-items: center;
+  min-width: 0;
+  margin: 0;
+}
+
+.sg-mlbar__search > .material-symbols-outlined {
+  position: absolute;
+  left: 14px;
+  z-index: 1;
+  font-size: 20px;
+  color: var(--sg-text-muted);
+  pointer-events: none;
+}
+
+#wrap .sg-mlbar__search input.sg-pinput {
+  width: 100%;
+  height: 46px;
+  padding-left: 44px !important;
+}
+
+.sg-mlbar__sort {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sg-mlbar__label {
+  color: var(--sg-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+#wrap .sg-mlbar__sort .sg-combo {
+  width: 200px;
+}
+
+.sg-seg.sg-mlbar__order {
+  flex: none;
+  width: 280px;
+}
+
+#wrap .sg-mlbar .sg-pbtn {
+  height: 46px;
+}
+
+/* --- Cartes des membres : portrait | pseudo et repères, sur shippō ------------------------------------------ */
+.sg-mlist {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+#wrap .sg-mcard {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+  min-width: 0;
+  padding: 16px 56px 16px 16px;
+  overflow: hidden;
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-surface);
+}
+
+#wrap .sg-mcard.sg-pat--shippo::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='%23000' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='20'/%3E%3Ccircle cx='40' cy='0' r='20'/%3E%3Ccircle cx='0' cy='40' r='20'/%3E%3Ccircle cx='40' cy='40' r='20'/%3E%3Ccircle cx='20' cy='20' r='20'/%3E%3C/g%3E%3C/svg%3E"), linear-gradient(to left, #000 0%, rgba(0, 0, 0, 0.5) 40%, transparent 85%);
+  -webkit-mask-repeat: repeat, no-repeat;
+  -webkit-mask-composite: source-in;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='%23000' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='20'/%3E%3Ccircle cx='40' cy='0' r='20'/%3E%3Ccircle cx='0' cy='40' r='20'/%3E%3Ccircle cx='40' cy='40' r='20'/%3E%3Ccircle cx='20' cy='20' r='20'/%3E%3C/g%3E%3C/svg%3E"), linear-gradient(to left, #000 0%, rgba(0, 0, 0, 0.5) 40%, transparent 85%);
+  mask-repeat: repeat, no-repeat;
+  mask-composite: intersect;
+}
+
+#wrap .sg-mcard:hover {
+  transform: translateY(-2px);
+}
+
+.sg-mcard__portrait {
+  display: grid;
+  place-items: center;
+  width: 88px;
+  aspect-ratio: 1 / 2;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--sg-surface-2);
+  color: var(--sg-text-muted);
+}
+
+.sg-mcard__portrait img {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: cover;
+}
+
+.sg-mcard__body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.sg-mcard__body .sg-role {
+  width: auto;
+  align-self: flex-start;
+  max-width: 100%;
+  padding: 5px 12px;
+}
+
+.sg-mcard__body .sg-role__label {
+  font-size: 0.9rem;
+}
+
+.sg-mcard__body .sg-role__mark {
+  width: 16px;
+  height: 16px;
+}
+
+#wrap .sg-mcard__name {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font-family: var(--sg-font-display);
+  font-size: 1.45rem;
+  font-weight: 400;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#wrap .sg-mcard__link {
+  color: var(--sg-text);
+  text-decoration: none;
+}
+
+#wrap .sg-mcard__link strong {
+  font-weight: 400;
+}
+
+/* Toute la carte mène au profil */
+#wrap .sg-mcard__link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+}
+
+#wrap .sg-mcard__link:focus-visible {
+  outline: none;
+}
+
+#wrap .sg-mcard:has(.sg-mcard__link:focus-visible) {
+  outline: 2px solid var(--sg-accent-1);
+  outline-offset: 3px;
+}
+
+#wrap .sg-mcard__facts {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sg-mcard__fact {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: var(--sg-text-muted);
+  font-size: 0.9rem;
+}
+
+.sg-mcard__fact span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sg-mcard__fact .material-symbols-outlined {
+  flex: none;
+  font-size: 18px;
+  color: var(--sg-primary);
+}
+
+/* Message privé : bouton rond au-dessus du lien étendu */
+#wrap .sg-mcard__pm {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: var(--sg-text-muted);
+  text-decoration: none;
+}
+
+#wrap .sg-mcard__pm:hover,
+#wrap .sg-mcard__pm:focus-visible {
+  background: var(--sg-contrast);
+  color: var(--sg-on-contrast);
+}
+
+#wrap .sg-mcard__pm .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.sg-mlist__empty {
+  grid-column: 1 / -1;
+}
+
+/* --- Pagination native ------------------------------------------------------------------------------------ */
+#wrap .sg-mlpag {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 24px 0 0;
+  color: var(--sg-text-muted);
+}
+
+#wrap .sg-mlpag a,
+#wrap .sg-mlpag strong {
+  display: inline-grid;
+  place-items: center;
+  min-width: 40px;
+  height: 40px;
+  padding: 0 10px;
+  border: 1px solid var(--sg-border);
+  border-radius: 999px;
+  background: var(--sg-surface);
+  color: var(--sg-text);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+#wrap .sg-mlpag strong {
+  border-color: var(--sg-contrast);
+  background: var(--sg-contrast);
+  color: var(--sg-on-contrast);
+}
+
+#wrap .sg-mlpag a:hover {
+  border-color: var(--sg-text-muted);
+}
+
+/* --- Responsive ------------------------------------------------------------------------------------------- */
+@media (max-width: 900px) {
+  .sg-mlist {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .sg-mlbar__row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #wrap .sg-mlbar__search {
+    flex: none;
+  }
+
+  .sg-mlbar__sort {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  #wrap .sg-mlbar__sort .sg-combo,
+  .sg-seg.sg-mlbar__order,
+  #wrap .sg-mlbar .sg-pbtn {
+    width: 100%;
+  }
+
+  #wrap .sg-mcard {
+    grid-template-columns: 64px minmax(0, 1fr);
+    gap: 14px;
+    padding-right: 52px;
+  }
+
+  .sg-mcard__portrait {
+    width: 64px;
+  }
+
+  #wrap .sg-mcard__pm {
+    width: 44px;
+    height: 44px;
+    top: 8px;
+    right: 8px;
+  }
+}
