@@ -620,8 +620,17 @@
     border-bottom: 1px solid var(--sg-border);
   }
 
+  /* Citation : 8px tout autour, crochets 「 」 sortis de part et d'autre (demande de Vinny) */
   .sgc-quote {
-    padding: 8px 30px;
+    padding: 8px;
+  }
+
+  .sgc-quote::before {
+    left: -31px;
+  }
+
+  .sgc-quote::after {
+    right: -31px;
   }
 
   .sgc-step {
