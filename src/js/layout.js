@@ -5796,7 +5796,19 @@
         return b;
       };
       var addB = mk(content.querySelector('input[name="add"]'), '', 'person_add', 'Ajouter');
-      var findB = mk(content.querySelector('input#find_user'), 'sg-pbtn--ghost', 'person_search', 'Trouver');
+      /* « Trouver » : Forumactif lie sa fenêtre de recherche au bouton natif (#find_user) avant nos scripts ; le
+         bouton natif reste donc en place, masqué, et le nôtre le déclenche */
+      var findNative = content.querySelector('input#find_user');
+      var findB = null;
+      if (findNative) {
+        findB = el('button', 'sg-pbtn sg-pbtn--ghost');
+        findB.type = 'button';
+        findB.appendChild(ico('person_search'));
+        findB.appendChild(el('span', null, 'Trouver'));
+        findB.setAttribute('title', findNative.value);
+        findB.addEventListener('click', function () { findNative.click(); });
+        findNative.classList.add('sg-hidden');
+      }
       removeBtn = mk(content.querySelector('input[name="remove"]'), 'sg-pbtn--ghost sg-pbtn--danger', 'person_remove', 'Retirer');
       [addB, findB].forEach(function (b) { if (b) barRow.appendChild(b); });
       if (removeBtn) {
