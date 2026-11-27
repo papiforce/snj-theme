@@ -446,6 +446,7 @@
     authPage();
     memberList();
     groupPage();
+    groupsList();
     noticePage();
     confirmPage();
     errorBlocks();
@@ -5515,6 +5516,173 @@
   }
 
   /* --------------------------------------------------------------------
+     Liste des groupes (/groups, template groupcp_body) : en-tête au pattern des forums, puis les groupes en
+     bannières nobori (même composant que la carte « Les groupes » de l'accueil, 45-stats.css), en deux cartes :
+     les nations, puis le staff (et tout autre groupe). Sous chaque bannière : effectif, type du groupe (ouvert,
+     fermé, invisible) et « Ton groupe » si le membre en fait partie. Le bloc natif « Appartenance à un groupe »
+     (doublon des bannières) est masqué, sauf s'il porte un formulaire (rejoindre un groupe), alors habillé.
+     -------------------------------------------------------------------- */
+  function groupsList() {
+    var wrap = document.getElementById('wrap');
+    if (!wrap || !/^\/groups\/?$/.test(location.pathname) || document.querySelector('.sg-groups')) return;
+    var listUl = wrap.querySelector(':scope > .block ul.group_list');
+    if (!listUl) return;
+    var el = uiEl, ico = uiIco;
+    var listBlock = listUl.closest('.block');
+    var blocks = Array.prototype.slice.call(wrap.querySelectorAll(':scope > .block'));
+    var memberBlock = blocks.filter(function (b) { return b !== listBlock; })[0] || null;
+
+    /* Groupes du membre (liens du bloc « Appartenance ») */
+    var mine = {};
+    if (memberBlock) Array.prototype.slice.call(memberBlock.querySelectorAll('a[href^="/g"]')).forEach(function (a) {
+      var mm = a.getAttribute('href').match(/^\/g(\d+)-/);
+      if (mm) mine[mm[1]] = true;
+    });
+
+    /* En-tête */
+    var topDiv = regDivider(true);
+    var head = el('section', 'sg-pagehead sg-pagehead--groups');
+    head.setAttribute('aria-label', 'En-tête de la page');
+    var crumbs = el('nav', 'sg-crumbs');
+    crumbs.setAttribute('aria-label', "Fil d'Ariane");
+    var ol = el('ol', 'sg-crumbs__list');
+    [['/', 'Accueil', 'home'], [null, 'Groupes']].forEach(function (c) {
+      var li = el('li', 'sg-crumbs__item');
+      var a = el(c[0] ? 'a' : 'span', 'sg-crumbs__link' + (c[0] ? '' : ' sg-crumbs__here'));
+      if (c[2]) a.appendChild(ico(c[2]));
+      a.appendChild(el('span', null, c[1]));
+      if (c[0]) a.href = c[0]; else a.setAttribute('aria-current', 'page');
+      li.appendChild(a);
+      ol.appendChild(li);
+    });
+    crumbs.appendChild(ol);
+    head.appendChild(crumbs);
+    var row = el('div', 'sg-pagehead__row');
+    var h1 = el('h1', 'sg-pagehead__title');
+    h1.appendChild(el('span', 'sg-pagehead__text', 'Groupes'));
+    row.appendChild(h1);
+    head.appendChild(row);
+    head.appendChild(el('div', 'sg-pagehead__desc', 'Les nations et les cercles qui rassemblent les shinobis du Sekai.'));
+    var nativeHead = wrap.querySelector(':scope > .page-header');
+    if (nativeHead) nativeHead.classList.add('sg-hidden');
+    var first = nativeHead || memberBlock || listBlock;
+    first.parentNode.insertBefore(topDiv, first);
+    first.parentNode.insertBefore(head, first);
+
+    var page = el('div', 'sg-groups');
+    listBlock.parentNode.insertBefore(page, listBlock);
+    listBlock.classList.add('sg-hidden');
+
+    /* Bloc « Appartenance » : masqué (doublon), sauf s'il permet de rejoindre un groupe */
+    if (memberBlock) {
+      var jf = memberBlock.querySelector('form');
+      if (jf && jf.querySelector('select, input[type="submit"]')) {
+        memberBlock.classList.add('sg-pcard', 'sg-gjoin');
+        var hd = memberBlock.querySelector('.block-header');
+        if (hd) { hd.textContent = ''; hd.className = 'sg-pcard__title'; hd.appendChild(ico('group_add')); hd.appendChild(el('span', null, 'Rejoindre un groupe')); }
+        Array.prototype.slice.call(jf.querySelectorAll('select')).forEach(function (sel) {
+          if (!sel.closest('.sg-combo')) { var c = combo(sel, {}); sel.parentNode.insertBefore(c.box, sel.nextSibling); }
+        });
+        Array.prototype.slice.call(jf.querySelectorAll('input[type="submit"]')).forEach(function (b) {
+          var nb = el('button', 'sg-pbtn');
+          nb.type = 'submit';
+          if (b.name) nb.name = b.name;
+          nb.value = b.value;
+          nb.appendChild(ico('group_add'));
+          nb.appendChild(el('span', null, b.value));
+          b.parentNode.replaceChild(nb, b);
+        });
+        page.appendChild(memberBlock);
+      } else memberBlock.classList.add('sg-hidden');
+    }
+
+    /* Groupes */
+    var TYPES = [[/invisible/i, 'visibility_off', 'Invisible'], [/ferm/i, 'lock', 'Fermé'], [/ouvert/i, 'lock_open', 'Ouvert']];
+    var ICONS = { staffeux: 'shield_person', moderateurs: 'gavel', administrateurs: 'admin_panel_settings' };
+    var NATIONS = { hi: 1, mizu: 1, kaze: 1, kaminari: 1, tsuchi: 1, autres: 1 };
+    var nations = [], others = [];
+    Array.prototype.slice.call(listUl.children).forEach(function (li, i) {
+      var a = li.querySelector('a[href^="/g"]');
+      if (!a) return;
+      var href = a.getAttribute('href');
+      var mm = href.match(/^\/g(\d+)-([a-z0-9-]+)/) || [];
+      var slug = mm[2] || '';
+      var meta = GROUP_META[slug] || ['', ''];
+      var name = a.textContent.replace(/\s+/g, ' ').trim();
+      var info = (li.querySelector('div') || li).textContent;
+      var nb = li.querySelector('[id^="nb-users-"]');
+      var count = parseInt(nb ? nb.textContent : (info.match(/:\s*(\d+)/) || [])[1], 10) || 0;
+      var type = TYPES.filter(function (t) { return t[0].test(info); })[0];
+
+      var item = el('li', mine[mm[1]] ? 'is-mine' : null);
+      item.style.setProperty('--i', String(i));
+      var flag = el('a', 'sg-nobori__flag sg-flag--' + (meta[1] || 'other'));
+      flag.href = href;
+      if (!meta[1]) {
+        var col = (a.getAttribute('style') || '').match(/#[0-9a-f]{3,6}/i);
+        flag.style.setProperty('--flag', col ? col[0] : 'var(--sg-surface-2)');
+        if (!col) flag.style.setProperty('--on-flag', 'var(--sg-text)');
+      }
+      flag.setAttribute('title', name + ' : ' + count + (count > 1 ? ' membres' : ' membre'));
+      var cloth = el('span', 'sg-nobori__cloth');
+      var mon = el('span', 'sg-nobori__mon');
+      mon.setAttribute('aria-hidden', 'true');
+      if (meta[0]) mon.textContent = meta[0]; else mon.appendChild(ico(ICONS[slug] || 'groups'));
+      cloth.appendChild(mon);
+      cloth.appendChild(el('span', 'sg-nobori__name', name));
+      flag.appendChild(cloth);
+      var cnt = el('span', 'sg-nobori__count');
+      cnt.appendChild(el('strong', null, count.toLocaleString('fr-FR')));
+      cnt.appendChild(document.createTextNode(count > 1 ? ' membres' : ' membre'));
+      flag.appendChild(cnt);
+      item.appendChild(flag);
+      var metaLine = el('div', 'sg-nobori__meta');
+      if (type) {
+        var t = el('span', 'sg-nobori__type');
+        t.appendChild(ico(type[1]));
+        t.appendChild(el('span', null, type[2]));
+        metaLine.appendChild(t);
+      }
+      if (mine[mm[1]]) {
+        var me = el('span', 'sg-nobori__mine');
+        me.appendChild(ico('check_circle'));
+        me.appendChild(el('span', null, 'Ton groupe'));
+        metaLine.appendChild(me);
+      }
+      item.appendChild(metaLine);
+      (NATIONS[meta[1]] ? nations : others).push(item);
+    });
+
+    function card(icon, title, text, items) {
+      if (!items.length) return;
+      var c = el('section', 'sg-pcard sg-glist sg-pat sg-pat--shippo');
+      var t = el('h2', 'sg-pcard__title');
+      t.appendChild(ico(icon));
+      t.appendChild(el('span', null, title));
+      c.appendChild(t);
+      c.appendChild(el('p', 'sg-glist__text', text));
+      var ul = el('ul', 'sg-nobori sg-nobori--page');
+      items.forEach(function (it) { ul.appendChild(it); });
+      c.appendChild(ul);
+      page.appendChild(c);
+    }
+    card('flag', 'Les nations', 'Chaque shinobi rejoint le groupe de son pays.', nations);
+    card('shield_person', 'Le staff', 'Ceux qui veillent sur le Sekai.', others);
+
+    /* « Sauter vers » masqué ; séparateur de fin et fil d'Ariane */
+    var jump = wrap.querySelector(':scope > form[name="jumpbox"]');
+    if (jump) jump.classList.add('sg-hidden');
+    var endDiv = regDivider(false);
+    page.parentNode.insertBefore(endDiv, page.nextSibling);
+    var endNav = el('nav', 'sg-crumbs sg-crumbs--end');
+    endNav.setAttribute('aria-label', "Fil d'Ariane");
+    endNav.appendChild(ol.cloneNode(true));
+    endDiv.parentNode.insertBefore(endNav, endDiv.nextSibling);
+    document.title = 'Groupes · Sengoku no Jidai';
+    document.body.classList.add('sg-groupspage', 'sg-pagehead-on');
+  }
+
+  /* --------------------------------------------------------------------
      Page d'un groupe (/gN-…, template groupcp_info_body) : en-tête au pattern des forums, à la couleur du groupe
      (pays : couleur et kanji en filigrane ; Staffeux / Modérateurs : couleur de leur groupe) ; carte « Le groupe »
      (membres, ton statut, rejoindre / quitter ; pour le responsable, type du groupe en contrôle segmenté) ; puis
@@ -5845,7 +6013,8 @@
       if (note) note.className = 'sg-gtools__note';
       content.insertBefore(barRow, content.firstChild);
       if (note) content.appendChild(note);
-      sec.appendChild(tools);
+      /* Entre la carte « Le groupe » et la liste des membres (demande de Vinny) */
+      mform.insertBefore(tools, sec);
       syncRemove();
     }
 

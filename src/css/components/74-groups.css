@@ -1,0 +1,119 @@
+/* ==========================================================================
+   SNJ — Liste des groupes (/groups) : groupsList dans src/js/layout.js
+   Les groupes en bannières nobori (composant de l'accueil, 45-stats.css), dans deux cartes sur motif shippō
+   (communauté) : les nations, puis le staff. Sous chaque bannière : effectif, type du groupe, « Ton groupe ».
+   ========================================================================== */
+
+.sg-groupspage .sg-hidden {
+  display: none !important;
+}
+
+.sg-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+#wrap .sg-glist {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  margin: 0;
+  padding: 28px;
+  border: 0;
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-surface);
+  box-shadow: none;
+}
+
+/* Shippō net à droite, estompé vers la gauche (comme la carte des sondages) */
+#wrap .sg-glist.sg-pat--shippo::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='%23000' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='20'/%3E%3Ccircle cx='40' cy='0' r='20'/%3E%3Ccircle cx='0' cy='40' r='20'/%3E%3Ccircle cx='40' cy='40' r='20'/%3E%3Ccircle cx='20' cy='20' r='20'/%3E%3C/g%3E%3C/svg%3E"), linear-gradient(to left, #000 0%, rgba(0, 0, 0, 0.5) 35%, transparent 70%);
+  -webkit-mask-repeat: repeat, no-repeat;
+  -webkit-mask-composite: source-in;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='%23000' stroke-width='1'%3E%3Ccircle cx='0' cy='0' r='20'/%3E%3Ccircle cx='40' cy='0' r='20'/%3E%3Ccircle cx='0' cy='40' r='20'/%3E%3Ccircle cx='40' cy='40' r='20'/%3E%3Ccircle cx='20' cy='20' r='20'/%3E%3C/g%3E%3C/svg%3E"), linear-gradient(to left, #000 0%, rgba(0, 0, 0, 0.5) 35%, transparent 70%);
+  mask-repeat: repeat, no-repeat;
+  mask-composite: intersect;
+}
+
+#wrap .sg-glist .sg-pcard__title {
+  margin-bottom: 6px;
+}
+
+#wrap .sg-glist__text {
+  margin: 0 0 24px 46px;
+  color: var(--sg-text-muted);
+  font-size: 0.95rem;
+}
+
+#wrap .sg-nobori--page {
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 24px 12px;
+}
+
+#wrap .sg-nobori--page > li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.sg-nobori__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--sg-text-muted);
+  font-size: 0.8rem;
+}
+
+.sg-nobori__type,
+.sg-nobori__mine {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.sg-nobori__type .material-symbols-outlined,
+.sg-nobori__mine .material-symbols-outlined {
+  font-size: 16px;
+}
+
+.sg-nobori__mine {
+  color: var(--sg-accent-1);
+  font-weight: 600;
+}
+
+.sg-nobori__mine .material-symbols-outlined {
+  font-variation-settings: "FILL" 1;
+}
+
+/* Bloc natif « Rejoindre un groupe », s'il existe */
+#wrap .sg-groups .block.sg-gjoin {
+  margin: 0;
+  padding: 28px;
+  border: 0;
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-surface);
+  box-shadow: none;
+}
+
+@media (max-width: 768px) {
+  #wrap .sg-glist,
+  #wrap .sg-groups .block.sg-gjoin {
+    padding: 20px 16px;
+  }
+
+  #wrap .sg-glist__text {
+    margin-left: 0;
+  }
+
+  #wrap .sg-nobori--page {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px 8px;
+  }
+}
