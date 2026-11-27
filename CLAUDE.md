@@ -466,7 +466,14 @@ dans le panneau d'administration (PA), puis on commit.
   `.sg-role` comme les messages — Staffeux / Modérateur d'après `staffRoles`, sinon le rang ; puis **portrait 200 ×
   400** tiré de `.mod-login-avatar img`) | pseudo coloré en Zen Antique, « Inscrit depuis … » (`memberSince`, date en
   infobulle, le champ « Date d'inscription » n'est pas répété), filet, champs en grille de 2 colonnes (libellé en
-  petites capitales, valeur sur 3 lignes au plus ; vide ou « - » → « Non renseigné » en italique). Pas de pastille
+  petites capitales, valeur sur 3 lignes au plus ; vide ou « - » → « Non renseigné » en italique). **Liens utiles**
+  (demande de Vinny) : **Présentation** puis **Fiche technique**, boutons au contour sous « Inscrit depuis … »
+  (`.sg-mprof__links`, icônes `history_edu` / `badge`, `open_in_new` et nouvel onglet pour un autre site ; pleine largeur
+  sur mobile ; un lien vide n'apparaît pas). Ce sont des **champs de contact** : le profil avancé ne les affiche pas (un
+  bloc `contact_field` ajouté au template `profile_advanced_body` reste vide, essai annulé). Ils sont lus dans l'onglet
+  **« Contact »** du profil avancé (`/uNcontact`, `dl` dont le `dt` nomme le champ), **activé** pour cela (PA ›
+  Utilisateurs & Groupes › Profils › Options générales › Onglets affichés › Contacter ; à reporter en production) et
+  **masqué de la barre d'onglets**. Pas de pastille
   « en ligne ». ≤ 768px : une colonne, portrait centré. Vérifié sur `/u1` (le mien), `/u2` (un autre),
   `/u2stats`, clair, sombre, 390px.
 - **Onglet « Signature »** (`layout.js`, fonction `sigPanel`, + `68-signature.css`) : carte « Ta signature » (icône
