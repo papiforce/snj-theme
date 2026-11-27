@@ -336,8 +336,7 @@
         text.classList.remove('ellipsis');
         text.setAttribute('title', text.textContent.replace(/\s+/g, ' ').trim());
       }
-      var time = box.querySelector('.contentTime');
-      if (time && !time.querySelector('.material-symbols-outlined')) time.insertBefore(ico('schedule'), time.firstChild);
+      /* L'heure (.contentTime) porte déjà l'icône « schedule » d'AwesomeBB (::before) */
       var del = box.querySelector('a.delete');
       if (del) {
         del.textContent = '';
