@@ -567,7 +567,16 @@ dans le panneau d'administration (PA), puis on commit.
   déconnecter : la page est lue en visiteur (`fetch('/register', {credentials: 'omit'})`, étape 2 :
   `/register?step=2&agreement=1&privacy=1`), puis écrite dans l'onglet (`document.open/write/close`, après
   `history.replaceState` vers `/register`) ; pour une version pas encore publiée, remplacer dans ce HTML le SHA du CSS
-  et le `/NNNNN.js` par `layout.js` sur jsDelivr. Mobile vérifié par mesures dans une iframe de 390px (les captures
+  et le `/NNNNN.js` par `layout.js` sur jsDelivr.
+  **Étape 3** (après « Créer mon compte », réponse POST au template `profile_add_body`, t=701 : `#wrap > .cp > .cp-inner >
+  form#ucp` + `.cp-sidebar`, sans `#username_reg`) : « Confirmer le mot de passe » (`password_confirm`) et le **captcha
+  Cloudflare Turnstile** (`regConfirm`). Trois étapes dans la colonne (« 確 Vérification » ajoutée). **Rien n'est déplacé
+  autour du captcha** (son iframe se rechargerait et le défi casserait) : le `.cp` natif devient la grille
+  (`.sg-reg.sg-reg--confirm`, colonne des étapes insérée en premier), le formulaire devient la carte « Dernière
+  vérification » (icône `verified_user`), libellé « Vérification » posé au-dessus du widget, boutons de l'étape 2
+  (`regButtons`, œil par `regEye`). Le widget garde son thème clair (choisi par Forumactif avant nos scripts).
+  **Vérifié sur une reconstitution** d'après le template (l'envoi de l'étape 2 n'a pas été fait) : à revoir sur la vraie
+  page si quelque chose y diffère. Mobile vérifié par mesures dans une iframe de 390px (les captures
   masquent les iframes et les champs de mot de passe). Non testé : l'envoi (création d'un compte), les erreurs, une
   éventuelle étape suivante (champs de profil obligatoires, captcha).
 - **Connexion et mot de passe oublié : poste-frontière « sekisho »** 関所 (où l'on présentait son laissez-passer)
@@ -615,7 +624,7 @@ dans le panneau d'administration (PA), puis on commit.
   ligne changés en `<br>`), clair, sombre, largeur réduite ; **pas encore posté pour de vrai** (un élément vide comme
   `.sgc-notch` ou `.sgc-step__mark` pourrait être retiré par Forumactif).
   Récapitulatif des patterns : **forum** (accueil) = image en fond + panneau + kanji ; **sous-forum** = ema
-  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ; **confirmation** = hanko (sceau au kanji ; 問 pour « Êtes-vous sûr ? ») ; **paramètres du profil** = ninbetsu-chō (onglets collants + cartes) ; **avatar** = nigao-e (portrait 200 × 400 + sources) ; **signature** = éditeur de l'écritoire suzuri ; **notifications** = alertes par famille en interrupteurs ; **sujets surveillés** et **favoris** = cartes yagasuri à cocher (`pickTopics`) ; **inscription** = kishōmon (étapes collantes, articles en kanji, sceaux à apposer) ; **connexion** = sekisho (formulaire | carte d'à-côté sur seigaiha) ; **sondage** = tōhyō (carte sur shippō) ; **fiche de personnage** = jinbutsu (codes `.sgc-`) ;
+  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ; **confirmation** = hanko (sceau au kanji ; 問 pour « Êtes-vous sûr ? ») ; **paramètres du profil** = ninbetsu-chō (onglets collants + cartes) ; **avatar** = nigao-e (portrait 200 × 400 + sources) ; **signature** = éditeur de l'écritoire suzuri ; **notifications** = alertes par famille en interrupteurs ; **sujets surveillés** et **favoris** = cartes yagasuri à cocher (`pickTopics`) ; **inscription** = kishōmon (étapes collantes, articles en kanji, sceaux à apposer, vérification finale) ; **connexion** = sekisho (formulaire | carte d'à-côté sur seigaiha) ; **sondage** = tōhyō (carte sur shippō) ; **fiche de personnage** = jinbutsu (codes `.sgc-`) ;
   **permission** = étiquette tegata aux coins coupés.
 - **Catégories de l'accueil** (`forums.js` + `40-zones.css`) : à gauche un sélecteur collant (Gestion, Hi, Mizu, Kaze,
   Kaminari, Tsuchi no Kuni, Shōkoku — « les petits pays », ex-Reste du Sekai) au style des raccourcis de l'Annexe, pastille = badge pour Gestion
