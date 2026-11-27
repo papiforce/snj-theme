@@ -10685,34 +10685,34 @@ body.sg-cppage .sg-cpage + .sg-divider--end {
 
 /* --- Étape 3 : « Dernière vérification » (mot de passe confirmé, captcha) ------------------------------------
    La grille est le .cp natif (la colonne des étapes y est insérée) : le formulaire et le captcha ne bougent pas. */
-#wrap .cp.sg-reg--confirm {
+#wrap .block.sg-reg--confirm {
   display: grid;
   width: auto;
   max-width: none;
   margin: 0;
   padding: 0;
   border: 0;
+  border-radius: 0;
   background: none;
   box-shadow: none;
 }
 
-#wrap .sg-reg--confirm > .cp-inner {
+#wrap .sg-reg form.sg-pcard {
   width: auto;
   max-width: none;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  background: none;
-  box-shadow: none;
-}
-
-#wrap .sg-reg form#ucp.sg-pcard {
   margin: 0;
   padding: 28px;
   border: 0;
   border-radius: var(--sg-radius-lg);
   background: var(--sg-surface);
   box-shadow: none;
+}
+
+#wrap .sg-reg--confirm .box {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
 }
 
 #wrap .sg-reg .sg-regblock,

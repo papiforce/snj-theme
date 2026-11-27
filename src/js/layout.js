@@ -4720,14 +4720,15 @@
     if (!wrap || document.querySelector('.sg-reg')) return;
     var agree = wrap.querySelector('#frmAgreement');
     var account = wrap.querySelector('form#ucp #username_reg') ? wrap.querySelector('form#ucp') : null;
-    /* Étape 3 (après « Créer mon compte ») : confirmation du mot de passe et captcha, dans le template du profil
-       (.cp > .cp-inner > form#ucp). Rien n'est déplacé autour du captcha : son iframe se rechargerait. */
-    var confirmCp = !agree && !account && /^\/register/.test(location.pathname) ? wrap.querySelector(':scope > .cp') : null;
-    var confirmForm = confirmCp && confirmCp.querySelector('form#ucp');
-    if (!agree && !account && !confirmForm) return;
+    /* Étape 3 (réponse à l'envoi de l'étape 2, même adresse) : confirmation du mot de passe et captcha Cloudflare,
+       #wrap > .block.block-login > form#form_confirm.block-content. Rien n'est déplacé autour du captcha :
+       son iframe se rechargerait et le défi casserait. */
+    var confirmForm = !agree && !account ? wrap.querySelector('form#form_confirm') : null;
+    var confirmBlock = confirmForm && (confirmForm.closest('#wrap > .block') || confirmForm.closest('#wrap > *'));
+    if (!agree && !account && !confirmBlock) return;
     var el = uiEl, ico = uiIco;
     var step = agree ? 0 : account ? 1 : 2;
-    var anchor = agree ? (agree.closest('#agreement') || agree) : account || confirmCp;
+    var anchor = agree ? (agree.closest('#agreement') || agree) : account || confirmBlock;
 
     /* En-tête : séparateur avec le logo, fil d'Ariane, titre, description de l'étape */
     var topDiv = regDivider(true);
@@ -4785,15 +4786,11 @@
     anchor.parentNode.insertBefore(topDiv, anchor);
     anchor.parentNode.insertBefore(head, anchor);
     if (confirmForm) {
-      /* La grille est le .cp natif : la colonne des étapes y est insérée, le formulaire ne bouge pas */
-      page = confirmCp;
+      /* La grille est le bloc natif : la colonne des étapes y est insérée, le formulaire ne bouge pas */
+      page = confirmBlock;
       page.classList.add('sg-reg', 'sg-reg--confirm');
       page.insertBefore(nav, page.firstChild);
-      var inner = confirmForm.parentNode;
-      inner.classList.add('sg-reg__main');
-      Array.prototype.slice.call(wrap.querySelectorAll('.block-error')).forEach(function (b) { inner.insertBefore(b, confirmForm); });
-      var side = wrap.querySelector(':scope > .cp-sidebar');
-      if (side) side.classList.add('sg-hidden');
+      Array.prototype.slice.call(wrap.querySelectorAll('.block-error')).forEach(function (b) { wrap.insertBefore(b, page); });
       regConfirm(confirmForm);
     } else {
       page.appendChild(nav);
@@ -5058,7 +5055,8 @@
     if (sub) fs.appendChild(sub);
   }
 
-  /* Étape 3 : confirmation du mot de passe et captcha (Cloudflare Turnstile) dans une carte « Dernière vérification ».
+  /* Étape 3 : confirmation du mot de passe et captcha (Cloudflare Turnstile) dans une carte « Dernière vérification »
+     (form#form_confirm, qui est aussi le .block-content natif).
      Le formulaire est la carte ; le captcha n'est jamais déplacé (son iframe se rechargerait), on l'entoure seulement. */
   function regConfirm(form) {
     var el = uiEl, ico = uiIco;
@@ -5077,10 +5075,17 @@
       var bc = b.querySelector(':scope > .block-content');
       if (bc) bc.classList.add('sg-pcard__grid');
     });
+    var box = form.querySelector(':scope > .box');
+    if (box) box.classList.add('sg-pcard__grid');
     Array.prototype.slice.call(form.querySelectorAll('label')).forEach(function (lab) {
       if (lab.querySelector(CAPTCHA) || !lab.isConnected) return;
       var inp = lab.querySelector('input[type="text"], input[type="email"], input[type="password"]');
       if (!inp) return;
+      /* Libellé en nœud texte (« Confirmer le mot de passe : * ») : enveloppé pour cpField */
+      if (!lab.querySelector(':scope > span')) {
+        var txt = Array.prototype.slice.call(lab.childNodes).filter(function (n) { return n.nodeType === 3 && n.textContent.trim(); })[0];
+        if (txt) { var sp = el('span'); lab.insertBefore(sp, txt); sp.appendChild(txt); }
+      }
       cpField(lab);
       var field = inp.closest('.sg-pfield');
       if (field) {
@@ -5091,11 +5096,11 @@
     /* Captcha : un libellé au-dessus, rien n'est déplacé */
     var cap = form.querySelector(CAPTCHA);
     if (cap) {
-      var box = cap;
-      while (box.parentNode && box.parentNode !== form && !(box.parentNode.classList && box.parentNode.classList.contains('block-content'))) box = box.parentNode;
-      box.classList.add('sg-regcaptcha');
+      var cbox = cap;
+      while (cbox.parentNode && cbox.parentNode !== form && !(cbox.parentNode.classList && (cbox.parentNode.classList.contains('block-content') || cbox.parentNode.classList.contains('box')))) cbox = cbox.parentNode;
+      cbox.classList.add('sg-regcaptcha');
       var capLab = el('span', 'sg-pfield__label sg-regcaptcha__label', 'Vérification');
-      box.parentNode.insertBefore(capLab, box);
+      cbox.parentNode.insertBefore(capLab, cbox);
     }
     regButtons(form);
   }
