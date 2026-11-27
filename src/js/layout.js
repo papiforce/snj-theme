@@ -3825,7 +3825,7 @@
     var cols = el('div', 'sg-alerts__cols');
     cols.setAttribute('aria-hidden', 'true');
     cols.appendChild(el('span'));
-    [['mail', 'E-mail'], ['notifications_active', 'Sur le forum']].forEach(function (c) {
+    [['mail', 'E-mail'], ['notifications_active', 'Forum']].forEach(function (c) {
       var s = el('span', 'sg-alerts__col');
       s.appendChild(ico(c[0]));
       s.appendChild(el('span', 'sg-alerts__colname', c[1]));

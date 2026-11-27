@@ -9202,7 +9202,7 @@ body.sg-cppage #wrap > .cp-mobile-menu,
   outline-offset: 2px;
 }
 
-#wrap .sg-cpage fieldset.sg-pactions {
+#wrap .sg-cpage .sg-pactions {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
@@ -9268,7 +9268,7 @@ body.sg-cppage .sg-cpage + .sg-divider--end {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  #wrap .sg-cpage fieldset.sg-pactions {
+  #wrap .sg-cpage .sg-pactions {
     flex-direction: column-reverse;
   }
 
@@ -11515,7 +11515,7 @@ body.sg-authpage .sg-auth + .sg-divider--end {
 
 /* --- Alertes ----------------------------------------------------------------------------------------------- */
 .sg-alerts {
-  --nc: 104px; /* largeur d'une colonne d'interrupteurs */
+  --nc: 112px; /* largeur d'une colonne d'interrupteurs */
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -11542,6 +11542,10 @@ body.sg-authpage .sg-auth + .sg-divider--end {
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+}
+
+.sg-alerts__colname {
+  white-space: nowrap;
 }
 
 .sg-alerts__col .material-symbols-outlined {

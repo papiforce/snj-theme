@@ -30,7 +30,7 @@
 
 /* --- Alertes ----------------------------------------------------------------------------------------------- */
 .sg-alerts {
-  --nc: 104px; /* largeur d'une colonne d'interrupteurs */
+  --nc: 112px; /* largeur d'une colonne d'interrupteurs */
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -57,6 +57,10 @@
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+}
+
+.sg-alerts__colname {
+  white-space: nowrap;
 }
 
 .sg-alerts__col .material-symbols-outlined {

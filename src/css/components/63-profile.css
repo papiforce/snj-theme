@@ -334,7 +334,7 @@ body.sg-cppage #wrap > .cp-mobile-menu,
   outline-offset: 2px;
 }
 
-#wrap .sg-cpage fieldset.sg-pactions {
+#wrap .sg-cpage .sg-pactions {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
@@ -400,7 +400,7 @@ body.sg-cppage .sg-cpage + .sg-divider--end {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  #wrap .sg-cpage fieldset.sg-pactions {
+  #wrap .sg-cpage .sg-pactions {
     flex-direction: column-reverse;
   }
 
