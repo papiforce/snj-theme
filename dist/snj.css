@@ -12215,3 +12215,28 @@ body.sg-authpage .sg-auth + .sg-divider--end {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Liens utiles (Présentation, Fiche technique) : boutons au contour sous « Inscrit depuis … » */
+.sg-mprof__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+#wrap .sg-mprof__link .material-symbols-outlined:last-child:not(:first-child) {
+  font-size: 16px;
+  opacity: 0.7;
+}
+
+@media (max-width: 768px) {
+  .sg-mprof__links {
+    flex-direction: column;
+  }
+
+  #wrap .sg-mprof__link {
+    width: 100%;
+    min-height: 44px;
+    justify-content: center;
+  }
+}

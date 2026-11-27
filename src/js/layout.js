@@ -5392,6 +5392,42 @@
     card.appendChild(body);
     block.parentNode.insertBefore(card, block);
 
+    /* Liens utiles : Présentation puis Fiche technique (champs de contact). Le profil avancé ne les affiche pas :
+       ils sont lus dans l'onglet « Contact » (/uNcontact, activé dans le PA et masqué de la barre d'onglets) */
+    var base = (location.pathname.match(/^\/u\d+/) || [])[0];
+    if (base) {
+      fetch(base + 'contact', { credentials: 'same-origin' }).then(function (r) { return r.ok ? r.text() : ''; }).then(function (html) {
+        if (!html) return;
+        var doc = new DOMParser().parseFromString(html, 'text/html');
+        var find = function (re) {
+          var dl = Array.prototype.slice.call(doc.querySelectorAll('.cp dl')).filter(function (d) {
+            var dt = d.querySelector('dt');
+            return dt && re.test(dt.textContent);
+          })[0];
+          var a = dl && dl.querySelector('dd a[href]');
+          var href = a ? a.getAttribute('href') : '';
+          return /^(https?:)?\/\//i.test(href) || /^\//.test(href) ? href : '';
+        };
+        var links = [[find(/pr[ée]sentation/i), 'Présentation', 'history_edu'], [find(/fiche\s*technique/i), 'Fiche technique', 'badge']]
+          .filter(function (l) { return l[0]; });
+        if (!links.length) return;
+        var row = el('div', 'sg-mprof__links');
+        row.setAttribute('aria-label', 'Liens utiles');
+        links.forEach(function (l) {
+          var a = el('a', 'sg-pbtn sg-pbtn--ghost sg-mprof__link');
+          a.href = l[0];
+          var ext = a.hostname && a.hostname !== location.hostname;
+          if (ext) { a.target = '_blank'; a.rel = 'noopener'; }
+          a.appendChild(ico(l[2]));
+          a.appendChild(el('span', null, l[1]));
+          if (ext) a.appendChild(ico('open_in_new'));
+          a.setAttribute('title', l[1] + ' : ' + l[0]);
+          row.appendChild(a);
+        });
+        idt.appendChild(row);
+      }).catch(function () {});
+    }
+
     /* Rôle : bandeau du staff (couleur du groupe), sinon le rang Forumactif, comme dans les messages */
     var uid = (location.pathname.match(/^\/u(\d+)/) || [])[1];
     var rankEl = side.querySelector('.mod-login-rank');
@@ -5453,6 +5489,8 @@
       var li = it.li;
       var a = li.querySelector('a');
       if (!a) return;
+      /* Onglet « Contact » du profil affiché : activé pour y lire les liens utiles, pas affiché */
+      if (viewing && /^\/u\d+contact$/.test(a.getAttribute('href') || '')) return;
       if (known && lastGroup !== null && it.r[0] !== lastGroup) {
         var sep = el('li', 'sg-ptabs__sep');
         sep.setAttribute('role', 'presentation');
