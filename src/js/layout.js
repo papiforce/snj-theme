@@ -5094,7 +5094,7 @@
       var box = cap;
       while (box.parentNode && box.parentNode !== form && !(box.parentNode.classList && box.parentNode.classList.contains('block-content'))) box = box.parentNode;
       box.classList.add('sg-regcaptcha');
-      var capLab = el('p', 'sg-pfield__label sg-regcaptcha__label', 'Vérification');
+      var capLab = el('span', 'sg-pfield__label sg-regcaptcha__label', 'Vérification');
       box.parentNode.insertBefore(capLab, box);
     }
     regButtons(form);

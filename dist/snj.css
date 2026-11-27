@@ -10728,6 +10728,10 @@ body.sg-cppage .sg-cpage + .sg-divider--end {
   margin-top: 20px;
 }
 
+#wrap .sg-reg--confirm form > .sg-pcard__hint {
+  margin: -8px 0 20px;
+}
+
 /* Captcha : à la largeur de son widget, sous son libellé */
 #wrap .sg-reg .sg-regcaptcha__label {
   grid-column: 1 / -1;
