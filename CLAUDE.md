@@ -524,14 +524,16 @@ dans le panneau d'administration (PA), puis on commit.
   ou retrait.
 - **Liste des groupes** (`/groups`, `layout.js`, fonction `groupsList`, + `74-groups.css`) : séparateur avec le logo,
   en-tête au pattern des forums (« Accueil › Groupes », titre « Groupes », « Les nations et les cercles qui rassemblent
-  les shinobis du Sekai. »). Les groupes en **bannières nobori** (même composant que la carte « Les groupes » de
-  l'accueil, `.sg-nobori` de `45-stats.css`, `.sg-nobori--page` : colonnes de 140px alignées à gauche, 3 colonnes
-  ≤ 768px), dans deux cartes sur **shippō** (communauté) estompé vers la gauche : **« Les nations »** (les six pays,
-  d'après `GROUP_META`) puis **« Le staff »** (Administrateurs, Modérateurs, Staffeux et tout groupe inconnu ; icône
-  Material Symbols à la place du kanji, couleur du PA à défaut de ton). Sous chaque bannière : effectif, type
-  (Ouvert `lock_open`, Fermé `lock`, Invisible `visibility_off`) et **« Ton groupe »** en Asagi pour les groupes du
-  membre. Le bloc natif « Appartenance à un groupe » (doublon) est masqué, sauf s'il porte un formulaire (rejoindre un
-  groupe : carte `.sg-gjoin`, listes en `combo`, non vu sur le compte de test). Vérifié clair, sombre, 390px.
+  les shinobis du Sekai. »). Deux sections (titre au pattern des cartes du profil + courte phrase) : **« Les nations »**
+  (les six pays, d'après `GROUP_META`) puis **« Le staff »** (Administrateurs, Modérateurs, Staffeux et tout groupe
+  inconnu). Groupes en **cartes paysage** `.sg-gtile` (demande de Vinny ; les bannières nobori ont été écartées ici),
+  **3 par ligne** (2 ≤ 900px, 1 ≤ 640px), proportion 2:1, fond de surface sur **shippō** estompé vers la gauche, toute
+  la carte est le lien : **étoffe** à la couleur du groupe à gauche (mon kanji ou icône Material Symbols, queue d'aronde,
+  ondulation au survol, comme les nobori de l'accueil ; couleur du PA à défaut de ton), nom en Zen Antique à la couleur
+  du groupe (`--gtext` = `--sg-group-*`), effectif, type (Ouvert `lock_open`, Fermé `lock`, Invisible
+  `visibility_off`), **« Ton groupe »** en Asagi, flèche qui glisse ; soulèvement au survol. Le bloc natif
+  « Appartenance à un groupe » (doublon) est masqué, sauf s'il porte un formulaire (rejoindre un groupe : carte
+  `.sg-gjoin`, listes en `combo`, non vu sur le compte de test). Vérifié clair, sombre, 390px.
 - **Onglet « Signature »** (`layout.js`, fonction `sigPanel`, + `68-signature.css`) : carte « Ta signature » (icône
   `draw`) dont l'**éditeur reprend celui de l'écritoire « suzuri »** : `form.sg-sigform` partage les règles de
   l'éditeur de `60-write.css` (sélecteurs `:is(.sg-writeform, .sg-sigform)` : barre d'outils posée sur la carte, icônes
@@ -705,7 +707,7 @@ dans le panneau d'administration (PA), puis on commit.
   ligne changés en `<br>`), clair, sombre, largeur réduite ; **pas encore posté pour de vrai** (un élément vide comme
   `.sgc-notch` ou `.sgc-step__mark` pourrait être retiré par Forumactif).
   Récapitulatif des patterns : **forum** (accueil) = image en fond + panneau + kanji ; **sous-forum** = ema
-  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ; **confirmation** = hanko (sceau au kanji ; 問 pour « Êtes-vous sûr ? ») ; **paramètres du profil** = ninbetsu-chō (onglets collants + cartes) ; **avatar** = nigao-e (portrait 200 × 400 + sources) ; **profil affiché** = fiche en lecture seule (portrait + champs ; statistiques en compteurs sur kikkō) ; **signature** = éditeur de l'écritoire suzuri ; **notifications** = alertes par famille en interrupteurs ; **sujets surveillés** et **favoris** = cartes yagasuri à cocher (`pickTopics`) ; **inscription** = kishōmon (étapes collantes, articles en kanji, sceaux à apposer, vérification finale) ; **connexion** = sekisho (formulaire | carte d'à-côté sur seigaiha) ; **sondage** = tōhyō (carte sur shippō) ; **membres** = registre en cartes portrait ; **groupe** = en-tête à sa couleur + carte « Le groupe » + membres en cartes portrait ; **liste des groupes** = bannières nobori ; **fiche de personnage** = jinbutsu (codes `.sgc-`) ;
+  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ; **confirmation** = hanko (sceau au kanji ; 問 pour « Êtes-vous sûr ? ») ; **paramètres du profil** = ninbetsu-chō (onglets collants + cartes) ; **avatar** = nigao-e (portrait 200 × 400 + sources) ; **profil affiché** = fiche en lecture seule (portrait + champs ; statistiques en compteurs sur kikkō) ; **signature** = éditeur de l'écritoire suzuri ; **notifications** = alertes par famille en interrupteurs ; **sujets surveillés** et **favoris** = cartes yagasuri à cocher (`pickTopics`) ; **inscription** = kishōmon (étapes collantes, articles en kanji, sceaux à apposer, vérification finale) ; **connexion** = sekisho (formulaire | carte d'à-côté sur seigaiha) ; **sondage** = tōhyō (carte sur shippō) ; **membres** = registre en cartes portrait ; **groupe** = en-tête à sa couleur + carte « Le groupe » + membres en cartes portrait ; **liste des groupes** = cartes paysage à étoffe ; **fiche de personnage** = jinbutsu (codes `.sgc-`) ;
   **permission** = étiquette tegata aux coins coupés.
 - **Catégories de l'accueil** (`forums.js` + `40-zones.css`) : à gauche un sélecteur collant (Gestion, Hi, Mizu, Kaze,
   Kaminari, Tsuchi no Kuni, Shōkoku — « les petits pays », ex-Reste du Sekai) au style des raccourcis de l'Annexe, pastille = badge pour Gestion
@@ -746,7 +748,9 @@ dans le panneau d'administration (PA), puis on commit.
   `shokoku`, l'ancien `reste-du-sekai` reste accepté), Modérateurs, Staffeux. Ordre 1 à 6 pour les pays, 7 et 8 pour
   Modérateurs et Staffeux : un membre du staff qui a un pays prend la couleur de son pays. Teintes du PA rebranchées
   sur les tokens dans `08-groups.css` (Staffeux `#ECE5D4` → sumi et gofun, Modérateurs `#9FB0C3` → Hagane, pays →
-  `--sg-nation-*`, assombris en clair). Le PA impose un modérateur par groupe, compté dans la légende : l'effectif
+  `--sg-nation-*`, assombris en clair ; **Kaminari en clair : or vif `#a6850a`** (contraste 3,3:1), pas l'olive du
+  mélange au noir, qu'on ne lisait plus comme du jaune — demande de Vinny, textes seulement, la couleur du groupe reste
+  `--sg-nation-kaminari`). Le PA impose un modérateur par groupe, compté dans la légende : l'effectif
   affiché retire 1 (`CONFIG.legendIncludesModerator`). Il faut donc un compte du staff dédié comme modérateur des
   groupes, qui n'en est pas membre.
 - **Pied de page** (`layout.js`, fonction `footer`, + `50-footer.css`, toutes les pages) : les statistiques natives du
