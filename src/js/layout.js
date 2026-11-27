@@ -5298,8 +5298,9 @@
   /* --------------------------------------------------------------------
      Liste des membres (/memberlist) : « registre des shinobis ». En-tête au pattern des forums, barre de recherche
      (formulaire natif #form-block gardé : nom, tri, ordre ; tri et ordre s'appliquent dès qu'on les change), puis une
-     carte par membre sur shippō (communauté) : portrait 200 × 400 réduit, rôle du staff, pseudo coloré,
-     « Inscrit depuis … », dernière visite, messages ; toute la carte mène au profil ; message privé en bouton rond.
+     carte par membre **en portrait** (demande de Vinny) : l'avatar 1:2 remplit la carte, rôle du staff en haut, pseudo
+     coloré et repères sur un voile en bas (comme les tuiles de l'accueil) ; toute la carte mène au profil ; pas de
+     bouton de message privé (demande de Vinny).
      -------------------------------------------------------------------- */
   function memberList() {
     var wrap = document.getElementById('wrap');
@@ -5424,7 +5425,7 @@
       var href = link.getAttribute('href');
       var uid = (href.match(/^\/u(\d+)/) || [])[1];
       var name = link.textContent.replace(/\s+/g, ' ').trim();
-      var card = el('article', 'sg-mcard sg-pat sg-pat--shippo');
+      var card = el('article', 'sg-mcard');
       var pic = el('div', 'sg-mcard__portrait');
       var img = b.querySelector('.avatar-default img, img');
       if (img) {
@@ -5470,16 +5471,6 @@
       });
       body.appendChild(facts);
       card.appendChild(body);
-      var pm = b.querySelector('.member-icons a[href*="privmsg"]');
-      /* Pas de message privé à soi-même */
-      if (pm && uid !== String((window._userdata || {}).user_id)) {
-        var pmBtn = el('a', 'sg-mcard__pm');
-        pmBtn.href = pm.getAttribute('href');
-        pmBtn.setAttribute('aria-label', 'Écrire à ' + name);
-        pmBtn.setAttribute('title', 'Écrire à ' + name);
-        pmBtn.appendChild(ico('mail'));
-        card.appendChild(pmBtn);
-      }
       card.setAttribute('data-uid', uid || '');
       grid.appendChild(card);
       cards.push({ card: card, uid: uid, body: body });
@@ -5493,11 +5484,11 @@
     list.classList.add('sg-hidden');
     list.parentNode.insertBefore(grid, list);
 
-    /* Rôle du staff : bandeau des messages, en tête de la carte */
+    /* Rôle du staff : bandeau des messages, en haut de la carte */
     staffRoles(function (roles) {
       cards.forEach(function (c) {
         var role = c.uid && roles[c.uid];
-        if (role) c.body.insertBefore(roleBand(role), c.body.firstChild);
+        if (role) c.card.insertBefore(roleBand(role), c.card.firstChild);
       });
     });
 
