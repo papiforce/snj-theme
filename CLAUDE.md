@@ -417,15 +417,17 @@ dans le panneau d'administration (PA), puis on commit.
   une action « Voir mon profil » (absente sur les pages `/uN`, qui ont aussi la colonne `.cp-sidebar` : Profil, Groupes,
   Récompenses, et reçoivent pour l'instant le même habillage), description propre à l'onglet, `CP_TABS`). **Onglets collants** (demande de Vinny) :
   colonne de 248px (comme la colonne de l'auteur des messages), `position: sticky` à 24px du haut, carte de surface,
-  icône Material Symbols par onglet (`CP_TABS`), onglet actif plein en sumi et gofun (icône pleine) ; ≤ 900px, **bande
-  collante en haut d'écran** qui défile à l'horizontale (onglet actif amené en vue). Les onglets natifs (colonne et
+  icône Material Symbols par onglet (`CP_TABS`), onglet actif plein en sumi et gofun (icône pleine) ; ≤ 900px, **liste
+  déroulante personnalisée collante en haut d'écran** (demande de Vinny ; `combo()` sur une `<select>` hors formulaire,
+  `.sg-ptabs__pick`, la liste des onglets masquée ; choisir une entrée mène à l'onglet), plus de bande qui défile. Les onglets natifs (colonne et
   menu mobile) sont masqués. **Blocs natifs en cartes** `.sg-pcard` (fond de surface, sans contour ni ombre, titre
   en Zen Antique avec icône dans un cercle teinté : Compte, Profil, Contact, Mes données — `CP_BLOCKS`), champs en
   grille de 2 colonnes (1 sur mobile ; zone de texte et choix en pleine largeur). **Champs** (`cpField`, depuis chaque
   `<label>` natif) : libellé en petites capitales (`CP_LABELS` : « Pseudo », « Mot de passe » ; astérisque
   « obligatoire » en Ume), champ arrondi au style des listes personnalisées (`.sg-pinput`), aide discrète ; genre
   (radios à image) et groupes Oui / Non des autres onglets (`.radio-wrap`, `cpRadioWrap`) en **contrôle segmenté**
-  `.sg-seg--auto` (une colonne par choix ; libellés longs sur plusieurs lignes) ; date de naissance : jour et mois en
+  `.sg-seg--auto` (une colonne par choix ; libellés longs sur plusieurs lignes ; libellés raccourcis dans `CP_CHOICES`,
+  phrase native en infobulle : « Pas de messages privés en masse », demande de Vinny) ; date de naissance : jour et mois en
   `combo`, année en champ court, sur une ligne (« Jour », « Mois », « Année » natifs gardés en noms accessibles) ;
   « Modifier le mot de passe » et « Exporter mes données » en boutons au contour (sans libellé en doublon au-dessus de
   l'export) ; champs de mot de passe avec l'œil natif dans le champ ; un bloc sans titre qui suit une carte la rejoint.
