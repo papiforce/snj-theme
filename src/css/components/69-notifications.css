@@ -196,6 +196,20 @@
   background: color-mix(in srgb, var(--sg-accent-1) 12%, var(--sg-surface-2));
 }
 
+/* Zone cliquable de 44px autour d'une case dessinée (checkHit) */
+#wrap .sg-checkhit {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin: -11px;
+  padding: 0;
+  cursor: pointer;
+}
+
 /* Case dessinée (la case native, sans son apparence) */
 #wrap input.sg-check {
   appearance: none;

@@ -3843,6 +3843,7 @@
         box.classList.add('sg-check');
         box.setAttribute('aria-label', 'Sélectionner « ' + card.querySelector('.sg-topic__link').textContent + ' »');
         top.insertBefore(box, top.firstChild);
+        checkHit(box);
         boxes.push(box);
       }
       if (forum) card.setAttribute('data-forum', (forum.getAttribute('href').match(/^\/f\d+/) || [''])[0]);
@@ -3904,6 +3905,14 @@
     section.appendChild(bar);
     sync();
     return true;
+  }
+
+  /* Case dessinée dans une zone cliquable de 44px (cible tactile), sans changer sa taille à l'écran */
+  function checkHit(box) {
+    var hit = uiEl('label', 'sg-checkhit');
+    box.parentNode.insertBefore(hit, box);
+    hit.appendChild(box);
+    return hit;
   }
 
   function notifSwitch(input, label) {
@@ -4030,6 +4039,7 @@
       item.classList.add('sg-nitem');
       i.classList.add('sg-check');
       i.setAttribute('aria-label', 'Sélectionner cette notification');
+      checkHit(i);
     });
 
     /* Barre : tout sélectionner, supprimer la sélection, tout supprimer */
