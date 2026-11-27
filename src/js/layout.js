@@ -5294,6 +5294,125 @@
     document.body.classList.add('sg-authpage', 'sg-pagehead-on');
   }
 
+  /* Onglets du profil affiché (/uN) : icône, description pour mon profil, pour celui d'un autre (%s = pseudo) */
+  var VIEW_TABS = {
+    profil: ['person', 'Ce que les autres shinobis voient de toi.', 'Ce que %s partage avec le Sekai.'],
+    statistiques: ['bar_chart', 'Ton activité sur le forum.', 'L’activité de %s sur le forum.'],
+    groupes: ['groups', 'Les groupes dont tu fais partie.', 'Les groupes de %s.'],
+    'récompenses': ['military_tech', 'Les récompenses que tu as reçues.', 'Les récompenses de %s.']
+  };
+
+  /* --------------------------------------------------------------------
+     Profil affiché (/uN, onglet Profil) : carte « Fiche » en LECTURE SEULE, quel que soit le rôle du lecteur
+     (demande de Vinny). Le bloc natif (champs modifiables par clic, lien d'administration) est masqué ; la carte
+     reprend le portrait 200 × 400 (comme les messages), le rôle, le pseudo coloré, « Inscrit depuis … » et
+     les champs du profil (libellé, valeur) lus dans .field_uneditable.
+     -------------------------------------------------------------------- */
+  function memberProfile(cp, side, who) {
+    var el = uiEl, ico = uiIco;
+    var block = cp.querySelector('.block .middleline') ? cp.querySelector('.block .middleline').closest('.block') : null;
+    if (!block) return;
+    block.setAttribute('data-sg-done', '');
+    block.classList.add('sg-hidden');
+
+    var card = el('section', 'sg-pcard sg-mprof');
+    card.setAttribute('aria-label', who ? 'Fiche de ' + who : 'Fiche');
+    /* Colonne du portrait : rôle puis portrait, comme la colonne de l'auteur des messages */
+    var aside = el('div', 'sg-mprof__aside');
+    var pic = el('div', 'sg-mprof__portrait');
+    var img = side.querySelector('.mod-login-avatar img');
+    if (img) {
+      var im = el('img');
+      im.src = img.getAttribute('src');
+      im.alt = who ? 'Portrait de ' + who : 'Portrait';
+      im.loading = 'lazy';
+      pic.appendChild(im);
+    } else {
+      pic.classList.add('is-empty');
+      pic.appendChild(ico('person'));
+    }
+    aside.appendChild(pic);
+    card.appendChild(aside);
+
+    var body = el('div', 'sg-mprof__body');
+    var idt = el('div', 'sg-mprof__id');
+    var nameEl = el('h2', 'sg-mprof__name');
+    var colored = side.querySelector('.box-head .usr_grp_clr, .box-head [style*="color"]');
+    if (colored) {
+      var c = colored.cloneNode(true);
+      Array.prototype.slice.call(c.querySelectorAll('em')).forEach(function (x) { x.remove(); });
+      nameEl.appendChild(c);
+    } else nameEl.textContent = who;
+    if (who) nameEl.setAttribute('title', who);
+    idt.appendChild(nameEl);
+    body.appendChild(idt);
+
+    /* Champs : libellé et valeur (version non modifiable de Forumactif) */
+    var since = '';
+    var list = el('dl', 'sg-mprof__fields');
+    Array.prototype.slice.call(block.querySelectorAll('dl')).forEach(function (dl) {
+      var dt = dl.querySelector('dt');
+      var dd = dl.querySelector('dd');
+      if (!dt || !dd) return;
+      var label = dt.textContent.replace(/\s+/g, ' ').replace(/\s*:\s*$/, '').trim();
+      var src = dd.querySelector('.field_uneditable') || dd;
+      var val = src.cloneNode(true);
+      Array.prototype.slice.call(val.querySelectorAll('.field_editable, input, select, textarea, script, button, .ajax-profil_edit')).forEach(function (x) { x.remove(); });
+      var text = val.textContent.replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim();
+      if (/^date d.inscription$/i.test(label)) { since = text; return; }
+      var row = el('div', 'sg-mprof__field');
+      var k = el('dt', 'sg-mprof__label', label);
+      var v = el('dd', 'sg-mprof__value');
+      if (!text || text === '-' || text === '—') {
+        if (val.querySelector('img')) { while (val.firstChild) v.appendChild(val.firstChild); }
+        else { v.classList.add('is-empty'); v.textContent = 'Non renseigné'; }
+      } else {
+        while (val.firstChild) v.appendChild(val.firstChild);
+        v.setAttribute('title', text);
+      }
+      Array.prototype.slice.call(v.querySelectorAll('[style]')).forEach(function (x) { if (!/color/i.test(x.getAttribute('style'))) x.removeAttribute('style'); });
+      row.appendChild(k);
+      row.appendChild(v);
+      list.appendChild(row);
+    });
+    if (since) {
+      var sinceTxt = memberSince(since);
+      if (sinceTxt) {
+        var f = el('p', 'sg-mprof__since');
+        f.appendChild(ico('calendar_month'));
+        f.appendChild(el('span', null, sinceTxt));
+        f.setAttribute('title', 'Inscrit le ' + since);
+        idt.appendChild(f);
+      }
+    }
+    if (list.children.length) {
+      body.appendChild(el('hr', 'sg-mprof__rule'));
+      body.appendChild(list);
+    }
+    card.appendChild(body);
+    block.parentNode.insertBefore(card, block);
+
+    /* Rôle : bandeau du staff (couleur du groupe), sinon le rang Forumactif, comme dans les messages */
+    var uid = (location.pathname.match(/^\/u(\d+)/) || [])[1];
+    var rankEl = side.querySelector('.mod-login-rank');
+    var rank = rankEl ? rankEl.textContent.replace(/\s+/g, ' ').replace(/^rang\s*:\s*/i, '').trim() : '';
+    staffRoles(function (roles) {
+      var role = uid && roles[uid];
+      var band;
+      if (role) band = roleBand(role);
+      else if (rank) { band = el('div', 'sg-role'); band.appendChild(el('span', 'sg-role__label', rank)); }
+      if (band) aside.insertBefore(band, aside.firstChild);
+    });
+    /* Couleur de l'auteur (rang d'un membre sans rôle) : lue sur le pseudo, relue à chaque changement de thème */
+    var readColor = function () {
+      var n = nameEl.querySelector('[style*="color"], .usr_grp_clr') || nameEl;
+      card.style.setProperty('--author', getComputedStyle(n).color);
+    };
+    readColor();
+    if (window.MutationObserver) new MutationObserver(function () { setTimeout(readColor, 260); })
+      .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  }
+
   function profilePage() {
     var cp = document.querySelector('#wrap > .cp');
     var side = document.querySelector('#wrap > .cp-sidebar');
@@ -5302,12 +5421,17 @@
     var ud = window._userdata || {};
     var tabs = Array.prototype.slice.call(side.querySelectorAll('.tabs li'));
     if (!tabs.length) return;
-    var current = cpKey(location.search) || 'informations';
+    /* Profil affiché (/uN) : onglets Profil, Statistiques… ; le mien ou celui d'un autre shinobi */
+    var viewing = (location.pathname.match(/^\/u\d+/) || [])[0];
+    var own = !!viewing && !!ud.user_id && viewing === '/u' + ud.user_id;
+    var whoEl = viewing ? side.querySelector('.box-head strong') : null;
+    var who = whoEl ? whoEl.textContent.replace(/\s+/g, ' ').trim() : '';
+    var current = viewing ? '' : cpKey(location.search) || 'informations';
     var curLabel = '';
 
     /* Onglets : colonne collante (bande collante en haut sur mobile) */
     var nav = el('nav', 'sg-ptabs');
-    nav.setAttribute('aria-label', 'Paramètres du profil');
+    nav.setAttribute('aria-label', viewing ? 'Profil' : 'Paramètres du profil');
     var ul = el('ul', 'sg-ptabs__list');
     /* Ordre de la refonte (CP_ORDER) ; onglet inconnu : après, dans l'ordre natif */
     var rankOf = function (key) {
@@ -5345,7 +5469,7 @@
       var link = el('a', 'sg-ptabs__link' + (active ? ' is-active' : ''));
       link.href = active || !href || href === '#' ? location.pathname + location.search : href;
       if (active) link.setAttribute('aria-current', 'page');
-      link.appendChild(ico((CP_TABS[key] || ['chevron_right'])[0]));
+      link.appendChild(ico(viewing ? (VIEW_TABS[name.toLowerCase()] || ['chevron_right'])[0] : (CP_TABS[key] || ['chevron_right'])[0]));
       link.appendChild(el('span', 'sg-ptabs__text', name));
       item.appendChild(link);
       ul.appendChild(item);
@@ -5398,14 +5522,16 @@
       li.appendChild(a);
       ol.appendChild(li);
     };
-    /* Accueil › Profil › onglet ; sur l'onglet « Profil » lui-même : Accueil › Profil (demande de Vinny) */
-    var viewing = (location.pathname.match(/^\/u\d+/) || [])[0];
+    /* Accueil › Profil › onglet ; sur l'onglet « Profil » lui-même : Accueil › Profil (demande de Vinny).
+       Profil d'un autre shinobi : « Profil de <pseudo> », au fil d'Ariane comme au titre (demande de Vinny) */
     var profHref = viewing || (ud.user_id ? '/u' + ud.user_id : '');
     var onProfile = /^profil$/i.test(curLabel);
+    var profName = viewing && !own && who ? 'Profil de ' + who : 'Profil';
+    if (onProfile) curLabel = profName;
     crumb('/', 'Accueil', 'home');
-    if (onProfile) crumb('', 'Profil', null, true);
+    if (onProfile) crumb('', profName, null, true);
     else {
-      if (profHref) crumb(profHref, 'Profil');
+      if (profHref) crumb(profHref, profName);
       crumb('', curLabel, null, true);
     }
     crumbs.appendChild(ol);
@@ -5413,7 +5539,18 @@
     var row = el('div', 'sg-pagehead__row');
     var h1 = el('h1', 'sg-pagehead__title');
     h1.appendChild(el('span', 'sg-pagehead__text', curLabel));
+    h1.setAttribute('title', curLabel);
     row.appendChild(h1);
+    /* Mon profil affiché : « Modifier mon profil » à droite du titre (demande de Vinny) ; rien sur celui d'un autre */
+    if (viewing && own && onProfile) {
+      var eActs = el('div', 'sg-pagehead__actions');
+      var edit = el('a', 'sg-action');
+      edit.href = '/profile?mode=editprofile&page_profil=informations';
+      edit.appendChild(ico('edit'));
+      edit.appendChild(el('span', null, 'Modifier mon profil'));
+      eActs.appendChild(edit);
+      row.appendChild(eActs);
+    }
     /* « Voir mon profil » : inutile sur les pages du profil affiché (doublon) */
     if (ud.user_id && !viewing) {
       var acts = el('div', 'sg-pagehead__actions');
@@ -5425,7 +5562,11 @@
       row.appendChild(acts);
     }
     head.appendChild(row);
-    if (CP_TABS[current]) head.appendChild(el('div', 'sg-pagehead__desc', CP_TABS[current][1]));
+    if (viewing) {
+      var vt = VIEW_TABS[(onProfile ? 'profil' : curLabel).toLowerCase()];
+      var desc = vt ? (own || !who ? vt[1] : vt[2].replace('%s', who)) : '';
+      if (desc) head.appendChild(el('div', 'sg-pagehead__desc', desc));
+    } else if (CP_TABS[current]) head.appendChild(el('div', 'sg-pagehead__desc', CP_TABS[current][1]));
 
     /* Grille : onglets | contenu */
     var page = el('div', 'sg-cpage');
@@ -5440,6 +5581,8 @@
     var mobileMenu = document.querySelector('#wrap > .cp-mobile-menu');
     if (mobileMenu) mobileMenu.classList.add('sg-hidden');
 
+    /* Profil affiché : portrait et fiche en lecture seule */
+    if (viewing) memberProfile(cp, side, who);
     /* Sujets surveillés : cartes de sujet */
     watchList(cp);
     /* Favoris : cartes de sujet */
