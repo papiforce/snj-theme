@@ -449,6 +449,27 @@ dans le panneau d'administration (PA), puis on commit.
   Attention : le `fieldset.fields1` natif garde `min-width: min-content` (débordement de l'éditeur sur mobile) : remis
   à 0. Pour tester une page `/post` dans une iframe, `history.replaceState` doit venir **après** `document.open()`
   (qui remet l'adresse de la page parente). Non testé : l'enregistrement réel.
+- **Onglet « Notifications »** (`layout.js`, fonctions `notifPrefs`, `notifList`, `notifSwitch`, + `69-notifications.css`).
+  **« Tes alertes »** (form `notif_opts`, tableau natif masqué) : titre + **menu trois points** (`actionsMenu`,
+  `sg-menu--icon` : « Tout activer » / « Tout désactiver », à la place des boutons natifs ; les canaux désactivés par
+  Forumactif ne bougent pas), courte aide, en-têtes de colonnes **E-mail** / **Forum** (icônes seules sur mobile), puis
+  les types **regroupés par famille** (`NOTIF_TYPES`, clé = valeur native de la case : Shinobis, Sujets, Groupes et
+  récompenses, Modération ; type inconnu → « Autres » avec sa phrase native), intitulé de famille en Zen Antique,
+  lignes sur `--sg-surface-2` séparées d'un filet : icône dans un cercle teinté Hagane, **libellé court** (phrase
+  native en infobulle, une ligne en ellipse, deux sur mobile), un **interrupteur par canal** (`.sg-nswitch` : la case
+  native déplacée dedans, cellule de 44px ; canal indisponible estompé, non cliquable). L'état des interrupteurs vient
+  des règles partagées `:is(.sg-opt, .sg-nswitch) input:checked ~ .sg-switch` (`60-write.css`). Boutons au pattern du
+  profil : « Réinitialiser » ajouté (`input type=reset`, les interrupteurs suivent les cases), « Enregistrer ».
+  `#wrap .sg-cpage .sg-pactions` vise désormais aussi une `div` (conteneur natif de ce formulaire).
+  **Liste des notifications** (`.cp_notifs`, form `notif_list`) : **masquée quand il n'y en a aucune** (titre
+  « 0 notification » ou aucune case ; demande de Vinny). Sinon carte « N notifications » (icône `inbox`), chaque
+  notification (`li` ou `tr` de sa case, `.sg-nitem`) sur `--sg-surface-2`, teintée d'Asagi une fois cochée, **case
+  dessinée** (`input.sg-check`, `appearance: none`, coche Asagi qui se pose avec un rebond) ; barre sous un filet :
+  « Tout sélectionner / Tout désélectionner » (contour), « Supprimer (N) » (contour Ume, désactivé sans sélection) et
+  « Tout supprimer » (Ume plein, `confirmModal`) ; les boutons natifs `delete` / `delete_all` restent masqués dans le
+  formulaire et sont envoyés par `requestSubmit`. **Balisage d'une notification inconnu** (aucune notification sur le
+  compte de test, pas de template) : vérifié sur deux notifications simulées (`ul > li` avec case) ; à revoir sur de
+  vraies notifications. Non testés : l'enregistrement des alertes, la suppression.
 - **Onglet « Avatar » : portrait « nigao-e »** 似顔絵 (`layout.js`, fonction `avatarPanel`, + `67-avatar.css`) : pattern
   **réservé au choix de l'avatar** (`page_profil=avatars`). Carte « Ton portrait » : **portrait 200 × 400** au style
   de l'avatar des messages (arrondi 12px, sans cadre, `object-fit: cover`) | **« Nouveau portrait »** en contrôle
@@ -548,7 +569,7 @@ dans le panneau d'administration (PA), puis on commit.
   ligne changés en `<br>`), clair, sombre, largeur réduite ; **pas encore posté pour de vrai** (un élément vide comme
   `.sgc-notch` ou `.sgc-step__mark` pourrait être retiré par Forumactif).
   Récapitulatif des patterns : **forum** (accueil) = image en fond + panneau + kanji ; **sous-forum** = ema
-  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ; **confirmation** = hanko (sceau au kanji) ; **paramètres du profil** = ninbetsu-chō (onglets collants + cartes) ; **avatar** = nigao-e (portrait 200 × 400 + sources) ; **signature** = éditeur de l'écritoire suzuri ; **inscription** = kishōmon (étapes collantes, articles en kanji, sceaux à apposer) ; **connexion** = sekisho (formulaire | carte d'à-côté sur seigaiha) ; **sondage** = tōhyō (carte sur shippō) ; **fiche de personnage** = jinbutsu (codes `.sgc-`) ;
+  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ; **confirmation** = hanko (sceau au kanji) ; **paramètres du profil** = ninbetsu-chō (onglets collants + cartes) ; **avatar** = nigao-e (portrait 200 × 400 + sources) ; **signature** = éditeur de l'écritoire suzuri ; **notifications** = alertes par famille en interrupteurs ; **inscription** = kishōmon (étapes collantes, articles en kanji, sceaux à apposer) ; **connexion** = sekisho (formulaire | carte d'à-côté sur seigaiha) ; **sondage** = tōhyō (carte sur shippō) ; **fiche de personnage** = jinbutsu (codes `.sgc-`) ;
   **permission** = étiquette tegata aux coins coupés.
 - **Catégories de l'accueil** (`forums.js` + `40-zones.css`) : à gauche un sélecteur collant (Gestion, Hi, Mizu, Kaze,
   Kaminari, Tsuchi no Kuni, Shōkoku — « les petits pays », ex-Reste du Sekai) au style des raccourcis de l'Annexe, pastille = badge pour Gestion
