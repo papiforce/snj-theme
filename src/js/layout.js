@@ -5449,6 +5449,154 @@
       .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
   }
 
+  /* --------------------------------------------------------------------
+     Profil affiché, onglet Statistiques (/uNstats) : trois compteurs (messages, sujets ouverts, expérience) sur
+     kikkō, comme les « Chroniques » de l'accueil ; puis « Repères » (dates en tuiles) et les recherches natives en
+     boutons courts (« Mes messages » / « Ses messages »…). Le bloc natif est masqué ; une ligne inconnue rejoint
+     les repères avec son libellé natif.
+     -------------------------------------------------------------------- */
+  function memberStats(cp, own) {
+    var el = uiEl, ico = uiIco;
+    var block = Array.prototype.slice.call(cp.querySelectorAll('.block')).filter(function (b) {
+      return b.querySelector('.sub-head') && b.querySelector('dl.profile-advanced-stats') && !b.querySelector('.middleline');
+    })[0];
+    if (!block) return;
+    var content = block.querySelector('.block-content') || block;
+    var fr = function (n, d) { return Number(n).toLocaleString('fr-FR', { maximumFractionDigits: d }); };
+    var rows = [];
+    var links = [];
+    var section = '';
+    Array.prototype.slice.call(content.children).forEach(function (n) {
+      if (n.classList.contains('sub-head')) { section = n.textContent.trim(); return; }
+      if (n.tagName === 'DL') {
+        var dt = n.querySelector('dt');
+        var dd = n.querySelector('dd');
+        if (!dt || !dd) return;
+        var a = dt.querySelector('a[href]');
+        rows.push({ section: section, label: dt.textContent.replace(/\s+/g, ' ').replace(/\s*:\s*$/, '').trim(),
+          value: dd.textContent.replace(/\s+/g, ' ').trim(), href: a ? a.getAttribute('href') : '' });
+        return;
+      }
+      if (n.tagName === 'A' && n.getAttribute('href')) links.push(n.getAttribute('href'));
+    });
+    if (!rows.length) return;
+    var used = [];
+    var take = function (re, sec) {
+      var r = rows.filter(function (x) { return used.indexOf(x) < 0 && re.test(x.label) && (!sec || sec.test(x.section)); })[0];
+      if (r) used.push(r);
+      return r;
+    };
+    var count = function (r) {
+      if (!r) return null;
+      var m = r.value.match(/^([\d\s.,]+)/);
+      var pct = r.value.match(/([\d.,]+)\s*%/);
+      return { n: m ? m[1].replace(/[\s,]/g, '') : r.value, pct: pct ? parseFloat(pct[1]) : null, href: r.href };
+    };
+    var posts = count(take(/^messages$/i));
+    var perPost = take(/messages par jour/i);
+    var topics = count(take(/sujets ouverts|^sujets$/i));
+    var perTopic = take(/sujets par jour/i);
+    var xp = count(take(/exp[ée]rience/i));
+
+    var page = el('section', 'sg-mstats');
+    page.setAttribute('aria-label', 'Statistiques');
+
+    /* Compteurs */
+    var kpis = el('div', 'sg-mstats__kpis');
+    var kpi = function (icon, label, c, details, href) {
+      if (!c) return;
+      var t = el(href ? 'a' : 'div', 'sg-mstats__kpi sg-pat sg-pat--kikko');
+      if (href) t.href = href;
+      var head = el('span', 'sg-mstats__klabel');
+      var dot = el('span', 'sg-mstats__kicon');
+      dot.appendChild(ico(icon));
+      head.appendChild(dot);
+      head.appendChild(el('span', null, label));
+      t.appendChild(head);
+      t.appendChild(el('span', 'sg-mstats__knum', fr(c.n, 0)));
+      var det = details.filter(Boolean).join(' · ');
+      if (det) t.appendChild(el('span', 'sg-mstats__kdetail', det));
+      if (href) t.appendChild(ico('arrow_forward'));
+      kpis.appendChild(t);
+    };
+    var perDay = function (r) {
+      if (!r) return '';
+      var v = parseFloat(r.value.replace(',', '.'));
+      return isNaN(v) ? r.value : fr(v, 2) + ' par jour';
+    };
+    var share = function (c) { return c && c.pct !== null ? fr(c.pct, 1) + '\u00a0% du forum' : ''; };
+    kpi('chat_bubble', 'Messages', posts, [share(posts), perDay(perPost)]);
+    kpi('topic', 'Sujets ouverts', topics, [share(topics), perDay(perTopic)], topics && topics.href);
+    kpi('auto_awesome', 'Expérience', xp, []);
+    if (kpis.children.length) page.appendChild(kpis);
+
+    /* Repères : dates et le reste, en tuiles */
+    var card = el('div', 'sg-pcard sg-mstats__card');
+    var h = el('h2', 'sg-pcard__title');
+    h.appendChild(ico('event'));
+    h.appendChild(el('span', null, 'Repères'));
+    card.appendChild(h);
+    var grid = el('dl', 'sg-mstats__facts');
+    var fact = function (icon, label, value, title) {
+      if (!value) return;
+      var row = el('div', 'sg-mstats__fact');
+      var k = el('dt', 'sg-mstats__flabel');
+      k.appendChild(ico(icon));
+      k.appendChild(el('span', null, label));
+      row.appendChild(k);
+      var v = el('dd', 'sg-mstats__fvalue', value);
+      if (title) v.setAttribute('title', title);
+      row.appendChild(v);
+      grid.appendChild(row);
+    };
+    var lastPost = take(/dernier message/i);
+    var lastTopic = take(/dernier sujet/i);
+    var joined = take(/inscrit/i);
+    var visit = take(/derni[èe]re visite/i);
+    var pms = take(/messages priv[ée]s/i);
+    fact('schedule', 'Dernier message', lastPost && lastPost.value);
+    fact('edit_note', 'Dernier sujet', lastTopic && lastTopic.value);
+    if (joined) {
+      var since = memberSince(joined.value);
+      fact('calendar_month', 'Inscrit le', joined.value + (since ? ' · ' + since.replace(/^Inscrit /, '') : ''), since);
+    }
+    fact('visibility', 'Dernière visite', visit && visit.value);
+    if (own) fact('mail', 'Messages privés', pms && fr(pms.value.replace(/\D/g, '') || 0, 0));
+    rows.forEach(function (r) {
+      if (used.indexOf(r) >= 0) return;
+      if (pms === r) return;
+      fact('info', r.label, r.value);
+    });
+    if (grid.children.length) card.appendChild(grid);
+
+    /* Recherches natives : boutons courts */
+    var acts = el('div', 'sg-mstats__actions');
+    var act = function (re, icon, label) {
+      var href = links.filter(function (l) { return re.test(l); })[0];
+      if (!href) return;
+      var a = el('a', 'sg-pbtn sg-pbtn--ghost');
+      a.href = href;
+      a.appendChild(ico(icon));
+      a.appendChild(el('span', null, label));
+      acts.appendChild(a);
+    };
+    act(/^\/spa\//, 'chat', own ? 'Mes messages' : 'Ses messages');
+    if (topics && topics.href) {
+      var ta = el('a', 'sg-pbtn sg-pbtn--ghost');
+      ta.href = topics.href;
+      ta.appendChild(ico('topic'));
+      ta.appendChild(el('span', null, own ? 'Mes sujets' : 'Ses sujets'));
+      acts.appendChild(ta);
+    }
+    act(/^\/sta\//, 'forum', own ? 'Mes participations' : 'Ses participations');
+    if (acts.children.length) card.appendChild(acts);
+    if (grid.children.length || acts.children.length) page.appendChild(card);
+
+    block.setAttribute('data-sg-done', '');
+    block.classList.add('sg-hidden');
+    block.parentNode.insertBefore(page, block);
+  }
+
   function profilePage() {
     var cp = document.querySelector('#wrap > .cp');
     var side = document.querySelector('#wrap > .cp-sidebar');
@@ -5620,7 +5768,7 @@
     if (mobileMenu) mobileMenu.classList.add('sg-hidden');
 
     /* Profil affiché : portrait et fiche en lecture seule */
-    if (viewing) memberProfile(cp, side, who);
+    if (viewing) { memberProfile(cp, side, who); memberStats(cp, own); }
     /* Sujets surveillés : cartes de sujet */
     watchList(cp);
     /* Favoris : cartes de sujet */
