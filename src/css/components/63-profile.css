@@ -36,6 +36,11 @@ body.sg-cppage #wrap > .cp-mobile-menu,
 }
 
 /* --- Onglets ---------------------------------------------------------------------------------------------- */
+/* Liste déroulante des onglets : seulement sur mobile (≤ 900px) */
+.sg-ptabs__pick {
+  display: none;
+}
+
 .sg-ptabs {
   position: sticky;
   top: 24px;
@@ -358,31 +363,28 @@ body.sg-cppage .sg-cpage + .sg-divider--end {
     gap: 16px;
   }
 
-  /* Bande d'onglets collante en haut d'écran, qui défile à l'horizontale */
+  /* Onglets : liste déroulante personnalisée, collante en haut d'écran (demande de Vinny) */
   .sg-ptabs {
-    top: 0;
-    margin: 0 -4px;
+    top: 8px;
     padding: 6px;
     box-shadow: var(--sg-shadow);
   }
 
   #wrap .sg-ptabs__list {
-    flex-direction: row;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  #wrap .sg-ptabs__list::-webkit-scrollbar {
     display: none;
   }
 
-  #wrap .sg-ptabs__item {
-    flex: none;
+  .sg-ptabs__pick {
+    display: block;
   }
 
-  #wrap a.sg-ptabs__link {
-    gap: 8px;
-    padding: 0 14px;
+  /* Le bouton de la liste prend la largeur ; sa liste s'ouvre par-dessus la page */
+  #wrap .sg-ptabs__pick .sg-combo {
+    width: 100%;
+  }
+
+  #wrap .sg-ptabs__pick .sg-combo__list {
+    z-index: 20;
   }
 }
 

@@ -4409,6 +4409,12 @@
     'Téléchargez les informations et contenus que vous avez publiés sur ce forum': ''
   };
 
+  /* Choix trop longs des contrôles segmentés du profil : libellés courts (phrase native en infobulle) */
+  var CP_CHOICES = {
+    'Je ne souhaite pas recevoir de messages privés de masse': 'Pas de messages privés en masse'
+  };
+  function cpChoice(text) { return CP_CHOICES[text] || text; }
+
   function cpKey(href) {
     var m = (href || '').match(/page_profil=([a-z]+)/) || (href || '').match(/search_id=([a-z]+)/);
     return m ? m[1] : '';
@@ -4529,10 +4535,12 @@
     radios.forEach(function (r) {
       var lab = r.closest('label');
       var name = lab ? lab.textContent.replace(/\s+/g, ' ').trim() : r.value;
+      var short = cpChoice(name);
       var opt = el('label', 'sg-seg__opt');
       opt.appendChild(r);
       var face = el('span', 'sg-seg__face');
-      face.appendChild(el('span', null, name));
+      face.appendChild(el('span', null, short));
+      if (short !== name) opt.setAttribute('title', name);
       opt.appendChild(face);
       seg.appendChild(opt);
     });
@@ -5154,6 +5162,24 @@
       ul.appendChild(item);
     });
     nav.appendChild(ul);
+    /* Mobile (≤ 900px) : liste déroulante personnalisée collante en haut d'écran, à la place des onglets
+       (demande de Vinny) ; choisir un onglet y mène */
+    var tabSel = el('select');
+    tabSel.setAttribute('aria-label', 'Paramètres du profil');
+    tabSel.setAttribute('form', 'sg-none');
+    Array.prototype.slice.call(ul.querySelectorAll('a.sg-ptabs__link')).forEach(function (a) {
+      var o = el('option', null, (a.querySelector('.sg-ptabs__text') || a).textContent.trim());
+      o.value = a.getAttribute('href');
+      if (a.classList.contains('is-active')) o.selected = true;
+      tabSel.appendChild(o);
+    });
+    var tabPick = el('div', 'sg-ptabs__pick');
+    tabPick.appendChild(combo(tabSel, {}).box);
+    tabSel.addEventListener('change', function () {
+      var a = ul.querySelector('a.sg-ptabs__link.is-active');
+      if (tabSel.value && (!a || tabSel.value !== a.getAttribute('href'))) location.href = tabSel.value;
+    });
+    nav.appendChild(tabPick);
     curLabel = curLabel || 'Mon profil';
 
     /* En-tête : séparateur avec le logo, fil d'Ariane, titre = l'onglet, « Voir mon profil », description */
@@ -5340,9 +5366,6 @@
     endDiv.parentNode.insertBefore(endNav, endDiv.nextSibling);
 
     document.body.classList.add('sg-cppage', 'sg-pagehead-on');
-    /* Mobile : l'onglet actif visible dans la bande */
-    var act = nav.querySelector('.is-active');
-    if (act && nav.scrollWidth > nav.clientWidth) ul.scrollLeft = act.offsetLeft - 16;
   }
 
   function noticeRead(doc) {
