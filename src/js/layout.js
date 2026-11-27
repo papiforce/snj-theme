@@ -257,6 +257,113 @@
     }
   }
 
+  /* Fenêtre des notifications (ouverte par la cloche de la barre latérale) : le panneau natif #notif-menu
+     d'AwesomeBB, habillé au design system (carte de surface, titre en Zen Antique, fermeture). Ses notifications
+     (li#nID[data-notif-type] > .content > .contentText, a.delete, .contentTime) sont ajoutées par FAToolbar.js à tout
+     moment : un MutationObserver les habille (icône du type, pastille « non lue », croix de suppression). Le lien
+     natif de suppression et le clic de la notification restent ceux de Forumactif. */
+  var NOTIF_ICONS = {
+    0: 'mail', 1: 'flag', 2: 'person_add', 3: 'group_add', 4: 'handshake', 5: 'forum', 6: 'report',
+    7: 'visibility', 8: 'alternate_email', 9: 'tag', 10: 'campaign', 11: 'favorite', 12: 'thumb_down',
+    13: 'notifications_active', 14: 'military_tech', 15: 'post_add', 16: 'chat', 17: 'volunteer_activism'
+  };
+  function notifPanel(menu, dimmer, trigger) {
+    if (!menu || menu.classList.contains('sg-notif')) return;
+    var el = uiEl, ico = uiIco;
+    var list = menu.querySelector('#notif_list');
+    menu.classList.add('sg-notif');
+    menu.setAttribute('role', 'dialog');
+    menu.setAttribute('aria-label', 'Notifications');
+
+    /* En-tête : icône, titre, fermeture */
+    var head = menu.querySelector('.main-menu-headline');
+    var bar = el('div', 'sg-notif__head');
+    var title = el('h2', 'sg-notif__title');
+    title.appendChild(ico('notifications'));
+    title.appendChild(el('span', null, 'Notifications'));
+    bar.appendChild(title);
+    var count = el('span', 'sg-notif__count');
+    bar.appendChild(count);
+    var close = el('button', 'sg-notif__close');
+    close.type = 'button';
+    close.setAttribute('aria-label', 'Fermer');
+    close.setAttribute('title', 'Fermer');
+    close.appendChild(ico('close'));
+    close.addEventListener('click', function () {
+      if (dimmer) dimmer.click();
+      if (trigger) { trigger.setAttribute('aria-expanded', 'false'); trigger.focus(); }
+    });
+    bar.appendChild(close);
+    if (head) { head.style.display = 'none'; menu.insertBefore(bar, head); } else menu.insertBefore(bar, menu.firstChild);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !menu.classList.contains('hidden') && menu.classList.contains('visible')) close.click();
+    });
+
+    function dressEmpty(li) {
+      if (li.hasAttribute('data-sg')) return;
+      li.setAttribute('data-sg', '');
+      li.textContent = '';
+      var c = el('span', 'sg-notif__emptyico');
+      c.appendChild(ico('notifications_paused'));
+      li.appendChild(c);
+      li.appendChild(el('strong', null, 'Aucune nouvelle notification'));
+      li.appendChild(el('span', null, 'Le Sekai est calme pour l’instant.'));
+    }
+    function dressAll(li) {
+      if (li.hasAttribute('data-sg')) return;
+      var a = li.querySelector('a');
+      if (!a) return;
+      li.setAttribute('data-sg', '');
+      a.textContent = '';
+      a.appendChild(el('span', null, 'Voir toutes les notifications'));
+      a.appendChild(ico('arrow_forward'));
+    }
+    function dressItem(li) {
+      if (li.hasAttribute('data-sg')) return;
+      var box = li.querySelector('.content');
+      if (!box) return;
+      li.setAttribute('data-sg', '');
+      li.classList.add('sg-nrow');
+      var hr = box.querySelector(':scope > hr');
+      if (hr) hr.remove();
+      var t = li.getAttribute('data-notif-type');
+      var mark = el('span', 'sg-nrow__ico');
+      mark.setAttribute('aria-hidden', 'true');
+      mark.appendChild(ico(NOTIF_ICONS[t] || 'notifications'));
+      box.insertBefore(mark, box.firstChild);
+      var text = box.querySelector('.contentText');
+      if (text) {
+        text.classList.remove('ellipsis');
+        text.setAttribute('title', text.textContent.replace(/\s+/g, ' ').trim());
+      }
+      var time = box.querySelector('.contentTime');
+      if (time && !time.querySelector('.material-symbols-outlined')) time.insertBefore(ico('schedule'), time.firstChild);
+      var del = box.querySelector('a.delete');
+      if (del) {
+        del.textContent = '';
+        del.appendChild(ico('close'));
+        del.setAttribute('aria-label', 'Supprimer cette notification');
+        del.setAttribute('title', 'Supprimer');
+      }
+    }
+    function dress() {
+      if (!list) return;
+      Array.prototype.slice.call(list.children).forEach(function (li) {
+        if (li.id === 'no-notifications') dressEmpty(li);
+        else if (li.id === 'notif-view-all') dressAll(li);
+        else dressItem(li);
+      });
+      var n = list.querySelectorAll('li.sg-nrow.unread').length;
+      count.textContent = n ? n + (n > 1 ? ' non lues' : ' non lue') : '';
+      var empty = list.querySelector('#no-notifications');
+      menu.classList.toggle('is-empty', !list.querySelector('li.sg-nrow') || !!(empty && empty.style.display !== 'none' && !list.querySelector('li.sg-nrow')));
+    }
+    dress();
+    if (list && window.MutationObserver) {
+      new MutationObserver(dress).observe(list, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
+    }
+  }
+
   /* Menu du compte, sur l'avatar : pseudo, profil, paramètres du profil, panneau d'administration
      (admins), déconnexion. L'avatar devient un bouton qui ouvre et ferme le menu au clic (Entrée et
      Espace au clavier) ; Échap, un clic à côté ou le focus qui sort le ferment. */
@@ -412,6 +519,7 @@
       }
       bottom.appendChild(notif);
       syncBadge(nativeNotif, notif.querySelector('.sg-sb-badge'));
+      notifPanel(notifMenu, dimmer, notif);
 
       /* Panneau d'administration et déconnexion : dans le menu de l'avatar (accountMenu) */
     } else {

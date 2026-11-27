@@ -630,6 +630,367 @@ button.sg-sb-brand {
   }
 }
 
+/* --- 11-notif.css --- */
+/* ==========================================================================
+   SNJ — Fenêtre des notifications (cloche de la barre latérale) : notifPanel dans src/js/layout.js
+   Le panneau natif #notif-menu d'AwesomeBB, replacé à côté de la barre (10-sidebar.css) et habillé : carte de
+   surface arrondie, en-tête (icône dans un cercle teinté, titre en Zen Antique, « N non lues », fermeture), liste
+   qui défile, une ligne par notification (icône du type, texte sur 3 lignes, heure, croix de suppression), non lue
+   teintée d'Asagi avec un point, état vide, « Voir toutes les notifications » au contour. Sur mobile : au-dessus
+   de la barre du bas, sur toute la largeur.
+   ========================================================================== */
+
+#notif-menu.sg-notif {
+  display: flex;
+  flex-direction: column;
+  width: 380px;
+  max-width: calc(100vw - 32px);
+  max-height: min(560px, calc(100vh - 48px));
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--sg-border);
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-surface);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  color: var(--sg-text);
+  font-family: var(--sg-font-body);
+  text-align: left;
+  transform: translateY(0);
+  transition: opacity 0.2s ease, transform 0.25s var(--sg-ease, ease);
+}
+
+#notif-menu.sg-notif.hidden {
+  transform: translateY(8px);
+}
+
+/* En-tête */
+.sg-notif__head {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 12px 12px 20px;
+  border-bottom: 1px solid var(--sg-border);
+}
+
+#notif-menu .sg-notif__title {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--sg-text);
+  font-family: var(--sg-font-display);
+  font-size: 1.3rem;
+  font-weight: 400;
+  line-height: 1.2;
+  text-transform: none;
+}
+
+.sg-notif__title .material-symbols-outlined {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--sg-primary) 16%, transparent);
+  color: var(--sg-primary);
+  font-size: 19px;
+}
+
+.sg-notif__count {
+  color: var(--sg-accent-1);
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.sg-notif__count:empty {
+  display: none;
+}
+
+#notif-menu .sg-notif__close {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--sg-text-muted);
+  cursor: pointer;
+}
+
+#notif-menu .sg-notif__close:hover,
+#notif-menu .sg-notif__close:focus-visible {
+  background: var(--sg-surface-2);
+  color: var(--sg-text);
+}
+
+/* Liste */
+#notif-menu.sg-notif #notif_list {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  min-width: 0;
+  margin: 0;
+  padding: 12px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+#notif-menu.sg-notif #notif_list > li {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  list-style: none;
+}
+
+/* Une notification */
+#notif-menu.sg-notif li.sg-nrow .content {
+  position: relative;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) 32px;
+  grid-template-areas: "ico text del" "ico time del";
+  gap: 2px 12px;
+  align-items: start;
+  margin: 0;
+  padding: 12px 8px 12px 12px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--sg-surface-2);
+  box-shadow: none;
+  color: var(--sg-text);
+}
+
+#notif-menu.sg-notif li.sg-nrow .content::before {
+  display: none;
+}
+
+#notif-menu.sg-notif li.sg-nrow.unread .content {
+  background: color-mix(in srgb, var(--sg-accent-1) 12%, var(--sg-surface-2));
+}
+
+/* Point « non lue » sur l'icône */
+#notif-menu.sg-notif li.sg-nrow.unread .sg-nrow__ico::after {
+  content: "";
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--sg-surface-2);
+  border-radius: 50%;
+  background: var(--sg-accent-1);
+}
+
+.sg-nrow__ico {
+  position: relative;
+  display: grid;
+  grid-area: ico;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--sg-primary) 16%, transparent);
+  color: var(--sg-primary);
+}
+
+.sg-nrow__ico .material-symbols-outlined {
+  font-size: 19px;
+}
+
+#notif-menu.sg-notif li.sg-nrow .contentText {
+  display: -webkit-box;
+  grid-area: text;
+  overflow: hidden;
+  color: var(--sg-text);
+  font-size: 0.9rem;
+  line-height: 1.45;
+  white-space: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+#notif-menu.sg-notif li.sg-nrow .contentText a {
+  color: var(--sg-text);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+#notif-menu.sg-notif li.sg-nrow .contentText a:hover {
+  text-decoration: underline;
+}
+
+#notif-menu.sg-notif li.sg-nrow .contentTime {
+  display: flex;
+  grid-area: time;
+  align-items: center;
+  gap: 4px;
+  margin: 2px 0 0;
+  color: var(--sg-text-muted);
+  font-size: 0.78rem;
+}
+
+.sg-nrow .contentTime .material-symbols-outlined {
+  font-size: 14px;
+}
+
+/* Croix de suppression (lien natif) : discrète, visible au survol et au focus */
+#notif-menu.sg-notif li.sg-nrow a.delete {
+  position: static;
+  display: grid;
+  grid-area: del;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  border-radius: 50%;
+  color: var(--sg-text-muted);
+  opacity: 0;
+  text-decoration: none;
+  transition: opacity 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+#notif-menu.sg-notif li.sg-nrow a.delete::after {
+  display: none;
+}
+
+#notif-menu.sg-notif li.sg-nrow a.delete .material-symbols-outlined {
+  font-size: 18px;
+}
+
+#notif-menu.sg-notif li.sg-nrow:hover a.delete,
+#notif-menu.sg-notif li.sg-nrow a.delete:focus-visible {
+  opacity: 1;
+}
+
+#notif-menu.sg-notif li.sg-nrow a.delete:hover,
+#notif-menu.sg-notif li.sg-nrow a.delete:focus-visible {
+  background: color-mix(in srgb, var(--sg-accent-2) 16%, transparent);
+  color: var(--sg-accent-2);
+}
+
+/* État vide */
+#notif-menu.sg-notif #no-notifications {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 28px 16px 20px;
+  color: var(--sg-text-muted);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+#notif-menu.sg-notif #no-notifications strong {
+  color: var(--sg-text);
+  font-family: var(--sg-font-display);
+  font-size: 1.1rem;
+  font-weight: 400;
+}
+
+.sg-notif__emptyico {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 8px;
+  border-radius: 50%;
+  background: var(--sg-surface-2);
+  color: var(--sg-text-muted);
+}
+
+.sg-notif__emptyico .material-symbols-outlined {
+  font-size: 28px;
+}
+
+/* « Voir toutes les notifications » : bouton au contour, collé en bas */
+#notif-menu.sg-notif #notif-view-all {
+  position: sticky;
+  bottom: -12px;
+  margin: auto -12px -12px;
+  padding: 12px;
+  border-top: 1px solid var(--sg-border);
+  background: var(--sg-surface);
+}
+
+#notif-menu.sg-notif #notif-view-all a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--sg-border-strong, var(--sg-border));
+  border-radius: 999px;
+  background: none;
+  color: var(--sg-text);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+#notif-menu.sg-notif #notif-view-all a .material-symbols-outlined {
+  font-size: 18px;
+  transition: transform 0.25s ease;
+}
+
+#notif-menu.sg-notif #notif-view-all a:hover,
+#notif-menu.sg-notif #notif-view-all a:focus-visible {
+  background: var(--sg-surface-2);
+}
+
+#notif-menu.sg-notif #notif-view-all a:hover .material-symbols-outlined {
+  transform: translateX(4px);
+}
+
+/* Voile d'AwesomeBB, plus léger que le noir natif */
+#dimmer {
+  background: rgba(0, 0, 0, 0.28) !important;
+}
+
+[data-theme="light"] #dimmer {
+  background: rgba(29, 25, 21, 0.14) !important;
+}
+
+@media (max-width: 768px) {
+  #notif-menu.sg-notif {
+    width: auto;
+    max-width: none;
+    max-height: calc(100vh - var(--sg-bottombar-h) - 32px);
+  }
+
+  /* Au toucher, la croix reste visible */
+  #notif-menu.sg-notif li.sg-nrow a.delete {
+    width: 40px;
+    height: 40px;
+    opacity: 1;
+  }
+
+  #notif-menu.sg-notif li.sg-nrow .content {
+    grid-template-columns: 36px minmax(0, 1fr) 40px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #notif-menu.sg-notif {
+    transition: opacity 0.2s ease;
+  }
+}
+
 /* --- 15-layout.css --- */
 /* ==========================================================================
    SNJ — Mise en page générale
