@@ -1,22 +1,8 @@
 <!-- ======================================================================
      SNJ — à insérer dans le template overall_header, juste avant </head>.
-     1. Applique le thème AVANT l'affichage (pas de flash clair/sombre).
-        Choix du membre lu dans localStorage, sinon dans le cookie snj-theme (secours).
-     2. Charge les polices et le CSS des composants (jsDelivr, version figée).
+     Charge les polices et le CSS des composants (jsDelivr, version figée).
+     Le thème est posé plus haut, par head-theme-snippet.html (tout en haut du <head>).
      ====================================================================== -->
-<script>
-(function () {
-  var KEY = 'snj-theme';
-  var saved = null;
-  try { saved = localStorage.getItem(KEY); } catch (e) {}
-  if (saved !== 'light' && saved !== 'dark') {
-    var m = document.cookie.match(/(?:^|;\s*)snj-theme=(light|dark)/);
-    saved = m ? m[1] : null;
-  }
-  var system = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', saved || system);
-})();
-</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inria+Sans:ital,wght@0,300;0,400;0,700;1,400&family=Zen+Antique&family=Noto+Serif+JP:wght@500;700&display=swap">

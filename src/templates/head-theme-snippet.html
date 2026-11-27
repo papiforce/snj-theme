@@ -1,0 +1,25 @@
+<!-- ======================================================================
+     SNJ — à insérer dans le template overall_header TOUT EN HAUT du <head>,
+     juste après la balise meta charset, avant les feuilles de style et les scripts de Forumactif.
+     Pose le thème (et les préférences d'affichage des sujets) AVANT toute peinture : placé en fin de
+     <head>, derrière les scripts externes bloquants de Forumactif (consentement, publicité, statistiques),
+     Chrome peignait d'abord le fond sombre par défaut, d'où un flash sombre à chaque page en thème clair.
+     Choix lus dans localStorage, sinon dans le cookie de secours ; thème de l'appareil par défaut.
+     ATTENTION : Forumactif retire « {} » des templates (pris pour une variable vide) et les retours à la
+     ligne : jamais de bloc vide (« catch (e) {} » cassait l'ancien script) ni de commentaire « // ».
+     ====================================================================== -->
+<script>
+(function () {
+  var root = document.documentElement;
+  var read = function (key, re) {
+    var v = null;
+    try { v = localStorage.getItem(key); } catch (e) { v = null; }
+    if (v === null) { var m = document.cookie.match(new RegExp('(?:^|;\\s*)' + key + '=([a-z]+)')); v = m ? m[1] : null; }
+    return v && re.test(v) ? v : null;
+  };
+  var system = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  root.setAttribute('data-theme', read('snj-theme', /^(light|dark)$/) || system);
+  if (read('snj-profile', /^right$/)) root.setAttribute('data-profile', 'right');
+  if (read('snj-density', /^compact$/)) root.setAttribute('data-density', 'compact');
+})();
+</script>

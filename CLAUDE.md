@@ -35,6 +35,12 @@ dans le panneau d'administration (PA), puis on commit.
 - **Thème** : celui de l'appareil par défaut ; le choix du membre est mémorisé dans le navigateur
   (`localStorage`, clé `snj-theme`, doublé d'un cookie `snj-theme` de secours) et réappliqué à chaque affichage
   de page, retour arrière compris (`pageshow`). Attribut `data-theme` sur `<html>`.
+  Posé **avant toute peinture** par `src/templates/head-theme-snippet.html`, **tout en haut du `<head>`** d'`overall_header`
+  (juste après `meta charset`, avant `{CSS}` et les scripts externes bloquants de Forumactif), avec `data-profile` et
+  `data-density`. L'ancien script, en fin de `<head>`, ne s'exécutait pas : **Forumactif retire « {} » des templates**
+  (variable vide) et les retours à la ligne, et `catch (e) {}` devenait une erreur de syntaxe ; le thème n'était posé
+  qu'ensuite par `layout.js`, d'où un flash sombre à chaque page en thème clair. Dans un template : jamais de bloc vide
+  ni de commentaire `//` ; vérifier le script servi avec `new Function(texte)`.
 - **Icônes** : **Material Symbols Outlined uniquement**, partout (c'est la bibliothèque native d'AwesomeBB).
   Jamais de Font Awesome ni d'autre bibliothèque. Seule exception : les logos de marque absents de Material Symbols
   (Discord…), en SVG inline repris de Simple Icons (licence CC0), à la même taille que les icônes.
