@@ -1,0 +1,69 @@
+/* ==========================================================================================================
+   Sujets surveillés (/search?search_id=watchsearch, layout.js watchList) : cartes de sujet yagasuri
+   (57-topics.css) avec le forum du sujet et une case de sélection ; barre de sélection sous la grille
+   (même barre que la liste des notifications, 69-notifications.css).
+   Et : boutons d'un formulaire posé dans une carte, sortis sous la carte (.sg-pactions--out).
+   ========================================================================================================== */
+
+/* --- Cartes ------------------------------------------------------------------------------------------------ */
+#wrap .sg-watch {
+  margin: 0;
+}
+
+/* La case et le lien du forum passent au-dessus du lien étendu de la carte */
+#wrap .sg-topic--pick .sg-topic__flags {
+  position: relative;
+  z-index: 1;
+  align-items: center;
+}
+
+#wrap .sg-topic--pick input.sg-check {
+  position: relative;
+  z-index: 1;
+}
+
+#wrap .sg-topic__forum {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  margin: -4px 0 0;
+  color: var(--sg-text-muted);
+  font-size: 0.85rem;
+}
+
+.sg-topic__forum .material-symbols-outlined {
+  flex: none;
+  color: var(--ph);
+  font-size: 16px;
+}
+
+#wrap .sg-topic__forum a,
+#wrap .sg-topic__forum a:visited {
+  overflow: hidden;
+  color: var(--sg-text-muted);
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#wrap .sg-topic__forum a:hover {
+  color: var(--sg-text);
+  text-decoration: underline;
+}
+
+/* Carte sélectionnée : contour Asagi */
+#wrap .sg-topic.is-picked {
+  box-shadow: inset 0 0 0 2px var(--sg-accent-1);
+}
+
+#wrap .sg-watch__bar {
+  margin-top: 24px;
+}
+
+/* --- Boutons sortis de leur carte (Signature, Notifications) ----------------------------------------------- */
+#wrap .sg-cpage .sg-pactions--out {
+  margin: 8px 0 24px; /* comme sous la carte de l’avatar, puis l’écart des cartes */
+}

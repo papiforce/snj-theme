@@ -3651,7 +3651,7 @@
   var CP_BLOCKS = {
     'Enregistrement': ['key', 'Compte'],
     'Profil personnalisé': ['person', 'Profil'],
-    'Champs de contact': ['alternate_email', 'Contact'],
+    'Champs de contact': ['link', 'Liens utiles'],
     'Export de données': ['download', 'Mes données'],
     'Panneau de contrôle des Avatars': ['account_circle', 'Ton portrait']
   };
@@ -3776,6 +3776,133 @@
     1: ['moderation', 'assignment', 'Nouveau rapport']
   };
   var NOTIF_GROUPS = [['shinobi', 'Shinobis'], ['sujets', 'Sujets'], ['groupes', 'Groupes et récompenses'], ['moderation', 'Modération'], ['autres', 'Autres']];
+
+  /* --------------------------------------------------------------------
+     Sujets surveillés (/search?search_id=watchsearch) : les lignes natives (.posts-section, comme dans un forum)
+     deviennent les cartes de sujet yagasuri (topicCard), avec le forum du sujet et une case de sélection ; barre
+     sous la grille : « Tout sélectionner », « Arrêter de suivre (N) » (bouton natif « valid », masqué).
+     -------------------------------------------------------------------- */
+  /* Couleur de catégorie de chaque forum (« /f4 » → « gestion »…), lue sur l'accueil (sous-forums compris) ;
+     gardée 15 minutes pour la session (sessionStorage « snj-ftone ») */
+  function forumTones(done) {
+    var KEY = 'snj-ftone', TTL = 15 * 60 * 1000;
+    try {
+      var hit = JSON.parse(sessionStorage.getItem(KEY) || 'null');
+      if (hit && Date.now() - hit.t < TTL) { done(hit.m); return; }
+    } catch (e) { hit = null; }
+    fetch('/', { credentials: 'same-origin' }).then(function (r) { return r.ok ? r.text() : ''; }).then(function (html) {
+      var doc = new DOMParser().parseFromString(html, 'text/html');
+      var map = {};
+      Array.prototype.slice.call(doc.querySelectorAll('.forum')).forEach(function (cat) {
+        var name = cat.querySelector('.category-title h2');
+        var meta = name ? CATEGORIES[name.textContent.trim()] : null;
+        if (!meta) return;
+        Array.prototype.slice.call(cat.querySelectorAll('a[href^="/f"]')).forEach(function (a) {
+          var k = (a.getAttribute('href').match(/^\/f\d+/) || [])[0];
+          if (k && !map[k]) map[k] = meta.tone;
+        });
+      });
+      try { sessionStorage.setItem(KEY, JSON.stringify({ t: Date.now(), m: map })); } catch (e) { map = map || {}; }
+      done(map);
+    }).catch(function () { done({}); });
+  }
+
+  function watchList(cp) {
+    var el = uiEl, ico = uiIco;
+    var list = cp.querySelector('form #memberlist.posts');
+    var form = list && list.closest('form');
+    if (!form || form.classList.contains('sg-watchform')) return false;
+    form.classList.add('sg-watchform');
+    /* Bloc natif « Sujets surveillés » : doublon du titre de la page */
+    Array.prototype.slice.call(form.querySelectorAll(':scope > .block')).forEach(function (b) { b.classList.add('sg-hidden'); b.setAttribute('data-sg-done', ''); });
+
+    var section = el('section', 'sg-topics sg-watch');
+    section.setAttribute('aria-label', 'Sujets surveillés');
+    var grid = el('ul', 'sg-topics__grid');
+    var boxes = [];
+    Array.prototype.slice.call(list.querySelectorAll('.posts-section')).forEach(function (row) {
+      var box = row.querySelector('input[type="checkbox"]');
+      var forum = row.querySelector('.posts-description a.postdetails');
+      var card = topicCard(row);
+      if (!card) return;
+      card.classList.add('sg-topic--pick');
+      /* Forum du sujet, sous le titre */
+      if (forum) {
+        var where = el('p', 'sg-topic__forum');
+        where.appendChild(ico('folder'));
+        var fa = el('a', null, forum.textContent.trim());
+        fa.href = forum.getAttribute('href');
+        where.appendChild(fa);
+        var title = card.querySelector('.sg-topic__title');
+        title.parentNode.insertBefore(where, title.nextSibling);
+      }
+      /* Case de sélection, en tête de carte (la case native, dessinée) */
+      if (box) {
+        var top = card.querySelector('.sg-topic__flags');
+        if (!top) { top = el('div', 'sg-topic__flags'); card.insertBefore(top, card.firstChild); }
+        box.classList.add('sg-check');
+        box.setAttribute('aria-label', 'Sélectionner « ' + card.querySelector('.sg-topic__link').textContent + ' »');
+        top.insertBefore(box, top.firstChild);
+        boxes.push(box);
+      }
+      if (forum) card.setAttribute('data-forum', (forum.getAttribute('href').match(/^\/f\d+/) || [''])[0]);
+      grid.appendChild(card);
+    });
+    forumTones(function (map) {
+      Array.prototype.slice.call(grid.querySelectorAll('.sg-topic[data-forum]')).forEach(function (c) {
+        var tone = map[c.getAttribute('data-forum')];
+        if (tone) c.classList.add('sg-tone-' + tone);
+      });
+    });
+    if (grid.children.length) section.appendChild(grid);
+    else {
+      var empty = el('p', 'sg-topics__empty');
+      empty.appendChild(ico('visibility_off'));
+      empty.appendChild(el('span', null, 'Tu ne suis aucun sujet pour l’instant.'));
+      section.appendChild(empty);
+    }
+    list.parentNode.insertBefore(section, list);
+    list.classList.add('sg-hidden');
+
+    var valid = form.querySelector('input[name="valid"]');
+    Array.prototype.slice.call(form.querySelectorAll('.mark-buttons, .form-buttons')).forEach(function (x) {
+      x.classList.remove('form-buttons');
+      x.classList.add('sg-hidden');
+    });
+    if (!boxes.length || !valid) return true;
+
+    var bar = el('div', 'sg-notifs__bar sg-watch__bar');
+    var pick = el('button', 'sg-pbtn sg-pbtn--ghost');
+    pick.type = 'button';
+    var stop = el('button', 'sg-pbtn sg-pbtn--ghost sg-pbtn--danger');
+    stop.type = 'button';
+    var sync = function () {
+      var sel = boxes.filter(function (i) { return i.checked; }).length;
+      var all = sel === boxes.length;
+      pick.textContent = '';
+      pick.appendChild(ico(all ? 'remove_done' : 'done_all'));
+      pick.appendChild(el('span', null, all ? 'Tout désélectionner' : 'Tout sélectionner'));
+      stop.textContent = '';
+      stop.appendChild(ico('visibility_off'));
+      stop.appendChild(el('span', null, sel ? 'Arrêter de suivre (' + sel + ')' : 'Arrêter de suivre'));
+      stop.disabled = !sel;
+      boxes.forEach(function (i) { i.closest('.sg-topic').classList.toggle('is-picked', i.checked); });
+    };
+    pick.addEventListener('click', function () {
+      var all = boxes.every(function (i) { return i.checked; });
+      boxes.forEach(function (i) { i.checked = !all; });
+      sync();
+    });
+    boxes.forEach(function (i) { i.addEventListener('change', sync); });
+    stop.addEventListener('click', function () {
+      if (form.requestSubmit) form.requestSubmit(valid); else valid.click();
+    });
+    bar.appendChild(pick);
+    bar.appendChild(stop);
+    section.appendChild(bar);
+    sync();
+    return true;
+  }
 
   function notifSwitch(input, label) {
     var el = uiEl;
@@ -5086,9 +5213,13 @@
     var mobileMenu = document.querySelector('#wrap > .cp-mobile-menu');
     if (mobileMenu) mobileMenu.classList.add('sg-hidden');
 
+    /* Sujets surveillés : cartes de sujet */
+    watchList(cp);
+
     /* Blocs natifs en cartes */
     Array.prototype.slice.call(cp.querySelectorAll('.block')).forEach(function (b) {
       if (b.closest('.sg-sigform')) return; /* aperçu de la signature : repris par sigPanel */
+      if (b.hasAttribute('data-sg-done')) return;
       /* Onglet « Notifications » : alertes, puis liste des notifications */
       if (b.querySelector(':scope > form[name="notif_opts"]')) { notifPrefs(b); return; }
       if (b.classList.contains('cp_notifs')) { notifList(b); return; }
@@ -5123,6 +5254,17 @@
       Array.prototype.slice.call(bc.querySelectorAll(':scope > label')).forEach(cpField);
       Array.prototype.slice.call(bc.querySelectorAll('.radio-wrap')).forEach(cpRadioWrap);
       bc.classList.add('sg-pcard__grid');
+      /* « Liens utiles » (ex-Contact) : seulement Présentation puis Fiche technique ; les autres champs restent
+         dans le formulaire (valeurs gardées), masqués (demande de Vinny) */
+      if (bh && /^Champs de contact$/.test(t)) {
+        var fields = Array.prototype.slice.call(bc.querySelectorAll(':scope > .sg-pfield'));
+        var named = function (re) { return fields.filter(function (f) { return re.test((f.querySelector('.sg-pfield__label') || f).textContent); })[0]; };
+        var keep = [named(/pr[ée]sentation/i), named(/fiche\s*technique/i)].filter(Boolean);
+        if (keep.length) {
+          fields.forEach(function (f) { if (keep.indexOf(f) < 0) f.classList.add('sg-hidden'); });
+          keep.forEach(function (f) { bc.appendChild(f); });
+        }
+      }
       /* Bloc sans titre juste après une carte (nouveau mot de passe…) : ses champs rejoignent cette carte */
       var prevCard = b.previousElementSibling;
       if (!bh && prevCard && prevCard.classList.contains('sg-pcard')) {
@@ -5149,6 +5291,25 @@
       });
       var subs = fs.querySelectorAll('button.sg-pbtn:not(.sg-pbtn--ghost)');
       Array.prototype.slice.call(subs).forEach(function (b) { fs.appendChild(b); });
+    });
+
+    /* Boutons d'un formulaire posé dans une carte (Signature, Notifications) : sortis sous la carte, comme sur les
+       autres onglets ; ils restent liés à leur formulaire par l'attribut form, les champs cachés y retournent */
+    Array.prototype.slice.call(cp.querySelectorAll('.sg-pcard .sg-pactions')).forEach(function (fs) {
+      var card = fs.closest('.sg-pcard');
+      var f = fs.closest('form');
+      if (!card || !f) return;
+      if (!f.id) f.id = 'sg-form-' + Math.random().toString(36).slice(2);
+      Array.prototype.slice.call(fs.querySelectorAll('input[type="hidden"]')).forEach(function (i) { f.appendChild(i); });
+      Array.prototype.slice.call(fs.querySelectorAll('button, input')).forEach(function (x) { x.setAttribute('form', f.id); });
+      var wrapper = fs.parentNode;
+      card.parentNode.insertBefore(fs, card.nextSibling);
+      fs.classList.add('sg-pactions--out');
+      /* Conteneur natif devenu vide (pied de la signature) */
+      if (wrapper && wrapper !== f && !wrapper.textContent.trim() && !wrapper.querySelector('input, button')) {
+        var foot = wrapper.closest('.sg-sig__foot') || wrapper;
+        foot.classList.add('sg-hidden');
+      }
     });
 
     /* Séparateur de fin et fil d'Ariane repris */
