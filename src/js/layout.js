@@ -4670,11 +4670,13 @@
      -------------------------------------------------------------------- */
   var REG_STEPS = [
     ['誓', 'Serment', 'Lire et accepter le règlement'],
-    ['名', 'Compte', 'Pseudo, e-mail et mot de passe']
+    ['名', 'Compte', 'Pseudo, e-mail et mot de passe'],
+    ['確', 'Vérification', 'Confirmer et valider']
   ];
   var REG_DESC = [
     'Avant de prendre place dans le Sekai, lis le règlement et appose ton sceau.',
-    'Dernière étape : choisis ton pseudo et tes identifiants.'
+    'Choisis ton pseudo et tes identifiants.',
+    'Dernière étape : confirme ton mot de passe et valide ton inscription.'
   ];
   var KANJI_NUM = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
   var OATH_TITLES = [[/^recueil/i, 'Données personnelles'], [/cookies/i, 'Cookies'], [/électroniques|e-mail/i, 'E-mails']];
@@ -4718,10 +4720,14 @@
     if (!wrap || document.querySelector('.sg-reg')) return;
     var agree = wrap.querySelector('#frmAgreement');
     var account = wrap.querySelector('form#ucp #username_reg') ? wrap.querySelector('form#ucp') : null;
-    if (!agree && !account) return;
+    /* Étape 3 (après « Créer mon compte ») : confirmation du mot de passe et captcha, dans le template du profil
+       (.cp > .cp-inner > form#ucp). Rien n'est déplacé autour du captcha : son iframe se rechargerait. */
+    var confirmCp = !agree && !account && /^\/register/.test(location.pathname) ? wrap.querySelector(':scope > .cp') : null;
+    var confirmForm = confirmCp && confirmCp.querySelector('form#ucp');
+    if (!agree && !account && !confirmForm) return;
     var el = uiEl, ico = uiIco;
-    var step = agree ? 0 : 1;
-    var anchor = agree ? (agree.closest('#agreement') || agree) : account;
+    var step = agree ? 0 : account ? 1 : 2;
+    var anchor = agree ? (agree.closest('#agreement') || agree) : account || confirmCp;
 
     /* En-tête : séparateur avec le logo, fil d'Ariane, titre, description de l'étape */
     var topDiv = regDivider(true);
@@ -4776,18 +4782,29 @@
     la.href = login ? login.getAttribute('href') : '/login';
     already.appendChild(la);
     nav.appendChild(already);
-    page.appendChild(nav);
-    var main = el('div', 'sg-reg__main');
-    page.appendChild(main);
-
     anchor.parentNode.insertBefore(topDiv, anchor);
     anchor.parentNode.insertBefore(head, anchor);
-    anchor.parentNode.insertBefore(page, anchor);
-    /* Erreurs de Forumactif (pseudo déjà pris…) : au-dessus du formulaire */
-    Array.prototype.slice.call(wrap.querySelectorAll('.block-error')).forEach(function (b) { main.appendChild(b); });
-    main.appendChild(anchor);
-
-    if (agree) regOath(agree); else regAccount(account);
+    if (confirmForm) {
+      /* La grille est le .cp natif : la colonne des étapes y est insérée, le formulaire ne bouge pas */
+      page = confirmCp;
+      page.classList.add('sg-reg', 'sg-reg--confirm');
+      page.insertBefore(nav, page.firstChild);
+      var inner = confirmForm.parentNode;
+      inner.classList.add('sg-reg__main');
+      Array.prototype.slice.call(wrap.querySelectorAll('.block-error')).forEach(function (b) { inner.insertBefore(b, confirmForm); });
+      var side = wrap.querySelector(':scope > .cp-sidebar');
+      if (side) side.classList.add('sg-hidden');
+      regConfirm(confirmForm);
+    } else {
+      page.appendChild(nav);
+      var main = el('div', 'sg-reg__main');
+      page.appendChild(main);
+      anchor.parentNode.insertBefore(page, anchor);
+      /* Erreurs de Forumactif (pseudo déjà pris…) : au-dessus du formulaire */
+      Array.prototype.slice.call(wrap.querySelectorAll('.block-error')).forEach(function (b) { main.appendChild(b); });
+      main.appendChild(anchor);
+      if (agree) regOath(agree); else regAccount(account);
+    }
 
     var endDiv = regDivider(false);
     page.parentNode.insertBefore(endDiv, page.nextSibling);
@@ -4973,18 +4990,7 @@
     var pwField = pw && pw.closest('.sg-pfield');
     if (pw && pwField) {
       pwField.classList.add('sg-pfield--wide');
-      var eyeA11y = function () {
-        var i = pwField.querySelector('.password-container > i');
-        if (!i || i.getAttribute('role')) return;
-        i.setAttribute('role', 'button');
-        i.setAttribute('tabindex', '0');
-        i.setAttribute('aria-label', 'Afficher ou masquer le mot de passe');
-        i.addEventListener('keydown', function (e) {
-          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); i.click(); }
-        });
-      };
-      if (window.MutationObserver) new MutationObserver(eyeA11y).observe(pwField, { childList: true, subtree: true });
-      eyeA11y();
+      regEye(pwField);
       var nat = document.getElementById('cont_pwd');
       if (nat) nat.classList.add('sg-hidden');
       var meter = el('div', 'sg-pwmeter');
@@ -5009,25 +5015,89 @@
       if (userIn) userIn.addEventListener('input', read);
       read();
     }
-    /* Boutons : « Réinitialiser » (contour) puis « Créer mon compte » (plein), à droite sous un filet */
-    var fs = form.querySelector('.form-buttons');
-    if (fs) {
-      fs.classList.add('sg-pactions');
-      Array.prototype.slice.call(fs.querySelectorAll('input[type="submit"], input[type="reset"]')).forEach(function (i) {
-        var isReset = i.type === 'reset';
-        var btn = el('button', 'sg-pbtn' + (isReset ? ' sg-pbtn--ghost' : ''));
-        btn.type = i.type;
-        if (i.name) btn.name = i.name;
-        btn.value = i.value;
-        btn.appendChild(ico(isReset ? 'restart_alt' : 'how_to_reg'));
-        btn.appendChild(el('span', null, isReset ? i.value : 'Créer mon compte'));
-        i.parentNode.replaceChild(btn, i);
+    regButtons(form);
+    /* Réinitialiser : la jauge se vide aussi */
+    form.addEventListener('reset', function () { setTimeout(function () { if (pw) pw.dispatchEvent(new Event('input')); }, 0); });
+  }
+
+  /* L'œil de Forumactif (.password-container > i « visibility », posé après nos scripts) : accessible au clavier */
+  function regEye(field) {
+    var eyeA11y = function () {
+      Array.prototype.slice.call(field.querySelectorAll('.password-container > i')).forEach(function (i) {
+        if (i.getAttribute('role')) return;
+        i.setAttribute('role', 'button');
+        i.setAttribute('tabindex', '0');
+        i.setAttribute('aria-label', 'Afficher ou masquer le mot de passe');
+        i.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); i.click(); }
+        });
       });
-      var sub = fs.querySelector('button.sg-pbtn:not(.sg-pbtn--ghost)');
-      if (sub) fs.appendChild(sub);
-      /* Réinitialiser : la jauge se vide aussi */
-      form.addEventListener('reset', function () { setTimeout(function () { if (pw) pw.dispatchEvent(new Event('input')); }, 0); });
+    };
+    if (window.MutationObserver) new MutationObserver(eyeA11y).observe(field, { childList: true, subtree: true });
+    eyeA11y();
+  }
+
+  /* Boutons : « Réinitialiser » (contour) puis « Créer mon compte » (plein), à droite sous un filet */
+  function regButtons(form) {
+    var el = uiEl, ico = uiIco;
+    var fs = form.querySelector('.form-buttons');
+    if (!fs) return;
+    fs.classList.add('sg-pactions');
+    Array.prototype.slice.call(fs.querySelectorAll('input[type="submit"], input[type="reset"]')).forEach(function (i) {
+      var isReset = i.type === 'reset';
+      var btn = el('button', 'sg-pbtn' + (isReset ? ' sg-pbtn--ghost' : ''));
+      btn.type = i.type;
+      if (i.name) btn.name = i.name;
+      btn.value = i.value;
+      btn.appendChild(ico(isReset ? 'restart_alt' : 'how_to_reg'));
+      btn.appendChild(el('span', null, isReset ? i.value : 'Créer mon compte'));
+      i.parentNode.replaceChild(btn, i);
+    });
+    Array.prototype.slice.call(fs.childNodes).forEach(function (n) { if (n.nodeType === 3) n.remove(); });
+    var sub = fs.querySelector('button.sg-pbtn:not(.sg-pbtn--ghost)');
+    if (sub) fs.appendChild(sub);
+  }
+
+  /* Étape 3 : confirmation du mot de passe et captcha (Cloudflare Turnstile) dans une carte « Dernière vérification ».
+     Le formulaire est la carte ; le captcha n'est jamais déplacé (son iframe se rechargerait), on l'entoure seulement. */
+  function regConfirm(form) {
+    var el = uiEl, ico = uiIco;
+    form.classList.add('sg-pcard', 'sg-regcard');
+    var h = el('h2', 'sg-pcard__title');
+    h.appendChild(ico('verified_user'));
+    h.appendChild(el('span', null, 'Dernière vérification'));
+    var hint = el('p', 'sg-pcard__hint', 'Confirme ton mot de passe, puis laisse Cloudflare vérifier que tu n’es pas un robot.');
+    form.insertBefore(hint, form.firstChild);
+    form.insertBefore(h, hint);
+    var CAPTCHA = 'iframe[src*="challenges.cloudflare.com"], .cf-turnstile, .g-recaptcha, .h-captcha, [data-sitekey]';
+    Array.prototype.slice.call(form.querySelectorAll('.block')).forEach(function (b) {
+      b.classList.add('sg-regblock');
+      var bh = b.querySelector(':scope > .block-header');
+      if (bh) bh.classList.add('sg-hidden');
+      var bc = b.querySelector(':scope > .block-content');
+      if (bc) bc.classList.add('sg-pcard__grid');
+    });
+    Array.prototype.slice.call(form.querySelectorAll('label')).forEach(function (lab) {
+      if (lab.querySelector(CAPTCHA) || !lab.isConnected) return;
+      var inp = lab.querySelector('input[type="text"], input[type="email"], input[type="password"]');
+      if (!inp) return;
+      cpField(lab);
+      var field = inp.closest('.sg-pfield');
+      if (field) {
+        field.classList.add('sg-pfield--wide');
+        if (inp.type === 'password') regEye(field);
+      }
+    });
+    /* Captcha : un libellé au-dessus, rien n'est déplacé */
+    var cap = form.querySelector(CAPTCHA);
+    if (cap) {
+      var box = cap;
+      while (box.parentNode && box.parentNode !== form && !(box.parentNode.classList && box.parentNode.classList.contains('block-content'))) box = box.parentNode;
+      box.classList.add('sg-regcaptcha');
+      var capLab = el('p', 'sg-pfield__label sg-regcaptcha__label', 'Vérification');
+      box.parentNode.insertBefore(capLab, box);
     }
+    regButtons(form);
   }
 
   /* --------------------------------------------------------------------

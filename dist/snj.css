@@ -10041,6 +10041,7 @@ body.sg-cppage .sg-cpage + .sg-divider--end {
         deux sceaux à apposer (cases natives), « J'accepte le règlement » actif une fois les deux posés.
      4. Étape 2 : carte « Ton compte » au pattern du profil, œil et jauge de force du mot de passe,
         interrupteur pour les actualités, « Créer mon compte ».
+     5. Étape 3 : carte « Dernière vérification » (confirmation du mot de passe, captcha Cloudflare).
    ========================================================================== */
 
 .sg-regpage .sg-hidden {
@@ -10680,6 +10681,75 @@ body.sg-cppage .sg-cpage + .sg-divider--end {
 .sg-pwmeter:not([data-level="0"]) .sg-pwmeter__label {
   color: var(--pw);
   font-weight: 700;
+}
+
+/* --- Étape 3 : « Dernière vérification » (mot de passe confirmé, captcha) ------------------------------------
+   La grille est le .cp natif (la colonne des étapes y est insérée) : le formulaire et le captcha ne bougent pas. */
+#wrap .cp.sg-reg--confirm {
+  display: grid;
+  width: auto;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+#wrap .sg-reg--confirm > .cp-inner {
+  width: auto;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+#wrap .sg-reg form#ucp.sg-pcard {
+  margin: 0;
+  padding: 28px;
+  border: 0;
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-surface);
+  box-shadow: none;
+}
+
+#wrap .sg-reg .sg-regblock,
+#wrap .sg-reg .sg-regblock > .block-content {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+#wrap .sg-reg .sg-regblock + .sg-regblock {
+  margin-top: 20px;
+}
+
+/* Captcha : à la largeur de son widget, sous son libellé */
+#wrap .sg-reg .sg-regcaptcha__label {
+  grid-column: 1 / -1;
+  margin: 4px 0 -8px;
+}
+
+#wrap .sg-reg .sg-regcaptcha {
+  grid-column: 1 / -1;
+  min-height: 65px;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
+#wrap .sg-reg .sg-regcaptcha iframe {
+  display: block;
+  max-width: 100%;
+  border-radius: 10px;
+}
+
+#wrap .sg-reg--confirm .sg-pactions {
+  margin-top: 24px;
 }
 
 /* --- Bas de page ------------------------------------------------------------------------------------------ */
