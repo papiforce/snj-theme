@@ -251,6 +251,16 @@
   text-decoration: none;
 }
 
+/* Kikkō net à droite, estompé vers la gauche (comme les autres motifs posés sous du texte) */
+#wrap .sg-mstats__kpi.sg-pat--kikko::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34.64' height='60' viewBox='0 0 34.64 60'%3E%3Cpath d='M17.32 0L34.64 10V30L17.32 40L0 30V10Z M17.32 40V60' fill='none' stroke='%23000' stroke-width='1'/%3E%3C/svg%3E"), linear-gradient(to left, #000 0%, rgba(0, 0, 0, 0.5) 45%, transparent 90%);
+  -webkit-mask-repeat: repeat, no-repeat;
+  -webkit-mask-composite: source-in;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34.64' height='60' viewBox='0 0 34.64 60'%3E%3Cpath d='M17.32 0L34.64 10V30L17.32 40L0 30V10Z M17.32 40V60' fill='none' stroke='%23000' stroke-width='1'/%3E%3C/svg%3E"), linear-gradient(to left, #000 0%, rgba(0, 0, 0, 0.5) 45%, transparent 90%);
+  mask-repeat: repeat, no-repeat;
+  mask-composite: intersect;
+}
+
 #wrap a.sg-mstats__kpi:hover {
   transform: translateY(-2px);
 }

@@ -5452,8 +5452,8 @@
   /* --------------------------------------------------------------------
      Profil affiché, onglet Statistiques (/uNstats) : trois compteurs (messages, sujets ouverts, expérience) sur
      kikkō, comme les « Chroniques » de l'accueil ; puis « Repères » (dates en tuiles) et les recherches natives en
-     boutons courts (« Mes messages » / « Ses messages »…). Le bloc natif est masqué ; une ligne inconnue rejoint
-     les repères avec son libellé natif.
+     boutons courts (« Mes messages » / « Ses messages »…). Le bloc natif est masqué ; le nombre de messages privés
+     n'est pas repris ; une ligne inconnue rejoint les repères avec son libellé natif.
      -------------------------------------------------------------------- */
   function memberStats(cp, own) {
     var el = uiEl, ico = uiIco;
@@ -5526,7 +5526,7 @@
     };
     var share = function (c) { return c && c.pct !== null ? fr(c.pct, 1) + '\u00a0% du forum' : ''; };
     kpi('chat_bubble', 'Messages', posts, [share(posts), perDay(perPost)]);
-    kpi('topic', 'Sujets ouverts', topics, [share(topics), perDay(perTopic)], topics && topics.href);
+    kpi('topic', 'Sujets ouverts', topics, [share(topics), perDay(perTopic)]);
     kpi('auto_awesome', 'Expérience', xp, []);
     if (kpis.children.length) page.appendChild(kpis);
 
@@ -5561,7 +5561,6 @@
       fact('calendar_month', 'Inscrit le', joined.value + (since ? ' · ' + since.replace(/^Inscrit /, '') : ''), since);
     }
     fact('visibility', 'Dernière visite', visit && visit.value);
-    if (own) fact('mail', 'Messages privés', pms && fr(pms.value.replace(/\D/g, '') || 0, 0));
     rows.forEach(function (r) {
       if (used.indexOf(r) >= 0) return;
       if (pms === r) return;
