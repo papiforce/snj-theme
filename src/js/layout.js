@@ -445,6 +445,7 @@
     regPage();
     authPage();
     noticePage();
+    confirmPage();
     errorBlocks();
     pollCards();
     applyTheme(storedTheme() || currentTheme());
@@ -3592,7 +3593,8 @@
   var NOTICE_TONES = {
     done: { kanji: '済', label: 'Fait' },
     error: { kanji: '否', label: 'Refusé' },
-    info: { kanji: '報', label: 'Avis' }
+    info: { kanji: '報', label: 'Avis' },
+    ask: { kanji: '問', label: 'Question' }
   };
   var NOTICE_TITLES = [
     [/ne surveillez plus/i, 'Suivi arrêté'],
@@ -5577,6 +5579,94 @@
       card.appendChild(acts);
     }
     return card;
+  }
+
+  /* --------------------------------------------------------------------
+     Page « Êtes-vous sûr ? » (template confirm_body : .block.block-modal avec un formulaire, boutons natifs
+     « confirm » et « cancel ») : même famille que le sceau « hanko ». Carte centrée, sceau 問 (question), Ume pour
+     une action destructive ; titre en question courte et explication au tutoiement d'après le message natif
+     (CONFIRM_KINDS) ; le formulaire natif est gardé tel quel (adresse avec la clé de session tid, champs cachés) et
+     ses deux boutons sont déplacés et restylés : « Annuler » (contour) puis l'action (pleine).
+     -------------------------------------------------------------------- */
+  var CONFIRM_KINDS = [
+    [/favori/i, 'Retirer ces favoris ?', 'Les sujets sélectionnés seront retirés de tes favoris. Ils restent sur le forum.', 'Retirer', 'bookmark_remove', true],
+    [/supprimer[^.]*sujet|sujet[^.]*supprim/i, 'Supprimer ce sujet ?', 'Le sujet et tous ses messages seront supprimés définitivement.', 'Supprimer', 'delete', true],
+    [/supprimer[^.]*message|message[^.]*supprim/i, 'Supprimer ce message ?', 'Le message sera supprimé définitivement.', 'Supprimer', 'delete', true],
+    [/(surveill|suivi)/i, 'Arrêter le suivi ?', '', 'Arrêter', 'visibility_off', true],
+    [/(supprim|effac|retir|bann)/i, 'Confirmer la suppression ?', '', 'Supprimer', 'delete', true]
+  ];
+
+  function confirmPage() {
+    var wrap = document.getElementById('wrap');
+    var block = wrap && wrap.querySelector(':scope > .block.block-modal');
+    var form = block && block.querySelector('form');
+    var yes = form && form.querySelector('button[name="confirm"], input[name="confirm"]');
+    if (!yes || block.classList.contains('sg-notice-native')) return;
+    var no = form.querySelector('button[name="cancel"], input[name="cancel"]');
+    var nativeText = (form.querySelector('.block-p-big') || form).textContent.replace(/\s+/g, ' ').trim()
+      .replace(/^Etes/, 'Êtes').replace(/\s*\?*$/, ' ?');
+    var kind = CONFIRM_KINDS.filter(function (k) { return k[0].test(nativeText); })[0];
+    var danger = kind ? kind[5] : false;
+    var data = {
+      tone: 'ask',
+      title: kind ? kind[1] : 'Confirmer cette action ?',
+      message: kind && kind[2] ? kind[2] : nativeText
+    };
+    var card = noticeCard(data, 'section', []);
+    if (danger) card.classList.add('is-danger');
+    card.setAttribute('role', 'alertdialog');
+    card.setAttribute('aria-labelledby', 'sg-notice-title');
+    card.setAttribute('aria-describedby', 'sg-notice-text');
+    /* Le formulaire natif rejoint la carte ; sa phrase native est remplacée par le texte de la carte */
+    var p = form.querySelector('.block-p-big');
+    if (p) p.classList.add('sg-hidden');
+    var fs = form.querySelector('fieldset') || form;
+    fs.classList.remove('form-buttons');
+    fs.classList.add('sg-notice__actions');
+    var restyle = function (b, cls, icon, label) {
+      if (!b) return;
+      var btn = b;
+      if (b.tagName === 'INPUT') {
+        btn = uiEl('button');
+        btn.type = 'submit';
+        btn.name = b.name;
+        btn.value = b.value;
+        b.parentNode.replaceChild(btn, b);
+      }
+      btn.className = cls;
+      btn.textContent = '';
+      btn.appendChild(uiIco(icon));
+      btn.appendChild(uiEl('span', null, label));
+      return btn;
+    };
+    var noBtn = restyle(no, 'sg-pbtn sg-pbtn--ghost', 'close', 'Annuler');
+    var yesBtn = restyle(yes, 'sg-pbtn' + (danger ? ' sg-pbtn--danger' : ''), kind ? kind[4] : 'check', kind ? kind[3] : 'Confirmer');
+    if (noBtn) fs.appendChild(noBtn);
+    fs.appendChild(yesBtn);
+    card.appendChild(form);
+
+    var top = uiEl('div', 'sg-divider sg-divider--notice');
+    top.setAttribute('role', 'separator');
+    var logo = uiEl('span', 'sg-divider__logo sg-divider__logo--mask');
+    logo.setAttribute('aria-hidden', 'true');
+    top.appendChild(logo);
+    var rule = uiEl('span', 'sg-divider__rule');
+    rule.setAttribute('aria-hidden', 'true');
+    rule.appendChild(uiEl('span', 'sg-divider__line'));
+    rule.insertAdjacentHTML('beforeend', '<svg class="sg-divider__notch" viewBox="0 0 48 25" aria-hidden="true"><path d="M0 .5L24 24.5L48 .5"/></svg>');
+    rule.appendChild(uiEl('span', 'sg-divider__line'));
+    top.appendChild(rule);
+    wrap.insertBefore(top, block);
+    wrap.insertBefore(card, block);
+    block.classList.add('sg-notice-native');
+    document.body.classList.add('sg-noticepage');
+    document.title = data.title.replace(/ \?$/, ' ?');
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    setTimeout(function () {
+      if (window.scrollY > 40) return;
+      top.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    }, 150);
+    if (noBtn) try { noBtn.focus({ preventScroll: true }); } catch (e) { noBtn.focus(); }
   }
 
   function noticePage() {

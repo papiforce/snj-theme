@@ -346,3 +346,31 @@ html.sg-busy * {
 .sg-modal .sg-combo__list {
   max-height: min(280px, 40vh);
 }
+
+/* --- Page « Êtes-vous sûr ? » (confirm_body, confirmPage) : même carte, sceau 問 ; Ume si l'action détruit ------ */
+.sg-notice.is-danger {
+  --tone: var(--sg-accent-2);
+}
+
+#wrap .sg-notice form {
+  margin: 0;
+  padding: 0;
+}
+
+#wrap .sg-notice fieldset.sg-notice__actions {
+  min-width: 0;
+  margin: 28px 0 0;
+  padding: 0;
+  border: 0;
+}
+
+@media (max-width: 768px) {
+  /* L'action au-dessus, « Annuler » dessous, en pleine largeur */
+  #wrap .sg-notice fieldset.sg-notice__actions {
+    flex-direction: column-reverse;
+  }
+
+  #wrap .sg-notice__actions .sg-pbtn {
+    width: 100%;
+  }
+}
