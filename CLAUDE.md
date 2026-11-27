@@ -55,6 +55,19 @@ dans le panneau d'administration (PA), puis on commit.
   Navigation : Accueil, Membres (masqué sur mobile), Discord, Annexe, Carte (masquée sur mobile pour les visiteurs).
   Visiteurs : Connexion et Inscription (Inscription masquée sur mobile) en bas.
   Bas : Notifications (avec pastille), thème clair/sombre (administration et déconnexion sont dans le menu du compte).
+  **Fenêtre des notifications** (`layout.js`, fonction `notifPanel`, + `11-notif.css`) : le panneau natif `#notif-menu`
+  d'AwesomeBB (ouvert par la cloche, replacé à côté de la barre par `10-sidebar.css`) habillé : carte de surface arrondie
+  (380px, ombre), en-tête (cloche dans un cercle teinté Hagane, « Notifications » en Zen Antique, « N non lues » en
+  Asagi, croix de fermeture qui passe par le voile natif `#dimmer` ; Échap ferme aussi), liste qui défile ; chaque
+  notification (`li#nID[data-notif-type] > .content`, ajoutée à tout moment par `FAToolbar.js` : `MutationObserver`)
+  en ligne `--sg-surface-2` arrondie : icône du type (`NOTIF_ICONS`, d'après `FA.Notification.NOTIF_*` : 0 MP, 7 sujet
+  suivi, 8 mention, 11 J'aime…) dans un cercle teinté, texte sur 3 lignes (liens en gras), heure (icône `schedule`
+  native, `::before`), croix de suppression (lien natif `a.delete`, visible au survol, toujours sur mobile, Ume au
+  survol) ; **non lue** teintée d'Asagi avec un point Asagi sur l'icône. Vide : icône `notifications_paused`, « Aucune
+  nouvelle notification », « Le Sekai est calme pour l'instant. ». « Voir toutes les notifications » en bouton au contour
+  collé en bas (AwesomeBB le place en tête : `order: -1` annulé). Voile natif allégé. Mobile : toute la largeur, au-dessus
+  de la barre du bas. **Vérifié sur trois notifications simulées** (même balisage que `FAToolbar.js`, aucune vraie
+  notification sur le compte de test) ; le clic sur une notification et la suppression restent ceux de Forumactif.
 - **Mise en page** : bannière, catégories et pied de page font au plus **1200px** (`--sg-content-max`, barre non comprise) ;
   la barre et le contenu forment un ensemble centré horizontalement (`--sg-shell-left`), coins arrondis.
 - **Bannière** : 640px de haut sur ordinateur (220px sur mobile). Clair = brume au clair de lune, sombre = renard dans les braises (`scripts/grade-banner.py`).
