@@ -494,12 +494,13 @@ dans le panneau d'administration (PA), puis on commit.
   `.sg-pinput`), « Trier par » en liste personnalisée (`combo` ; libellés courts : Dernière visite, Inscription,
   Pseudo, Signes distinctifs, Messages, Groupes, Expérience ; « Site web » retiré), l'ordre en contrôle segmenté
   Décroissant / Croissant (radios hors formulaire, la liste native `order` reçoit la valeur) ; tri et ordre
-  **envoient le formulaire dès qu'on les change** ; bouton plein « Chercher ». **Cartes** `.sg-mcard` (grille de 2
-  colonnes, 1 ≤ 900px) sur **shippō** (communauté, estompé vers la gauche) : portrait 1:2 (88px, 64px sur mobile),
-  bandeau `.sg-role` réduit pour le staff (`staffRoles`), pseudo coloré en Zen Antique (une ligne, ellipse), « Inscrit
-  depuis … » (`memberSince`, date en infobulle), « Vu aujourd'hui à … », messages s'ils sont donnés ; **toute la carte
-  mène au profil** (lien étendu), bouton rond **message privé** (`mail`, au-dessus du lien, 44px sur mobile ; absent
-  sur sa propre carte). Rang « #n » retiré. Aucun résultat : encadré pointillé « Aucun shinobi ne porte ce nom. ».
+  **envoient le formulaire dès qu'on les change** ; bouton plein « Chercher ». **Cartes en portrait** `.sg-mcard` (demande de Vinny ;
+  grille `auto-fill` de 200px min., 2 colonnes sur mobile) : l'avatar 1:2 remplit la carte (`object-position: top`,
+  léger zoom au survol), bandeau `.sg-role` du staff en haut (`staffRoles`), voile dégradé en bas comme les tuiles de
+  l'accueil (encre en sombre, papier en clair, `--ml-fade` / `--ml-ink`) avec le pseudo coloré en Zen Antique (une
+  ligne, ellipse), « Inscrit depuis … » (`memberSince`) et « Vu aujourd'hui à … » ; **toute la carte mène au profil**
+  (lien étendu). **Pas de bouton de message privé** (demande de Vinny). Rang « #n » retiré. Aucun résultat : encadré
+  pointillé « Aucun shinobi ne porte ce nom. ».
   Pagination native gardée et restylée en pastilles rondes (`.sg-mlpag`, non vue : 4 membres sur le forum de test),
   puis séparateur de fin et fil d'Ariane. Vérifié clair, sombre, 390px, tri par pseudo.
 - **Onglet « Signature »** (`layout.js`, fonction `sigPanel`, + `68-signature.css`) : carte « Ta signature » (icône
@@ -675,7 +676,7 @@ dans le panneau d'administration (PA), puis on commit.
   ligne changés en `<br>`), clair, sombre, largeur réduite ; **pas encore posté pour de vrai** (un élément vide comme
   `.sgc-notch` ou `.sgc-step__mark` pourrait être retiré par Forumactif).
   Récapitulatif des patterns : **forum** (accueil) = image en fond + panneau + kanji ; **sous-forum** = ema
-  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ; **confirmation** = hanko (sceau au kanji ; 問 pour « Êtes-vous sûr ? ») ; **paramètres du profil** = ninbetsu-chō (onglets collants + cartes) ; **avatar** = nigao-e (portrait 200 × 400 + sources) ; **profil affiché** = fiche en lecture seule (portrait + champs ; statistiques en compteurs sur kikkō) ; **signature** = éditeur de l'écritoire suzuri ; **notifications** = alertes par famille en interrupteurs ; **sujets surveillés** et **favoris** = cartes yagasuri à cocher (`pickTopics`) ; **inscription** = kishōmon (étapes collantes, articles en kanji, sceaux à apposer, vérification finale) ; **connexion** = sekisho (formulaire | carte d'à-côté sur seigaiha) ; **sondage** = tōhyō (carte sur shippō) ; **membres** = registre en cartes sur shippō ; **fiche de personnage** = jinbutsu (codes `.sgc-`) ;
+  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ; **confirmation** = hanko (sceau au kanji ; 問 pour « Êtes-vous sûr ? ») ; **paramètres du profil** = ninbetsu-chō (onglets collants + cartes) ; **avatar** = nigao-e (portrait 200 × 400 + sources) ; **profil affiché** = fiche en lecture seule (portrait + champs ; statistiques en compteurs sur kikkō) ; **signature** = éditeur de l'écritoire suzuri ; **notifications** = alertes par famille en interrupteurs ; **sujets surveillés** et **favoris** = cartes yagasuri à cocher (`pickTopics`) ; **inscription** = kishōmon (étapes collantes, articles en kanji, sceaux à apposer, vérification finale) ; **connexion** = sekisho (formulaire | carte d'à-côté sur seigaiha) ; **sondage** = tōhyō (carte sur shippō) ; **membres** = registre en cartes portrait ; **fiche de personnage** = jinbutsu (codes `.sgc-`) ;
   **permission** = étiquette tegata aux coins coupés.
 - **Catégories de l'accueil** (`forums.js` + `40-zones.css`) : à gauche un sélecteur collant (Gestion, Hi, Mizu, Kaze,
   Kaminari, Tsuchi no Kuni, Shōkoku — « les petits pays », ex-Reste du Sekai) au style des raccourcis de l'Annexe, pastille = badge pour Gestion
