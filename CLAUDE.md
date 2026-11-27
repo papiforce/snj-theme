@@ -568,15 +568,19 @@ dans le panneau d'administration (PA), puis on commit.
   `/register?step=2&agreement=1&privacy=1`), puis écrite dans l'onglet (`document.open/write/close`, après
   `history.replaceState` vers `/register`) ; pour une version pas encore publiée, remplacer dans ce HTML le SHA du CSS
   et le `/NNNNN.js` par `layout.js` sur jsDelivr.
-  **Étape 3** (après « Créer mon compte », réponse POST au template `profile_add_body`, t=701 : `#wrap > .cp > .cp-inner >
-  form#ucp` + `.cp-sidebar`, sans `#username_reg`) : « Confirmer le mot de passe » (`password_confirm`) et le **captcha
-  Cloudflare Turnstile** (`regConfirm`). Trois étapes dans la colonne (« 確 Vérification » ajoutée). **Rien n'est déplacé
-  autour du captcha** (son iframe se rechargerait et le défi casserait) : le `.cp` natif devient la grille
+  **Étape 3** (réponse à l'envoi de l'étape 2, **à la même adresse** : le formulaire de l'étape 2 n'a pas d'`action`) :
+  `#wrap > .block.block-login > form#form_confirm.block-content` (`name="form_confirm"`) avec `.box` (libellé en nœud
+  texte « Confirmer le mot de passe : * » + `password_confirm`, le script Turnstile et `div.cf-turnstile`) puis
+  `.form-buttons` (champs cachés `auth[]`, `username`, `email`, `password`, `privacy`, `confirm_pass`, « Enregistrer »,
+  « Réinitialiser ») ; c'est « Enregistrer » qui crée le compte. Le template `profile_add_body` n'est **pas** utilisé
+  ici. `regConfirm` : trois étapes dans la colonne (« 確 Vérification » ajoutée). **Rien n'est déplacé autour du
+  captcha** (son iframe se rechargerait et le défi casserait) : le `.block-login` natif devient la grille
   (`.sg-reg.sg-reg--confirm`, colonne des étapes insérée en premier), le formulaire devient la carte « Dernière
-  vérification » (icône `verified_user`), libellé « Vérification » posé au-dessus du widget, boutons de l'étape 2
-  (`regButtons`, œil par `regEye`). Le widget garde son thème clair (choisi par Forumactif avant nos scripts).
-  **Vérifié sur une reconstitution** d'après le template (l'envoi de l'étape 2 n'a pas été fait) : à revoir sur la vraie
-  page si quelque chose y diffère. Mobile vérifié par mesures dans une iframe de 390px (les captures
+  vérification » (icône `verified_user`), le libellé texte est enveloppé pour `cpField`, « Vérification » est posé
+  au-dessus du widget, boutons de l'étape 2 (`regButtons`, œil par `regEye`). Le widget suit le thème du système.
+  Vérifié sur la vraie réponse (étape 2 envoyée en visiteur, `credentials: 'omit'`, avec l'accord de Vinny ; aucun
+  compte créé) : captcha réussi, tous les champs envoyés. **Juste après, la session de Vinny a été coupée** (cause
+  inconnue, peut-être cet envoi) : ne pas le refaire sans le prévenir. Mobile vérifié par mesures dans une iframe de 390px (les captures
   masquent les iframes et les champs de mot de passe). Non testé : l'envoi (création d'un compte), les erreurs, une
   éventuelle étape suivante (champs de profil obligatoires, captcha).
 - **Connexion et mot de passe oublié : poste-frontière « sekisho »** 関所 (où l'on présentait son laissez-passer)
