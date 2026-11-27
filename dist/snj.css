@@ -13170,8 +13170,14 @@ body.sg-authpage .sg-auth + .sg-divider--end {
 }
 
 #wrap .sg-nobori--page {
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 24px 12px;
+}
+
+/* La bannière prend la largeur de sa colonne (140px au plus), comme sur l'accueil */
+#wrap .sg-nobori--page .sg-nobori__flag {
+  width: 100%;
+  max-width: 140px;
 }
 
 #wrap .sg-nobori--page > li {
