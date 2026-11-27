@@ -433,6 +433,12 @@ dans le panneau d'administration (PA), puis on commit.
   et valeur que le bouton natif). Envoi normal : page de confirmation « Profil enregistré » (« Modifier mon profil » en
   premier). En bas : séparateur de fin et fil d'Ariane repris. Les autres onglets reçoivent l'habillage générique
   (onglets, cartes, champs, radios) ; leurs contenus particuliers (listes) restent à reprendre.
+  **« Liens utiles »** (ex-bloc « Champs de contact », icône `link`, demande de Vinny) : seuls **Présentation** puis
+  **Fiche technique** restent visibles ; site web, Facebook, X, Pinterest, Skype sont masqués mais gardés dans le
+  formulaire (leurs valeurs ne sont pas perdues). **Boutons toujours sous la carte** (demande de Vinny, comme l'onglet
+  Avatar) : quand le formulaire est dans la carte (Signature, Notifications), `.sg-pactions` est déplacé après la carte
+  (`.sg-pactions--out`, `margin: 8px 0 24px`), ses boutons gardent le lien au formulaire par l'attribut `form` (id posé
+  au besoin) et ses champs cachés retournent dans le formulaire ; le conteneur natif devenu vide est masqué.
   **Ordre des onglets** (`CP_ORDER`) : Informations, Avatar, Signature | Préférences, Notifications | Sujets surveillés,
   Favoris, un filet entre les groupes (`.sg-ptabs__sep`, vertical dans la bande mobile) ; onglet inconnu après, dans
   l'ordre natif (les pages `/uN` ne sont pas réordonnées).
@@ -470,6 +476,20 @@ dans le panneau d'administration (PA), puis on commit.
   formulaire et sont envoyés par `requestSubmit`. **Balisage d'une notification inconnu** (aucune notification sur le
   compte de test, pas de template) : vérifié sur deux notifications simulées (`ul > li` avec case) ; à revoir sur de
   vraies notifications. Non testés : l'enregistrement des alertes, la suppression.
+- **Sujets surveillés** (`/search?search_id=watchsearch`, `layout.js`, fonctions `watchList`, `forumTones`,
+  `checkHit`, + `70-watch.css`) : page du panneau de l'utilisateur (onglets, en-tête « Accueil › Profil › Sujets
+  surveillés »). Le bloc natif « Sujets surveillés » (doublon du titre), la liste native `#memberlist`, la barre « Tout
+  sélectionner » et « Sauter vers » natifs sont masqués. Chaque ligne native (`.posts-section`, comme dans un forum)
+  devient une **carte de sujet yagasuri** (`topicCard`, même pattern que les forums et les sujets similaires) dans une
+  grille `.sg-topics.sg-watch`, à la **couleur de la catégorie de son forum** (`forumTones` : correspondance « /fN » →
+  catégorie lue sur l'accueil, cache `sessionStorage` `snj-ftone` de 15 min), avec le **forum du sujet** sous le titre
+  (`.sg-topic__forum`, icône `folder`, une ligne en ellipse) et une **case de sélection** en tête de carte (la case
+  native `mark[]`, dessinée `.sg-check`, zone cliquable de 44px `.sg-checkhit`), au-dessus du lien étendu de la carte ;
+  carte cochée : contour Asagi (`.is-picked`). Sous la grille, la **barre de la liste des notifications** : « Tout
+  sélectionner / désélectionner » (contour) et « Arrêter de suivre (N) » (contour Ume, désactivé sans sélection ; envoie
+  le bouton natif `valid` par `requestSubmit`, sans fenêtre : c'est réversible). Aucun sujet : encadré pointillé des
+  forums, « Tu ne suis aucun sujet pour l'instant. ». Deux sujets suivis sur le compte de test pour la vérification
+  (« Informations | Présentation », « Informations | Fiche technique »). Non testé : l'envoi « Arrêter de suivre ».
 - **Onglet « Avatar » : portrait « nigao-e »** 似顔絵 (`layout.js`, fonction `avatarPanel`, + `67-avatar.css`) : pattern
   **réservé au choix de l'avatar** (`page_profil=avatars`). Carte « Ton portrait » : **portrait 200 × 400** au style
   de l'avatar des messages (arrondi 12px, sans cadre, `object-fit: cover`) | **« Nouveau portrait »** en contrôle
@@ -569,7 +589,7 @@ dans le panneau d'administration (PA), puis on commit.
   ligne changés en `<br>`), clair, sombre, largeur réduite ; **pas encore posté pour de vrai** (un élément vide comme
   `.sgc-notch` ou `.sgc-step__mark` pourrait être retiré par Forumactif).
   Récapitulatif des patterns : **forum** (accueil) = image en fond + panneau + kanji ; **sous-forum** = ema
-  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ; **confirmation** = hanko (sceau au kanji) ; **paramètres du profil** = ninbetsu-chō (onglets collants + cartes) ; **avatar** = nigao-e (portrait 200 × 400 + sources) ; **signature** = éditeur de l'écritoire suzuri ; **notifications** = alertes par famille en interrupteurs ; **inscription** = kishōmon (étapes collantes, articles en kanji, sceaux à apposer) ; **connexion** = sekisho (formulaire | carte d'à-côté sur seigaiha) ; **sondage** = tōhyō (carte sur shippō) ; **fiche de personnage** = jinbutsu (codes `.sgc-`) ;
+  (image en toit) ; **sujet** = motif yagasuri, sans image ; **message** = fumi (profil collant + lettre) ; **écriture** = suzuri (la lettre en cours d'écriture) ; **confirmation** = hanko (sceau au kanji) ; **paramètres du profil** = ninbetsu-chō (onglets collants + cartes) ; **avatar** = nigao-e (portrait 200 × 400 + sources) ; **signature** = éditeur de l'écritoire suzuri ; **notifications** = alertes par famille en interrupteurs ; **sujets surveillés** = cartes yagasuri à cocher ; **inscription** = kishōmon (étapes collantes, articles en kanji, sceaux à apposer) ; **connexion** = sekisho (formulaire | carte d'à-côté sur seigaiha) ; **sondage** = tōhyō (carte sur shippō) ; **fiche de personnage** = jinbutsu (codes `.sgc-`) ;
   **permission** = étiquette tegata aux coins coupés.
 - **Catégories de l'accueil** (`forums.js` + `40-zones.css`) : à gauche un sélecteur collant (Gestion, Hi, Mizu, Kaze,
   Kaminari, Tsuchi no Kuni, Shōkoku — « les petits pays », ex-Reste du Sekai) au style des raccourcis de l'Annexe, pastille = badge pour Gestion
