@@ -5687,7 +5687,8 @@
         if (txt) {
           var empty = el('div', 'sg-topics__empty sg-mlist__empty');
           empty.appendChild(ico('group_off'));
-          empty.appendChild(el('span', null, /cach|invisible/i.test(txt) ? 'Les membres de ce groupe sont cachés.' : 'Aucun shinobi dans ce groupe pour l’instant.'));
+          empty.appendChild(el('span', null, /cach|invisible/i.test(txt) ? 'Les membres de ce groupe sont cachés.'
+            : cards ? 'Aucun autre shinobi dans ce groupe pour l’instant.' : 'Aucun shinobi dans ce groupe pour l’instant.'));
           grid.appendChild(empty);
         }
         return;
