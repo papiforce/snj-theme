@@ -3945,7 +3945,7 @@
         confirmModal({
           danger: true,
           icon: 'delete_sweep',
-          title: 'Supprimer toutes tes notifications ?',
+          title: 'Supprimer toutes tes notifications\u00a0?',
           text: 'Les ' + n + ' notifications seront effacées. Cette action est définitive.',
           confirm: 'Tout supprimer',
           busy: 'Suppression…',

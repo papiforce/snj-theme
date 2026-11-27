@@ -11654,6 +11654,16 @@ body.sg-authpage .sg-auth + .sg-divider--end {
   margin: 0;
 }
 
+/* Conteneurs natifs de la liste (balisage inconnu) : sans retrait ni puces */
+#wrap .sg-pcard--notifs form :is(ul, ol) {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
 #wrap .sg-nitem {
   display: flex;
   align-items: center;
