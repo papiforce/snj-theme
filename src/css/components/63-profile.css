@@ -226,6 +226,7 @@ body.sg-cppage #wrap > .cp-mobile-menu,
 
 /* Forumactif impose « border-radius: 0 !important » et un fond transparent à .input-subtle, d'où les !important */
 #wrap input.sg-pinput,
+#find_username input.sg-pinput,
 #wrap textarea.sg-pinput {
   box-sizing: border-box;
   flex: 1 1 100%;
@@ -254,11 +255,13 @@ body.sg-cppage #wrap > .cp-mobile-menu,
 }
 
 #wrap input.sg-pinput:hover,
+#find_username input.sg-pinput:hover,
 #wrap textarea.sg-pinput:hover {
   background: var(--sg-surface-2) !important;
 }
 
 #wrap input.sg-pinput:focus,
+#find_username input.sg-pinput:focus,
 #wrap textarea.sg-pinput:focus {
   border-color: var(--sg-accent-1);
   background: var(--sg-surface) !important;
