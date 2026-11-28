@@ -610,7 +610,7 @@
     var head = el('section', 'sg-pagehead');
     head.setAttribute('aria-label', 'En-tête du forum');
 
-    /* Fil d'Ariane : liens d'origine, la catégorie ouvre son onglet sur l'accueil */
+    /* Fil d'Ariane : liens d'origine (la catégorie mène à sa page, /c2-gestion) */
     var crumbs = native.querySelector('#breadcrumbs');
     var links = crumbs ? Array.prototype.slice.call(crumbs.querySelectorAll('a')) : [];
     var category = links[1] ? links[1].textContent.trim() : '';
@@ -623,7 +623,6 @@
       links.forEach(function (a, i) {
         var li = el('li', 'sg-crumbs__item');
         a.className = 'sg-crumbs__link';
-        if (i === 1 && meta) a.setAttribute('href', '/?onglet=' + meta.slug);
         if (i === links.length - 1 && !isTopic) a.setAttribute('aria-current', 'page');
         li.appendChild(a);
         ol.appendChild(li);
@@ -2348,7 +2347,6 @@
           var li = el('li', 'sg-crumbs__item');
           var link = document.importNode(a, true);
           link.className = 'sg-crumbs__link';
-          if (i === 1 && meta) link.setAttribute('href', '/?onglet=' + meta.slug);
           li.appendChild(link);
           ol.appendChild(li);
         });
