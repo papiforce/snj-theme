@@ -746,6 +746,17 @@ dans le panneau d'administration (PA), puis on commit.
   data-danger data-clan data-clan-href hidden>` puis le texte. Structure et contenus : `docs/structure-forums.json`
   (repris de la production ; dangerosité provisoire, tirée au hasard). Index : sous-forums affichés (PA › Affichage ›
   Page d'accueil › Structure et hiérarchie). La liste native n'est masquée que si le sélecteur est monté.
+- **Page d'une catégorie** (`/c2-gestion`, `/c3-hi-no-kuni`… ; `forums.js` + `home.js` + `40-zones.css`) : Forumactif
+  y sert le **template de l'accueil** (`#index`, une seule catégorie, nom dans `h1#h1-category` et non `h2`). **Pas de
+  sélecteur d'onglets** (demande de Vinny) : `forums.js` reconnaît `/cN…`, retrouve la catégorie dans `ZONES` et monte
+  `.sg-zones.sg-zones--single` (une colonne, le panneau de la catégorie seul, mêmes cartes de forum que l'accueil), sans
+  `localStorage` ni `?onglet=`. Au-dessus, **en-tête au pattern des forums** (`.sg-pagehead--cat`, `sg-tone-…` de la
+  catégorie, kanji du pays en filigrane) : « Accueil › <catégorie> », titre, description (Gestion : « Règlement,
+  annonces, présentations et vie du forum. » ; pays : « Les régions du Pays du Feu. » ; Shōkoku : « Les petits pays du
+  Sekai… ») ; en bas, séparateur de fin et fil d'Ariane repris. **Widgets** : seulement Guide du joueur, Saison et
+  Annexe (`home.js` passe en mode `#sg-home.is-forum` sur `/cN…`), puis le séparateur avec le logo ; la barre native
+  `.action-bar-top` est masquée (`body.sg-catpage`). Pas de statistiques (bloc « Qui est en ligne » absent de ces pages).
+  Catégorie inconnue de `ZONES` : couleur primaire, icône `folder`. Vérifié sur Gestion et Hi no Kuni, clair, sombre, 390px.
 - **Statistiques de l'accueil** (`stats.js` + `45-stats.css`) : remplacent le bloc « Qui est en ligne », sous le
   séparateur de fin. Grille bento : Chroniques (messages en compteur animé, shinobis, messages par shinobi, kikkō),
   Dernier inscrit (portrait, sceau 新 qui se tamponne au survol ; pseudo sur toute la largeur, coupé en ellipse ;
