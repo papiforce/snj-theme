@@ -508,7 +508,7 @@ dans le panneau d'administration (PA), puis on commit.
   `.sg-pinput`), « Trier par » en liste personnalisée (`combo` ; libellés courts : Dernière visite, Inscription,
   Pseudo, Signes distinctifs, Messages, Groupes, Expérience ; « Site web » retiré), l'ordre en contrôle segmenté
   Décroissant / Croissant (radios hors formulaire, la liste native `order` reçoit la valeur) ; tri et ordre
-  **envoient le formulaire dès qu'on les change** ; bouton plein « Chercher ». **Cartes en portrait** `.sg-mcard` (demande de Vinny ;
+  **envoient le formulaire dès qu'on les change** ; bouton plein « Chercher ». AwesomeBB donne `overflow: hidden` au formulaire, qui coupait la liste « Trier par » : remis à `visible`. **Cartes en portrait** `.sg-mcard` (demande de Vinny ;
   grille `auto-fill` de 200px min., 2 colonnes sur mobile) : l'avatar 1:2 remplit la carte (`object-position: top`,
   léger zoom au survol), bandeau `.sg-role` du staff en haut (`staffRoles`), voile dégradé en bas comme les tuiles de
   l'accueil (encre en sombre, papier en clair, `--ml-fade` / `--ml-ink`) avec le pseudo coloré en Zen Antique (une
