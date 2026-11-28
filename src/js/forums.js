@@ -136,7 +136,8 @@
 
     var forumsByCategory = {};
     blocks.forEach(function (b) {
-      var name = text(b.querySelector('.forum-header .category-title h2'));
+      /* h2 sur l'accueil, h1#h1-category sur la page d'une catégorie (/c2-gestion) */
+      var name = text(b.querySelector('.forum-header .category-title h2, .forum-header .category-title h1'));
       forumsByCategory[name] = Array.prototype.slice.call(b.querySelectorAll(':scope > .forum-section')).map(readForum);
     });
 
@@ -260,6 +261,51 @@
         h('span', { class: 'sg-zone-tab__name', text: zone.label }),
         zone.sub ? h('span', { class: 'sg-zone-tab__sub', text: zone.sub }) : null
       ]);
+    }
+
+    /* ----------------------------------------------------------------------
+       Page d'une catégorie (/c2-gestion) : pas de sélecteur, seulement les forums de la catégorie, sous un
+       en-tête au pattern des forums (55-pagehead.css) ; widgets Guide / Saison / Annexe posés par home.js
+       ---------------------------------------------------------------------- */
+    if (/^\/c\d+/.test(location.pathname)) {
+      var catName = text(blocks[0].querySelector('.forum-header .category-title h1, .forum-header .category-title h2'));
+      var czone = ZONES.filter(function (z) { return z.category === catName || OLD_NAMES[z.category] === catName; })[0]
+        || { slug: 'autre', label: catName || 'Catégorie', icon: 'folder', color: 'var(--sg-primary)', category: catName };
+      var TONES = { gestion: 'gestion', 'hi-no-kuni': 'hi', 'mizu-no-kuni': 'mizu', 'kaze-no-kuni': 'kaze', 'kaminari-no-kuni': 'kaminari', 'tsuchi-no-kuni': 'tsuchi', shokoku: 'autres' };
+      var cdesc = czone.slug === 'gestion' ? 'Règlement, annonces, présentations et vie du forum.'
+        : czone.slug === 'shokoku' ? 'Les petits pays du Sekai, hors des cinq grandes nations.'
+        : czone.sub ? fr('Les régions du ' + czone.sub + '.') : '';
+      var crumbItems = [['/', 'Accueil', 'home'], [null, czone.label]].map(function (c) {
+        var link = h(c[0] ? 'a' : 'span', c[0] ? { class: 'sg-crumbs__link', href: c[0] } : { class: 'sg-crumbs__link sg-crumbs__here', 'aria-current': 'page' },
+          [c[2] ? icon(c[2]) : null, h('span', { text: c[1] })]);
+        return h('li', { class: 'sg-crumbs__item' }, [link]);
+      });
+      var cHead = h('section', { class: 'sg-pagehead sg-pagehead--cat' + (TONES[czone.slug] ? ' sg-tone-' + TONES[czone.slug] : ''), 'aria-label': 'En-tête de la catégorie' }, [
+        czone.kanji ? h('span', { class: 'sg-pagehead__kanji', 'aria-hidden': 'true', text: czone.kanji }) : null,
+        h('nav', { class: 'sg-crumbs', 'aria-label': "Fil d'Ariane" }, [h('ol', { class: 'sg-crumbs__list' }, crumbItems)]),
+        h('div', { class: 'sg-pagehead__row' }, [h('h1', { class: 'sg-pagehead__title', text: czone.label })]),
+        cdesc ? h('div', { class: 'sg-pagehead__desc', text: cdesc }) : null
+      ]);
+      var cPanel = panelFor(czone);
+      cPanel.hidden = false;
+      cPanel.removeAttribute('role');
+      cPanel.removeAttribute('aria-labelledby');
+      var cRoot = h('section', { id: 'sg-zones', class: 'sg-zones sg-zones--single', 'aria-label': 'Forums de ' + czone.label }, [
+        h('div', { class: 'sg-zones__panels' }, [cPanel])
+      ]);
+      blocks[0].parentNode.insertBefore(cHead, blocks[0]);
+      blocks[0].parentNode.insertBefore(cRoot, blocks[0]);
+      document.body.classList.add('sg-zones-on', 'sg-catpage', 'sg-pagehead-on');
+      /* Séparateur de fin et fil d'Ariane repris, à la place de la barre de liens native */
+      var cBar = index.querySelector('.action-bar-bottom');
+      var cRule = h('span', { class: 'sg-divider__rule', 'aria-hidden': 'true' }, [h('span', { class: 'sg-divider__line' })]);
+      cRule.insertAdjacentHTML('beforeend', '<svg class="sg-divider__notch" viewBox="0 0 48 25" aria-hidden="true"><path d="M0 .5L24 24.5L48 .5"/></svg>');
+      cRule.appendChild(h('span', { class: 'sg-divider__line' }));
+      var cEnd = h('div', { class: 'sg-divider sg-divider--end', role: 'separator' }, [cRule]);
+      var after = cBar || cRoot.nextSibling;
+      cRoot.parentNode.insertBefore(cEnd, after);
+      cRoot.parentNode.insertBefore(h('nav', { class: 'sg-crumbs sg-crumbs--end', 'aria-label': "Fil d'Ariane" }, [h('ol', { class: 'sg-crumbs__list' }, crumbItems.map(function (li) { return li.cloneNode(true); }))]), after);
+      return;
     }
 
     /* ----------------------------------------------------------------------

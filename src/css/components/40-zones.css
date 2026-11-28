@@ -778,3 +778,13 @@ a.sg-zcard__last:hover .sg-zcard__last-title {
     font-size: 1.6rem;
   }
 }
+
+/* --- Page d'une catégorie (/c2-gestion) : pas de sélecteur, les forums sur toute la largeur ----------------- */
+.sg-zones.sg-zones--single {
+  grid-template-columns: minmax(0, 1fr);
+  margin-bottom: 0;
+}
+
+body.sg-catpage #index .action-bar-top {
+  display: none !important;
+}
